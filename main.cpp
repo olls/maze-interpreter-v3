@@ -46,7 +46,7 @@ assert(bool cond)
 
 // NOTE: size is in bytes.
 void *
-take_mem(GameMemory * game_memory, uint32_t size)
+take_mem(GameMemory * game_memory, size_t size)
 {
   void * result = (void *)game_memory->pos;
 
