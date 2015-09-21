@@ -9,6 +9,7 @@ struct GameMemory
 
 struct Keys
 {
+  bool p_down;
   bool w_down;
   bool s_down;
   bool a_down;
@@ -20,4 +21,7 @@ struct Player
 {
   uint32_t x;
   uint32_t y;
+
+  uint32_t width;
+  uint32_t height;
 };

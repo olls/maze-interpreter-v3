@@ -67,6 +67,11 @@ draw_box(uint32_t * pixels,
   uint32_t end_x = start_x + width;
   uint32_t end_y = start_y + height;
 
+  start_y = fmin(start_y, WINDOW_HEIGHT);
+  start_x = fmin(start_x, WINDOW_WIDTH);
+  end_y =   fmin(end_y,   WINDOW_HEIGHT);
+  end_x =   fmin(end_x,   WINDOW_WIDTH);
+
   for (uint32_t pixel_y = start_y;
        pixel_y < end_y;
        pixel_y++)
@@ -78,13 +83,6 @@ draw_box(uint32_t * pixels,
       pixels[pixel_y * WINDOW_WIDTH + pixel_x] = 0;
     }
   }
-}
-
-
-void
-draw_player(uint32_t * pixels, Player * player)
-{
-  draw_box(pixels, player->x, player->y, 30, 30);
 }
 
 
@@ -111,10 +109,18 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Player
     dx--;
   }
 
-  player->x += dx;
-  player->y += dy;
+  dx *= keys.p_down ? 5 : 1;
+  dy *= keys.p_down ? 5 : 1;
 
-  draw_player(pixels, player);
+  player->x = fmax((int32_t)player->x + dx, 0);
+  player->y = fmax((int32_t)player->y + dy, 0);
+
+  player->x = fmin(player->x, WINDOW_WIDTH - player->width);
+  player->y = fmin(player->y, WINDOW_HEIGHT - player->height);
+
+  draw_box(pixels,
+           player->x, player->y,
+           player->width, player->height);
 }
 
 
@@ -132,23 +138,23 @@ main(int32_t argc, char * argv[])
   SDL_Texture * texture = SDL_CreateTexture(renderer,
     SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-
+  // Init game memory
   GameMemory game_memory;
-
   game_memory.total = MAX_MEM;
   game_memory.memory = (uint8_t *)malloc(game_memory.total);
   game_memory.pos = game_memory.memory;
   assert(game_memory.memory != NULL);
 
-
   // The pixel buffer
   uint32_t * pixels = (uint32_t *)take_mem(&game_memory, WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
 
   Player * player = (Player *)take_mem(&game_memory, sizeof(Player));
-
+  player->width = 30;
+  player->height = 30;
 
   // Initalise keys
   Keys keys;
+  keys.p_down = false;
   keys.w_down = false;
   keys.a_down = false;
   keys.s_down = false;
@@ -187,6 +193,10 @@ main(int32_t argc, char * argv[])
           quit = true;
         }
 
+        if (key == 'p')
+        {
+          keys.p_down = true;
+        }
         if (key == 'w')
         {
           keys.w_down = true;
@@ -207,6 +217,10 @@ main(int32_t argc, char * argv[])
 
       case SDL_KEYUP:
 
+        if (key == 'p')
+        {
+          keys.p_down = false;
+        }
         if (key == 'w')
         {
           keys.w_down = false;
