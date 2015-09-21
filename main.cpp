@@ -1,10 +1,9 @@
-// #include <stdio.h>
 #include <sys/time.h>
-// #include <stdlib.h>
-// #include <stdarg.h>
 
 #include <time.h>
 #include <SDL2/SDL.h>
+
+#include "thingy.h"
 
 
 #define kilobytes(n) (1024 * n)
@@ -23,29 +22,6 @@ const uint32_t MAX_MEM = megabytes(5);
 
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
-
-struct GameMemory
-{
-  uint32_t total;
-  uint8_t * memory;
-  uint8_t * pos;
-};
-
-
-struct Keys
-{
-  bool w_down;
-  bool s_down;
-  bool a_down;
-  bool d_down;
-};
-
-
-struct Player
-{
-  uint32_t x;
-  uint32_t y;
-};
 
 
 uint64_t
