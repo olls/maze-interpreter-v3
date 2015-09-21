@@ -21,9 +21,8 @@
 
 const uint32_t MAX_MEM = megabytes(5);
 
-const uint32_t WINDOW_WIDTH = 1280 / 2 + 1280 / 3; // Ta Da :P
-const uint32_t WINDOW_HEIGHT = 720 / 2 + 720 / 3;
-
+const uint32_t WINDOW_WIDTH = 1024;
+const uint32_t WINDOW_HEIGHT = 600;
 
 struct GameMemory
 {
