@@ -135,7 +135,7 @@ main(int32_t argc, char * argv[])
 
   SDL_Init(SDL_INIT_VIDEO);
 
-  SDL_Window * window = SDL_CreateWindow("A Thingy",
+  SDL_Window * window = SDL_CreateWindow("A Maze Thingy",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
 
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);

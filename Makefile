@@ -2,7 +2,7 @@ CC         = clang++
 CFLAGS     = -Werror -g -ffunction-sections -ferror-limit=1
 LIBS       = -lSDL2
 SOURCES    = main.cpp
-EXECUTABLE = thingy
+EXECUTABLE = maze-interpreter
 
 
 all:
