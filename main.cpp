@@ -23,6 +23,9 @@ const uint32_t MAX_MEM = megabytes(5);
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
+const uint32_t CELL_GRID_WIDTH = 15;
+const uint32_t CELL_GRID_HEIGHT = 15;
+
 
 uint64_t
 get_us()
@@ -93,38 +96,52 @@ draw_box(uint32_t * pixels,
 
 
 void
-update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse)
+update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse, Cell * cells)
 {
-
-  uint32_t box_x = 100;
-  uint32_t box_y = 100;
-  uint32_t box_width = 50;
-  uint32_t box_height = 50;
-  uint32_t box_color = 0;
-
-  if ((mouse.x >= box_x) &&
-      (mouse.x < box_x + box_width) &&
-      (mouse.y >= box_y) &&
-      (mouse.y < box_y + box_height))
+  for (uint32_t cell_y = 0;
+       cell_y < CELL_GRID_HEIGHT;
+       cell_y++)
   {
-    if (mouse.l_down)
+    for (uint32_t cell_x = 0;
+         cell_x < CELL_GRID_WIDTH;
+         cell_x++)
     {
-      box_color = 0x00885522;
-    }
-    else if (mouse.r_down)
-    {
-      box_color = 0x00558822;
-    }
-    else
-    {
-      box_color = 0x00552288;
+      Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
+
+      uint32_t margin = 3;
+      uint32_t x = cell_x * 30 + margin;
+      uint32_t y = cell_y * 30 + margin;
+      uint32_t width = 30 - margin * 2;
+      uint32_t height = 30 - margin * 2;
+
+      uint32_t color = 0;
+      switch (cell->type)
+      {
+        case CELL_BLANK:
+          color = 0x00CCCCCC;
+          break;
+        case CELL_WALL:
+          color = 0x00333333;
+          break;
+        case CELL_PATH:
+          color = 0x00558822;
+          break;
+      }
+
+      if ((mouse.x >= x) &&
+          (mouse.x < x + width) &&
+          (mouse.y >= y) &&
+          (mouse.y < y + height))
+      {
+        color += 0x00202020;
+      }
+
+      draw_box(pixels,
+               x, y,
+               width, height,
+               color);
     }
   }
-
-  draw_box(pixels,
-           box_x, box_y,
-           box_width, box_height,
-           box_color);
 }
 
 
@@ -152,6 +169,33 @@ main(int32_t argc, char * argv[])
   // The pixel buffer
   uint32_t * pixels = (uint32_t *)take_mem(&game_memory, WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
 
+  // The cell grid
+  Cell * cells = (Cell *)take_mem(&game_memory, CELL_GRID_WIDTH * CELL_GRID_HEIGHT * sizeof(Cell));
+
+  for (uint32_t cell_y = 0;
+       cell_y < CELL_GRID_HEIGHT;
+       cell_y++)
+  {
+    for (uint32_t cell_x = 0;
+         cell_x < CELL_GRID_WIDTH;
+         cell_x++)
+    {
+      Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
+
+      if (cell_x == 0 ||
+          cell_x == (CELL_GRID_WIDTH - 1) ||
+          cell_y == 0 ||
+          cell_y == (CELL_GRID_HEIGHT - 1))
+      {
+        cell->type = CELL_WALL;
+      }
+      else
+      {
+        cell->type = CELL_PATH;
+      }
+    }
+  }
+
   // Initalise keys
   Keys keys;
   keys.p_down = false;
@@ -162,8 +206,8 @@ main(int32_t argc, char * argv[])
 
   // Initalise mouse
   Mouse mouse;
-  mouse.x = 0;
-  mouse.y = 0;
+  mouse.x = -1;
+  mouse.y = -1;
   mouse.l_down = false;
   mouse.r_down = false;
 
@@ -296,14 +340,14 @@ main(int32_t argc, char * argv[])
            screen_y++)
       {
         for (uint32_t screen_x = 0;
-             screen_x < WINDOW_WIDTH  ;
+             screen_x < WINDOW_WIDTH;
              screen_x++)
         {
           pixels[screen_y * WINDOW_WIDTH + screen_x] = 0x00FFFFFF;
         }
       }
 
-      update_and_render(&game_memory, pixels, keys, mouse);
+      update_and_render(&game_memory, pixels, keys, mouse, cells);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;

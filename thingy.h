@@ -25,3 +25,15 @@ struct Mouse
   bool l_down;
   bool r_down;
 };
+
+enum CellType
+{
+  CELL_BLANK,
+  CELL_WALL,
+  CELL_PATH
+};
+
+struct Cell
+{
+  enum CellType type;
+};
