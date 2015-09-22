@@ -59,18 +59,24 @@ take_mem(GameMemory * game_memory, size_t size)
 
 void
 draw_box(uint32_t * pixels,
-         uint32_t start_x,
-         uint32_t start_y,
+         int32_t start_x,
+         int32_t start_y,
          uint32_t width,
-         uint32_t height)
+         uint32_t height,
+         uint32_t color)
 {
-  uint32_t end_x = start_x + width;
-  uint32_t end_y = start_y + height;
+  int32_t end_x = start_x + width;
+  int32_t end_y = start_y + height;
 
   start_y = fmin(start_y, WINDOW_HEIGHT);
   start_x = fmin(start_x, WINDOW_WIDTH);
   end_y =   fmin(end_y,   WINDOW_HEIGHT);
   end_x =   fmin(end_x,   WINDOW_WIDTH);
+
+  start_y = fmax(start_y, 0);
+  start_x = fmax(start_x, 0);
+  end_y =   fmax(end_y,   0);
+  end_x =   fmax(end_x,   0);
 
   for (uint32_t pixel_y = start_y;
        pixel_y < end_y;
@@ -80,47 +86,45 @@ draw_box(uint32_t * pixels,
          pixel_x < end_x;
          pixel_x++)
     {
-      pixels[pixel_y * WINDOW_WIDTH + pixel_x] = 0;
+      pixels[pixel_y * WINDOW_WIDTH + pixel_x] = color;
     }
   }
 }
 
 
 void
-update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Player * player)
+update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse)
 {
-  int32_t dy = 0;
-  int32_t dx = 0;
 
-  if (keys.w_down)
-  {
-    dy++;
-  }
-  if (keys.s_down)
-  {
-    dy--;
-  }
-  if (keys.d_down)
-  {
-    dx++;
-  }
-  if (keys.a_down)
-  {
-    dx--;
-  }
+  uint32_t box_x = 100;
+  uint32_t box_y = 100;
+  uint32_t box_width = 50;
+  uint32_t box_height = 50;
+  uint32_t box_color = 0;
 
-  dx *= keys.p_down ? 5 : 1;
-  dy *= keys.p_down ? 5 : 1;
-
-  player->x = fmax((int32_t)player->x + dx, 0);
-  player->y = fmax((int32_t)player->y + dy, 0);
-
-  player->x = fmin(player->x, WINDOW_WIDTH - player->width);
-  player->y = fmin(player->y, WINDOW_HEIGHT - player->height);
+  if ((mouse.x >= box_x) &&
+      (mouse.x < box_x + box_width) &&
+      (mouse.y >= box_y) &&
+      (mouse.y < box_y + box_height))
+  {
+    if (mouse.l_down)
+    {
+      box_color = 0x00885522;
+    }
+    else if (mouse.r_down)
+    {
+      box_color = 0x00558822;
+    }
+    else
+    {
+      box_color = 0x00552288;
+    }
+  }
 
   draw_box(pixels,
-           player->x, player->y,
-           player->width, player->height);
+           box_x, box_y,
+           box_width, box_height,
+           box_color);
 }
 
 
@@ -148,10 +152,6 @@ main(int32_t argc, char * argv[])
   // The pixel buffer
   uint32_t * pixels = (uint32_t *)take_mem(&game_memory, WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
 
-  Player * player = (Player *)take_mem(&game_memory, sizeof(Player));
-  player->width = 30;
-  player->height = 30;
-
   // Initalise keys
   Keys keys;
   keys.p_down = false;
@@ -159,6 +159,13 @@ main(int32_t argc, char * argv[])
   keys.a_down = false;
   keys.s_down = false;
   keys.d_down = false;
+
+  // Initalise mouse
+  Mouse mouse;
+  mouse.x = 0;
+  mouse.y = 0;
+  mouse.l_down = false;
+  mouse.r_down = false;
 
   // For average FPS measurement
   uint64_t last_measure = get_us();
@@ -193,53 +200,75 @@ main(int32_t argc, char * argv[])
           quit = true;
         }
 
-        if (key == 'p')
+        switch (key)
         {
+        case 'p':
           keys.p_down = true;
-        }
-        if (key == 'w')
-        {
+          break;
+        case 'w':
           keys.w_down = true;
-        }
-        if (key == 'a')
-        {
+          break;
+        case 'a':
           keys.a_down = true;
-        }
-        if (key == 's')
-        {
+          break;
+        case 's':
           keys.s_down = true;
-        }
-        if (key == 'd')
-        {
+          break;
+        case 'd':
           keys.d_down = true;
+          break;
         }
         break;
 
       case SDL_KEYUP:
-
-        if (key == 'p')
+        switch (key)
         {
+        case 'p':
           keys.p_down = false;
-        }
-        if (key == 'w')
-        {
+          break;
+        case 'w':
           keys.w_down = false;
-        }
-        if (key == 'a')
-        {
+          break;
+        case 'a':
           keys.a_down = false;
-        }
-        if (key == 's')
-        {
+          break;
+        case 's':
           keys.s_down = false;
-        }
-        if (key == 'd')
-        {
+          break;
+        case 'd':
           keys.d_down = false;
+          break;
         }
         break;
 
-      default:
+      case SDL_MOUSEMOTION:
+        // NOTE: Remember our Y is inverted from SDL
+        mouse.x = event.motion.x;
+        mouse.y = WINDOW_HEIGHT - event.motion.y;
+        break;
+
+      case SDL_MOUSEBUTTONDOWN:
+        switch (event.button.button)
+        {
+          case SDL_BUTTON_LEFT:
+            mouse.l_down = true;
+            break;
+          case SDL_BUTTON_RIGHT:
+            mouse.r_down = true;
+            break;
+        }
+        break;
+
+      case SDL_MOUSEBUTTONUP:
+        switch (event.button.button)
+        {
+          case SDL_BUTTON_LEFT:
+            mouse.l_down = false;
+            break;
+          case SDL_BUTTON_RIGHT:
+            mouse.r_down = false;
+            break;
+        }
         break;
       }
     }
@@ -274,7 +303,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, pixels, keys, player);
+      update_and_render(&game_memory, pixels, keys, mouse);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;
