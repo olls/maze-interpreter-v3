@@ -32,7 +32,7 @@ get_us()
 {
   struct timeval tv;
   gettimeofday(&tv, NULL);
-  return ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec;
+  return ((uint64_t)tv.tv_sec * (uint64_t)seconds_in_u(1)) + (uint64_t)tv.tv_usec;
 }
 
 
@@ -327,7 +327,7 @@ main(int32_t argc, char * argv[])
     }
 
     // Render
-    if (now >= last_frame + (1000000/FPS))
+    if (now >= last_frame + (seconds_in_u(1)/FPS))
     {
       delta_frame = now - last_frame;
       last_frame = now;
