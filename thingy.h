@@ -1,10 +1,47 @@
 
+
+void
+assert(bool cond)
+{
+  if (!cond)
+  {
+    printf("Assertion FAILED!! :(\n");
+    exit(1);
+  }
+}
+
+
 struct GameMemory
 {
-  uint32_t total;
+  size_t total;
   uint8_t * memory;
-  uint8_t * pos;
+  size_t used;
 };
+
+
+void
+init_mem(GameMemory * game_memory, size_t total)
+{
+  game_memory->total = total;
+  game_memory->memory = (uint8_t *)malloc(total);
+  game_memory->used = 0;
+
+  assert(game_memory->memory != NULL);
+}
+
+
+#define take_sruct_mem(game_memory, size, obj_struct) take_mem(game_memory, ((size) * sizeof(obj_struct)))
+
+void *
+take_mem(GameMemory * game_memory, size_t size)
+{
+  void * result = game_memory->memory + game_memory->used;
+  game_memory->used += size;
+
+  assert(game_memory->used < game_memory->total);
+
+  return result;
+}
 
 
 struct Keys
@@ -42,4 +79,9 @@ struct Cell
 {
   enum CellType type;
   int32_t data;
+};
+
+struct Car
+{
+  int32_t value;
 };

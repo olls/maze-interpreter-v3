@@ -18,13 +18,13 @@
 
 #define FPS 30
 
-const uint32_t MAX_MEM = megabytes(5);
-
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
+
+const uint32_t MAX_CARS = 128;
 
 
 uint64_t
@@ -33,30 +33,6 @@ get_us()
   struct timeval tv;
   gettimeofday(&tv, NULL);
   return ((uint64_t)tv.tv_sec * (uint64_t)seconds_in_u(1)) + (uint64_t)tv.tv_usec;
-}
-
-
-void
-assert(bool cond)
-{
-  if (!cond)
-  {
-    printf("Assertion FAILED!! :(\n");
-    exit(1);
-  }
-}
-
-
-// NOTE: size is in bytes.
-void *
-take_mem(GameMemory * game_memory, size_t size)
-{
-  void * result = (void *)game_memory->pos;
-
-  game_memory->pos = game_memory->pos + size;
-  assert(game_memory->pos < game_memory->memory + game_memory->total);
-
-  return result;
 }
 
 
@@ -194,10 +170,7 @@ main(int32_t argc, char * argv[])
 
   // Init game memory
   GameMemory game_memory;
-  game_memory.total = MAX_MEM;
-  game_memory.memory = (uint8_t *)malloc(game_memory.total);
-  game_memory.pos = game_memory.memory;
-  assert(game_memory.memory != NULL);
+  init_mem(&game_memory, megabytes(5));
 
   // The pixel buffer
   uint32_t * pixels = (uint32_t *)take_mem(&game_memory, WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
@@ -230,6 +203,9 @@ main(int32_t argc, char * argv[])
       }
     }
   }
+
+  // The car list
+  Car * cars = (Car *)take_sruct_mem(&game_memory, MAX_CARS, Car);
 
   // Initalise keys
   Keys keys;
