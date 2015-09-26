@@ -28,12 +28,18 @@ struct Mouse
 
 enum CellType
 {
-  CELL_BLANK,
+  CELL_NULL,
+  CELL_START,
+  CELL_PATH,
   CELL_WALL,
-  CELL_PATH
+  CELL_HOLE,
+  CELL_SPLITTER,
+  CELL_FUNCTION,
+  CELL_ONCE
 };
 
 struct Cell
 {
   enum CellType type;
+  int32_t data;
 };

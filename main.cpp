@@ -117,14 +117,29 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse 
       uint32_t color = 0;
       switch (cell->type)
       {
-        case CELL_BLANK:
-          color = 0x00CCCCCC;
+        case CELL_NULL:
+          color = 0;
+          break;
+        case CELL_START:
+          color = 0x0033AA55;
+          break;
+        case CELL_PATH:
+          color = 0x00558822;
           break;
         case CELL_WALL:
           color = 0x00333333;
           break;
-        case CELL_PATH:
-          color = 0x00558822;
+        case CELL_HOLE:
+          color = 0x00BB6644;
+          break;
+        case CELL_SPLITTER:
+          color = 0x00224499;
+          break;
+        case CELL_FUNCTION:
+          color = 0x00667788;
+          break;
+        case CELL_ONCE:
+          color = 0x00887766;
           break;
       }
 
@@ -133,7 +148,25 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse 
           (mouse.y >= y) &&
           (mouse.y < y + height))
       {
-        color += 0x00202020;
+        uint32_t color_a = ((color >> 24) & 0xFF);
+        uint32_t color_r = ((color >> 16) & 0xFF);
+        uint32_t color_g = ((color >> 8) & 0xFF);
+        uint32_t color_b = ((color >> 0) & 0xFF);
+
+        if (color_r <= (0xFF - 0x20))
+        {
+          color_r += 0x20;
+        }
+        if (color_g <= (0xFF - 0x20))
+        {
+          color_g += 0x20;
+        }
+        if (color_b <= (0xFF - 0x20))
+        {
+          color_b += 0x20;
+        }
+
+        color = (color_a << 24) | (color_r << 16) | (color_g << 8) | (color_b << 0);
       }
 
       draw_box(pixels,
@@ -181,6 +214,7 @@ main(int32_t argc, char * argv[])
          cell_x++)
     {
       Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
+      cell->data = 0;
 
       if (cell_x == 0 ||
           cell_x == (CELL_GRID_WIDTH - 1) ||
@@ -191,7 +225,8 @@ main(int32_t argc, char * argv[])
       }
       else
       {
-        cell->type = CELL_PATH;
+        // cell->type = CELL_PATH;
+        cell->type = (enum CellType)(cell_x % 8);
       }
     }
   }
