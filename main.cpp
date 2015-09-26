@@ -24,8 +24,6 @@ const uint32_t WINDOW_HEIGHT = 600;
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
 
-const uint32_t MAX_CARS = 128;
-
 
 uint64_t
 get_us()
@@ -72,7 +70,7 @@ draw_box(uint32_t * pixels,
 
 
 void
-update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse, Cell * cells)
+update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 {
   for (uint32_t cell_y = 0;
        cell_y < CELL_GRID_HEIGHT;
@@ -154,6 +152,40 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse 
 }
 
 
+void
+update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
+{
+  // Add new cars
+  if (keys.space_down)
+  {
+    assert(cars->first_free < array_count(cars->cars));
+    Car * new_car = cars->cars + (cars->first_free++);
+    new_car->exists = true;
+    new_car->x = mouse.x;
+    new_car->y = mouse.y;
+  }
+
+  // Render cars
+  uint32_t car_index = 0;
+  Car * car = cars->cars + car_index;
+
+  while (car->exists)
+  {
+    draw_box(pixels, car->x, car->y, 10, 10, 0x00229977);
+
+    car = cars->cars + (++car_index);
+  }
+}
+
+
+void
+update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse, Cell * cells, Cars * cars)
+{
+  update_and_render_cells(pixels, mouse, cells);
+  update_and_render_cars(pixels, keys, mouse, cars);
+}
+
+
 int
 main(int32_t argc, char * argv[])
 {
@@ -205,10 +237,12 @@ main(int32_t argc, char * argv[])
   }
 
   // The car list
-  Car * cars = (Car *)take_sruct_mem(&game_memory, MAX_CARS, Car);
+  Cars * cars = (Cars *)take_mem(&game_memory, sizeof(Cars));
+  init_cars(cars);
 
   // Initalise keys
   Keys keys;
+  keys.space_down = false;
   keys.p_down = false;
   keys.w_down = false;
   keys.a_down = false;
@@ -257,6 +291,9 @@ main(int32_t argc, char * argv[])
 
         switch (key)
         {
+        case ' ':
+          keys.space_down = true;
+          break;
         case 'p':
           keys.p_down = true;
           break;
@@ -278,6 +315,9 @@ main(int32_t argc, char * argv[])
       case SDL_KEYUP:
         switch (key)
         {
+        case ' ':
+          keys.space_down = false;
+          break;
         case 'p':
           keys.p_down = false;
           break;
@@ -358,7 +398,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, pixels, keys, mouse, cells);
+      update_and_render(&game_memory, pixels, keys, mouse, cells, cars);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;

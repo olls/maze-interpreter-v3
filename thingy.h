@@ -1,4 +1,4 @@
-
+#define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
 void
 assert(bool cond)
@@ -30,8 +30,6 @@ init_mem(GameMemory * game_memory, size_t total)
 }
 
 
-#define take_sruct_mem(game_memory, size, obj_struct) take_mem(game_memory, ((size) * sizeof(obj_struct)))
-
 void *
 take_mem(GameMemory * game_memory, size_t size)
 {
@@ -46,6 +44,7 @@ take_mem(GameMemory * game_memory, size_t size)
 
 struct Keys
 {
+  bool space_down;
   bool p_down;
   bool w_down;
   bool s_down;
@@ -75,6 +74,7 @@ enum CellType
   CELL_ONCE
 };
 
+// TODO: Sparce storage of cells and cars
 struct Cell
 {
   enum CellType type;
@@ -83,5 +83,30 @@ struct Cell
 
 struct Car
 {
+  bool exists;
   int32_t value;
+  uint32_t x;
+  uint32_t y;
 };
+
+#define MAX_CARS (128)
+
+struct Cars
+{
+  Car cars[MAX_CARS];
+  uint32_t first_free;
+};
+
+void
+init_cars(Cars * cars)
+{
+  cars->first_free = 0;
+  for (uint32_t car_index = 0;
+       car_index < MAX_CARS;
+       ++car_index)
+  {
+    Car * car = cars->cars + car_index;
+    car->exists = false;
+    car->value = 1337;
+  }
+}
