@@ -1,4 +1,15 @@
+#define kilobytes(n) (1024 * n)
+#define megabytes(n) (kilobytes(1024) * n)
+#define gigabytes(n) (megabytes(1024) * n)
+
+#define seconds_in_m(n) (1000 * n )
+#define seconds_in_u(n) (seconds_in_m(1000) * n )
+
+#define m_in_seconds(n) (n / (real32)seconds_in_m(1))
+#define u_in_seconds(n) (n / (real32)seconds_in_u(1))
+
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
+
 
 void
 assert(bool cond)
