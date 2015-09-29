@@ -17,8 +17,8 @@ const float WORLD_COORD_TO_PIXELS = 1.0f / 256.0f;
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
 
-const uint32_t CELL_MARGIN = 3;
-const uint32_t CELL_SPACING = 30;
+const uint32_t CELL_MARGIN = 500;
+const uint32_t CELL_SPACING = 10000;
 
 
 
@@ -79,11 +79,6 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
     {
       Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
 
-      uint32_t x = cell_x * CELL_SPACING + CELL_MARGIN;
-      uint32_t y = cell_y * CELL_SPACING + CELL_MARGIN;
-      uint32_t width = CELL_SPACING - CELL_MARGIN * 2;
-      uint32_t height = CELL_SPACING - CELL_MARGIN * 2;
-
       uint32_t color = 0;
       switch (cell->type)
       {
@@ -112,6 +107,12 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
           color = 0x00887766;
           break;
       }
+
+      // Into the pixel space!
+      uint32_t x = ((cell_x * CELL_SPACING) + CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
+      uint32_t y = ((cell_y * CELL_SPACING) + CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
+      uint32_t width = (CELL_SPACING - (CELL_MARGIN * 2)) * WORLD_COORD_TO_PIXELS;
+      uint32_t height = (CELL_SPACING - (CELL_MARGIN * 2)) * WORLD_COORD_TO_PIXELS;
 
       if ((mouse.x >= x) &&
           (mouse.x < x + width) &&
@@ -244,7 +245,7 @@ main(int32_t argc, char * argv[])
       else if (cell_x == 1 && cell_y == 1)
       {
         cell->type = CELL_START;
-        add_car(cars, cell_x, cell_y);
+        add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
       }
       else
       {
