@@ -96,8 +96,12 @@ struct Car
 {
   bool exists;
   int32_t value;
-  uint32_t x;
-  uint32_t y;
+
+  uint32_t cell_x;
+  uint32_t cell_y;
+
+  uint32_t offset_x;
+  uint32_t offset_y;
 };
 
 #define MAX_CARS (128)
@@ -109,7 +113,7 @@ struct Cars
 };
 
 void
-init_cars(Cars * cars)
+init_car_mem(Cars * cars)
 {
   cars->first_free = 0;
   for (uint32_t car_index = 0;

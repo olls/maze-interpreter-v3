@@ -14,6 +14,10 @@ const uint32_t WINDOW_HEIGHT = 600;
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
 
+const uint32_t CELL_MARGIN = 3;
+const uint32_t CELL_SPACING = 30;
+
+
 
 uint64_t
 get_us()
@@ -72,11 +76,10 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
     {
       Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
 
-      uint32_t margin = 3;
-      uint32_t x = cell_x * 30 + margin;
-      uint32_t y = cell_y * 30 + margin;
-      uint32_t width = 30 - margin * 2;
-      uint32_t height = 30 - margin * 2;
+      uint32_t x = cell_x * CELL_SPACING + CELL_MARGIN;
+      uint32_t y = cell_y * CELL_SPACING + CELL_MARGIN;
+      uint32_t width = CELL_SPACING - CELL_MARGIN * 2;
+      uint32_t height = CELL_SPACING - CELL_MARGIN * 2;
 
       uint32_t color = 0;
       switch (cell->type)
@@ -145,15 +148,6 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 void
 update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
 {
-  // Add new cars
-  if (keys.space_down)
-  {
-    assert(cars->first_free < array_count(cars->cars));
-    Car * new_car = cars->cars + (cars->first_free++);
-    new_car->exists = true;
-    new_car->x = mouse.x;
-    new_car->y = mouse.y;
-  }
 
   // Render cars
   uint32_t car_index = 0;
@@ -161,7 +155,24 @@ update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
 
   while (car->exists)
   {
-    draw_box(pixels, car->x, car->y, 10, 10, 0x00229977);
+    // Calc world coord
+    uint32_t car_world_x = car->cell_x + car->offset_x;
+    uint32_t car_world_y = car->cell_y + car->offset_y;
+
+    car_world_x += CELL_SPACING + CELL_MARGIN;
+
+    // Pixel coords
+    // TODO: Figure this out...
+    uint32_t pixel_x = car_world_x;
+    uint32_t pixel_y = car_world_y;
+
+    draw_box(pixels, pixel_x, pixel_y, 10, 10, 0x00229977);
+
+    // Re canonicalise coords
+    car->cell_x = car_world_x / CELL_SPACING;
+    car->cell_y = car_world_y / CELL_SPACING;
+    car->offset_x = car_world_x - car->cell_x;
+    car->offset_y = car_world_y - car->cell_y;
 
     car = cars->cars + (++car_index);
   }
@@ -175,6 +186,18 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse 
   update_and_render_cars(pixels, keys, mouse, cars);
 }
 
+
+Car *
+add_car(Cars * cars, uint32_t x, uint32_t y)
+{
+  assert(cars->first_free < array_count(cars->cars));
+  Car * new_car = cars->cars + (cars->first_free++);
+  new_car->exists = true;
+  new_car->cell_x = x;
+  new_car->cell_y = y;
+
+  return new_car;
+}
 
 int
 main(int32_t argc, char * argv[])
@@ -200,6 +223,11 @@ main(int32_t argc, char * argv[])
   // The cell grid
   Cell * cells = (Cell *)take_mem(&game_memory, CELL_GRID_WIDTH * CELL_GRID_HEIGHT * sizeof(Cell));
 
+  // The car list
+  Cars * cars = (Cars *)take_mem(&game_memory, sizeof(Cars));
+  init_car_mem(cars);
+
+  // Init cells and cars
   for (uint32_t cell_y = 0;
        cell_y < CELL_GRID_HEIGHT;
        cell_y++)
@@ -218,17 +246,18 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_WALL;
       }
+      else if (cell_x == 1 && cell_y == 1)
+      {
+        cell->type = CELL_START;
+        add_car(cars, cell_x, cell_y);
+      }
       else
       {
         // cell->type = CELL_PATH;
-        cell->type = (enum CellType)(cell_x % 8);
+        cell->type = CELL_PATH;
       }
     }
   }
-
-  // The car list
-  Cars * cars = (Cars *)take_mem(&game_memory, sizeof(Cars));
-  init_cars(cars);
 
   // Initalise keys
   Keys keys;
