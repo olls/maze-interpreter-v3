@@ -97,11 +97,9 @@ struct Car
   bool exists;
   int32_t value;
 
-  uint32_t cell_x;
-  uint32_t cell_y;
-
-  uint32_t offset_x;
-  uint32_t offset_y;
+  // TODO: These are in world space, might need more range?
+  float x;
+  float y;
 };
 
 #define MAX_CARS (128)

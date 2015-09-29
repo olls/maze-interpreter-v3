@@ -11,6 +11,9 @@ const uint32_t FPS = 30;
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
+// NOTE: 256 sub-pixel steps!
+const float WORLD_COORD_TO_PIXELS = 1.0f / 256.0f;
+
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
 
@@ -146,7 +149,7 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 
 
 void
-update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
+update_and_render_cars(uint32_t * pixels, uint32_t df, Keys keys, Mouse mouse, Cars * cars)
 {
 
   // Render cars
@@ -155,24 +158,15 @@ update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
 
   while (car->exists)
   {
-    // Calc world coord
-    uint32_t car_world_x = car->cell_x + car->offset_x;
-    uint32_t car_world_y = car->cell_y + car->offset_y;
+    // Update
+    float delta_move_per_us = 5000.0f / seconds_in_u(1);
+    car->x += delta_move_per_us * (float)df;
 
-    car_world_x += CELL_SPACING + CELL_MARGIN;
+    // Render
+    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * car->x);
+    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * car->y);
 
-    // Pixel coords
-    // TODO: Figure this out...
-    uint32_t pixel_x = car_world_x;
-    uint32_t pixel_y = car_world_y;
-
-    draw_box(pixels, pixel_x, pixel_y, 10, 10, 0x00229977);
-
-    // Re canonicalise coords
-    car->cell_x = car_world_x / CELL_SPACING;
-    car->cell_y = car_world_y / CELL_SPACING;
-    car->offset_x = car_world_x - car->cell_x;
-    car->offset_y = car_world_y - car->cell_y;
+    draw_box(pixels, x, y, 10, 10, 0x00229977);
 
     car = cars->cars + (++car_index);
   }
@@ -180,10 +174,11 @@ update_and_render_cars(uint32_t * pixels, Keys keys, Mouse mouse, Cars * cars)
 
 
 void
-update_and_render(GameMemory * game_memory, uint32_t * pixels, Keys keys, Mouse mouse, Cell * cells, Cars * cars)
+update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df,
+                  Keys keys, Mouse mouse, Cell * cells, Cars * cars)
 {
   update_and_render_cells(pixels, mouse, cells);
-  update_and_render_cars(pixels, keys, mouse, cars);
+  update_and_render_cars(pixels, df, keys, mouse, cars);
 }
 
 
@@ -193,8 +188,8 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   assert(cars->first_free < array_count(cars->cars));
   Car * new_car = cars->cars + (cars->first_free++);
   new_car->exists = true;
-  new_car->cell_x = x;
-  new_car->cell_y = y;
+  new_car->x = x;
+  new_car->y = y;
 
   return new_car;
 }
@@ -253,7 +248,6 @@ main(int32_t argc, char * argv[])
       }
       else
       {
-        // cell->type = CELL_PATH;
         cell->type = CELL_PATH;
       }
     }
@@ -417,7 +411,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, pixels, keys, mouse, cells, cars);
+      update_and_render(&game_memory, pixels, delta_frame, keys, mouse, cells, cars);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;
