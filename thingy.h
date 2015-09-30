@@ -98,6 +98,8 @@ struct Car
   int32_t value;
 
   // TODO: These are in world space, might need more range?
+  //       1 byte per pixel + 1 byte per cell leaves 2 bytes (65536) for cell
+  //       grid range.
   float x;
   float y;
 };
