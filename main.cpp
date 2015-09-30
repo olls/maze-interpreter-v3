@@ -17,8 +17,8 @@ const float WORLD_COORD_TO_PIXELS = 1.0f / 256.0f;
 const uint32_t CELL_GRID_WIDTH = 15;
 const uint32_t CELL_GRID_HEIGHT = 15;
 
-const uint32_t CELL_MARGIN = 500;
 const uint32_t CELL_SPACING = 10000;
+const uint32_t CELL_MARGIN = 1000;
 
 
 
@@ -109,10 +109,10 @@ update_and_render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
       }
 
       // Into the pixel space!
-      uint32_t x = ((cell_x * CELL_SPACING) + CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
-      uint32_t y = ((cell_y * CELL_SPACING) + CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
-      uint32_t width = (CELL_SPACING - (CELL_MARGIN * 2)) * WORLD_COORD_TO_PIXELS;
-      uint32_t height = (CELL_SPACING - (CELL_MARGIN * 2)) * WORLD_COORD_TO_PIXELS;
+      uint32_t x = (cell_x * CELL_SPACING) * WORLD_COORD_TO_PIXELS;
+      uint32_t y = (cell_y * CELL_SPACING) * WORLD_COORD_TO_PIXELS;
+      uint32_t width = (CELL_SPACING - CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
+      uint32_t height = (CELL_SPACING - CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
 
       if ((mouse.x >= x) &&
           (mouse.x < x + width) &&
@@ -159,9 +159,29 @@ update_and_render_cars(uint32_t * pixels, uint32_t df, Keys keys, Mouse mouse, C
 
   while (car->exists)
   {
-    // Update
-    float delta_move_per_us = 5000.0f / seconds_in_u(1);
-    car->x += delta_move_per_us * (float)df;
+
+    // TODO: Annimation
+    // float delta_move_per_s = CELL_SPACING;
+    // float delta_move_per_us = delta_move_per_s / seconds_in_u(1);
+    // float delta_move_per_frame = delta_move_per_us * df;
+    // car->x += delta_move_per_frame;
+
+    if (keys.up_down)
+    {
+      car->y += CELL_SPACING;
+    }
+    if (keys.down_down)
+    {
+      car->y -= CELL_SPACING;
+    }
+    if (keys.right_down)
+    {
+      car->x += CELL_SPACING;
+    }
+    if (keys.left_down)
+    {
+      car->x -= CELL_SPACING;
+    }
 
     // Render
     uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * car->x);
@@ -257,6 +277,10 @@ main(int32_t argc, char * argv[])
   // Initalise keys
   Keys keys;
   keys.space_down = false;
+  keys.up_down = false;
+  keys.down_down = false;
+  keys.left_down = false;
+  keys.right_down = false;
   keys.p_down = false;
   keys.w_down = false;
   keys.a_down = false;
@@ -289,96 +313,129 @@ main(int32_t argc, char * argv[])
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
-      char key = event.key.keysym.sym;
+
       switch (event.type)
       {
-      case SDL_QUIT:
-        quit = true;
-        break;
-
-      case SDL_KEYDOWN:
-
-        if (key == 'w' && event.key.keysym.mod == KMOD_LCTRL)
+        case SDL_QUIT:
         {
           quit = true;
-        }
+        } break;
 
-        switch (key)
+        case SDL_KEYDOWN:
         {
-        case ' ':
-          keys.space_down = true;
-          break;
-        case 'p':
-          keys.p_down = true;
-          break;
-        case 'w':
-          keys.w_down = true;
-          break;
-        case 'a':
-          keys.a_down = true;
-          break;
-        case 's':
-          keys.s_down = true;
-          break;
-        case 'd':
-          keys.d_down = true;
-          break;
-        }
-        break;
+          SDL_Keycode key = event.key.keysym.sym;
 
-      case SDL_KEYUP:
-        switch (key)
+          if (key == 'w' && event.key.keysym.mod == KMOD_LCTRL)
+          {
+            quit = true;
+          }
+
+          switch (key)
+          {
+          case ' ':
+            keys.space_down = true;
+            break;
+          case SDLK_UP:
+            keys.up_down = true;
+            break;
+          case SDLK_DOWN:
+            keys.down_down = true;
+            break;
+          case SDLK_LEFT:
+            keys.left_down = true;
+            break;
+          case SDLK_RIGHT:
+            keys.right_down = true;
+            break;
+          case 'p':
+            keys.p_down = true;
+            break;
+          case 'w':
+            keys.w_down = true;
+            break;
+          case 'a':
+            keys.a_down = true;
+            break;
+          case 's':
+            keys.s_down = true;
+            break;
+          case 'd':
+            keys.d_down = true;
+            break;
+          }
+        } break;
+
+        case SDL_KEYUP:
         {
-        case ' ':
-          keys.space_down = false;
-          break;
-        case 'p':
-          keys.p_down = false;
-          break;
-        case 'w':
-          keys.w_down = false;
-          break;
-        case 'a':
-          keys.a_down = false;
-          break;
-        case 's':
-          keys.s_down = false;
-          break;
-        case 'd':
-          keys.d_down = false;
-          break;
-        }
-        break;
+          SDL_Keycode key = event.key.keysym.sym;
 
-      case SDL_MOUSEMOTION:
-        // NOTE: Remember our Y is inverted from SDL
-        mouse.x = event.motion.x;
-        mouse.y = WINDOW_HEIGHT - event.motion.y;
-        break;
+          switch (key)
+          {
+          case ' ':
+            keys.space_down = false;
+            break;
+          case SDLK_UP:
+            keys.up_down = false;
+            break;
+          case SDLK_DOWN:
+            keys.down_down = false;
+            break;
+          case SDLK_LEFT:
+            keys.left_down = false;
+            break;
+          case SDLK_RIGHT:
+            keys.right_down = false;
+            break;
+          case 'p':
+            keys.p_down = false;
+            break;
+          case 'w':
+            keys.w_down = false;
+            break;
+          case 'a':
+            keys.a_down = false;
+            break;
+          case 's':
+            keys.s_down = false;
+            break;
+          case 'd':
+            keys.d_down = false;
+            break;
+          }
+        } break;
 
-      case SDL_MOUSEBUTTONDOWN:
-        switch (event.button.button)
+        case SDL_MOUSEMOTION:
         {
-          case SDL_BUTTON_LEFT:
-            mouse.l_down = true;
-            break;
-          case SDL_BUTTON_RIGHT:
-            mouse.r_down = true;
-            break;
-        }
-        break;
+          // NOTE: Remember our Y is inverted from SDL
+          mouse.x = event.motion.x;
+          mouse.y = WINDOW_HEIGHT - event.motion.y;
+        } break;
 
-      case SDL_MOUSEBUTTONUP:
-        switch (event.button.button)
+        case SDL_MOUSEBUTTONDOWN:
         {
-          case SDL_BUTTON_LEFT:
-            mouse.l_down = false;
-            break;
-          case SDL_BUTTON_RIGHT:
-            mouse.r_down = false;
-            break;
-        }
-        break;
+          switch (event.button.button)
+          {
+            case SDL_BUTTON_LEFT:
+              mouse.l_down = true;
+              break;
+            case SDL_BUTTON_RIGHT:
+              mouse.r_down = true;
+              break;
+          }
+        } break;
+
+        case SDL_MOUSEBUTTONUP:
+        {
+          switch (event.button.button)
+          {
+            case SDL_BUTTON_LEFT:
+              mouse.l_down = false;
+              break;
+            case SDL_BUTTON_RIGHT:
+              mouse.r_down = false;
+              break;
+          }
+        } break;
       }
     }
 

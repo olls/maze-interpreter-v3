@@ -56,6 +56,10 @@ take_mem(GameMemory * game_memory, size_t size)
 struct Keys
 {
   bool space_down;
+  bool up_down;
+  bool down_down;
+  bool left_down;
+  bool right_down;
   bool p_down;
   bool w_down;
   bool s_down;
