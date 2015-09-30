@@ -53,6 +53,13 @@ take_mem(GameMemory * game_memory, size_t size)
 }
 
 
+struct FpsMeasurement
+{
+  uint64_t last_measure;
+  uint32_t frame_count;
+};
+
+
 struct Keys
 {
   bool space_down;
@@ -96,6 +103,14 @@ struct Cell
   int32_t data;
 };
 
+enum Direction
+{
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
+};
+
 struct Car
 {
   bool exists;
@@ -106,6 +121,8 @@ struct Car
   //       grid range.
   float x;
   float y;
+
+  enum Direction d_preference[4];
 };
 
 #define MAX_CARS (128)
