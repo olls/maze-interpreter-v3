@@ -166,9 +166,9 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   car->y = y;
 
   car->d_preference[0] = UP;
-  car->d_preference[1] = DOWN;
-  car->d_preference[2] = LEFT;
-  car->d_preference[3] = RIGHT;
+  car->d_preference[1] = RIGHT;
+  car->d_preference[2] = DOWN;
+  car->d_preference[3] = LEFT;
 
   return car;
 }
@@ -204,45 +204,76 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
 
     // Car movements
 
-    Cell * cell_above = get_cell(cells, cell_x, (cell_y + 1));
-    Cell * cell_below = get_cell(cells, cell_x, (cell_y - 1));
-    Cell * cell_right = get_cell(cells, (cell_x + 1), cell_y);
-    Cell * cell_LEFT = get_cell(cells, (cell_x - 1), cell_y);
-
     bool walls[4];
-    walls[0] = cell_above->type == CELL_WALL;
-    walls[1] = cell_below->type == CELL_WALL;
-    walls[2] = cell_right->type == CELL_WALL;
-    walls[3] = cell_LEFT->type == CELL_WALL;
+    walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
+    walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
+    walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
+    walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
 
-    for (uint32_t i = 0; i < 4; ++i)
+    // Find first non-wall direction in order of car->d_preference
+
+    Direction test_direction;
+    bool test_direction_is_wall = true;
+
+    uint32_t direction_index;
+    for (direction_index = 0;
+         test_direction_is_wall;
+         ++direction_index)
     {
-      if (walls[i])
-      {
-
-      }
+      test_direction = car->d_preference[direction_index];
+      test_direction_is_wall = walls[test_direction];
     }
 
-    // switch (best_direction)
-    // {
-    //   case 0:
-    //   {
-    //     car->y += CELL_SPACING;
-    //     car->up_preference = 0;
-    //   } break;
-    //   case 1:
-    //   {
-    //     car->y -= CELL_SPACING;
-    //   } break;
-    //   case 2:
-    //   {
-    //     car->x += CELL_SPACING;
-    //   } break;
-    //   case 3:
-    //   {
-    //     car->x -= CELL_SPACING;
-    //   } break;
-    // }
+    uint32_t new_direction_index = direction_index - 1;
+    Direction new_direction = car->d_preference[new_direction_index];
+    Direction old_direction = car->d_preference[0];
+
+    if (new_direction != old_direction)
+    {
+      // Re-sort direction preference list
+      // Shift new_direction to front of preferences, old_direction to back, other two to middle.
+
+      if (new_direction_index == 1)
+      {
+        car->d_preference[1] = car->d_preference[2];
+        car->d_preference[2] = car->d_preference[3];
+      }
+      else if (new_direction_index == 2)
+      {
+        car->d_preference[2] = car->d_preference[3];
+      }
+
+      car->d_preference[0] = new_direction;
+      car->d_preference[3] = old_direction;
+    }
+
+    switch (new_direction)
+    {
+      case UP:
+      {
+        car->y += CELL_SPACING;
+      } break;
+
+      case DOWN:
+      {
+        car->y -= CELL_SPACING;
+      } break;
+
+      case LEFT:
+      {
+        car->x -= CELL_SPACING;
+      } break;
+
+      case RIGHT:
+      {
+        car->x += CELL_SPACING;
+      } break;
+
+      default:
+      {
+        invalid_code_path;
+      }
+    }
 
     car = cars->cars + (++car_index);
   }
@@ -261,7 +292,7 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
     uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * car->x);
     uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * car->y);
 
-    draw_box(pixels, x, y, 10, 10, 0x00229977);
+    draw_box(pixels, x, y, 10, 10, 0x00992277);
 
     car = cars->cars + (++car_index);
   }
@@ -274,7 +305,7 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint
 {
   render_cells(pixels, mouse, cells);
 
-  if (frame_count % 15 == 0)
+  if (frame_count % 5 == 0)
   {
     update_cars(pixels, df, frame_count, keys, mouse, cells, cars);
   }
@@ -334,6 +365,11 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_START;
         add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
+      }
+      else if ((cell_x == 2 && cell_y == 1) ||
+               (cell_x == 3 && cell_y == 2))
+      {
+        cell->type = CELL_WALL;
       }
       else
       {

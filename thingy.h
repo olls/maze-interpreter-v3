@@ -10,6 +10,7 @@
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
+#define invalid_code_path assert(false)
 
 void
 assert(bool cond)
@@ -122,7 +123,7 @@ struct Car
   float x;
   float y;
 
-  enum Direction d_preference[4];
+  Direction d_preference[4];
 };
 
 #define MAX_CARS (128)
