@@ -185,7 +185,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
   while (car->exists)
   {
 
-    // TODO: Annimation
+    // TODO: Animation
     // float delta_move_per_s = CELL_SPACING;
     // float delta_move_per_us = delta_move_per_s / seconds_in_u(1);
     // float delta_move_per_frame = delta_move_per_us * df;
