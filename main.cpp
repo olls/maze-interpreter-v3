@@ -20,6 +20,7 @@ const uint32_t CELL_GRID_HEIGHT = 15;
 const uint32_t CELL_SPACING = 10000;
 const uint32_t CELL_MARGIN = 1000;
 
+const uint32_t CAR_SIZE = 2000;
 
 
 uint64_t
@@ -199,13 +200,6 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
     }
 
     // Car movements
-
-    bool walls[4];
-    walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
-    walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
-    walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
-    walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
-
     if (car->direction == STATIONARY)
     {
       // Leave them alone!
@@ -229,6 +223,12 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
           directions[i++] = (Direction)direction;
         }
       }
+
+      bool walls[4];
+      walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
+      walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
+      walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
+      walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
 
       Direction test_direction;
       bool can_move = false;
@@ -295,10 +295,12 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
   while (car->exists)
   {
     // Render
-    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * car->x);
-    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * car->y);
+    uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
+    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+    uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
 
-    draw_box(pixels, x, y, 10, 10, 0x00992277);
+    draw_box(pixels, x, y, size, size, 0x00992277);
 
     car = cars->cars + (++car_index);
   }
