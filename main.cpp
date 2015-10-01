@@ -164,11 +164,7 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   car->exists = true;
   car->x = x;
   car->y = y;
-
-  car->d_preference[0] = UP;
-  car->d_preference[1] = RIGHT;
-  car->d_preference[2] = DOWN;
-  car->d_preference[3] = LEFT;
+  car->direction = UP;
 
   return car;
 }
@@ -210,68 +206,78 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
     walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
     walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
 
-    // Find first non-wall direction in order of car->d_preference
-
-    Direction test_direction;
-    bool test_direction_is_wall = true;
-
-    uint32_t direction_index;
-    for (direction_index = 0;
-         test_direction_is_wall;
-         ++direction_index)
+    if (car->direction == STATIONARY)
     {
-      test_direction = car->d_preference[direction_index];
-      test_direction_is_wall = walls[test_direction];
+      // Leave them alone!
     }
-
-    uint32_t new_direction_index = direction_index - 1;
-    Direction new_direction = car->d_preference[new_direction_index];
-    Direction old_direction = car->d_preference[0];
-
-    if (new_direction != old_direction)
+    else
     {
-      // Re-sort direction preference list
-      // Shift new_direction to front of preferences, old_direction to back, other two to middle.
 
-      if (new_direction_index == 1)
+      Direction directions[4];
+
+      directions[0] = car->direction;
+      directions[3] = reverse(car->direction);
+
+      uint32_t i = 1;
+      for (uint32_t direction = 0;
+           direction < 4;
+           direction++)
       {
-        car->d_preference[1] = car->d_preference[2];
-        car->d_preference[2] = car->d_preference[3];
-      }
-      else if (new_direction_index == 2)
-      {
-        car->d_preference[2] = car->d_preference[3];
+        if ((direction != directions[0]) &&
+            (direction != directions[3]))
+        {
+          directions[i++] = (Direction)direction;
+        }
       }
 
-      car->d_preference[0] = new_direction;
-      car->d_preference[3] = old_direction;
-    }
-
-    switch (new_direction)
-    {
-      case UP:
+      Direction test_direction;
+      bool can_move = false;
+      for (uint32_t direction_index = 0;
+           direction_index < 4;
+           direction_index++)
       {
-        car->y += CELL_SPACING;
-      } break;
+        test_direction = directions[direction_index];
+        if (!walls[test_direction])
+        {
+          can_move = true;
+          car->direction = test_direction;
+          break;
+        }
+      }
 
-      case DOWN:
+      if (can_move)
       {
-        car->y -= CELL_SPACING;
-      } break;
+        switch (car->direction)
+        {
+          case UP:
+          {
+            car->y += CELL_SPACING;
+          } break;
 
-      case LEFT:
-      {
-        car->x -= CELL_SPACING;
-      } break;
+          case DOWN:
+          {
+            car->y -= CELL_SPACING;
+          } break;
 
-      case RIGHT:
-      {
-        car->x += CELL_SPACING;
-      } break;
+          case LEFT:
+          {
+            car->x -= CELL_SPACING;
+          } break;
 
-      default:
-      {
-        invalid_code_path;
+          case RIGHT:
+          {
+            car->x += CELL_SPACING;
+          } break;
+
+          case STATIONARY:
+          {
+          } break;
+
+          default:
+          {
+            invalid_code_path;
+          }
+        }
       }
     }
 

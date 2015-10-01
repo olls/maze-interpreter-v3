@@ -109,8 +109,45 @@ enum Direction
   UP,
   DOWN,
   LEFT,
-  RIGHT
+  RIGHT,
+  STATIONARY
 };
+
+Direction
+reverse(Direction d)
+{
+  Direction result;
+
+  switch (d)
+  {
+    case UP:
+    {
+      result = DOWN;
+    } break;
+
+    case DOWN:
+    {
+      result = UP;
+    } break;
+
+    case LEFT:
+    {
+      result = RIGHT;
+    } break;
+
+    case RIGHT:
+    {
+      result = LEFT;
+    } break;
+
+    default:
+    {
+      result = STATIONARY;
+    } break;
+  }
+
+  return result;
+}
 
 struct Car
 {
@@ -123,7 +160,7 @@ struct Car
   float x;
   float y;
 
-  Direction d_preference[4];
+  Direction direction;
 };
 
 #define MAX_CARS (128)
