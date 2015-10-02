@@ -20,7 +20,7 @@ const uint32_t CELL_GRID_HEIGHT = 15;
 const uint32_t CELL_SPACING = 10000;
 const uint32_t CELL_MARGIN = 1000;
 
-const uint32_t CAR_SIZE = 2000;
+const uint32_t CAR_SIZE = 6000;
 
 
 uint64_t
@@ -160,6 +160,8 @@ render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 Car *
 add_car(Cars * cars, uint32_t x, uint32_t y)
 {
+  // TODO: Change car storage to make removal quicker.
+
   assert(cars->first_free < array_count(cars->cars));
   Car * car = cars->cars + (cars->first_free++);
   car->exists = true;
@@ -168,6 +170,18 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   car->direction = UP;
 
   return car;
+}
+
+void
+rm_car(Cars * cars, uint32_t car_index)
+{
+  // Move all cars after car_index down one
+  for (uint32_t index = car_index;
+       car_index < (array_count(cars->cars) - 1);
+       ++car_index)
+  {
+    cars[index] = cars[index + 1];
+  }
 }
 
 
@@ -194,9 +208,54 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
 
     Cell * current_cell = get_cell(cells, cell_x, cell_y);
 
-    if (current_cell->type == CELL_SPLITTER)
-    {
-      add_car(cars, car->x, car->y);
+    switch (current_cell->type)
+    {  
+      case (CELL_NULL):
+      {
+        printf("Null\n");
+      } break;
+  
+      case (CELL_START):
+      {
+        printf("Start\n");
+      } break;
+  
+      case (CELL_PATH):
+      {
+      } break;
+  
+      case (CELL_WALL):
+      {
+        printf("Wall\n");
+        invalid_code_path;
+      } break;
+  
+      case (CELL_HOLE):
+      {
+        printf("Hole\n");
+        rm_car(cars, car_index);
+      } break;
+  
+      case (CELL_SPLITTER):
+      {
+        printf("Splitter\n");
+        add_car(cars, car->x, car->y);
+      } break;
+  
+      case (CELL_FUNCTION):
+      {
+        printf("Function\n");
+      } break;
+  
+      case (CELL_ONCE):
+      {
+        printf("Once\n");
+      } break;
+
+      default:
+      {
+        invalid_code_path;
+      } break;
     }
 
     // Car movements
@@ -313,7 +372,7 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint
 {
   render_cells(pixels, mouse, cells);
 
-  if (frame_count % 5 == 0)
+  if (frame_count % 1 == 0)
   {
     update_cars(pixels, df, frame_count, keys, mouse, cells, cars);
   }
@@ -375,9 +434,14 @@ main(int32_t argc, char * argv[])
         add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
       }
       else if ((cell_x == 2 && cell_y == 1) ||
+               (cell_x == 7 && cell_y == 1) ||
                (cell_x == 3 && cell_y == 2))
       {
         cell->type = CELL_WALL;
+      }
+      else if (cell_x == 8 && cell_y == 7)
+      {
+        cell->type = CELL_HOLE;
       }
       else
       {
@@ -386,7 +450,7 @@ main(int32_t argc, char * argv[])
     }
   }
 
-  // Initalise keys
+  // Initialise keys
   Keys keys;
   keys.space_down = false;
   keys.up_down = false;
