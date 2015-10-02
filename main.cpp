@@ -172,7 +172,7 @@ init_car_mem(Cars * cars)
 
 
 Car *
-add_car(Cars * cars, uint32_t x, uint32_t y)
+add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
 {
   // TODO: Change car storage to make addition quicker.
 
@@ -191,9 +191,10 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   assert(!car->exists);
 
   car->exists = true;
+  car->update = false;
   car->x = x;
   car->y = y;
-  car->direction = UP;
+  car->direction = direction;
 
   return car;
 }
@@ -210,7 +211,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
   {
     Car * car = cars->cars + car_index;
 
-    if (car->exists)
+    if (car->exists && car->update)
     {
 
       // TODO: Animation
@@ -219,7 +220,6 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
       // float delta_move_per_frame = delta_move_per_us * df;
       // car->x += delta_move_per_frame;
 
-      // Cell actions
       uint32_t cell_x = car->x / CELL_SPACING;
       uint32_t cell_y = car->y / CELL_SPACING;
 
@@ -258,8 +258,8 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         case (CELL_SPLITTER):
         {
           printf("Splitter\n");
-          add_car(cars, (car->x + CELL_SPACING), car->y);
-          car->exists = false;
+          add_car(cars, car->x, car->y, RIGHT);
+          car->direction = LEFT;
         } break;
 
         case (CELL_FUNCTION):
@@ -278,6 +278,21 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         } break;
       }
     }
+  }
+
+  for (uint32_t car_index = 0;
+       car_index < array_count(cars->cars);
+       ++car_index)
+  {
+    Car * car = cars->cars + car_index;
+    car->update = true;
+  }
+
+  for (uint32_t car_index = 0;
+       car_index < array_count(cars->cars);
+       ++car_index)
+  {
+    Car * car = cars->cars + car_index;
 
     if (car->exists)
     {

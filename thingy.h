@@ -152,6 +152,7 @@ reverse(Direction d)
 struct Car
 {
   bool exists;
+  bool update;
   int32_t value;
 
   // TODO: These are in world space, might need more range?
