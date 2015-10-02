@@ -166,7 +166,7 @@ init_car_mem(Cars * cars)
   {
     Car * car = cars->cars + car_index;
     car->exists = false;
-    car->value = 1337;
+    car->value = 0;
   }
 }
 
