@@ -157,13 +157,39 @@ render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 }
 
 
+void
+init_car_mem(Cars * cars)
+{
+  for (uint32_t car_index = 0;
+       car_index < MAX_CARS;
+       ++car_index)
+  {
+    Car * car = cars->cars + car_index;
+    car->exists = false;
+    car->value = 1337;
+  }
+}
+
+
 Car *
 add_car(Cars * cars, uint32_t x, uint32_t y)
 {
-  // TODO: Change car storage to make removal quicker.
+  // TODO: Change car storage to make addition quicker.
 
-  assert(cars->first_free < array_count(cars->cars));
-  Car * car = cars->cars + (cars->first_free++);
+  Car * car;
+  for (uint32_t index = 0;
+       index < array_count(cars->cars);
+       ++index)
+  {
+    car = cars->cars + index;
+    if (!car->exists)
+    {
+      break;
+    }
+  }
+
+  assert(!car->exists);
+
   car->exists = true;
   car->x = x;
   car->y = y;
@@ -172,179 +198,174 @@ add_car(Cars * cars, uint32_t x, uint32_t y)
   return car;
 }
 
-void
-rm_car(Cars * cars, uint32_t car_index)
-{
-  // Move all cars after car_index down one
-  for (uint32_t index = car_index;
-       index < (array_count(cars->cars) - 1);
-       ++index)
-  {
-    cars->cars[index] = cars->cars[index + 1];
-  }
-
-  --cars->first_free;
-}
-
 
 void
 update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mouse mouse,
             Cell * cells, Cars * cars)
 {
 
-  uint32_t car_index = 0;
-  Car * car = cars->cars + car_index;
-
-  while (car->exists)
+  for (uint32_t car_index = 0;
+       car_index < array_count(cars->cars);
+       ++car_index)
   {
+    Car * car = cars->cars + car_index;
 
-    // TODO: Animation
-    // float delta_move_per_s = CELL_SPACING;
-    // float delta_move_per_us = delta_move_per_s / seconds_in_u(1);
-    // float delta_move_per_frame = delta_move_per_us * df;
-    // car->x += delta_move_per_frame;
-
-    // Cell actions
-    uint32_t cell_x = car->x / CELL_SPACING;
-    uint32_t cell_y = car->y / CELL_SPACING;
-
-    Cell * current_cell = get_cell(cells, cell_x, cell_y);
-
-    // TODO: Deal with race cars (conditions)
-
-    switch (current_cell->type)
-    {  
-      case (CELL_NULL):
-      {
-        printf("Null\n");
-      } break;
-  
-      case (CELL_START):
-      {
-        printf("Start\n");
-      } break;
-  
-      case (CELL_PATH):
-      {
-      } break;
-  
-      case (CELL_WALL):
-      {
-        printf("Wall\n");
-        invalid_code_path;
-      } break;
-  
-      case (CELL_HOLE):
-      {
-        printf("Hole\n");
-        rm_car(cars, car_index);
-      } break;
-  
-      case (CELL_SPLITTER):
-      {
-        printf("Splitter\n");
-        add_car(cars, car->x, car->y);
-      } break;
-  
-      case (CELL_FUNCTION):
-      {
-        printf("Function\n");
-      } break;
-  
-      case (CELL_ONCE):
-      {
-        printf("Once\n");
-      } break;
-
-      default:
-      {
-        invalid_code_path;
-      } break;
-    }
-
-    // Car movements
-    if (car->direction == STATIONARY)
-    {
-      // Leave them alone!
-    }
-    else
+    if (car->exists)
     {
 
-      Direction directions[4];
+      // TODO: Animation
+      // float delta_move_per_s = CELL_SPACING;
+      // float delta_move_per_us = delta_move_per_s / seconds_in_u(1);
+      // float delta_move_per_frame = delta_move_per_us * df;
+      // car->x += delta_move_per_frame;
 
-      directions[0] = car->direction;
-      directions[3] = reverse(car->direction);
+      // Cell actions
+      uint32_t cell_x = car->x / CELL_SPACING;
+      uint32_t cell_y = car->y / CELL_SPACING;
 
-      uint32_t i = 1;
-      for (uint32_t direction = 0;
-           direction < 4;
-           direction++)
+      Cell * current_cell = get_cell(cells, cell_x, cell_y);
+
+      // TODO: Deal with race cars (conditions)
+
+      switch (current_cell->type)
       {
-        if ((direction != directions[0]) &&
-            (direction != directions[3]))
+        case (CELL_NULL):
         {
-          directions[i++] = (Direction)direction;
-        }
+          printf("Null\n");
+        } break;
+
+        case (CELL_START):
+        {
+          printf("Start\n");
+        } break;
+
+        case (CELL_PATH):
+        {
+        } break;
+
+        case (CELL_WALL):
+        {
+          printf("Wall\n");
+          invalid_code_path;
+        } break;
+
+        case (CELL_HOLE):
+        {
+          printf("Hole\n");
+          car->exists = false;
+        } break;
+
+        case (CELL_SPLITTER):
+        {
+          printf("Splitter\n");
+          add_car(cars, (car->x + CELL_SPACING), car->y);
+          car->exists = false;
+        } break;
+
+        case (CELL_FUNCTION):
+        {
+          printf("Function\n");
+        } break;
+
+        case (CELL_ONCE):
+        {
+          printf("Once\n");
+        } break;
+
+        default:
+        {
+          invalid_code_path;
+        } break;
       }
+    }
 
-      bool walls[4];
-      walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
-      walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
-      walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
-      walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
+    if (car->exists)
+    {
 
-      Direction test_direction;
-      bool can_move = false;
-      for (uint32_t direction_index = 0;
-           direction_index < 4;
-           direction_index++)
+      // Car movements
+      if (car->direction == STATIONARY)
       {
-        test_direction = directions[direction_index];
-        if (!walls[test_direction])
-        {
-          can_move = true;
-          car->direction = test_direction;
-          break;
-        }
+        // Leave them alone!
       }
-
-      if (can_move)
+      else
       {
-        switch (car->direction)
+        uint32_t cell_x = car->x / CELL_SPACING;
+        uint32_t cell_y = car->y / CELL_SPACING;
+
+        Direction directions[4];
+
+        directions[0] = car->direction;
+        directions[3] = reverse(car->direction);
+
+        uint32_t i = 1;
+        for (uint32_t direction = 0;
+             direction < 4;
+             direction++)
         {
-          case UP:
+          if ((direction != directions[0]) &&
+              (direction != directions[3]))
           {
-            car->y += CELL_SPACING;
-          } break;
+            directions[i++] = (Direction)direction;
+          }
+        }
 
-          case DOWN:
-          {
-            car->y -= CELL_SPACING;
-          } break;
+        bool walls[4];
+        walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
+        walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
+        walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
+        walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
 
-          case LEFT:
+        Direction test_direction;
+        bool can_move = false;
+        for (uint32_t direction_index = 0;
+             direction_index < 4;
+             direction_index++)
+        {
+          test_direction = directions[direction_index];
+          if (!walls[test_direction])
           {
-            car->x -= CELL_SPACING;
-          } break;
+            can_move = true;
+            car->direction = test_direction;
+            break;
+          }
+        }
 
-          case RIGHT:
+        if (can_move)
+        {
+          switch (car->direction)
           {
-            car->x += CELL_SPACING;
-          } break;
+            case UP:
+            {
+              car->y += CELL_SPACING;
+            } break;
 
-          case STATIONARY:
-          {
-          } break;
+            case DOWN:
+            {
+              car->y -= CELL_SPACING;
+            } break;
 
-          default:
-          {
-            invalid_code_path;
+            case LEFT:
+            {
+              car->x -= CELL_SPACING;
+            } break;
+
+            case RIGHT:
+            {
+              car->x += CELL_SPACING;
+            } break;
+
+            case STATIONARY:
+            {
+            } break;
+
+            default:
+            {
+              invalid_code_path;
+            }
           }
         }
       }
     }
-
-    car = cars->cars + (++car_index);
   }
 }
 
@@ -352,20 +373,22 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
 void
 render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
 {
-  uint32_t car_index = 0;
-  Car * car = cars->cars + car_index;
-
-  while (car->exists)
+  for (uint32_t car_index = 0;
+       car_index < array_count(cars->cars);
+       ++car_index)
   {
-    // Render
-    uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
-    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-    uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
+    Car * car = cars->cars + car_index;
 
-    draw_box(pixels, x, y, size, size, 0x00992277);
+    if (car->exists)
+    {
+      // Render
+      uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
+      uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+      uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+      uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
 
-    car = cars->cars + (++car_index);
+      draw_box(pixels, x, y, size, size, 0x00992277);
+    }
   }
 }
 

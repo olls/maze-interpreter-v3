@@ -168,19 +168,4 @@ struct Car
 struct Cars
 {
   Car cars[MAX_CARS];
-  uint32_t first_free;
 };
-
-void
-init_car_mem(Cars * cars)
-{
-  cars->first_free = 0;
-  for (uint32_t car_index = 0;
-       car_index < MAX_CARS;
-       ++car_index)
-  {
-    Car * car = cars->cars + car_index;
-    car->exists = false;
-    car->value = 1337;
-  }
-}
