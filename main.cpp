@@ -210,6 +210,8 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
 
     Cell * current_cell = get_cell(cells, cell_x, cell_y);
 
+    // TODO: Deal with race cars (conditions)
+
     switch (current_cell->type)
     {  
       case (CELL_NULL):
@@ -445,6 +447,10 @@ main(int32_t argc, char * argv[])
       else if (cell_x == 8 && cell_y == 7)
       {
         cell->type = CELL_HOLE;
+      }
+      else if (cell_x == 8 && cell_y == 5)
+      {
+        cell->type = CELL_SPLITTER;
       }
       else
       {
