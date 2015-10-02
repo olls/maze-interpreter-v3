@@ -177,11 +177,13 @@ rm_car(Cars * cars, uint32_t car_index)
 {
   // Move all cars after car_index down one
   for (uint32_t index = car_index;
-       car_index < (array_count(cars->cars) - 1);
-       ++car_index)
+       index < (array_count(cars->cars) - 1);
+       ++index)
   {
-    cars[index] = cars[index + 1];
+    cars->cars[index] = cars->cars[index + 1];
   }
+
+  --cars->first_free;
 }
 
 
@@ -372,7 +374,7 @@ update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint
 {
   render_cells(pixels, mouse, cells);
 
-  if (frame_count % 1 == 0)
+  if (frame_count % 2 == 0)
   {
     update_cars(pixels, df, frame_count, keys, mouse, cells, cars);
   }
@@ -428,7 +430,8 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_WALL;
       }
-      else if (cell_x == 1 && cell_y == 1)
+      else if ((cell_x == 1 && cell_y == 1) ||
+               (cell_x == 9 && cell_y == 9))
       {
         cell->type = CELL_START;
         add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
