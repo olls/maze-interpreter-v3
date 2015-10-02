@@ -300,7 +300,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
       // Car movements
       if (car->direction == STATIONARY)
       {
-        // Leave them alone!
+        // They're stuck this way, FOREVER!
       }
       else
       {

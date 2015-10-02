@@ -97,7 +97,7 @@ enum CellType
   CELL_ONCE
 };
 
-// TODO: Sparce storage of cells and cars
+// TODO: Sparse storage of cells and cars
 struct Cell
 {
   enum CellType type;
@@ -164,7 +164,7 @@ struct Car
   Direction direction;
 };
 
-#define MAX_CARS (128)
+#define MAX_CARS (1024)
 
 struct Cars
 {
