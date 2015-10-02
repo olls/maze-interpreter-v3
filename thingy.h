@@ -12,6 +12,14 @@
 
 #define invalid_code_path assert(false)
 
+#define DEBUG
+
+#ifndef DEBUG
+void nothing() {}
+#define printf(...) nothing()
+#endif
+
+
 void
 assert(bool cond)
 {
@@ -164,9 +172,10 @@ struct Car
   Direction direction;
 };
 
-#define MAX_CARS (1024)
+#define MAX_CARS (10000)
 
 struct Cars
 {
   Car cars[MAX_CARS];
+  uint32_t next_free;
 };

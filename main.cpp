@@ -168,27 +168,17 @@ init_car_mem(Cars * cars)
     car->exists = false;
     car->value = 0;
   }
+  cars->next_free = 0;
 }
 
 
 Car *
 add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
 {
-  // TODO: Change car storage to make addition quicker.
+  assert(cars->next_free != MAX_CARS);
 
-  Car * car;
-  for (uint32_t index = 0;
-       index < array_count(cars->cars);
-       ++index)
-  {
-    car = cars->cars + index;
-    if (!car->exists)
-    {
-      break;
-    }
-  }
-
-  assert(!car->exists);
+  Car * car = cars->cars + cars->next_free;
+  ++cars->next_free;
 
   car->exists = true;
   car->update = false;
@@ -201,12 +191,24 @@ add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
 
 
 void
+rm_car(Cars * cars, uint32_t car_index)
+{
+  --cars->next_free;
+
+  Car * new_slot = cars->cars + car_index;
+  Car * last_car = cars->cars + cars->next_free;
+
+  *new_slot = *last_car;
+}
+
+
+void
 update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mouse mouse,
             Cell * cells, Cars * cars)
 {
 
   for (uint32_t car_index = 0;
-       car_index < array_count(cars->cars);
+       car_index < cars->next_free;
        ++car_index)
   {
     Car * car = cars->cars + car_index;
@@ -252,7 +254,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         case (CELL_HOLE):
         {
           printf("Hole\n");
-          car->exists = false;
+          rm_car(cars, car_index);
         } break;
 
         case (CELL_SPLITTER):
@@ -270,6 +272,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         case (CELL_ONCE):
         {
           printf("Once\n");
+          current_cell->type = CELL_WALL;
         } break;
 
         default:
@@ -281,7 +284,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
   }
 
   for (uint32_t car_index = 0;
-       car_index < array_count(cars->cars);
+       car_index < cars->next_free;
        ++car_index)
   {
     Car * car = cars->cars + car_index;
@@ -289,7 +292,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
   }
 
   for (uint32_t car_index = 0;
-       car_index < array_count(cars->cars);
+       car_index < cars->next_free;
        ++car_index)
   {
     Car * car = cars->cars + car_index;
@@ -389,7 +392,7 @@ void
 render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
 {
   for (uint32_t car_index = 0;
-       car_index < array_count(cars->cars);
+       car_index < cars->next_free;
        ++car_index)
   {
     Car * car = cars->cars + car_index;
@@ -486,9 +489,17 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_HOLE;
       }
+      else if (cell_x == (CELL_GRID_WIDTH - 2) && cell_y == 6)
+      {
+        cell->type = CELL_ONCE;
+      }
       else if (cell_x == 8 && cell_y == 5)
       {
         cell->type = CELL_SPLITTER;
+      }
+      else if ((cell_x == 7 && cell_y == 5))
+      {
+        cell->type = CELL_WALL;
       }
       else
       {
