@@ -102,7 +102,11 @@ enum CellType
   CELL_HOLE,
   CELL_SPLITTER,
   CELL_FUNCTION,
-  CELL_ONCE
+  CELL_ONCE,
+  CELL_UP,
+  CELL_DOWN,
+  CELL_LEFT,
+  CELL_RIGHT
 };
 
 // TODO: Sparse storage of cells and cars

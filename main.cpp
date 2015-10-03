@@ -90,29 +90,29 @@ render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
       uint32_t color = 0;
       switch (cell->type)
       {
-        case CELL_NULL:
-          color = 0;
+        case CELL_NULL:     color = 0;
           break;
-        case CELL_START:
-          color = 0x0033AA55;
+        case CELL_START:    color = 0x0033AA55;
           break;
-        case CELL_PATH:
-          color = 0x00558822;
+        case CELL_PATH:     color = 0x00558822;
           break;
-        case CELL_WALL:
-          color = 0x00333333;
+        case CELL_WALL:     color = 0x00333333;
           break;
-        case CELL_HOLE:
-          color = 0x00BB6644;
+        case CELL_HOLE:     color = 0x00BB6644;
           break;
-        case CELL_SPLITTER:
-          color = 0x00224499;
+        case CELL_SPLITTER: color = 0x00224499;
           break;
-        case CELL_FUNCTION:
-          color = 0x00667788;
+        case CELL_FUNCTION: color = 0x00667788;
           break;
-        case CELL_ONCE:
-          color = 0x00887766;
+        case CELL_ONCE:     color = 0x00887766;
+          break;
+        case CELL_UP:       color = 0x00220000;
+          break;
+        case CELL_DOWN:     color = 0x00002200;
+          break;
+        case CELL_LEFT:     color = 0x00000022;
+          break;
+        case CELL_RIGHT:    color = 0x00002222;
           break;
       }
 
@@ -234,6 +234,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         case (CELL_NULL):
         {
           printf("Null\n");
+          invalid_code_path;
         } break;
 
         case (CELL_START):
@@ -275,9 +276,28 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
           current_cell->type = CELL_WALL;
         } break;
 
-        default:
+        case (CELL_UP):
         {
-          invalid_code_path;
+          printf("Up\n");
+          car->direction = UP;
+        } break;
+
+        case (CELL_DOWN):
+        {
+          printf("Down\n");
+          car->direction = DOWN;
+        } break;
+
+        case (CELL_LEFT):
+        {
+          printf("Left\n");
+          car->direction = LEFT;
+        } break;
+
+        case (CELL_RIGHT):
+        {
+          printf("Right\n");
+          car->direction = RIGHT;
         } break;
       }
     }
@@ -496,6 +516,10 @@ main(int32_t argc, char * argv[])
       else if (cell_x == 8 && cell_y == 5)
       {
         cell->type = CELL_SPLITTER;
+      }
+      else if (cell_x == (CELL_GRID_WIDTH - 2) && cell_y == 3)
+      {
+        cell->type = CELL_UP;
       }
       else if ((cell_x == 7 && cell_y == 5))
       {
