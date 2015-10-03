@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include "thingy.h"
+#include "parser.cpp"
 
 
 const uint32_t FPS = 30;
@@ -531,6 +532,8 @@ main(int32_t argc, char * argv[])
       }
     }
   }
+
+  parse();
 
   // Initialise keys
   Keys keys;
