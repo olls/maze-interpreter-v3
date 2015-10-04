@@ -15,7 +15,8 @@ parse()
 
     char potential_cell[3];
     size_t offset = 0;
-    while (sscanf((buffer + offset), "%2s", potential_cell) != EOF)
+    uint32_t bytes_read = 0;
+    while (sscanf((buffer + offset), "%2s%n", potential_cell, &bytes_read) != EOF)
     {
       Cell new_cell;
       new_cell.type = CELL_NULL;
@@ -84,12 +85,12 @@ parse()
 
       if (new_cell.type == CELL_NULL)
       {
-        offset += 1;
+        // If we havent't found a valid cell only move on by one char instead of two.
+        offset += bytes_read - 1;
       }
       else
       {
-        offset += 2;
-
+        offset += bytes_read;
 
         printf("%s ", potential_cell);
       }
