@@ -487,10 +487,14 @@ main(int32_t argc, char * argv[])
       Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
       cell->data = 0;
 
-      if (cell_x == 0 ||
-          cell_x == (CELL_GRID_WIDTH - 1) ||
-          cell_y == 0 ||
-          cell_y == (CELL_GRID_HEIGHT - 1))
+      if ((cell_x == 0) ||
+          (cell_x == (CELL_GRID_WIDTH - 1)) ||
+          (cell_y == 0) ||
+          (cell_y == (CELL_GRID_HEIGHT - 1)) ||
+          (cell_x == 2 && cell_y == 1) ||
+          (cell_x == 7 && cell_y == 1) ||
+          (cell_x == 7 && cell_y == 5) ||
+          (cell_x == 9 && cell_y == 5))
       {
         cell->type = CELL_WALL;
       }
@@ -499,13 +503,6 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_START;
         add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
-      }
-      else if ((cell_x == 2 && cell_y == 1) ||
-               (cell_x == 7 && cell_y == 1) ||
-               (cell_x == 7 && cell_y == 5) ||
-               (cell_x == 9 && cell_y == 5))
-      {
-        cell->type = CELL_WALL;
       }
       else if (cell_x == 8 && cell_y == 7)
       {
