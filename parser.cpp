@@ -122,11 +122,9 @@ parse()
 
   }
 
-  // if (buffer[] == '\n')
-  {
-    printf("\n");
-    ++height_in_cells;
-  }
+  // Deal with final line
+  printf("\n");
+  ++height_in_cells;
 
   printf("(%d, %d)\n", width_in_cells, height_in_cells);
 
