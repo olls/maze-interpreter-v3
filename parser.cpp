@@ -7,6 +7,7 @@ parse()
   assert(file != NULL);
 
   uint32_t width_in_cells = 0;
+  uint32_t current_width_in_cells = 0;
   uint32_t height_in_cells = 0;
 
   char buffer[256];
@@ -96,7 +97,7 @@ parse()
       else
       {
         offset += bytes_read;
-
+        ++current_width_in_cells;
         printf("%s ", potential_cell);
       }
     }
@@ -109,11 +110,25 @@ parse()
 
     if (ln > 0)
     {
-      height_in_cells += 1;
       printf("\n");
+      ++height_in_cells;
+      
+      if (current_width_in_cells > width_in_cells)
+      {
+        width_in_cells = current_width_in_cells;
+      }
+      current_width_in_cells = 0;
     }
 
   }
+
+  // if (buffer[] == '\n')
+  {
+    printf("\n");
+    ++height_in_cells;
+  }
+
+  printf("(%d, %d)\n", width_in_cells, height_in_cells);
 
   fclose(file);
 }
