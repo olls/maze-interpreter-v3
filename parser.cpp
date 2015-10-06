@@ -97,9 +97,7 @@ parse()
       else
       {
         offset += bytes_read;
-
-        current_width_in_cells += 1;
-
+        ++current_width_in_cells;
         printf("%s ", potential_cell);
       }
     }
@@ -113,7 +111,6 @@ parse()
     if (ln > 0)
     {
       printf("\n");
-
       ++height_in_cells;
 
       if (current_width_in_cells > width_in_cells)
@@ -132,5 +129,6 @@ parse()
   }
 
   printf("(%d, %d)\n", width_in_cells, height_in_cells);
+
   fclose(file);
 }
