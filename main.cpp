@@ -68,12 +68,17 @@ draw_box(uint32_t * pixels,
 Cell *
 get_cell(Maze * maze, uint32_t cell_x, uint32_t cell_y)
 {
-  uint32_t cell_index = (cell_y * maze->width) + cell_x;
+  // Mazes are stored upside-down...
+  // TODO: Parse them the right way up.
+  uint32_t x_storage = cell_x;
+  uint32_t y_storage = maze->height - cell_y - 1;
 
-  uint32_t cell_block_index = cell_index / array_count(maze->first_block->cells);
-  uint32_t within_block_cell_index = cell_index - (cell_block_index * array_count(maze->first_block->cells));
+  uint32_t cell_index = (y_storage * maze->width) + x_storage;
 
-  MazeBlock * block = maze->first_block;
+  uint32_t cell_block_index = cell_index / array_count(maze->start->cells);
+  uint32_t within_block_cell_index = cell_index - (cell_block_index * array_count(maze->start->cells));
+
+  MazeBlock * block = maze->start;
   for (uint32_t block_index = 0;
        block_index < cell_block_index;
        ++block_index)

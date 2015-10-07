@@ -27,13 +27,13 @@
 
 #define invalid_code_path assert(false)
 
+
 struct GameMemory
 {
   size_t total;
   uint8_t * memory;
   size_t used;
 };
-
 
 void
 init_mem(GameMemory * game_memory, size_t total)
@@ -118,6 +118,7 @@ struct Cell
 struct MazeBlock
 {
   Cell cells[50];
+  uint32_t used;
   MazeBlock * next;
 };
 
@@ -126,8 +127,7 @@ struct Maze
   uint32_t width;
   uint32_t height;
 
-  uint32_t used;
-  MazeBlock * first_block;
+  MazeBlock * start;
 };
 
 enum Direction
