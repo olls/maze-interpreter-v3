@@ -121,12 +121,9 @@ parse()
     }
   }
 
-  if (buffer[sizeof(buffer) - 1] != '\n')
-  {
-    // File does not end in new line, therefore, we won't have counted the height for the last line.
-    printf("\n");
-    ++height_in_cells;
-  }
+  // Account for last line
+  printf("\n");
+  ++height_in_cells;
 
   printf("(%d, %d)\n", width_in_cells, height_in_cells);
 
