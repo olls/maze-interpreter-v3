@@ -112,19 +112,21 @@ parse()
     {
       printf("\n");
       ++height_in_cells;
-      
+
       if (current_width_in_cells > width_in_cells)
       {
         width_in_cells = current_width_in_cells;
       }
       current_width_in_cells = 0;
     }
-
   }
 
-  // Deal with final line
-  printf("\n");
-  ++height_in_cells;
+  if (buffer[sizeof(buffer) - 1] != '\n')
+  {
+    // File does not end in new line, therefore, we won't have counted the height for the last line.
+    printf("\n");
+    ++height_in_cells;
+  }
 
   printf("(%d, %d)\n", width_in_cells, height_in_cells);
 
