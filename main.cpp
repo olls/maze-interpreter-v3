@@ -15,9 +15,6 @@ const uint32_t WINDOW_HEIGHT = 600;
 // NOTE: 256 sub-pixel steps!
 const float WORLD_COORD_TO_PIXELS = 1.0f / 256.0f;
 
-const uint32_t CELL_GRID_WIDTH = 15;
-const uint32_t CELL_GRID_HEIGHT = 15;
-
 const uint32_t CELL_SPACING = 10000;
 const uint32_t CELL_MARGIN = 1000;
 
@@ -69,24 +66,39 @@ draw_box(uint32_t * pixels,
 
 
 Cell *
-get_cell(Cell * cells, uint32_t cell_x, uint32_t cell_y)
+get_cell(Maze * maze, uint32_t cell_x, uint32_t cell_y)
 {
-  return cells + (cell_y * CELL_GRID_WIDTH) + cell_x;
+  uint32_t cell_index = (cell_y * maze->width) + cell_x;
+
+  uint32_t cell_block_index = cell_index / array_count(maze->first_block->cells);
+  uint32_t within_block_cell_index = cell_index - (cell_block_index * array_count(maze->first_block->cells));
+
+  MazeBlock * block = maze->first_block;
+  for (uint32_t block_index = 0;
+       block_index < cell_block_index;
+       ++block_index)
+  {
+    block = block->next;
+  }
+
+  Cell * cell = block->cells + within_block_cell_index;
+
+  return cell;
 }
 
 
 void
-render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
+render_cells(uint32_t * pixels, Mouse mouse, Maze * maze)
 {
   for (uint32_t cell_y = 0;
-       cell_y < CELL_GRID_HEIGHT;
+       cell_y < maze->height;
        cell_y++)
   {
     for (uint32_t cell_x = 0;
-         cell_x < CELL_GRID_WIDTH;
+         cell_x < maze->width;
          cell_x++)
     {
-      Cell * cell = get_cell(cells, cell_x, cell_y);
+      Cell * cell = get_cell(maze, cell_x, cell_y);
 
       uint32_t color = 0;
       switch (cell->type)
@@ -205,7 +217,7 @@ rm_car(Cars * cars, uint32_t car_index)
 
 void
 update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mouse mouse,
-            Cell * cells, Cars * cars)
+            Maze * maze, Cars * cars)
 {
 
   Car * car = cars->cars;
@@ -226,7 +238,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
       uint32_t cell_x = car->x / CELL_SPACING;
       uint32_t cell_y = car->y / CELL_SPACING;
 
-      Cell * current_cell = get_cell(cells, cell_x, cell_y);
+      Cell * current_cell = get_cell(maze, cell_x, cell_y);
 
       // TODO: Deal with race cars (conditions)
 
@@ -351,10 +363,10 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         }
 
         bool walls[4];
-        walls[UP]    = get_cell(cells, cell_x, (cell_y + 1))->type == CELL_WALL;
-        walls[DOWN]  = get_cell(cells, cell_x, (cell_y - 1))->type == CELL_WALL;
-        walls[LEFT]  = get_cell(cells, (cell_x - 1), cell_y)->type == CELL_WALL;
-        walls[RIGHT] = get_cell(cells, (cell_x + 1), cell_y)->type == CELL_WALL;
+        walls[UP]    = get_cell(maze, cell_x, (cell_y + 1))->type == CELL_WALL;
+        walls[DOWN]  = get_cell(maze, cell_x, (cell_y - 1))->type == CELL_WALL;
+        walls[LEFT]  = get_cell(maze, (cell_x - 1), cell_y)->type == CELL_WALL;
+        walls[RIGHT] = get_cell(maze, (cell_x + 1), cell_y)->type == CELL_WALL;
 
         Direction test_direction;
         bool can_move = false;
@@ -436,13 +448,13 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
 
 void
 update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint32_t frame_count,
-                  Keys keys, Mouse mouse, Cell * cells, Cars * cars)
+                  Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
-  render_cells(pixels, mouse, cells);
+  render_cells(pixels, mouse, maze);
 
   if (frame_count % 2 == 0)
   {
-    update_cars(pixels, df, frame_count, keys, mouse, cells, cars);
+    update_cars(pixels, df, frame_count, keys, mouse, maze, cars);
   }
 
   render_cars(pixels, df, cars);
@@ -470,65 +482,12 @@ main(int32_t argc, char * argv[])
   // The pixel buffer
   uint32_t * pixels = take_struct_mem(&game_memory, uint32_t, (WINDOW_WIDTH * WINDOW_HEIGHT));
 
-  // The cell grid
-  Cell * cells = take_struct_mem(&game_memory, Cell, (CELL_GRID_WIDTH * CELL_GRID_HEIGHT));
+  char maze_filename[] = "test.mz";
+  Maze * maze = parse(&game_memory, maze_filename);
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
   init_car_mem(cars);
-
-  // Init cells and cars
-  for (uint32_t cell_y = 0;
-       cell_y < CELL_GRID_HEIGHT;
-       cell_y++)
-  {
-    for (uint32_t cell_x = 0;
-         cell_x < CELL_GRID_WIDTH;
-         cell_x++)
-    {
-      Cell * cell = cells + cell_y * CELL_GRID_WIDTH + cell_x;
-      cell->data = 0;
-
-      if ((cell_x == 0) ||
-          (cell_x == (CELL_GRID_WIDTH - 1)) ||
-          (cell_y == 0) ||
-          (cell_y == (CELL_GRID_HEIGHT - 1)) ||
-          (cell_x == 2 && cell_y == 1) ||
-          (cell_x == 7 && cell_y == 1) ||
-          (cell_x == 7 && cell_y == 5))
-      {
-        cell->type = CELL_WALL;
-      }
-      else if ((cell_x == 1 && cell_y == 1) ||
-               (cell_x == 9 && cell_y == 9))
-      {
-        cell->type = CELL_START;
-        add_car(cars, cell_x * CELL_SPACING, cell_y * CELL_SPACING);
-      }
-      else if (cell_x == 8 && cell_y == 7)
-      {
-        cell->type = CELL_HOLE;
-      }
-      else if (cell_x == (CELL_GRID_WIDTH - 2) && cell_y == 6)
-      {
-        cell->type = CELL_ONCE;
-      }
-      else if (cell_x == 8 && cell_y == 5)
-      {
-        cell->type = CELL_SPLITTER;
-      }
-      else if (cell_x == 8 && cell_y == 3)
-      {
-        cell->type = CELL_UP;
-      }
-      else
-      {
-        cell->type = CELL_PATH;
-      }
-    }
-  }
-
-  parse();
 
   // Initialise keys
   Keys keys;
@@ -725,7 +684,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, pixels, delta_frame, frame_count, keys, mouse, cells, cars);
+      update_and_render(&game_memory, pixels, delta_frame, frame_count, keys, mouse, maze, cars);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;

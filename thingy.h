@@ -46,7 +46,7 @@ init_mem(GameMemory * game_memory, size_t total)
 }
 
 
-#define take_struct_mem(game_memory, struct, num) {(struct *)take_mem(game_memory, (sizeof(struct) * num))}
+#define take_struct_mem(game_memory, struct_, num) {(struct_ *)take_mem(game_memory, (sizeof(struct_) * num))}
 void *
 take_mem(GameMemory * game_memory, size_t size)
 {
@@ -111,6 +111,23 @@ struct Cell
 {
   enum CellType type;
   int32_t data;
+};
+
+// TODO: Should probably be split spatially, to make it easier to index.
+// NOTE: The cells should be stored contiguously, left to right, top to bottom.
+struct MazeBlock
+{
+  Cell cells[50];
+  MazeBlock * next;
+};
+
+struct Maze
+{
+  uint32_t width;
+  uint32_t height;
+
+  uint32_t used;
+  MazeBlock * first_block;
 };
 
 enum Direction
