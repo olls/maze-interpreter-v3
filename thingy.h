@@ -15,21 +15,17 @@
 #define DEBUG
 
 #ifndef DEBUG
-void nothing() {}
-#define printf(...) nothing()
+#define printf(x, ...) sizeof(x)
 #endif
 
-
-void
-assert(bool cond)
-{
-  if (!cond)
-  {
-    printf("Assertion FAILED!! :(\n");
-    exit(1);
-  }
-}
-
+#ifdef DEBUG
+#define S(x) #x
+#define S_(x) S(x)
+#define S__LINE__ S_(__LINE__)
+#define assert(x) ((void)(!(x) && printf("Assertion Failed: "__FILE__":"S__LINE__":  ("#x")\n") && (exit(1), 1)))
+#else
+#define assert(x) ((void)sizeof(x))
+#endif
 
 struct GameMemory
 {
@@ -50,6 +46,7 @@ init_mem(GameMemory * game_memory, size_t total)
 }
 
 
+#define take_struct_mem(game_memory, struct, num) {(struct *)take_mem(game_memory, (sizeof(struct) * num))}
 void *
 take_mem(GameMemory * game_memory, size_t size)
 {

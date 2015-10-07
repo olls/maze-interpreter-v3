@@ -468,13 +468,13 @@ main(int32_t argc, char * argv[])
   init_mem(&game_memory, megabytes(5));
 
   // The pixel buffer
-  uint32_t * pixels = (uint32_t *)take_mem(&game_memory, WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(uint32_t));
+  uint32_t * pixels = take_struct_mem(&game_memory, uint32_t, (WINDOW_WIDTH * WINDOW_HEIGHT));
 
   // The cell grid
-  Cell * cells = (Cell *)take_mem(&game_memory, CELL_GRID_WIDTH * CELL_GRID_HEIGHT * sizeof(Cell));
+  Cell * cells = take_struct_mem(&game_memory, Cell, (CELL_GRID_WIDTH * CELL_GRID_HEIGHT));
 
   // The car list
-  Cars * cars = (Cars *)take_mem(&game_memory, sizeof(Cars));
+  Cars * cars = take_struct_mem(&game_memory, Cars, 1);
   init_car_mem(cars);
 
   // Init cells and cars
