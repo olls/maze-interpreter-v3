@@ -493,8 +493,7 @@ main(int32_t argc, char * argv[])
           (cell_y == (CELL_GRID_HEIGHT - 1)) ||
           (cell_x == 2 && cell_y == 1) ||
           (cell_x == 7 && cell_y == 1) ||
-          (cell_x == 7 && cell_y == 5) ||
-          (cell_x == 9 && cell_y == 5))
+          (cell_x == 7 && cell_y == 5))
       {
         cell->type = CELL_WALL;
       }
@@ -508,7 +507,7 @@ main(int32_t argc, char * argv[])
       {
         cell->type = CELL_HOLE;
       }
-      else if (cell_x == (CELL_GRID_WIDTH - 3) && cell_y == 6)
+      else if (cell_x == (CELL_GRID_WIDTH - 2) && cell_y == 6)
       {
         cell->type = CELL_ONCE;
       }
