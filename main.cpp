@@ -502,7 +502,7 @@ main(int32_t argc, char * argv[])
   keys.s_down = false;
   keys.d_down = false;
 
-  // Initalise mouse
+  // Initialise mouse
   Mouse mouse;
   mouse.x = -1;
   mouse.y = -1;
