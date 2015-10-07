@@ -10,8 +10,6 @@
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
-#define invalid_code_path assert(false)
-
 #define DEBUG
 
 #ifndef DEBUG
@@ -26,6 +24,8 @@
 #else
 #define assert(x) ((void)sizeof(x))
 #endif
+
+#define invalid_code_path assert(false)
 
 struct GameMemory
 {
