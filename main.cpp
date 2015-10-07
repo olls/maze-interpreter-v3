@@ -494,6 +494,42 @@ main(int32_t argc, char * argv[])
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
   init_car_mem(cars);
 
+  // TODO: When the cells are stored spatially properly, use this for looping through the cells:
+  // // Add start cars
+  // MazeBlock * block = maze->start;
+  // for (uint32_t block_index = 0;
+  //      block->next;
+  //      ++block)
+  // {
+  //   Cell * cell = block->cells;
+  //   for (uint32_t cell_index = 0;
+  //        cell_index < array_count(block->cells);
+  //        ++cell_index, ++cell)
+  //   {
+  //     if (cell->type == CELL_START)
+  //     {
+  //       Car * car = add_car(cars, cell->x, cell->y);
+  //     }
+  //   }
+  //   block = block->next;
+  // }
+
+  for (uint32_t cell_y = 0;
+       cell_y < maze->height;
+       ++cell_y)
+  {
+    for (uint32_t cell_x = 0;
+         cell_x < maze->width;
+         ++cell_x)
+    {
+      Cell * cell = get_cell(maze, cell_x, cell_y);
+      if (cell->type == CELL_START)
+      {
+        add_car(cars, (CELL_SPACING * cell_x), (CELL_SPACING * cell_y));
+      }
+    }
+  }
+
   // Initialise keys
   Keys keys;
   keys.space_down = false;
