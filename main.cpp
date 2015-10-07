@@ -161,11 +161,11 @@ render_cells(uint32_t * pixels, Mouse mouse, Cell * cells)
 void
 init_car_mem(Cars * cars)
 {
+  Car * car = cars->cars;
   for (uint32_t car_index = 0;
        car_index < MAX_CARS;
-       ++car_index)
+       ++car_index, ++car)
   {
-    Car * car = cars->cars + car_index;
     car->exists = false;
     car->value = 0;
   }
@@ -208,11 +208,11 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
             Cell * cells, Cars * cars)
 {
 
+  Car * car = cars->cars;
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
-       ++car_index)
+       ++car_index, ++car)
   {
-    Car * car = cars->cars + car_index;
 
     if (car->exists && car->update)
     {
@@ -304,19 +304,21 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
     }
   }
 
+  // TODO: Stop looping through them so many times!
+
+  car = cars->cars;
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
-       ++car_index)
+       ++car_index, ++car)
   {
-    Car * car = cars->cars + car_index;
     car->update = true;
   }
 
+  car = cars->cars;
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
-       ++car_index)
+       ++car_index, ++car)
   {
-    Car * car = cars->cars + car_index;
 
     if (car->exists)
     {
