@@ -35,6 +35,7 @@ struct GameMemory
   size_t used;
 };
 
+
 void
 init_mem(GameMemory * game_memory, size_t total)
 {
