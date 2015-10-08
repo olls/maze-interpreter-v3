@@ -3,8 +3,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
-#include "thingy.h"
-#include "blocks.h"
+#include "main.h"
 #include "blocks.cpp"
 #include "parser.cpp"
 

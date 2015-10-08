@@ -28,6 +28,9 @@
 #define invalid_code_path assert(false)
 
 
+#include "blocks.h"
+
+
 struct GameMemory
 {
   size_t total;
