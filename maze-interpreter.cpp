@@ -22,6 +22,8 @@ const uint32_t CELL_MARGIN = 1000;
 
 const uint32_t CAR_SIZE = 6000;
 
+const char MAZE_FILENAME[] = "test.mz";
+
 
 uint64_t
 get_us()
@@ -470,8 +472,7 @@ main(int32_t argc, char * argv[])
   // The pixel buffer
   uint32_t * pixels = take_struct_mem(&game_memory, uint32_t, (WINDOW_WIDTH * WINDOW_HEIGHT));
 
-  char maze_filename[] = "test.mz";
-  Maze * maze = parse(&game_memory, maze_filename);
+  Maze * maze = parse(&game_memory, MAZE_FILENAME);
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);

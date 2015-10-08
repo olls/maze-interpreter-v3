@@ -16,7 +16,7 @@ isLetter(char character)
 
 
 Maze *
-parse(GameMemory * game_memory, char * filename)
+parse(GameMemory * game_memory, const char * filename)
 {
 
   FILE * file = fopen(filename, "r");
