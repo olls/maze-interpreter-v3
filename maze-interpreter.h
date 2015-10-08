@@ -139,7 +139,6 @@ reverse(Direction d)
 
 struct Car
 {
-  bool exists;
   bool update;
   int32_t value;
 

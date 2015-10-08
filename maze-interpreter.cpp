@@ -162,7 +162,6 @@ init_car_mem(Cars * cars)
        car_index < MAX_CARS;
        ++car_index, ++car)
   {
-    car->exists = false;
     car->value = 0;
   }
   cars->next_free = 0;
@@ -177,7 +176,6 @@ add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
   Car * car = cars->cars + cars->next_free;
   ++cars->next_free;
 
-  car->exists = true;
   car->update = false;
   car->x = x;
   car->y = y;
@@ -210,7 +208,7 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
        ++car_index, ++car)
   {
 
-    if (car->exists && car->update)
+    if (car->update)
     {
 
       // TODO: Animation
@@ -322,89 +320,85 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
        ++car_index, ++car)
   {
 
-    if (car->exists)
+    // Car movements
+    if (car->direction == STATIONARY)
     {
+      // They're stuck this way, FOREVER!
+    }
+    else
+    {
+      uint32_t cell_x = car->x / CELL_SPACING;
+      uint32_t cell_y = car->y / CELL_SPACING;
 
-      // Car movements
-      if (car->direction == STATIONARY)
+      Direction directions[4];
+
+      directions[0] = car->direction;
+      directions[3] = reverse(car->direction);
+
+      uint32_t i = 1;
+      for (uint32_t direction = 0;
+           direction < 4;
+           direction++)
       {
-        // They're stuck this way, FOREVER!
+        if ((direction != directions[0]) &&
+            (direction != directions[3]))
+        {
+          directions[i++] = (Direction)direction;
+        }
       }
-      else
+
+      bool walls[4];
+      walls[UP]    = get_cell(maze, cell_x, (cell_y + 1))->type == CELL_WALL;
+      walls[DOWN]  = get_cell(maze, cell_x, (cell_y - 1))->type == CELL_WALL;
+      walls[LEFT]  = get_cell(maze, (cell_x - 1), cell_y)->type == CELL_WALL;
+      walls[RIGHT] = get_cell(maze, (cell_x + 1), cell_y)->type == CELL_WALL;
+
+      Direction test_direction;
+      bool can_move = false;
+      for (uint32_t direction_index = 0;
+           direction_index < 4;
+           direction_index++)
       {
-        uint32_t cell_x = car->x / CELL_SPACING;
-        uint32_t cell_y = car->y / CELL_SPACING;
-
-        Direction directions[4];
-
-        directions[0] = car->direction;
-        directions[3] = reverse(car->direction);
-
-        uint32_t i = 1;
-        for (uint32_t direction = 0;
-             direction < 4;
-             direction++)
+        test_direction = directions[direction_index];
+        if (!walls[test_direction])
         {
-          if ((direction != directions[0]) &&
-              (direction != directions[3]))
-          {
-            directions[i++] = (Direction)direction;
-          }
+          can_move = true;
+          car->direction = test_direction;
+          break;
         }
+      }
 
-        bool walls[4];
-        walls[UP]    = get_cell(maze, cell_x, (cell_y + 1))->type == CELL_WALL;
-        walls[DOWN]  = get_cell(maze, cell_x, (cell_y - 1))->type == CELL_WALL;
-        walls[LEFT]  = get_cell(maze, (cell_x - 1), cell_y)->type == CELL_WALL;
-        walls[RIGHT] = get_cell(maze, (cell_x + 1), cell_y)->type == CELL_WALL;
-
-        Direction test_direction;
-        bool can_move = false;
-        for (uint32_t direction_index = 0;
-             direction_index < 4;
-             direction_index++)
+      if (can_move)
+      {
+        switch (car->direction)
         {
-          test_direction = directions[direction_index];
-          if (!walls[test_direction])
+          case UP:
           {
-            can_move = true;
-            car->direction = test_direction;
-            break;
-          }
-        }
+            car->y += CELL_SPACING;
+          } break;
 
-        if (can_move)
-        {
-          switch (car->direction)
+          case DOWN:
           {
-            case UP:
-            {
-              car->y += CELL_SPACING;
-            } break;
+            car->y -= CELL_SPACING;
+          } break;
 
-            case DOWN:
-            {
-              car->y -= CELL_SPACING;
-            } break;
+          case LEFT:
+          {
+            car->x -= CELL_SPACING;
+          } break;
 
-            case LEFT:
-            {
-              car->x -= CELL_SPACING;
-            } break;
+          case RIGHT:
+          {
+            car->x += CELL_SPACING;
+          } break;
 
-            case RIGHT:
-            {
-              car->x += CELL_SPACING;
-            } break;
+          case STATIONARY:
+          {
+          } break;
 
-            case STATIONARY:
-            {
-            } break;
-
-            default:
-            {
-              invalid_code_path;
-            }
+          default:
+          {
+            invalid_code_path;
           }
         }
       }
@@ -422,16 +416,13 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
   {
     Car * car = cars->cars + car_index;
 
-    if (car->exists)
-    {
-      // Render
-      uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
-      uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-      uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-      uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
+    // Render
+    uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
+    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
+    uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
 
-      draw_box(pixels, x, y, size, size, 0x00992277);
-    }
+    draw_box(pixels, x, y, size, size, 0x00992277);
   }
 }
 
