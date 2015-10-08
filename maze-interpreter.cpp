@@ -3,7 +3,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
-#include "main.h"
+#include "maze-interpreter.h"
 #include "blocks.cpp"
 #include "parser.cpp"
 
