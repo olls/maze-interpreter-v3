@@ -98,7 +98,7 @@ parse(GameMemory * game_memory, char * filename)
       }
       else
       {
-        Cell * cell = get_cell(maze, x, y);
+        Cell * cell = get_cell(maze, x, 14 - y);
         *cell = new_cell;
 
         offset += bytes_read;
