@@ -25,7 +25,7 @@
 #define assert(x) ((void)sizeof(x))
 #endif
 
-#define invalid_code_path assert(false)
+#define invalid_code_path assert(!"Invalid Code Path! D:")
 
 
 #include "blocks.h"
