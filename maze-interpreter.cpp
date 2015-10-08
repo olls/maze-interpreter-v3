@@ -107,6 +107,8 @@ render_cells(uint32_t * pixels, Mouse mouse, Maze * maze)
           break;
         case CELL_RIGHT:    color = 0x00002222;
           break;
+        case CELL_PAUSE:    color = 0x00888811;
+          break;
       }
 
       // Into the pixel space!
@@ -291,6 +293,12 @@ update_cars(uint32_t * pixels, uint32_t df, uint32_t frame_count, Keys keys, Mou
         {
           printf("Right\n");
           car->direction = RIGHT;
+        } break;
+
+        case (CELL_PAUSE):
+        {
+          printf("Pause\n");
+          // TODO: Actually pause...
         } break;
       }
     }

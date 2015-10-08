@@ -12,7 +12,8 @@ enum CellType
   CELL_UP,
   CELL_DOWN,
   CELL_LEFT,
-  CELL_RIGHT
+  CELL_RIGHT,
+  CELL_PAUSE
 };
 
 // TODO: Sparse storage of cells and cars

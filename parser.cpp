@@ -1,3 +1,20 @@
+bool
+isNum(char character)
+{
+  bool result = (character >= '0') && (character <= '9');
+  return result;
+}
+
+
+bool
+isLetter(char character)
+{
+  bool result = (((character >= 'a') && (character <= 'z')) ||
+                 ((character >= 'A') && (character <= 'Z')));
+  return result;
+}
+
+
 Maze *
 parse(GameMemory * game_memory, char * filename)
 {
@@ -84,6 +101,12 @@ parse(GameMemory * game_memory, char * filename)
                 (potential_cell[1] == 'r')))
       {
         new_cell.type = CELL_RIGHT;
+      }
+      else if (isNum(potential_cell[0]) &&
+               isNum(potential_cell[1]))
+      {
+        new_cell.type = CELL_PAUSE;
+        new_cell.data = 0;
       }
 
       if (new_cell.type == CELL_NULL)
