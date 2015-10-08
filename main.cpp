@@ -4,10 +4,13 @@
 #include <SDL2/SDL.h>
 
 #include "thingy.h"
+#include "blocks.h"
+#include "blocks.cpp"
 #include "parser.cpp"
 
 
 const uint32_t FPS = 30;
+const uint32_t TOTAL_MEMORY = megabytes(50);
 
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
@@ -62,33 +65,6 @@ draw_box(uint32_t * pixels,
       pixels[pixel_y * WINDOW_WIDTH + pixel_x] = color;
     }
   }
-}
-
-
-Cell *
-get_cell(Maze * maze, uint32_t cell_x, uint32_t cell_y)
-{
-  // Mazes are stored upside-down...
-  // TODO: Parse them the right way up.
-  uint32_t x_storage = cell_x;
-  uint32_t y_storage = maze->height - cell_y - 1;
-
-  uint32_t cell_index = (y_storage * maze->width) + x_storage;
-
-  uint32_t cell_block_index = cell_index / array_count(maze->start->cells);
-  uint32_t within_block_cell_index = cell_index - (cell_block_index * array_count(maze->start->cells));
-
-  MazeBlock * block = maze->start;
-  for (uint32_t block_index = 0;
-       block_index < cell_block_index;
-       ++block_index)
-  {
-    block = block->next;
-  }
-
-  Cell * cell = block->cells + within_block_cell_index;
-
-  return cell;
 }
 
 
@@ -482,7 +458,7 @@ main(int32_t argc, char * argv[])
 
   // Init game memory
   GameMemory game_memory;
-  init_mem(&game_memory, megabytes(5));
+  init_mem(&game_memory, TOTAL_MEMORY);
 
   // The pixel buffer
   uint32_t * pixels = take_struct_mem(&game_memory, uint32_t, (WINDOW_WIDTH * WINDOW_HEIGHT));

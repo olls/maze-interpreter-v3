@@ -9,13 +9,8 @@ parse(GameMemory * game_memory, char * filename)
   maze->width = 0;
   maze->height = 0;
 
-  MazeBlock * first_block = take_struct_mem(game_memory, MazeBlock, 1);
-  maze->start = first_block;
-  maze->start->used = 0;
-
-  MazeBlock * block = maze->start;
-
-  uint32_t current_width_in_cells = 0;
+  uint32_t x = 0;
+  uint32_t y = 0;
 
   char buffer[256];
   while (fgets(buffer, sizeof(buffer), file) != NULL)
@@ -103,23 +98,13 @@ parse(GameMemory * game_memory, char * filename)
       }
       else
       {
+        Cell * cell = get_cell(maze, x, y);
+        *cell = new_cell;
+
         offset += bytes_read;
-        ++current_width_in_cells;
+        ++x;
 
         printf("%s ", potential_cell);
-
-        if (block->used >= array_count(block->cells))
-        {
-          // Block is full
-          MazeBlock * new_block = take_struct_mem(game_memory, MazeBlock, 1);
-
-          block->next = new_block;
-          block = new_block;
-          block->used = 0;
-        }
-
-        Cell * cell = block->cells + block->used++;
-        *cell = new_cell;
       }
     }
 
@@ -132,25 +117,25 @@ parse(GameMemory * game_memory, char * filename)
     if (ln > 0)
     {
       printf("\n");
-      ++maze->height;
+      ++y;
 
-      if (current_width_in_cells > maze->width)
+      if (x > maze->width)
       {
-        maze->width = current_width_in_cells;
+        maze->width = x;
       }
-      current_width_in_cells = 0;
+      x = 0;
     }
   }
 
   // Account for last line
   printf("\n");
-  ++maze->height;
+  maze->height = y + 1;
 
-  if (current_width_in_cells > maze->width)
+  if (x > maze->width)
   {
-    maze->width = current_width_in_cells;
+    maze->width = x;
   }
-  current_width_in_cells = 0;
+  x = 0;
 
   printf("(%d, %d)\n", maze->width, maze->height);
 
