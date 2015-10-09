@@ -465,6 +465,8 @@ main(int32_t argc, char * argv[])
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
 
+  printf("Collisions: %d\n", maze->collisions);
+
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
   init_car_mem(cars);
