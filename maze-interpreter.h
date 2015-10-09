@@ -59,7 +59,7 @@ take_mem(GameMemory * game_memory, size_t size)
   game_memory->used += size;
 
   assert(game_memory->used < game_memory->total);
-  printf("Used %lumb\n", bytes_to_megabytes(game_memory->used));
+  // printf("Used %lumb\n", bytes_to_megabytes(game_memory->used));
 
   return result;
 }

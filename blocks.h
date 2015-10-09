@@ -1,4 +1,3 @@
-
 enum CellType
 {
   CELL_NULL,
@@ -16,18 +15,17 @@ enum CellType
   CELL_PAUSE
 };
 
-// TODO: Sparse storage of cells and cars
 struct Cell
 {
   enum CellType type;
   int32_t data;
 };
 
-// NOTE: The cells should be stored contiguously, left to right, top to bottom.
 const uint32_t BLOCK_NUM = 512;
 const uint32_t BLOCK_SIDE_LENGTH = 64;
 struct MazeBlock
 {
+  bool used;
   uint32_t x;
   uint32_t y;
   Cell cells[BLOCK_SIDE_LENGTH * BLOCK_SIDE_LENGTH];
@@ -40,4 +38,8 @@ struct Maze
   uint32_t height;
 
   MazeBlock hash[BLOCK_NUM];
+
+#ifdef DEBUG
+  uint32_t collisions;
+#endif
 };
