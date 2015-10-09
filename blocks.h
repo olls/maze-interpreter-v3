@@ -23,13 +23,15 @@ struct Cell
   int32_t data;
 };
 
-// TODO: Should probably be split spatially, to make it easier to index.
 // NOTE: The cells should be stored contiguously, left to right, top to bottom.
 const uint32_t BLOCK_NUM = 512;
 const uint32_t BLOCK_SIDE_LENGTH = 64;
 struct MazeBlock
 {
+  uint32_t x;
+  uint32_t y;
   Cell cells[BLOCK_SIDE_LENGTH * BLOCK_SIDE_LENGTH];
+  MazeBlock * next;
 };
 
 struct Maze
