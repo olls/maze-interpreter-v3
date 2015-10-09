@@ -9,7 +9,7 @@
 
 
 const uint32_t FPS = 30;
-const uint32_t TOTAL_MEMORY = megabytes(50);
+const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;

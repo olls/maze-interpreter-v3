@@ -1,6 +1,10 @@
-#define kilobytes(n) (1024 * n)
-#define megabytes(n) (kilobytes(1024) * n)
-#define gigabytes(n) (megabytes(1024) * n)
+#define kilobytes_to_bytes(n) (1024 * n)
+#define megabytes_to_bytes(n) (kilobytes_to_bytes(1024) * n)
+#define gigabytes_to_bytes(n) (megabytes_to_bytes(1024) * n)
+
+#define bytes_to_kilobytes(n) (n / 1024)
+#define bytes_to_megabytes(n) (n / kilobytes_to_bytes(1024))
+#define bytes_to_gigabytes(n) (n / bytes_to_megabytes(1024))
 
 #define seconds_in_m(n) (1000 * n )
 #define seconds_in_u(n) (seconds_in_m(1000) * n )
