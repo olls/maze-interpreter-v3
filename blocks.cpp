@@ -6,21 +6,24 @@ get_block(GameMemory * game_memory, Maze * maze, uint32_t block_x, uint32_t bloc
 
   MazeBlock * block = maze->hash + hash_value;
 
-  while (!(block->x == block_x && block->y == block_y))
+  if (block->next)
   {
     // Collision, get next or new block
-    if (block->next)
+    while (!(block->x == block_x && block->y == block_y))
     {
-      block = block->next;
-    }
-    else
-    {
-      printf("Collision: Getting new block\n");
-      MazeBlock * new_block = take_struct_mem(game_memory, MazeBlock, 1);
-      block->next = new_block;
-      block = new_block;
+      if (block->next)
+      {
+        block = block->next;
+      }
+      else
+      {
+        printf("Collision: Getting new block\n");
+        MazeBlock * new_block = take_struct_mem(game_memory, MazeBlock, 1);
+        block->next = new_block;
+        block = new_block;
 
-      break;
+        break;
+      }
     }
   }
 
