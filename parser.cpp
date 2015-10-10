@@ -51,59 +51,48 @@ parse(GameMemory * game_memory, const char * filename)
       {
         new_cell.type = CELL_PATH;
       }
-      else if (((potential_cell[0] == '#') &&
-                (potential_cell[1] == '#')) ||
-               ((potential_cell[0] == '`') &&
-                (potential_cell[1] == '`')))
+      else if (((potential_cell[0] == '#') && (potential_cell[1] == '#')) ||
+               ((potential_cell[0] == '`') && (potential_cell[1] == '`')))
       {
         new_cell.type = CELL_WALL;
       }
-      else if ((potential_cell[0] == '(') &&
-               (potential_cell[1] == ')'))
+      else if ((potential_cell[0] == '(') && (potential_cell[1] == ')'))
       {
         new_cell.type = CELL_HOLE;
       }
-      else if ((potential_cell[0] == '<') &&
-               (potential_cell[1] == '>'))
+      else if ((potential_cell[0] == '<') && (potential_cell[1] == '>'))
       {
         new_cell.type = CELL_SPLITTER;
       }
-      else if (isLetter(potential_cell[0]) &&
-               isLetter(potential_cell[1]))
+      else if (isLetter(potential_cell[0]) && isLetter(potential_cell[1]))
       {
         new_cell.type = CELL_FUNCTION;
       }
-      else if ((potential_cell[0] == '-') &&
-               (potential_cell[1] == '-'))
+      else if ((potential_cell[0] == '-') && (potential_cell[1] == '-'))
       {
         new_cell.type = CELL_ONCE;
       }
-      else if ((potential_cell[0] == '%') &&
-               ((potential_cell[1] == 'U') ||
-                (potential_cell[1] == 'u')))
+      else if ((potential_cell[0] == '%') && ((potential_cell[1] == 'U') ||
+                                              (potential_cell[1] == 'u')))
       {
         new_cell.type = CELL_UP;
       }
-      else if ((potential_cell[0] == '%') &&
-               ((potential_cell[1] == 'D') ||
-                (potential_cell[1] == 'd')))
+      else if ((potential_cell[0] == '%') && ((potential_cell[1] == 'D') ||
+                                              (potential_cell[1] == 'd')))
       {
         new_cell.type = CELL_DOWN;
       }
-      else if ((potential_cell[0] == '%') &&
-               ((potential_cell[1] == 'L') ||
-                (potential_cell[1] == 'l')))
+      else if ((potential_cell[0] == '%') && ((potential_cell[1] == 'L') ||
+                                              (potential_cell[1] == 'l')))
       {
         new_cell.type = CELL_LEFT;
       }
-      else if ((potential_cell[0] == '%') &&
-               ((potential_cell[1] == 'R') ||
-                (potential_cell[1] == 'r')))
+      else if ((potential_cell[0] == '%') && ((potential_cell[1] == 'R') ||
+                                              (potential_cell[1] == 'r')))
       {
         new_cell.type = CELL_RIGHT;
       }
-      else if (isNum(potential_cell[0]) &&
-               isNum(potential_cell[1]))
+      else if (isNum(potential_cell[0]) && isNum(potential_cell[1]))
       {
         new_cell.type = CELL_PAUSE;
         new_cell.data = 0;
