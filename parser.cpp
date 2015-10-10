@@ -68,8 +68,8 @@ parse(GameMemory * game_memory, const char * filename)
       {
         new_cell.type = CELL_SPLITTER;
       }
-      else if ((potential_cell[0] > 'A') &&
-               (potential_cell[1] == '#'))
+      else if (isLetter(potential_cell[0]) &&
+               isLetter(potential_cell[1]))
       {
         new_cell.type = CELL_FUNCTION;
       }
