@@ -15,7 +15,8 @@ const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
 // NOTE: 256 sub-pixel steps!
-const float WORLD_COORD_TO_PIXELS = 1.0f / 256.0f;
+const uint32_t PIXELS_TO_WORLD_COORDS = 256;
+const float WORLD_COORDS_TO_PIXELS = 1.0f / (float)PIXELS_TO_WORLD_COORDS;
 
 const uint32_t CELL_SPACING = 10000;
 const uint32_t CELL_MARGIN = 1000;
@@ -45,31 +46,63 @@ draw_box(uint32_t * pixels,
   int32_t end_x_world = start_x_world + width_world;
   int32_t end_y_world = start_y_world + height_world;
 
-  // Into the pixel space!
-  int32_t start_x = start_x_world * WORLD_COORD_TO_PIXELS;
-  int32_t start_y = start_y_world * WORLD_COORD_TO_PIXELS;
-  int32_t end_x   = end_x_world * WORLD_COORD_TO_PIXELS;
-  int32_t end_y   = end_y_world * WORLD_COORD_TO_PIXELS;
+  // Into the (floating point) pixel space!
+  float start_x = start_x_world * WORLD_COORDS_TO_PIXELS;
+  float start_y = start_y_world * WORLD_COORDS_TO_PIXELS;
+  float end_x   = end_x_world * WORLD_COORDS_TO_PIXELS;
+  float end_y   = end_y_world * WORLD_COORDS_TO_PIXELS;
 
-  start_y = fmin(start_y, WINDOW_HEIGHT);
-  start_x = fmin(start_x, WINDOW_WIDTH);
-  end_y   = fmin(end_y,   WINDOW_HEIGHT);
-  end_x   = fmin(end_x,   WINDOW_WIDTH);
+  // Into the (rounded exact) pixel space!
+  int32_t start_x_pixels = (int32_t)start_x;
+  int32_t start_y_pixels = (int32_t)start_y;
+  int32_t end_x_pixels   = (int32_t)end_x + 1;
+  int32_t end_y_pixels   = (int32_t)end_y + 1;
 
-  start_y = fmax(start_y, 0);
-  start_x = fmax(start_x, 0);
-  end_y   = fmax(end_y,   0);
-  end_x   = fmax(end_x,   0);
+  start_x_pixels = fmin(start_x_pixels, WINDOW_WIDTH - 1);
+  start_y_pixels = fmin(start_y_pixels, WINDOW_HEIGHT - 1);
+  end_x_pixels   = fmin(end_x_pixels,   WINDOW_WIDTH - 1);
+  end_y_pixels   = fmin(end_y_pixels,   WINDOW_HEIGHT - 1);
 
-  for (uint32_t pixel_y = start_y;
-       pixel_y < end_y;
+  start_y_pixels = fmax(start_y_pixels, 0);
+  start_x_pixels = fmax(start_x_pixels, 0);
+  end_y_pixels   = fmax(end_y_pixels,   0);
+  end_x_pixels   = fmax(end_x_pixels,   0);
+
+  for (uint32_t pixel_y = start_y_pixels;
+       pixel_y <= end_y_pixels;
        pixel_y++)
   {
-    for (uint32_t pixel_x = start_x;
-         pixel_x < end_x;
+    for (uint32_t pixel_x = start_x_pixels;
+         pixel_x <= end_x_pixels;
          pixel_x++)
     {
-      pixels[pixel_y * WINDOW_WIDTH + pixel_x] = color;
+      // TODO: Take previous pixels colour into account.
+
+      uint32_t pixel_color = color;
+      uint32_t alpha = (pixel_color >> 24);
+      float alpha_percent = alpha / 256.0f;
+
+      if (pixel_x == start_x_pixels)
+      {
+        alpha_percent *= start_x - (uint32_t)start_x;
+      }
+      else if (pixel_x == end_x_pixels)
+      {
+        alpha_percent *= start_y - (uint32_t)start_y;
+      }
+      else if (pixel_y == start_y_pixels)
+      {
+        alpha_percent *= end_y - (uint32_t)end_y;
+      }
+      else if (pixel_y == end_y_pixels)
+      {
+        alpha_percent *= end_y - (uint32_t)end_y;
+      }
+
+      alpha = (uint32_t)(alpha_percent * 256.0f);
+      pixel_color = (pixel_color & 0x00FFFFFF) | (alpha << 24);
+
+      pixels[pixel_y * WINDOW_WIDTH + pixel_x] = pixel_color;
     }
   }
 }
@@ -88,34 +121,34 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
     {
       Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
 
-      uint32_t color = 0;
+      uint32_t color = 0xFF000000;
       switch (cell->type)
       {
-        case CELL_NULL:     color = 0;
+        case CELL_NULL:     color = 0xFF000000;
           break;
-        case CELL_START:    color = 0x0033AA55;
+        case CELL_START:    color = 0xFF33AA55;
           break;
-        case CELL_PATH:     color = 0x00558822;
+        case CELL_PATH:     color = 0xFF558822;
           break;
-        case CELL_WALL:     color = 0x00333333;
+        case CELL_WALL:     color = 0xFF333333;
           break;
-        case CELL_HOLE:     color = 0x00BB6644;
+        case CELL_HOLE:     color = 0xFFBB6644;
           break;
-        case CELL_SPLITTER: color = 0x00224499;
+        case CELL_SPLITTER: color = 0xFF224499;
           break;
-        case CELL_FUNCTION: color = 0x00667788;
+        case CELL_FUNCTION: color = 0xFF667788;
           break;
-        case CELL_ONCE:     color = 0x00887766;
+        case CELL_ONCE:     color = 0xFF887766;
           break;
-        case CELL_UP:       color = 0x00220000;
+        case CELL_UP:       color = 0xFF220000;
           break;
-        case CELL_DOWN:     color = 0x00002200;
+        case CELL_DOWN:     color = 0xFF002200;
           break;
-        case CELL_LEFT:     color = 0x00000022;
+        case CELL_LEFT:     color = 0xFF000022;
           break;
-        case CELL_RIGHT:    color = 0x00002222;
+        case CELL_RIGHT:    color = 0xFF002222;
           break;
-        case CELL_PAUSE:    color = 0x00888811;
+        case CELL_PAUSE:    color = 0xFF888811;
           break;
       }
 
@@ -459,6 +492,9 @@ main(int32_t argc, char * argv[])
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
     SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
   // Init game memory
   GameMemory game_memory;
