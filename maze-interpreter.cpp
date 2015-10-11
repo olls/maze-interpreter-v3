@@ -36,24 +36,30 @@ get_us()
 
 void
 draw_box(uint32_t * pixels,
-         int32_t start_x,
-         int32_t start_y,
-         uint32_t width,
-         uint32_t height,
+         int32_t start_x_world,
+         int32_t start_y_world,
+         uint32_t width_world,
+         uint32_t height_world,
          uint32_t color)
 {
-  int32_t end_x = start_x + width;
-  int32_t end_y = start_y + height;
+  int32_t end_x_world = start_x_world + width_world;
+  int32_t end_y_world = start_y_world + height_world;
+
+  // Into the pixel space!
+  int32_t start_x = start_x_world * WORLD_COORD_TO_PIXELS;
+  int32_t start_y = start_y_world * WORLD_COORD_TO_PIXELS;
+  int32_t end_x   = end_x_world * WORLD_COORD_TO_PIXELS;
+  int32_t end_y   = end_y_world * WORLD_COORD_TO_PIXELS;
 
   start_y = fmin(start_y, WINDOW_HEIGHT);
   start_x = fmin(start_x, WINDOW_WIDTH);
-  end_y =   fmin(end_y,   WINDOW_HEIGHT);
-  end_x =   fmin(end_x,   WINDOW_WIDTH);
+  end_y   = fmin(end_y,   WINDOW_HEIGHT);
+  end_x   = fmin(end_x,   WINDOW_WIDTH);
 
   start_y = fmax(start_y, 0);
   start_x = fmax(start_x, 0);
-  end_y =   fmax(end_y,   0);
-  end_x =   fmax(end_x,   0);
+  end_y   = fmax(end_y,   0);
+  end_x   = fmax(end_x,   0);
 
   for (uint32_t pixel_y = start_y;
        pixel_y < end_y;
@@ -113,16 +119,10 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
           break;
       }
 
-      // Into the pixel space!
-      uint32_t x = (cell_x * CELL_SPACING) * WORLD_COORD_TO_PIXELS;
-      uint32_t y = (cell_y * CELL_SPACING) * WORLD_COORD_TO_PIXELS;
-      uint32_t width = (CELL_SPACING - CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
-      uint32_t height = (CELL_SPACING - CELL_MARGIN) * WORLD_COORD_TO_PIXELS;
-
-      if ((mouse.x >= x) &&
-          (mouse.x < x + width) &&
-          (mouse.y >= y) &&
-          (mouse.y < y + height))
+      // if ((mouse.x >= x) &&
+      //     (mouse.x < x + width) &&
+      //     (mouse.y >= y) &&
+      //     (mouse.y < y + height))
       {
         uint32_t color_a = ((color >> 24) & 0xFF);
         uint32_t color_r = ((color >> 16) & 0xFF);
@@ -144,6 +144,12 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
 
         color = (color_a << 24) | (color_r << 16) | (color_g << 8) | (color_b << 0);
       }
+
+      // Into world space
+      uint32_t x = (cell_x * CELL_SPACING);
+      uint32_t y = (cell_y * CELL_SPACING);
+      uint32_t width = (CELL_SPACING - CELL_MARGIN);
+      uint32_t height = (CELL_SPACING - CELL_MARGIN);
 
       draw_box(pixels,
                x, y,
@@ -417,12 +423,10 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
     Car * car = cars->cars + car_index;
 
     // Render
-    uint32_t test = ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f);
-    uint32_t x = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-    uint32_t y = (uint32_t)(WORLD_COORD_TO_PIXELS * (car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) * 0.5f)));
-    uint32_t size = (uint32_t)(WORLD_COORD_TO_PIXELS * CAR_SIZE);
+    uint32_t x = car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
+    uint32_t y = car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
 
-    draw_box(pixels, x, y, size, size, 0x00992277);
+    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, 0x00992277);
   }
 }
 
