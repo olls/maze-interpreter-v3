@@ -14,24 +14,6 @@ union V3
   };
 };
 
-union V4
-{
-  struct
-  {
-    float w;
-    float x;
-    float y;
-    float z;
-  };
-  struct
-  {
-    float a;
-    float r;
-    float g;
-    float b;
-  };
-};
-
 
 V3
 operator*(float c, V3 vec)
@@ -180,6 +162,25 @@ operator-=(V3 & a, V3 b)
   a = a - b;
   return a;
 }
+
+
+union V4
+{
+  struct
+  {
+    float w;
+    float x;
+    float y;
+    float z;
+  };
+  struct
+  {
+    float a;
+    float r;
+    float g;
+    float b;
+  };
+};
 
 
 V4
