@@ -86,15 +86,15 @@ draw_box(uint32_t * pixels,
       {
         alpha_percent *= start_x - (uint32_t)start_x;
       }
-      else if (pixel_x == end_x_pixels)
+      if (pixel_x == end_x_pixels)
       {
         alpha_percent *= start_y - (uint32_t)start_y;
       }
-      else if (pixel_y == start_y_pixels)
+      if (pixel_y == start_y_pixels)
       {
         alpha_percent *= end_y - (uint32_t)end_y;
       }
-      else if (pixel_y == end_y_pixels)
+      if (pixel_y == end_y_pixels)
       {
         alpha_percent *= end_y - (uint32_t)end_y;
       }
