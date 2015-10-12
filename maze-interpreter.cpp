@@ -700,8 +700,8 @@ main(int32_t argc, char * argv[])
         case SDL_MOUSEMOTION:
         {
           // NOTE: Remember our Y is inverted from SDL
-          mouse.x = event.motion.x;
-          mouse.y = WINDOW_HEIGHT - event.motion.y;
+          mouse.x = PIXELS_TO_WORLD_COORDS * (event.motion.x);
+          mouse.y = PIXELS_TO_WORLD_COORDS * (WINDOW_HEIGHT - event.motion.y);
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
