@@ -55,8 +55,8 @@ draw_box(uint32_t * pixels,
   // Into the (rounded exact) pixel space!
   int32_t start_x_pixels = (int32_t)start_x;
   int32_t start_y_pixels = (int32_t)start_y;
-  int32_t end_x_pixels   = (int32_t)end_x + 1;
-  int32_t end_y_pixels   = (int32_t)end_y + 1;
+  int32_t end_x_pixels   = (int32_t)end_x;
+  int32_t end_y_pixels   = (int32_t)end_y;
 
   start_x_pixels = fmin(start_x_pixels, WINDOW_WIDTH - 1);
   start_y_pixels = fmin(start_y_pixels, WINDOW_HEIGHT - 1);
@@ -76,33 +76,45 @@ draw_box(uint32_t * pixels,
          pixel_x <= end_x_pixels;
          pixel_x++)
     {
-      // TODO: Take previous pixels colour into account.
-
-      uint32_t pixel_color = color;
-      uint32_t alpha = (pixel_color >> 24);
-      float alpha_percent = alpha / 256.0f;
+      float alpha = (color >> 24) / 256.0f;
 
       if (pixel_x == start_x_pixels)
       {
-        alpha_percent *= start_x - (uint32_t)start_x;
+        alpha *= (start_x_pixels + 1) - start_x;
       }
       if (pixel_x == end_x_pixels)
       {
-        alpha_percent *= start_y - (uint32_t)start_y;
+        alpha *= end_x - end_x_pixels;
       }
       if (pixel_y == start_y_pixels)
       {
-        alpha_percent *= end_y - (uint32_t)end_y;
+        alpha *= (start_y_pixels + 1) - start_y;
       }
       if (pixel_y == end_y_pixels)
       {
-        alpha_percent *= end_y - (uint32_t)end_y;
+        alpha *= end_y - end_y_pixels;
       }
 
-      alpha = (uint32_t)(alpha_percent * 256.0f);
-      pixel_color = (pixel_color & 0x00FFFFFF) | (alpha << 24);
+      uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
+      uint32_t prev_color = pixels[pixel_pos];
 
-      pixels[pixel_y * WINDOW_WIDTH + pixel_x] = pixel_color;
+      uint32_t old_b = (prev_color >> 0) & 0xFF;
+      uint32_t old_g = (prev_color >> 8) & 0xFF;
+      uint32_t old_r = (prev_color >> 16) & 0xFF;
+
+      uint32_t new_b = (color >> 0) & 0xFF;
+      uint32_t new_g = (color >> 8) & 0xFF;
+      uint32_t new_r = (color >> 16) & 0xFF;
+
+      new_b = (alpha * new_b) + ((1.0f - alpha) * old_b);
+      new_g = (alpha * new_g) + ((1.0f - alpha) * old_g);
+      new_r = (alpha * new_r) + ((1.0f - alpha) * old_r);
+
+      uint32_t new_color = ((new_b << 0) |
+                            (new_g << 8) |
+                            (new_r << 16));
+
+      pixels[pixel_pos] = new_color;
     }
   }
 }
@@ -492,9 +504,6 @@ main(int32_t argc, char * argv[])
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
     SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
   // Init game memory
   GameMemory game_memory;
