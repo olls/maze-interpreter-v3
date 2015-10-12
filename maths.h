@@ -339,26 +339,47 @@ operator-=(V4 & a, V4 b)
   return a;
 }
 
-
-V4
-decomposeColor(uint32_t color)
+union PixelColor
 {
-  V4 vec;
-  vec.a = (color >> 24) & 0xFF;
-  vec.r = (color >> 16) & 0xFF;
-  vec.g = (color >> 8) & 0xFF;
-  vec.b = (color >> 0) & 0xFF;
+  struct
+  {
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+  };
+  // Pad to 32 bits for SDL :(
+  uint32_t _;
+};
 
-  return vec;
+
+V3
+remove_alpha(V4 vec)
+{
+  V3 result;
+  result.r = vec.r;
+  result.g = vec.g;
+  result.b = vec.b;
+  return result;
 }
 
-uint32_t
-composeColor(V4 vec)
-{
-  uint32_t color = (((uint32_t)vec.a << 24) |
-                    ((uint32_t)vec.r << 16) |
-                    ((uint32_t)vec.g << 8) |
-                    ((uint32_t)vec.b << 0));
 
-  return color;
+V3
+pixel_color_to_V3(PixelColor color)
+{
+  V3 result;
+  result.r = color.r;
+  result.g = color.g;
+  result.b = color.b;
+  return result;
+}
+
+
+PixelColor
+to_color(V3 vec)
+{
+  PixelColor result;
+  result.r = vec.r;
+  result.g = vec.g;
+  result.b = vec.b;
+  return result;
 }

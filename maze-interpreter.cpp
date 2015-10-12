@@ -36,7 +36,7 @@ get_us()
 
 
 void
-draw_box(uint32_t * pixels,
+draw_box(PixelColor * pixels,
          int32_t start_x_world,
          int32_t start_y_world,
          uint32_t width_world,
@@ -97,19 +97,18 @@ draw_box(uint32_t * pixels,
 
       uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
 
-      V4 prev_color = decomposeColor(pixels[pixel_pos]);
-      V4 new_color = (alpha * color) + ((1.0f - alpha) * prev_color);
+      V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
+      V3 new_color = remove_alpha(color);
 
-      uint32_t new_color_int = composeColor(new_color);
-
-      pixels[pixel_pos] = new_color_int;
+      PixelColor alpha_blended = to_color((alpha * new_color) + ((1.0f - alpha) * prev_color));
+      pixels[pixel_pos] = alpha_blended;
     }
   }
 }
 
 
 void
-render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * maze)
+render_cells(GameMemory * game_memory, PixelColor * pixels, Mouse mouse, Maze * maze)
 {
   for (uint32_t cell_y = 0;
        cell_y < maze->height;
@@ -236,7 +235,7 @@ rm_car(Cars * cars, uint32_t car_index)
 
 
 void
-update_cars(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint32_t frame_count,
+update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
             Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
 
@@ -463,7 +462,7 @@ update_cars(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint32_t f
 
 
 void
-render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
+render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
 {
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
@@ -481,14 +480,14 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
 
 
 void
-update_and_render(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint32_t frame_count,
+update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
   render_cells(game_memory, pixels, mouse, maze);
 
   if (frame_count % 2 == 0)
   {
-    update_cars(game_memory, pixels, df, frame_count, keys, mouse, maze, cars);
+    update_cars(game_memory, df, frame_count, keys, mouse, maze, cars);
   }
 
   render_cars(pixels, df, cars);
@@ -507,14 +506,14 @@ main(int32_t argc, char * argv[])
 
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
-    SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
+    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // Init game memory
   GameMemory game_memory;
   init_mem(&game_memory, TOTAL_MEMORY);
 
   // The pixel buffer
-  uint32_t * pixels = take_struct_mem(&game_memory, uint32_t, (WINDOW_WIDTH * WINDOW_HEIGHT));
+  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (WINDOW_WIDTH * WINDOW_HEIGHT));
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
 
@@ -751,7 +750,7 @@ main(int32_t argc, char * argv[])
              screen_x < WINDOW_WIDTH;
              screen_x++)
         {
-          pixels[screen_y * WINDOW_WIDTH + screen_x] = 0x00FFFFFF;
+          pixels[screen_y * WINDOW_WIDTH + screen_x] = (PixelColor){255, 255, 255};
         }
       }
 
@@ -767,7 +766,7 @@ main(int32_t argc, char * argv[])
              pixel_x++)
         {
           uint32_t top_pixel_pos = pixel_y * WINDOW_WIDTH + pixel_x;
-          uint32_t top_pixel = pixels[top_pixel_pos];
+          PixelColor top_pixel = pixels[top_pixel_pos];
 
           uint32_t bottom_pixel_pos = (WINDOW_HEIGHT - pixel_y - 1) * WINDOW_WIDTH + pixel_x;
 
@@ -776,7 +775,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      SDL_UpdateTexture(texture, NULL, pixels, WINDOW_WIDTH * sizeof(uint32_t));
+      SDL_UpdateTexture(texture, NULL, pixels, WINDOW_WIDTH * sizeof(PixelColor));
 
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);
