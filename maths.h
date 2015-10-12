@@ -34,7 +34,7 @@ union V4
 
 
 V3
-operator*(uint32_t c, V3 vec)
+operator*(float c, V3 vec)
 {
   V3 result;
   result.x = c * vec.x;
@@ -44,13 +44,13 @@ operator*(uint32_t c, V3 vec)
   return result;
 }
 V3
-operator*(V3 vec, uint32_t c)
+operator*(V3 vec, float c)
 {
   V3 result = c * vec;
   return result;
 }
 V3 &
-operator*=(V3 & vec, uint32_t c)
+operator*=(V3 & vec, float c)
 {
   vec = vec * c;
   return vec;
@@ -58,7 +58,7 @@ operator*=(V3 & vec, uint32_t c)
 
 
 V3
-operator/(uint32_t c, V3 vec)
+operator/(float c, V3 vec)
 {
   V3 result;
   result.x = c / vec.x;
@@ -68,7 +68,7 @@ operator/(uint32_t c, V3 vec)
   return result;
 }
 V3
-operator/(V3 vec, uint32_t c)
+operator/(V3 vec, float c)
 {
   V3 result;
   result.x = vec.x / c;
@@ -78,7 +78,7 @@ operator/(V3 vec, uint32_t c)
   return result;
 }
 V3 &
-operator/=(V3 & vec, uint32_t c)
+operator/=(V3 & vec, float c)
 {
   vec = vec / c;
   return vec;
@@ -86,7 +86,7 @@ operator/=(V3 & vec, uint32_t c)
 
 
 V3
-operator+(uint32_t c, V3 vec)
+operator+(float c, V3 vec)
 {
   V3 result;
   result.x = c + vec.x;
@@ -96,13 +96,13 @@ operator+(uint32_t c, V3 vec)
   return result;
 }
 V3
-operator+(V3 vec, uint32_t c)
+operator+(V3 vec, float c)
 {
   V3 result = c + vec;
   return result;
 }
 V3 &
-operator+=(V3 & vec, uint32_t c)
+operator+=(V3 & vec, float c)
 {
   vec = vec + c;
   return vec;
@@ -138,7 +138,7 @@ operator-(V3 vec)
 }
 
 V3
-operator-(uint32_t c, V3 vec)
+operator-(float c, V3 vec)
 {
   V3 result;
   result.x = c - vec.x;
@@ -148,7 +148,7 @@ operator-(uint32_t c, V3 vec)
   return result;
 }
 V3
-operator-(V3 vec, uint32_t c)
+operator-(V3 vec, float c)
 {
   V3 result;
   result.x = vec.x - c;
@@ -158,7 +158,7 @@ operator-(V3 vec, uint32_t c)
   return result;
 }
 V3 &
-operator-=(V3 & vec, uint32_t c)
+operator-=(V3 & vec, float c)
 {
   vec = vec - c;
   return vec;
@@ -183,7 +183,7 @@ operator-=(V3 & a, V3 b)
 
 
 V4
-operator*(uint32_t c, V4 vec)
+operator*(float c, V4 vec)
 {
   V4 result;
   result.w = c * vec.w;
@@ -194,13 +194,13 @@ operator*(uint32_t c, V4 vec)
   return result;
 }
 V4
-operator*(V4 vec, uint32_t c)
+operator*(V4 vec, float c)
 {
   V4 result = c * vec;
   return result;
 }
 V4 &
-operator*=(V4 & vec, uint32_t c)
+operator*=(V4 & vec, float c)
 {
   vec = vec * c;
   return vec;
@@ -208,7 +208,7 @@ operator*=(V4 & vec, uint32_t c)
 
 
 V4
-operator/(uint32_t c, V4 vec)
+operator/(float c, V4 vec)
 {
   V4 result;
   result.w = c / vec.w;
@@ -219,7 +219,7 @@ operator/(uint32_t c, V4 vec)
   return result;
 }
 V4
-operator/(V4 vec, uint32_t c)
+operator/(V4 vec, float c)
 {
   V4 result;
   result.w = vec.w / c;
@@ -230,7 +230,7 @@ operator/(V4 vec, uint32_t c)
   return result;
 }
 V4 &
-operator/=(V4 & vec, uint32_t c)
+operator/=(V4 & vec, float c)
 {
   vec = vec / c;
   return vec;
@@ -238,7 +238,7 @@ operator/=(V4 & vec, uint32_t c)
 
 
 V4
-operator+(uint32_t c, V4 vec)
+operator+(float c, V4 vec)
 {
   V4 result;
   result.w = c + vec.w;
@@ -249,13 +249,13 @@ operator+(uint32_t c, V4 vec)
   return result;
 }
 V4
-operator+(V4 vec, uint32_t c)
+operator+(V4 vec, float c)
 {
   V4 result = c + vec;
   return result;
 }
 V4 &
-operator+=(V4 & vec, uint32_t c)
+operator+=(V4 & vec, float c)
 {
   vec = vec + c;
   return vec;
@@ -293,7 +293,7 @@ operator-(V4 vec)
 }
 
 V4
-operator-(uint32_t c, V4 vec)
+operator-(float c, V4 vec)
 {
   V4 result;
   result.w = c - vec.w;
@@ -304,7 +304,7 @@ operator-(uint32_t c, V4 vec)
   return result;
 }
 V4
-operator-(V4 vec, uint32_t c)
+operator-(V4 vec, float c)
 {
   V4 result;
   result.w = vec.w - c;
@@ -315,7 +315,7 @@ operator-(V4 vec, uint32_t c)
   return result;
 }
 V4 &
-operator-=(V4 & vec, uint32_t c)
+operator-=(V4 & vec, float c)
 {
   vec = vec - c;
   return vec;

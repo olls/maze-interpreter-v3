@@ -41,7 +41,7 @@ draw_box(uint32_t * pixels,
          int32_t start_y_world,
          uint32_t width_world,
          uint32_t height_world,
-         uint32_t color)
+         V4 color)
 {
   int32_t end_x_world = start_x_world + width_world;
   int32_t end_y_world = start_y_world + height_world;
@@ -76,7 +76,7 @@ draw_box(uint32_t * pixels,
          pixel_x <= end_x_pixels;
          pixel_x++)
     {
-      float alpha = (color >> 24) / 256.0f;
+      float alpha = color.a / 255.0f;
 
       if (pixel_x == start_x_pixels)
       {
@@ -96,25 +96,13 @@ draw_box(uint32_t * pixels,
       }
 
       uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
-      uint32_t prev_color = pixels[pixel_pos];
 
-      uint32_t old_b = (prev_color >> 0) & 0xFF;
-      uint32_t old_g = (prev_color >> 8) & 0xFF;
-      uint32_t old_r = (prev_color >> 16) & 0xFF;
+      V4 prev_color = decomposeColor(pixels[pixel_pos]);
+      V4 new_color = (alpha * color) + ((1.0f - alpha) * prev_color);
 
-      uint32_t new_b = (color >> 0) & 0xFF;
-      uint32_t new_g = (color >> 8) & 0xFF;
-      uint32_t new_r = (color >> 16) & 0xFF;
+      uint32_t new_color_int = composeColor(new_color);
 
-      new_b = (alpha * new_b) + ((1.0f - alpha) * old_b);
-      new_g = (alpha * new_g) + ((1.0f - alpha) * old_g);
-      new_r = (alpha * new_r) + ((1.0f - alpha) * old_r);
-
-      uint32_t new_color = ((new_b << 0) |
-                            (new_g << 8) |
-                            (new_r << 16));
-
-      pixels[pixel_pos] = new_color;
+      pixels[pixel_pos] = new_color_int;
     }
   }
 }
@@ -133,40 +121,40 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
     {
       Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
 
-      uint32_t color = 0xFF000000;
+      V4 color = (V4){};
       switch (cell->type)
       {
-        case CELL_NULL:     color = 0xFF000000;
+        case CELL_NULL:     color = (V4){0xFF, 0x00, 0x00, 0x00};
           break;
-        case CELL_START:    color = 0xFF33AA55;
+        case CELL_START:    color = (V4){0xFF, 0x33, 0xAA, 0x55};
           break;
-        case CELL_PATH:     color = 0xFF558822;
+        case CELL_PATH:     color = (V4){0xFF, 0x55, 0x88, 0x22};
           break;
-        case CELL_WALL:     color = 0xFF333333;
+        case CELL_WALL:     color = (V4){0xFF, 0x33, 0x33, 0x33};
           break;
-        case CELL_HOLE:     color = 0xFFBB6644;
+        case CELL_HOLE:     color = (V4){0xFF, 0xBB, 0x66, 0x44};
           break;
-        case CELL_SPLITTER: color = 0xFF224499;
+        case CELL_SPLITTER: color = (V4){0xFF, 0x22, 0x44, 0x99};
           break;
-        case CELL_FUNCTION: color = 0xFF667788;
+        case CELL_FUNCTION: color = (V4){0xFF, 0x66, 0x77, 0x88};
           break;
-        case CELL_ONCE:     color = 0xFF887766;
+        case CELL_ONCE:     color = (V4){0xFF, 0x88, 0x77, 0x66};
           break;
-        case CELL_SIGNAL:   color = 0xFF999922;
+        case CELL_SIGNAL:   color = (V4){0xFF, 0x99, 0x99, 0x22};
           break;
-        case CELL_INC:      color = 0xFF339922;
+        case CELL_INC:      color = (V4){0xFF, 0x33, 0x99, 0x22};
           break;
-        case CELL_DEC:      color = 0xFF993322;
+        case CELL_DEC:      color = (V4){0xFF, 0x99, 0x33, 0x22};
           break;
-        case CELL_UP:       color = 0xFF220000;
+        case CELL_UP:       color = (V4){0xFF, 0x22, 0x00, 0x00};
           break;
-        case CELL_DOWN:     color = 0xFF002200;
+        case CELL_DOWN:     color = (V4){0xFF, 0x00, 0x22, 0x00};
           break;
-        case CELL_LEFT:     color = 0xFF000022;
+        case CELL_LEFT:     color = (V4){0xFF, 0x00, 0x00, 0x22};
           break;
-        case CELL_RIGHT:    color = 0xFF002222;
+        case CELL_RIGHT:    color = (V4){0xFF, 0x00, 0x22, 0x22};
           break;
-        case CELL_PAUSE:    color = 0xFF888811;
+        case CELL_PAUSE:    color = (V4){0xFF, 0x88, 0x88, 0x11};
           break;
       }
 
@@ -174,27 +162,27 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
       //     (mouse.x < x + width) &&
       //     (mouse.y >= y) &&
       //     (mouse.y < y + height))
-      {
-        uint32_t color_a = ((color >> 24) & 0xFF);
-        uint32_t color_r = ((color >> 16) & 0xFF);
-        uint32_t color_g = ((color >> 8) & 0xFF);
-        uint32_t color_b = ((color >> 0) & 0xFF);
+      // {
+      //   uint32_t color_a = ((color >> 24) & 0xFF);
+      //   uint32_t color_r = ((color >> 16) & 0xFF);
+      //   uint32_t color_g = ((color >> 8) & 0xFF);
+      //   uint32_t color_b = ((color >> 0) & 0xFF);
 
-        if (color_r <= (0xFF - 0x20))
-        {
-          color_r += 0x20;
-        }
-        if (color_g <= (0xFF - 0x20))
-        {
-          color_g += 0x20;
-        }
-        if (color_b <= (0xFF - 0x20))
-        {
-          color_b += 0x20;
-        }
+      //   if (color_r <= (0xFF - 0x20))
+      //   {
+      //     color_r += 0x20;
+      //   }
+      //   if (color_g <= (0xFF - 0x20))
+      //   {
+      //     color_g += 0x20;
+      //   }
+      //   if (color_b <= (0xFF - 0x20))
+      //   {
+      //     color_b += 0x20;
+      //   }
 
-        color = (color_a << 24) | (color_r << 16) | (color_g << 8) | (color_b << 0);
-      }
+      //   color = (color_a << 24) | (color_r << 16) | (color_g << 8) | (color_b << 0);
+      // }
 
       // Into world space
       uint32_t x = (cell_x * CELL_SPACING);
@@ -494,7 +482,7 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
     uint32_t x = car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
     uint32_t y = car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
 
-    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, 0x00992277);
+    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, (V4){0x00, 0x99, 0x22, 0x77});
   }
 }
 
