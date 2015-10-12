@@ -158,37 +158,30 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
           break;
       }
 
-      // if ((mouse.x >= x) &&
-      //     (mouse.x < x + width) &&
-      //     (mouse.y >= y) &&
-      //     (mouse.y < y + height))
-      // {
-      //   uint32_t color_a = ((color >> 24) & 0xFF);
-      //   uint32_t color_r = ((color >> 16) & 0xFF);
-      //   uint32_t color_g = ((color >> 8) & 0xFF);
-      //   uint32_t color_b = ((color >> 0) & 0xFF);
-
-      //   if (color_r <= (0xFF - 0x20))
-      //   {
-      //     color_r += 0x20;
-      //   }
-      //   if (color_g <= (0xFF - 0x20))
-      //   {
-      //     color_g += 0x20;
-      //   }
-      //   if (color_b <= (0xFF - 0x20))
-      //   {
-      //     color_b += 0x20;
-      //   }
-
-      //   color = (color_a << 24) | (color_r << 16) | (color_g << 8) | (color_b << 0);
-      // }
-
       // Into world space
       uint32_t x = (cell_x * CELL_SPACING);
       uint32_t y = (cell_y * CELL_SPACING);
       uint32_t width = (CELL_SPACING - CELL_MARGIN);
       uint32_t height = (CELL_SPACING - CELL_MARGIN);
+
+      if ((mouse.x >= x) &&
+          (mouse.x < x + width) &&
+          (mouse.y >= y) &&
+          (mouse.y < y + height))
+      {
+        if (color.r <= (0xFF - 0x20))
+        {
+          color.r += 0x20;
+        }
+        if (color.g <= (0xFF - 0x20))
+        {
+          color.g += 0x20;
+        }
+        if (color.b <= (0xFF - 0x20))
+        {
+          color.b += 0x20;
+        }
+      }
 
       draw_box(pixels,
                x, y,
