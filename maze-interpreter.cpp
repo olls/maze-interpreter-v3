@@ -475,7 +475,7 @@ render_cars(uint32_t * pixels, uint32_t df, Cars * cars)
     uint32_t x = car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
     uint32_t y = car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
 
-    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, (V4){0x00, 0x99, 0x22, 0x77});
+    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, (V4){0xFF, 0x99, 0x22, 0x77});
   }
 }
 
