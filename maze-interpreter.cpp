@@ -777,7 +777,6 @@ main(int32_t argc, char * argv[])
 
       SDL_UpdateTexture(texture, NULL, pixels, WINDOW_WIDTH * sizeof(PixelColor));
 
-      SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
 
