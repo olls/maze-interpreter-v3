@@ -152,6 +152,12 @@ render_cells(GameMemory * game_memory, uint32_t * pixels, Mouse mouse, Maze * ma
           break;
         case CELL_ONCE:     color = 0xFF887766;
           break;
+        case CELL_SIGNAL:   color = 0xFF999922;
+          break;
+        case CELL_INC:      color = 0xFF339922;
+          break;
+        case CELL_DEC:      color = 0xFF993322;
+          break;
         case CELL_UP:       color = 0xFF220000;
           break;
         case CELL_DOWN:     color = 0xFF002200;
@@ -320,6 +326,23 @@ update_cars(GameMemory * game_memory, uint32_t * pixels, uint32_t df, uint32_t f
         {
           printf("Once\n");
           current_cell->type = CELL_WALL;
+        } break;
+
+        case (CELL_SIGNAL):
+        {
+          printf("Once\n");
+        } break;
+
+        case (CELL_INC):
+        {
+          printf("Increment\n");
+          ++car->value;
+        } break;
+
+        case (CELL_DEC):
+        {
+          printf("Decrement\n");
+          --car->value;
         } break;
 
         case (CELL_UP):

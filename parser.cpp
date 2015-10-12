@@ -72,6 +72,18 @@ parse(GameMemory * game_memory, const char * filename)
       {
         new_cell.type = CELL_ONCE;
       }
+      else if ((potential_cell[0] == '*') && (potential_cell[1] == '*'))
+      {
+        new_cell.type = CELL_SIGNAL;
+      }
+      else if ((potential_cell[0] == '>') && (potential_cell[1] == '>'))
+      {
+        new_cell.type = CELL_INC;
+      }
+      else if ((potential_cell[0] == '<') && (potential_cell[1] == '<'))
+      {
+        new_cell.type = CELL_DEC;
+      }
       else if ((potential_cell[0] == '%') && ((potential_cell[1] == 'U') ||
                                               (potential_cell[1] == 'u')))
       {
