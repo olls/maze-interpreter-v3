@@ -158,6 +158,16 @@ max_V2(V2 a, V2 b)
 }
 
 
+V2
+round_down(V2 vec)
+{
+  V2 result;
+  result.x = (uint32_t)vec.x;
+  result.y = (uint32_t)vec.y;
+  return result;
+}
+
+
 struct Rectangle
 {
   V2 start;
@@ -293,6 +303,16 @@ operator-=(Rectangle & a, Rectangle b)
 {
   a = a - b;
   return a;
+}
+
+
+Rectangle
+round_down(Rectangle vec)
+{
+  Rectangle result;
+  result.start = round_down(vec.start);
+  result.end = round_down(vec.end);
+  return result;
 }
 
 
@@ -473,6 +493,38 @@ operator-=(V3 & a, V3 b)
 }
 
 
+V3
+min_V3(V3 a, V3 b)
+{
+  V3 result;
+  result.x = fmin(a.x, b.x);
+  result.y = fmin(a.y, b.y);
+  result.z = fmin(a.z, b.z);
+  return result;
+}
+
+V3
+max_V3(V3 a, V3 b)
+{
+  V3 result;
+  result.x = fmax(a.x, b.x);
+  result.y = fmax(a.y, b.y);
+  result.z = fmax(a.z, b.z);
+  return result;
+}
+
+
+V3
+round_down(V3 vec)
+{
+  V3 result;
+  result.x = (uint32_t)vec.x;
+  result.y = (uint32_t)vec.y;
+  result.z = (uint32_t)vec.z;
+  return result;
+}
+
+
 union V4
 {
   struct
@@ -639,6 +691,42 @@ operator-=(V4 & a, V4 b)
   a = a - b;
   return a;
 }
+
+
+V4
+min_V4(V4 a, V4 b)
+{
+  V4 result;
+  result.w = fmin(a.w, b.w);
+  result.x = fmin(a.x, b.x);
+  result.y = fmin(a.y, b.y);
+  result.z = fmin(a.z, b.z);
+  return result;
+}
+
+V4
+max_V4(V4 a, V4 b)
+{
+  V4 result;
+  result.w = fmax(a.w, b.w);
+  result.x = fmax(a.x, b.x);
+  result.y = fmax(a.y, b.y);
+  result.z = fmax(a.z, b.z);
+  return result;
+}
+
+
+V4
+round_down(V4 vec)
+{
+  V4 result;
+  result.w = (uint32_t)vec.w;
+  result.x = (uint32_t)vec.x;
+  result.y = (uint32_t)vec.y;
+  result.z = (uint32_t)vec.z;
+  return result;
+}
+
 
 union PixelColor
 {
