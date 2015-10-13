@@ -183,6 +183,15 @@ in_rectangle(V2 test, Rectangle rect)
   return result;
 }
 
+Rectangle
+crop_to(Rectangle a, Rectangle bound)
+{
+  Rectangle result;
+  result.start = max_V2(a.start, bound.start);
+  result.end   = min_V2(a.end,   bound.end);
+  return result;
+}
+
 
 union V3
 {
