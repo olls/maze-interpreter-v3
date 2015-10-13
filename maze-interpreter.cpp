@@ -311,50 +311,46 @@ draw_box(PixelColor * pixels,
          V2 world_size,
          V4 color)
 {
-  V2 end_world = start_world + world_size;
+  // Into fractional pixel space
+  Rectangle fract_pixel_space;
+  fract_pixel_space.start = start_world * WORLD_COORDS_TO_PIXELS;
+  fract_pixel_space.end   = (start_world + world_size) * WORLD_COORDS_TO_PIXELS;
 
-  // TODO: These should probably be cropped too.
-  V2 start_frac = start_world * WORLD_COORDS_TO_PIXELS;
-  V2 end_frac   = end_world * WORLD_COORDS_TO_PIXELS;
+  // Crop into window
+  Rectangle window;
+  window.start = (V2){0, 0};
+  window.end = (V2){WINDOW_WIDTH - 1, WINDOW_HEIGHT - 1};
+  fract_pixel_space = crop_to(fract_pixel_space, window);
+  
+  Rectangle pixel_space;
+  pixel_space.start = (V2){(int32_t)fract_pixel_space.start.x, (int32_t)fract_pixel_space.start.y};
+  pixel_space.end   = (V2){(int32_t)fract_pixel_space.end.x,   (int32_t)fract_pixel_space.end.y};
 
-  V2 start_pixels = {(int32_t)start_frac.x, (int32_t)start_frac.y};
-  V2 end_pixels   = {(int32_t)end_frac.x,   (int32_t)end_frac.y};
-
-  start_pixels.x = fmin(start_pixels.x, WINDOW_WIDTH - 1);
-  start_pixels.y = fmin(start_pixels.y, WINDOW_HEIGHT - 1);
-  end_pixels.x   = fmin(end_pixels.x,   WINDOW_WIDTH - 1);
-  end_pixels.y   = fmin(end_pixels.y,   WINDOW_HEIGHT - 1);
-
-  start_pixels.y = fmax(start_pixels.y, 0);
-  start_pixels.x = fmax(start_pixels.x, 0);
-  end_pixels.y   = fmax(end_pixels.y,   0);
-  end_pixels.x   = fmax(end_pixels.x,   0);
-
-  for (uint32_t pixel_y = start_pixels.y;
-       pixel_y <= end_pixels.y;
+  for (uint32_t pixel_y = pixel_space.start.y;
+       pixel_y <= pixel_space.end.y;
        pixel_y++)
   {
-    for (uint32_t pixel_x = start_pixels.x;
-         pixel_x <= end_pixels.x;
+    for (uint32_t pixel_x = pixel_space.start.x;
+         pixel_x <= pixel_space.end.x;
          pixel_x++)
     {
       float alpha = color.a / 255.0f;
 
-      if (pixel_x == start_pixels.x)
+      if (pixel_x == pixel_space.start.x)
       {
-        alpha *= (start_pixels.x + 1) - start_frac.x;
+        alpha *= (pixel_space.start.x + 1) - fract_pixel_space.start.x;
       }
-      if (pixel_x == end_pixels.x)
+      if (pixel_x == pixel_space.end.x)
       {
-        alpha *= end_frac.x - end_pixels.x;
+        alpha *= fract_pixel_space.end.x - pixel_space.end.x;
       }
-      if (pixel_y == start_pixels.y)
+      if (pixel_y == pixel_space.start.y)
       {
-        alpha *= (start_pixels.y + 1) - start_frac.y;
+        alpha *= (pixel_space.start.y + 1) - fract_pixel_space.start.y;
       }
-      if (pixel_y == end_pixels.y)
+      if (pixel_y == pixel_space.end.y)
       {
-        alpha *= end_frac.y - end_pixels.y;
+        alpha *= fract_pixel_space.end.y - pixel_space.end.y;
       }
 
       uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;

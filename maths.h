@@ -148,6 +148,25 @@ operator-=(V2 & a, V2 b)
 }
 
 
+V2
+min_V2(V2 a, V2 b)
+{
+  V2 result;
+  result.x = fmin(a.x, b.x);
+  result.y = fmin(a.y, b.y);
+  return result;
+}
+
+V2
+max_V2(V2 a, V2 b)
+{
+  V2 result;
+  result.x = fmax(a.x, b.x);
+  result.y = fmax(a.y, b.y);
+  return result;
+}
+
+
 struct Rectangle
 {
   V2 start;
