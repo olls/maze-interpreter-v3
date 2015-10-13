@@ -173,6 +173,147 @@ struct Rectangle
   V2 end;
 };
 
+
+Rectangle
+operator*(float c, Rectangle rect)
+{
+  Rectangle result;
+  result.start = c * rect.start;
+  result.end = c * rect.end;
+
+  return result;
+}
+Rectangle
+operator*(Rectangle rect, float c)
+{
+  Rectangle result = c * rect;
+  return result;
+}
+Rectangle &
+operator*=(Rectangle & rect, float c)
+{
+  rect = c * rect;
+  return rect;
+}
+
+
+Rectangle
+operator/(float c, Rectangle rect)
+{
+  Rectangle result;
+  result.start = c / rect.start;
+  result.end = c / rect.end;
+
+  return result;
+}
+Rectangle
+operator/(Rectangle rect, float c)
+{
+  Rectangle result;
+  result.start = rect.start / c;
+  result.end = rect.end / c;
+
+  return result;
+}
+Rectangle &
+operator/=(Rectangle & rect, float c)
+{
+  rect = rect / c;
+  return rect;
+}
+
+
+Rectangle
+operator+(float c, Rectangle rect)
+{
+  Rectangle result;
+  result.start = c + rect.start;
+  result.end = c + rect.end;
+
+  return result;
+}
+Rectangle
+operator+(Rectangle rect, float c)
+{
+  Rectangle result = c + rect;
+  return result;
+}
+Rectangle &
+operator+=(Rectangle & rect, float c)
+{
+  rect = rect + c;
+  return rect;
+}
+
+Rectangle
+operator+(Rectangle a, Rectangle b)
+{
+  Rectangle result;
+  result.start = a.start + b.start;
+  result.end = a.end + b.end;
+
+  return result;
+}
+Rectangle &
+operator+=(Rectangle & a, Rectangle b)
+{
+  a = a + b;
+  return a;
+}
+
+
+Rectangle
+operator-(Rectangle rect)
+{
+  Rectangle result;
+  result.start = -rect.start;
+  result.end = -rect.end;
+
+  return result;
+}
+
+Rectangle
+operator-(float c, Rectangle rect)
+{
+  Rectangle result;
+  result.start = c - rect.start;
+  result.end = c - rect.end;
+
+  return result;
+}
+Rectangle
+operator-(Rectangle rect, float c)
+{
+  Rectangle result;
+  result.start = rect.start - c;
+  result.end = rect.end - c;
+
+  return result;
+}
+Rectangle &
+operator-=(Rectangle & rect, float c)
+{
+  rect = rect - c;
+  return rect;
+}
+
+Rectangle
+operator-(Rectangle a, Rectangle b)
+{
+  Rectangle result;
+  result.start = a.start - b.start;
+  result.end = a.end - b.end;
+
+  return result;
+}
+Rectangle &
+operator-=(Rectangle & a, Rectangle b)
+{
+  a = a - b;
+  return a;
+}
+
+
 bool
 in_rectangle(V2 test, Rectangle rect)
 {

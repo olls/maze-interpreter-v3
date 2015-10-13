@@ -307,6 +307,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
 void
 draw_box(PixelColor * pixels,
+         Rectangle render_region,
          V2 start_world,
          V2 world_size,
          V4 color)
@@ -316,12 +317,9 @@ draw_box(PixelColor * pixels,
   fract_pixel_space.start = start_world * WORLD_COORDS_TO_PIXELS;
   fract_pixel_space.end   = (start_world + world_size) * WORLD_COORDS_TO_PIXELS;
 
-  // Crop into window
-  Rectangle window;
-  window.start = (V2){0, 0};
-  window.end = (V2){WINDOW_WIDTH - 1, WINDOW_HEIGHT - 1};
-  fract_pixel_space = crop_to(fract_pixel_space, window);
-  
+  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
+  fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
+
   Rectangle pixel_space;
   pixel_space.start = (V2){(int32_t)fract_pixel_space.start.x, (int32_t)fract_pixel_space.start.y};
   pixel_space.end   = (V2){(int32_t)fract_pixel_space.end.x,   (int32_t)fract_pixel_space.end.y};
@@ -370,6 +368,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
 {
   uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2;
 
+  // TODO: Loop through only relevent cars?
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
        ++car_index)
@@ -378,10 +377,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
 
     V2 pos = car->pos + car_center_offset;
 
-    if (in_rectangle(pos, render_region))
-    {
-      draw_box(pixels, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
-    }
+    draw_box(pixels, render_region, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
   }
 }
 
@@ -391,8 +387,8 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
 {
   uint32_t cell_size = CELL_SPACING - CELL_MARGIN;
 
-  V2 cells_start = render_region.start / CELL_SPACING;
-  V2 cells_end = render_region.end / CELL_SPACING;
+  V2 cells_start = max_V2((render_region.start / CELL_SPACING), (V2){0, 0});
+  V2 cells_end = min_V2(((render_region.end / CELL_SPACING) + 1), (V2){maze->width, maze->height});
 
   for (uint32_t cell_y = cells_start.y;
        cell_y < cells_end.y;
@@ -464,6 +460,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
       }
 
       draw_box(pixels,
+               render_region,
                world_pos,
                (V2){cell_size, cell_size},
                color);
@@ -478,7 +475,7 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
 {
   Rectangle render_region;
   render_region.start = (V2){0, 0};
-  render_region.end = (V2){(15 * CELL_SPACING), (15 * CELL_SPACING)};
+  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * PIXELS_TO_WORLD_COORDS;
 
   render_cells(game_memory, pixels, render_region, mouse, maze);
 
