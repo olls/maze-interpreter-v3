@@ -14,7 +14,6 @@ operator*(float c, V2 vec)
   V2 result;
   result.x = c * vec.x;
   result.y = c * vec.y;
-
   return result;
 }
 V2
@@ -37,7 +36,6 @@ operator/(float c, V2 vec)
   V2 result;
   result.x = c / vec.x;
   result.y = c / vec.y;
-
   return result;
 }
 V2
@@ -46,7 +44,6 @@ operator/(V2 vec, float c)
   V2 result;
   result.x = vec.x / c;
   result.y = vec.y / c;
-
   return result;
 }
 V2 &
@@ -63,7 +60,6 @@ operator+(float c, V2 vec)
   V2 result;
   result.x = c + vec.x;
   result.y = c + vec.y;
-
   return result;
 }
 V2
@@ -85,7 +81,6 @@ operator+(V2 a, V2 b)
   V2 result;
   result.x = a.x + b.x;
   result.y = a.y + b.y;
-
   return result;
 }
 V2 &
@@ -102,7 +97,6 @@ operator-(V2 vec)
   V2 result;
   result.x = -vec.x;
   result.y = -vec.y;
-
   return result;
 }
 
@@ -112,7 +106,6 @@ operator-(float c, V2 vec)
   V2 result;
   result.x = c - vec.x;
   result.y = c - vec.y;
-
   return result;
 }
 V2
@@ -121,7 +114,6 @@ operator-(V2 vec, float c)
   V2 result;
   result.x = vec.x - c;
   result.y = vec.y - c;
-
   return result;
 }
 V2 &
@@ -137,7 +129,6 @@ operator-(V2 a, V2 b)
   V2 result;
   result.x = a.x - b.x;
   result.y = a.y - b.y;
-
   return result;
 }
 V2 &
@@ -180,7 +171,6 @@ operator*(float c, Rectangle rect)
   Rectangle result;
   result.start = c * rect.start;
   result.end = c * rect.end;
-
   return result;
 }
 Rectangle
@@ -203,7 +193,6 @@ operator/(float c, Rectangle rect)
   Rectangle result;
   result.start = c / rect.start;
   result.end = c / rect.end;
-
   return result;
 }
 Rectangle
@@ -212,7 +201,6 @@ operator/(Rectangle rect, float c)
   Rectangle result;
   result.start = rect.start / c;
   result.end = rect.end / c;
-
   return result;
 }
 Rectangle &
@@ -229,7 +217,6 @@ operator+(float c, Rectangle rect)
   Rectangle result;
   result.start = c + rect.start;
   result.end = c + rect.end;
-
   return result;
 }
 Rectangle
@@ -251,7 +238,6 @@ operator+(Rectangle a, Rectangle b)
   Rectangle result;
   result.start = a.start + b.start;
   result.end = a.end + b.end;
-
   return result;
 }
 Rectangle &
@@ -268,7 +254,6 @@ operator-(Rectangle rect)
   Rectangle result;
   result.start = -rect.start;
   result.end = -rect.end;
-
   return result;
 }
 
@@ -278,7 +263,6 @@ operator-(float c, Rectangle rect)
   Rectangle result;
   result.start = c - rect.start;
   result.end = c - rect.end;
-
   return result;
 }
 Rectangle
@@ -287,7 +271,6 @@ operator-(Rectangle rect, float c)
   Rectangle result;
   result.start = rect.start - c;
   result.end = rect.end - c;
-
   return result;
 }
 Rectangle &
@@ -303,7 +286,6 @@ operator-(Rectangle a, Rectangle b)
   Rectangle result;
   result.start = a.start - b.start;
   result.end = a.end - b.end;
-
   return result;
 }
 Rectangle &
@@ -358,7 +340,6 @@ operator*(float c, V3 vec)
   result.x = c * vec.x;
   result.y = c * vec.y;
   result.z = c * vec.z;
-
   return result;
 }
 V3
@@ -382,7 +363,6 @@ operator/(float c, V3 vec)
   result.x = c / vec.x;
   result.y = c / vec.y;
   result.z = c / vec.z;
-
   return result;
 }
 V3
@@ -392,7 +372,6 @@ operator/(V3 vec, float c)
   result.x = vec.x / c;
   result.y = vec.y / c;
   result.z = vec.z / c;
-
   return result;
 }
 V3 &
@@ -410,7 +389,6 @@ operator+(float c, V3 vec)
   result.x = c + vec.x;
   result.y = c + vec.y;
   result.z = c + vec.z;
-
   return result;
 }
 V3
@@ -433,7 +411,6 @@ operator+(V3 a, V3 b)
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   result.z = a.z + b.z;
-
   return result;
 }
 V3 &
@@ -451,7 +428,6 @@ operator-(V3 vec)
   result.x = -vec.x;
   result.y = -vec.y;
   result.z = -vec.z;
-
   return result;
 }
 
@@ -462,7 +438,6 @@ operator-(float c, V3 vec)
   result.x = c - vec.x;
   result.y = c - vec.y;
   result.z = c - vec.z;
-
   return result;
 }
 V3
@@ -472,7 +447,6 @@ operator-(V3 vec, float c)
   result.x = vec.x - c;
   result.y = vec.y - c;
   result.z = vec.z - c;
-
   return result;
 }
 V3 &
@@ -489,7 +463,6 @@ operator-(V3 a, V3 b)
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
-
   return result;
 }
 V3 &
@@ -527,7 +500,6 @@ operator*(float c, V4 vec)
   result.x = c * vec.x;
   result.y = c * vec.y;
   result.z = c * vec.z;
-
   return result;
 }
 V4
@@ -552,7 +524,6 @@ operator/(float c, V4 vec)
   result.x = c / vec.x;
   result.y = c / vec.y;
   result.z = c / vec.z;
-
   return result;
 }
 V4
@@ -563,7 +534,6 @@ operator/(V4 vec, float c)
   result.x = vec.x / c;
   result.y = vec.y / c;
   result.z = vec.z / c;
-
   return result;
 }
 V4 &
@@ -582,7 +552,6 @@ operator+(float c, V4 vec)
   result.x = c + vec.x;
   result.y = c + vec.y;
   result.z = c + vec.z;
-
   return result;
 }
 V4
@@ -606,7 +575,6 @@ operator+(V4 a, V4 b)
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   result.z = a.z + b.z;
-
   return result;
 }
 V4 &
@@ -625,7 +593,6 @@ operator-(V4 vec)
   result.x = -vec.x;
   result.y = -vec.y;
   result.z = -vec.z;
-
   return result;
 }
 
@@ -637,7 +604,6 @@ operator-(float c, V4 vec)
   result.x = c - vec.x;
   result.y = c - vec.y;
   result.z = c - vec.z;
-
   return result;
 }
 V4
@@ -648,7 +614,6 @@ operator-(V4 vec, float c)
   result.x = vec.x - c;
   result.y = vec.y - c;
   result.z = vec.z - c;
-
   return result;
 }
 V4 &
@@ -666,7 +631,6 @@ operator-(V4 a, V4 b)
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
-
   return result;
 }
 V4 &
