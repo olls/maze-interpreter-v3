@@ -1,3 +1,160 @@
+union V2
+{
+  struct
+  {
+    float x;
+    float y;
+  };
+};
+
+
+V2
+operator*(float c, V2 vec)
+{
+  V2 result;
+  result.x = c * vec.x;
+  result.y = c * vec.y;
+
+  return result;
+}
+V2
+operator*(V2 vec, float c)
+{
+  V2 result = c * vec;
+  return result;
+}
+V2 &
+operator*=(V2 & vec, float c)
+{
+  vec = vec * c;
+  return vec;
+}
+
+
+V2
+operator/(float c, V2 vec)
+{
+  V2 result;
+  result.x = c / vec.x;
+  result.y = c / vec.y;
+
+  return result;
+}
+V2
+operator/(V2 vec, float c)
+{
+  V2 result;
+  result.x = vec.x / c;
+  result.y = vec.y / c;
+
+  return result;
+}
+V2 &
+operator/=(V2 & vec, float c)
+{
+  vec = vec / c;
+  return vec;
+}
+
+
+V2
+operator+(float c, V2 vec)
+{
+  V2 result;
+  result.x = c + vec.x;
+  result.y = c + vec.y;
+
+  return result;
+}
+V2
+operator+(V2 vec, float c)
+{
+  V2 result = c + vec;
+  return result;
+}
+V2 &
+operator+=(V2 & vec, float c)
+{
+  vec = vec + c;
+  return vec;
+}
+
+V2
+operator+(V2 a, V2 b)
+{
+  V2 result;
+  result.x = a.x + b.x;
+  result.y = a.y + b.y;
+
+  return result;
+}
+V2 &
+operator+=(V2 & a, V2 b)
+{
+  a = a + b;
+  return a;
+}
+
+
+V2
+operator-(V2 vec)
+{
+  V2 result;
+  result.x = -vec.x;
+  result.y = -vec.y;
+
+  return result;
+}
+
+V2
+operator-(float c, V2 vec)
+{
+  V2 result;
+  result.x = c - vec.x;
+  result.y = c - vec.y;
+
+  return result;
+}
+V2
+operator-(V2 vec, float c)
+{
+  V2 result;
+  result.x = vec.x - c;
+  result.y = vec.y - c;
+
+  return result;
+}
+V2 &
+operator-=(V2 & vec, float c)
+{
+  vec = vec - c;
+  return vec;
+}
+
+V2
+operator-(V2 a, V2 b)
+{
+  V2 result;
+  result.x = a.x - b.x;
+  result.y = a.y - b.y;
+
+  return result;
+}
+V2 &
+operator-=(V2 & a, V2 b)
+{
+  a = a - b;
+  return a;
+}
+
+
+struct Rectangle
+{
+  V2 start;
+  V2 end;
+};
+
+
 union V3
 {
   struct
