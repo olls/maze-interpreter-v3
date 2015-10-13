@@ -36,165 +36,6 @@ get_us()
 
 
 void
-draw_box(PixelColor * pixels,
-         int32_t start_x_world,
-         int32_t start_y_world,
-         uint32_t width_world,
-         uint32_t height_world,
-         V4 color)
-{
-  int32_t end_x_world = start_x_world + width_world;
-  int32_t end_y_world = start_y_world + height_world;
-
-  // Into the (floating point) pixel space!
-  float start_x = start_x_world * WORLD_COORDS_TO_PIXELS;
-  float start_y = start_y_world * WORLD_COORDS_TO_PIXELS;
-  float end_x   = end_x_world * WORLD_COORDS_TO_PIXELS;
-  float end_y   = end_y_world * WORLD_COORDS_TO_PIXELS;
-
-  // Into the (rounded exact) pixel space!
-  int32_t start_x_pixels = (int32_t)start_x;
-  int32_t start_y_pixels = (int32_t)start_y;
-  int32_t end_x_pixels   = (int32_t)end_x;
-  int32_t end_y_pixels   = (int32_t)end_y;
-
-  start_x_pixels = fmin(start_x_pixels, WINDOW_WIDTH - 1);
-  start_y_pixels = fmin(start_y_pixels, WINDOW_HEIGHT - 1);
-  end_x_pixels   = fmin(end_x_pixels,   WINDOW_WIDTH - 1);
-  end_y_pixels   = fmin(end_y_pixels,   WINDOW_HEIGHT - 1);
-
-  start_y_pixels = fmax(start_y_pixels, 0);
-  start_x_pixels = fmax(start_x_pixels, 0);
-  end_y_pixels   = fmax(end_y_pixels,   0);
-  end_x_pixels   = fmax(end_x_pixels,   0);
-
-  for (uint32_t pixel_y = start_y_pixels;
-       pixel_y <= end_y_pixels;
-       pixel_y++)
-  {
-    for (uint32_t pixel_x = start_x_pixels;
-         pixel_x <= end_x_pixels;
-         pixel_x++)
-    {
-      float alpha = color.a / 255.0f;
-
-      if (pixel_x == start_x_pixels)
-      {
-        alpha *= (start_x_pixels + 1) - start_x;
-      }
-      if (pixel_x == end_x_pixels)
-      {
-        alpha *= end_x - end_x_pixels;
-      }
-      if (pixel_y == start_y_pixels)
-      {
-        alpha *= (start_y_pixels + 1) - start_y;
-      }
-      if (pixel_y == end_y_pixels)
-      {
-        alpha *= end_y - end_y_pixels;
-      }
-
-      uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
-
-      V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
-      V3 new_color = remove_alpha(color);
-
-      PixelColor alpha_blended = to_color((alpha * new_color) + ((1.0f - alpha) * prev_color));
-      pixels[pixel_pos] = alpha_blended;
-    }
-  }
-}
-
-
-void
-render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, Mouse mouse, Maze * maze)
-{
-  V2 cells_start = render_region.start / CELL_SPACING;
-  V2 cells_end = render_region.end / CELL_SPACING;
-
-  for (uint32_t cell_y = cells_start.y;
-       cell_y < cells_end.y;
-       cell_y++)
-  {
-    for (uint32_t cell_x = cells_start.x;
-         cell_x < cells_end.x;
-         cell_x++)
-    {
-      Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
-
-      V4 color = (V4){};
-      switch (cell->type)
-      {
-        case CELL_NULL:     color = (V4){0xFF, 0x00, 0x00, 0x00};
-          break;
-        case CELL_START:    color = (V4){0xFF, 0x33, 0xAA, 0x55};
-          break;
-        case CELL_PATH:     color = (V4){0xFF, 0x55, 0x88, 0x22};
-          break;
-        case CELL_WALL:     color = (V4){0xFF, 0x33, 0x33, 0x33};
-          break;
-        case CELL_HOLE:     color = (V4){0xFF, 0xBB, 0x66, 0x44};
-          break;
-        case CELL_SPLITTER: color = (V4){0xFF, 0x22, 0x44, 0x99};
-          break;
-        case CELL_FUNCTION: color = (V4){0xFF, 0x66, 0x77, 0x88};
-          break;
-        case CELL_ONCE:     color = (V4){0xFF, 0x88, 0x77, 0x66};
-          break;
-        case CELL_SIGNAL:   color = (V4){0xFF, 0x99, 0x99, 0x22};
-          break;
-        case CELL_INC:      color = (V4){0xFF, 0x33, 0x99, 0x22};
-          break;
-        case CELL_DEC:      color = (V4){0xFF, 0x99, 0x33, 0x22};
-          break;
-        case CELL_UP:       color = (V4){0xFF, 0x22, 0x00, 0x00};
-          break;
-        case CELL_DOWN:     color = (V4){0xFF, 0x00, 0x22, 0x00};
-          break;
-        case CELL_LEFT:     color = (V4){0xFF, 0x00, 0x00, 0x22};
-          break;
-        case CELL_RIGHT:    color = (V4){0xFF, 0x00, 0x22, 0x22};
-          break;
-        case CELL_PAUSE:    color = (V4){0xFF, 0x88, 0x88, 0x11};
-          break;
-      }
-
-      // Into world space
-      uint32_t x = (cell_x * CELL_SPACING);
-      uint32_t y = (cell_y * CELL_SPACING);
-      uint32_t width = (CELL_SPACING - CELL_MARGIN);
-      uint32_t height = (CELL_SPACING - CELL_MARGIN);
-
-      if ((mouse.x >= x) &&
-          (mouse.x < x + width) &&
-          (mouse.y >= y) &&
-          (mouse.y < y + height))
-      {
-        if (color.r <= (0xFF - 0x20))
-        {
-          color.r += 0x20;
-        }
-        if (color.g <= (0xFF - 0x20))
-        {
-          color.g += 0x20;
-        }
-        if (color.b <= (0xFF - 0x20))
-        {
-          color.b += 0x20;
-        }
-      }
-
-      draw_box(pixels,
-               x, y,
-               width, height,
-               color);
-    }
-  }
-}
-
-
-void
 init_car_mem(Cars * cars)
 {
   Car * car = cars->cars;
@@ -469,6 +310,78 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
 
 void
+draw_box(PixelColor * pixels,
+         int32_t start_x_world,
+         int32_t start_y_world,
+         uint32_t width_world,
+         uint32_t height_world,
+         V4 color)
+{
+  int32_t end_x_world = start_x_world + width_world;
+  int32_t end_y_world = start_y_world + height_world;
+
+  // Into the (floating point) pixel space!
+  float start_x = start_x_world * WORLD_COORDS_TO_PIXELS;
+  float start_y = start_y_world * WORLD_COORDS_TO_PIXELS;
+  float end_x   = end_x_world * WORLD_COORDS_TO_PIXELS;
+  float end_y   = end_y_world * WORLD_COORDS_TO_PIXELS;
+
+  // Into the (rounded exact) pixel space!
+  int32_t start_x_pixels = (int32_t)start_x;
+  int32_t start_y_pixels = (int32_t)start_y;
+  int32_t end_x_pixels   = (int32_t)end_x;
+  int32_t end_y_pixels   = (int32_t)end_y;
+
+  start_x_pixels = fmin(start_x_pixels, WINDOW_WIDTH - 1);
+  start_y_pixels = fmin(start_y_pixels, WINDOW_HEIGHT - 1);
+  end_x_pixels   = fmin(end_x_pixels,   WINDOW_WIDTH - 1);
+  end_y_pixels   = fmin(end_y_pixels,   WINDOW_HEIGHT - 1);
+
+  start_y_pixels = fmax(start_y_pixels, 0);
+  start_x_pixels = fmax(start_x_pixels, 0);
+  end_y_pixels   = fmax(end_y_pixels,   0);
+  end_x_pixels   = fmax(end_x_pixels,   0);
+
+  for (uint32_t pixel_y = start_y_pixels;
+       pixel_y <= end_y_pixels;
+       pixel_y++)
+  {
+    for (uint32_t pixel_x = start_x_pixels;
+         pixel_x <= end_x_pixels;
+         pixel_x++)
+    {
+      float alpha = color.a / 255.0f;
+
+      if (pixel_x == start_x_pixels)
+      {
+        alpha *= (start_x_pixels + 1) - start_x;
+      }
+      if (pixel_x == end_x_pixels)
+      {
+        alpha *= end_x - end_x_pixels;
+      }
+      if (pixel_y == start_y_pixels)
+      {
+        alpha *= (start_y_pixels + 1) - start_y;
+      }
+      if (pixel_y == end_y_pixels)
+      {
+        alpha *= end_y - end_y_pixels;
+      }
+
+      uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
+
+      V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
+      V3 new_color = remove_alpha(color);
+
+      PixelColor alpha_blended = to_color((alpha * new_color) + ((1.0f - alpha) * prev_color));
+      pixels[pixel_pos] = alpha_blended;
+    }
+  }
+}
+
+
+void
 render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
 {
   for (uint32_t car_index = 0;
@@ -482,6 +395,93 @@ render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
     uint32_t y = car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
 
     draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, (V4){0xFF, 0x99, 0x22, 0x77});
+  }
+}
+
+
+void
+render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, Mouse mouse, Maze * maze)
+{
+  V2 cells_start = render_region.start / CELL_SPACING;
+  V2 cells_end = render_region.end / CELL_SPACING;
+
+  for (uint32_t cell_y = cells_start.y;
+       cell_y < cells_end.y;
+       cell_y++)
+  {
+    for (uint32_t cell_x = cells_start.x;
+         cell_x < cells_end.x;
+         cell_x++)
+    {
+      Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
+
+      V4 color = (V4){};
+      switch (cell->type)
+      {
+        case CELL_NULL:     color = (V4){0xFF, 0x00, 0x00, 0x00};
+          break;
+        case CELL_START:    color = (V4){0xFF, 0x33, 0xAA, 0x55};
+          break;
+        case CELL_PATH:     color = (V4){0xFF, 0x55, 0x88, 0x22};
+          break;
+        case CELL_WALL:     color = (V4){0xFF, 0x33, 0x33, 0x33};
+          break;
+        case CELL_HOLE:     color = (V4){0xFF, 0xBB, 0x66, 0x44};
+          break;
+        case CELL_SPLITTER: color = (V4){0xFF, 0x22, 0x44, 0x99};
+          break;
+        case CELL_FUNCTION: color = (V4){0xFF, 0x66, 0x77, 0x88};
+          break;
+        case CELL_ONCE:     color = (V4){0xFF, 0x88, 0x77, 0x66};
+          break;
+        case CELL_SIGNAL:   color = (V4){0xFF, 0x99, 0x99, 0x22};
+          break;
+        case CELL_INC:      color = (V4){0xFF, 0x33, 0x99, 0x22};
+          break;
+        case CELL_DEC:      color = (V4){0xFF, 0x99, 0x33, 0x22};
+          break;
+        case CELL_UP:       color = (V4){0xFF, 0x22, 0x00, 0x00};
+          break;
+        case CELL_DOWN:     color = (V4){0xFF, 0x00, 0x22, 0x00};
+          break;
+        case CELL_LEFT:     color = (V4){0xFF, 0x00, 0x00, 0x22};
+          break;
+        case CELL_RIGHT:    color = (V4){0xFF, 0x00, 0x22, 0x22};
+          break;
+        case CELL_PAUSE:    color = (V4){0xFF, 0x88, 0x88, 0x11};
+          break;
+      }
+
+      // Into world space
+      uint32_t x = (cell_x * CELL_SPACING);
+      uint32_t y = (cell_y * CELL_SPACING);
+      uint32_t width = (CELL_SPACING - CELL_MARGIN);
+      uint32_t height = (CELL_SPACING - CELL_MARGIN);
+
+      if ((mouse.x >= x) &&
+          (mouse.x < x + width) &&
+          (mouse.y >= y) &&
+          (mouse.y < y + height))
+      {
+        if (color.r <= (0xFF - 0x20))
+        {
+          color.r += 0x20;
+        }
+        if (color.g <= (0xFF - 0x20))
+        {
+          color.g += 0x20;
+        }
+        if (color.b <= (0xFF - 0x20))
+        {
+          color.b += 0x20;
+        }
+      }
+
+      draw_box(pixels,
+               x, y,
+               width, height,
+               color);
+    }
   }
 }
 
