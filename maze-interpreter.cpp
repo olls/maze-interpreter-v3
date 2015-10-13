@@ -108,14 +108,17 @@ draw_box(PixelColor * pixels,
 
 
 void
-render_cells(GameMemory * game_memory, PixelColor * pixels, Mouse mouse, Maze * maze)
+render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, Mouse mouse, Maze * maze)
 {
-  for (uint32_t cell_y = 0;
-       cell_y < maze->height;
+  V2 cells_start = render_region.start / CELL_SPACING;
+  V2 cells_end = render_region.end / CELL_SPACING;
+
+  for (uint32_t cell_y = cells_start.y;
+       cell_y < cells_end.y;
        cell_y++)
   {
-    for (uint32_t cell_x = 0;
-         cell_x < maze->width;
+    for (uint32_t cell_x = cells_start.x;
+         cell_x < cells_end.x;
          cell_x++)
     {
       Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
@@ -483,7 +486,11 @@ void
 update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
-  render_cells(game_memory, pixels, mouse, maze);
+  Rectangle render_region;
+  render_region.start = (V2){0, 0};
+  render_region.end = (V2){(15 * CELL_SPACING), (15 * CELL_SPACING)};
+
+  render_cells(game_memory, pixels, render_region, mouse, maze);
 
   if (frame_count % 2 == 0)
   {
