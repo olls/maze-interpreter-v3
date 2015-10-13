@@ -359,17 +359,21 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
         } break;
       }
     }
+    else
+    {
+      car->update = true;
+    }
   }
 
-  // TODO: Stop looping through them so many times!
+  // // TODO: Stop looping through them so many times!
 
-  car = cars->cars;
-  for (uint32_t car_index = 0;
-       car_index < cars->next_free;
-       ++car_index, ++car)
-  {
-    car->update = true;
-  }
+  // car = cars->cars;
+  // for (uint32_t car_index = 0;
+  //      car_index < cars->next_free;
+  //      ++car_index, ++car)
+  // {
+  //   car->update = true;
+  // }
 
   car = cars->cars;
   for (uint32_t car_index = 0;
