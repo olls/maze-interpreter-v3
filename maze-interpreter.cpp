@@ -50,7 +50,7 @@ init_car_mem(Cars * cars)
 
 
 Car *
-add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
+add_car(Cars * cars, V2 pos, Direction direction = UP)
 {
   assert(cars->next_free != MAX_CARS);
 
@@ -58,8 +58,7 @@ add_car(Cars * cars, uint32_t x, uint32_t y, Direction direction = UP)
   ++cars->next_free;
 
   car->update = false;
-  car->x = x;
-  car->y = y;
+  car->pos = pos;
   car->direction = direction;
 
   return car;
@@ -98,10 +97,9 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       // float delta_move_per_frame = delta_move_per_us * df;
       // car->x += delta_move_per_frame;
 
-      uint32_t cell_x = car->x / CELL_SPACING;
-      uint32_t cell_y = car->y / CELL_SPACING;
+      V2 cell_pos = car->pos / CELL_SPACING;
 
-      Cell * current_cell = get_cell(game_memory, maze, cell_x, cell_y);
+      Cell * current_cell = get_cell(game_memory, maze, cell_pos.x, cell_pos.y);
 
       // TODO: Deal with race cars (conditions)
 
@@ -137,7 +135,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
         case (CELL_SPLITTER):
         {
           printf("Splitter\n");
-          add_car(cars, car->x, car->y, RIGHT);
+          add_car(cars, car->pos, RIGHT);
           car->direction = LEFT;
         } break;
 
@@ -229,11 +227,9 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
     }
     else
     {
-      uint32_t cell_x = car->x / CELL_SPACING;
-      uint32_t cell_y = car->y / CELL_SPACING;
+      V2 cell_pos = car->pos / CELL_SPACING;
 
       Direction directions[4];
-
       directions[0] = car->direction;
       directions[3] = reverse(car->direction);
 
@@ -250,10 +246,10 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       }
 
       bool walls[4];
-      walls[UP]    = get_cell(game_memory, maze, cell_x, (cell_y + 1))->type == CELL_WALL;
-      walls[DOWN]  = get_cell(game_memory, maze, cell_x, (cell_y - 1))->type == CELL_WALL;
-      walls[LEFT]  = get_cell(game_memory, maze, (cell_x - 1), cell_y)->type == CELL_WALL;
-      walls[RIGHT] = get_cell(game_memory, maze, (cell_x + 1), cell_y)->type == CELL_WALL;
+      walls[UP]    = get_cell(game_memory, maze, cell_pos.x, (cell_pos.y + 1))->type == CELL_WALL;
+      walls[DOWN]  = get_cell(game_memory, maze, cell_pos.x, (cell_pos.y - 1))->type == CELL_WALL;
+      walls[LEFT]  = get_cell(game_memory, maze, (cell_pos.x - 1), cell_pos.y)->type == CELL_WALL;
+      walls[RIGHT] = get_cell(game_memory, maze, (cell_pos.x + 1), cell_pos.y)->type == CELL_WALL;
 
       Direction test_direction;
       bool can_move = false;
@@ -276,22 +272,22 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
         {
           case UP:
           {
-            car->y += CELL_SPACING;
+            car->pos.y += CELL_SPACING;
           } break;
 
           case DOWN:
           {
-            car->y -= CELL_SPACING;
+            car->pos.y -= CELL_SPACING;
           } break;
 
           case LEFT:
           {
-            car->x -= CELL_SPACING;
+            car->pos.x -= CELL_SPACING;
           } break;
 
           case RIGHT:
           {
-            car->x += CELL_SPACING;
+            car->pos.x += CELL_SPACING;
           } break;
 
           case STATIONARY:
@@ -311,62 +307,54 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
 void
 draw_box(PixelColor * pixels,
-         int32_t start_x_world,
-         int32_t start_y_world,
-         uint32_t width_world,
-         uint32_t height_world,
+         V2 start_world,
+         V2 world_size,
          V4 color)
 {
-  int32_t end_x_world = start_x_world + width_world;
-  int32_t end_y_world = start_y_world + height_world;
+  V2 end_world = start_world + world_size;
 
-  // Into the (floating point) pixel space!
-  float start_x = start_x_world * WORLD_COORDS_TO_PIXELS;
-  float start_y = start_y_world * WORLD_COORDS_TO_PIXELS;
-  float end_x   = end_x_world * WORLD_COORDS_TO_PIXELS;
-  float end_y   = end_y_world * WORLD_COORDS_TO_PIXELS;
+  // TODO: These should probably be cropped too.
+  V2 start_frac = start_world * WORLD_COORDS_TO_PIXELS;
+  V2 end_frac   = end_world * WORLD_COORDS_TO_PIXELS;
 
-  // Into the (rounded exact) pixel space!
-  int32_t start_x_pixels = (int32_t)start_x;
-  int32_t start_y_pixels = (int32_t)start_y;
-  int32_t end_x_pixels   = (int32_t)end_x;
-  int32_t end_y_pixels   = (int32_t)end_y;
+  V2 start_pixels = {(int32_t)start_frac.x, (int32_t)start_frac.y};
+  V2 end_pixels   = {(int32_t)end_frac.x,   (int32_t)end_frac.y};
 
-  start_x_pixels = fmin(start_x_pixels, WINDOW_WIDTH - 1);
-  start_y_pixels = fmin(start_y_pixels, WINDOW_HEIGHT - 1);
-  end_x_pixels   = fmin(end_x_pixels,   WINDOW_WIDTH - 1);
-  end_y_pixels   = fmin(end_y_pixels,   WINDOW_HEIGHT - 1);
+  start_pixels.x = fmin(start_pixels.x, WINDOW_WIDTH - 1);
+  start_pixels.y = fmin(start_pixels.y, WINDOW_HEIGHT - 1);
+  end_pixels.x   = fmin(end_pixels.x,   WINDOW_WIDTH - 1);
+  end_pixels.y   = fmin(end_pixels.y,   WINDOW_HEIGHT - 1);
 
-  start_y_pixels = fmax(start_y_pixels, 0);
-  start_x_pixels = fmax(start_x_pixels, 0);
-  end_y_pixels   = fmax(end_y_pixels,   0);
-  end_x_pixels   = fmax(end_x_pixels,   0);
+  start_pixels.y = fmax(start_pixels.y, 0);
+  start_pixels.x = fmax(start_pixels.x, 0);
+  end_pixels.y   = fmax(end_pixels.y,   0);
+  end_pixels.x   = fmax(end_pixels.x,   0);
 
-  for (uint32_t pixel_y = start_y_pixels;
-       pixel_y <= end_y_pixels;
+  for (uint32_t pixel_y = start_pixels.y;
+       pixel_y <= end_pixels.y;
        pixel_y++)
   {
-    for (uint32_t pixel_x = start_x_pixels;
-         pixel_x <= end_x_pixels;
+    for (uint32_t pixel_x = start_pixels.x;
+         pixel_x <= end_pixels.x;
          pixel_x++)
     {
       float alpha = color.a / 255.0f;
 
-      if (pixel_x == start_x_pixels)
+      if (pixel_x == start_pixels.x)
       {
-        alpha *= (start_x_pixels + 1) - start_x;
+        alpha *= (start_pixels.x + 1) - start_frac.x;
       }
-      if (pixel_x == end_x_pixels)
+      if (pixel_x == end_pixels.x)
       {
-        alpha *= end_x - end_x_pixels;
+        alpha *= end_frac.x - end_pixels.x;
       }
-      if (pixel_y == start_y_pixels)
+      if (pixel_y == start_pixels.y)
       {
-        alpha *= (start_y_pixels + 1) - start_y;
+        alpha *= (start_pixels.y + 1) - start_frac.y;
       }
-      if (pixel_y == end_y_pixels)
+      if (pixel_y == end_pixels.y)
       {
-        alpha *= end_y - end_y_pixels;
+        alpha *= end_frac.y - end_pixels.y;
       }
 
       uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
@@ -384,17 +372,16 @@ draw_box(PixelColor * pixels,
 void
 render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
 {
+  uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2;
+
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
        ++car_index)
   {
     Car * car = cars->cars + car_index;
 
-    // Render
-    uint32_t x = car->x + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
-    uint32_t y = car->y + ((CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2);
-
-    draw_box(pixels, x, y, CAR_SIZE, CAR_SIZE, (V4){0xFF, 0x99, 0x22, 0x77});
+    V2 pos = car->pos + car_center_offset;
+    draw_box(pixels, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
   }
 }
 
@@ -402,6 +389,8 @@ render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
 void
 render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, Mouse mouse, Maze * maze)
 {
+  uint32_t cell_size = CELL_SPACING - CELL_MARGIN;
+
   V2 cells_start = render_region.start / CELL_SPACING;
   V2 cells_end = render_region.end / CELL_SPACING;
 
@@ -453,15 +442,12 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
       }
 
       // Into world space
-      uint32_t x = (cell_x * CELL_SPACING);
-      uint32_t y = (cell_y * CELL_SPACING);
-      uint32_t width = (CELL_SPACING - CELL_MARGIN);
-      uint32_t height = (CELL_SPACING - CELL_MARGIN);
+      V2 world_pos = (V2){cell_x, cell_y} * CELL_SPACING;
 
-      if ((mouse.x >= x) &&
-          (mouse.x < x + width) &&
-          (mouse.y >= y) &&
-          (mouse.y < y + height))
+      if ((mouse.x >= world_pos.x) &&
+          (mouse.x < world_pos.x + cell_size) &&
+          (mouse.y >= world_pos.y) &&
+          (mouse.y < world_pos.y + cell_size))
       {
         if (color.r <= (0xFF - 0x20))
         {
@@ -478,8 +464,8 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
       }
 
       draw_box(pixels,
-               x, y,
-               width, height,
+               world_pos,
+               (V2){cell_size, cell_size},
                color);
     }
   }
@@ -565,7 +551,8 @@ main(int32_t argc, char * argv[])
       Cell * cell = get_cell(&game_memory, maze, cell_x, cell_y);
       if (cell->type == CELL_START)
       {
-        add_car(cars, (CELL_SPACING * cell_x), (CELL_SPACING * cell_y));
+        V2 pos = (V2){cell_x, cell_y} * CELL_SPACING;
+        add_car(cars, pos);
       }
     }
   }
