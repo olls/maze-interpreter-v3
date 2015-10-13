@@ -370,7 +370,7 @@ draw_box(PixelColor * pixels,
 
 
 void
-render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
+render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * cars)
 {
   uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2;
 
@@ -381,7 +381,11 @@ render_cars(PixelColor * pixels, uint32_t df, Cars * cars)
     Car * car = cars->cars + car_index;
 
     V2 pos = car->pos + car_center_offset;
-    draw_box(pixels, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
+
+    if (in_rectangle(pos, render_region))
+    {
+      draw_box(pixels, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
+    }
   }
 }
 
@@ -487,7 +491,7 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
     update_cars(game_memory, df, frame_count, keys, mouse, maze, cars);
   }
 
-  render_cars(pixels, df, cars);
+  render_cars(pixels, render_region, df, cars);
 }
 
 

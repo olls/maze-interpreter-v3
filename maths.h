@@ -154,6 +154,16 @@ struct Rectangle
   V2 end;
 };
 
+bool
+in_rectangle(V2 test, Rectangle rect)
+{
+  bool result = ((test.x >= rect.start.x) &&
+                 (test.x < rect.end.x) &&
+                 (test.y >= rect.start.y) &&
+                 (test.y < rect.end.y));
+  return result;
+}
+
 
 union V3
 {
