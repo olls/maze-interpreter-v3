@@ -97,7 +97,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       // float delta_move_per_frame = delta_move_per_us * df;
       // car->x += delta_move_per_frame;
 
-      V2 cell_pos = car->pos / CELL_SPACING;
+      V2 cell_pos = round_down(car->pos / CELL_SPACING);
 
       Cell * current_cell = get_cell(game_memory, maze, cell_pos.x, cell_pos.y);
 
@@ -227,7 +227,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
     }
     else
     {
-      V2 cell_pos = car->pos / CELL_SPACING;
+      V2 cell_pos = round_down(car->pos / CELL_SPACING);
 
       Direction directions[4];
       directions[0] = car->direction;
@@ -387,8 +387,8 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
 {
   uint32_t cell_size = CELL_SPACING - CELL_MARGIN;
 
-  V2 cells_start = max_V2((render_region.start / CELL_SPACING), (V2){0, 0});
-  V2 cells_end = min_V2(((render_region.end / CELL_SPACING) + 1), (V2){maze->width, maze->height});
+  V2 cells_start = max_V2(round_down(render_region.start / CELL_SPACING), (V2){0, 0});
+  V2 cells_end = min_V2((round_down(render_region.end / CELL_SPACING) + 1), (V2){maze->width, maze->height});
 
   for (uint32_t cell_y = cells_start.y;
        cell_y < cells_end.y;
