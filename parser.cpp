@@ -18,6 +18,7 @@ isLetter(char character)
 Maze *
 parse(GameMemory * game_memory, const char * filename)
 {
+  // TODO: How to get it the right way up?!
 
   FILE * file = fopen(filename, "r");
   assert(file != NULL);
@@ -122,7 +123,7 @@ parse(GameMemory * game_memory, const char * filename)
       }
       else
       {
-        Cell * cell = get_cell(game_memory, maze, x, 14 - y);
+        Cell * cell = get_cell(game_memory, maze, x, y);
         *cell = new_cell;
 
         offset += bytes_read;
