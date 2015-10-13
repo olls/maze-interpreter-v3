@@ -26,7 +26,7 @@ operator*(V2 vec, float c)
 V2 &
 operator*=(V2 & vec, float c)
 {
-  vec = vec * c;
+  vec = c * vec;
   return vec;
 }
 
@@ -75,7 +75,7 @@ operator+(V2 vec, float c)
 V2 &
 operator+=(V2 & vec, float c)
 {
-  vec = vec + c;
+  vec = c + vec;
   return vec;
 }
 
@@ -229,7 +229,7 @@ operator*(V3 vec, float c)
 V3 &
 operator*=(V3 & vec, float c)
 {
-  vec = vec * c;
+  vec = c * vec;
   return vec;
 }
 
@@ -281,7 +281,7 @@ operator+(V3 vec, float c)
 V3 &
 operator+=(V3 & vec, float c)
 {
-  vec = vec + c;
+  vec = c + vec;
   return vec;
 }
 
@@ -398,7 +398,7 @@ operator*(V4 vec, float c)
 V4 &
 operator*=(V4 & vec, float c)
 {
-  vec = vec * c;
+  vec = c * vec;
   return vec;
 }
 
@@ -453,7 +453,7 @@ operator+(V4 vec, float c)
 V4 &
 operator+=(V4 & vec, float c)
 {
-  vec = vec + c;
+  vec = c + vec;
   return vec;
 }
 
