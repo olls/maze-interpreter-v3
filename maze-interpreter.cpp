@@ -99,7 +99,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
       V2 cell_pos = round_down(car->pos / CELL_SPACING);
 
-      Cell * current_cell = get_cell(game_memory, maze, cell_pos.x, cell_pos.y);
+      Cell * current_cell = get_cell(game_memory, maze, cell_pos);
 
       // TODO: Deal with race cars (conditions)
 
@@ -246,10 +246,10 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       }
 
       bool walls[4];
-      walls[UP]    = get_cell(game_memory, maze, cell_pos.x, (cell_pos.y + 1))->type == CELL_WALL;
-      walls[DOWN]  = get_cell(game_memory, maze, cell_pos.x, (cell_pos.y - 1))->type == CELL_WALL;
-      walls[LEFT]  = get_cell(game_memory, maze, (cell_pos.x - 1), cell_pos.y)->type == CELL_WALL;
-      walls[RIGHT] = get_cell(game_memory, maze, (cell_pos.x + 1), cell_pos.y)->type == CELL_WALL;
+      walls[UP]    = get_cell(game_memory, maze, (V2){cell_pos.x, (cell_pos.y + 1)})->type == CELL_WALL;
+      walls[DOWN]  = get_cell(game_memory, maze, (V2){cell_pos.x, (cell_pos.y - 1)})->type == CELL_WALL;
+      walls[LEFT]  = get_cell(game_memory, maze, (V2){(cell_pos.x - 1), cell_pos.y})->type == CELL_WALL;
+      walls[RIGHT] = get_cell(game_memory, maze, (V2){(cell_pos.x + 1), cell_pos.y})->type == CELL_WALL;
 
       Direction test_direction;
       bool can_move = false;
@@ -398,7 +398,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
          cell_x < cells_end.x;
          cell_x++)
     {
-      Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
+      Cell * cell = get_cell(game_memory, maze, (V2){cell_x, cell_y});
 
       V4 color = (V4){};
       switch (cell->type)
@@ -545,7 +545,7 @@ main(int32_t argc, char * argv[])
          cell_x < maze->width;
          ++cell_x)
     {
-      Cell * cell = get_cell(&game_memory, maze, cell_x, cell_y);
+      Cell * cell = get_cell(&game_memory, maze, (V2){cell_x, cell_y});
       if (cell->type == CELL_START)
       {
         V2 pos = (V2){cell_x, cell_y} * CELL_SPACING;

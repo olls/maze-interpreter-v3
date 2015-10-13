@@ -1,6 +1,9 @@
 MazeBlock *
-get_block(GameMemory * game_memory, Maze * maze, uint32_t block_x, uint32_t block_y)
+get_block(GameMemory * game_memory, Maze * maze, V2 block_pos)
 {
+  uint32_t block_x = (uint32_t)block_pos.x;
+  uint32_t block_y = (uint32_t)block_pos.y;
+
   // TODO: Better hash function
   // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x * 3) + (block_y * 7));
   // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x << 3) + (block_y << 7));
@@ -42,16 +45,13 @@ get_block(GameMemory * game_memory, Maze * maze, uint32_t block_x, uint32_t bloc
 
 
 Cell *
-get_cell(GameMemory * game_memory, Maze * maze, uint32_t cell_x, uint32_t cell_y)
+get_cell(GameMemory * game_memory, Maze * maze, V2 cell_pos)
 {
-  uint32_t block_x = cell_x / BLOCK_SIDE_LENGTH;
-  uint32_t block_y = cell_y / BLOCK_SIDE_LENGTH;
+  V2 block_pos = round_down(cell_pos / BLOCK_SIDE_LENGTH);
+  V2 cell_pos_in_block = cell_pos - (block_pos * BLOCK_SIDE_LENGTH);
 
-  uint32_t cell_x_in_block = cell_x - (block_x * BLOCK_SIDE_LENGTH);
-  uint32_t cell_y_in_block = cell_y - (block_y * BLOCK_SIDE_LENGTH);
-
-  MazeBlock * block = get_block(game_memory, maze, block_x, block_y);
-  Cell * cell = block->cells + cell_x_in_block + (cell_y_in_block * BLOCK_SIDE_LENGTH);
+  MazeBlock * block = get_block(game_memory, maze, block_pos);
+  Cell * cell = block->cells + (uint32_t)(cell_pos_in_block.x + (cell_pos_in_block.y * BLOCK_SIDE_LENGTH));
 
   return cell;
 }
