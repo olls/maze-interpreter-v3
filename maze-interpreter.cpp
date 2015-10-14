@@ -308,14 +308,11 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 void
 draw_box(PixelColor * pixels,
          Rectangle render_region,
-         V2 start_world,
-         V2 world_size,
+         Rectangle box,
          V4 color)
 {
   // Into fractional pixel space
-  Rectangle fract_pixel_space;
-  fract_pixel_space.start = start_world * WORLD_COORDS_TO_PIXELS;
-  fract_pixel_space.end   = (start_world + world_size) * WORLD_COORDS_TO_PIXELS;
+  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
 
   Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
   fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
@@ -376,8 +373,9 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
     Car * car = cars->cars + car_index;
 
     V2 pos = car->pos + car_center_offset;
+    Rectangle car_box = rectangle(pos, (V2){CAR_SIZE, CAR_SIZE});
 
-    draw_box(pixels, render_region, pos, (V2){CAR_SIZE, CAR_SIZE}, (V4){0xFF, 0x99, 0x22, 0x77});
+    draw_box(pixels, render_region, car_box, (V4){0xFF, 0x99, 0x22, 0x77});
   }
 }
 
@@ -459,11 +457,8 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
         }
       }
 
-      draw_box(pixels,
-               render_region,
-               world_pos,
-               (V2){cell_size, cell_size},
-               color);
+      Rectangle cell_box = rectangle(world_pos, (V2){cell_size, cell_size});
+      draw_box(pixels, render_region, cell_box, color);
     }
   }
 }

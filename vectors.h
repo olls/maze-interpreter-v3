@@ -307,6 +307,16 @@ operator-=(Rectangle & a, Rectangle b)
 
 
 Rectangle
+rectangle(V2 start, V2 size)
+{
+  Rectangle result;
+  result.start = start;
+  result.end = result.start + size;
+  return result;
+}
+
+
+Rectangle
 round_down(Rectangle vec)
 {
   Rectangle result;
