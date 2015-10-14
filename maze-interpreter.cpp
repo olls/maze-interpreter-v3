@@ -306,6 +306,19 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
 
 void
+set_pixel(PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
+{
+  uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
+
+  V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
+  V3 new_color = remove_alpha(color);
+
+  PixelColor alpha_blended = to_color((color.a * new_color) + ((1.0f - color.a) * prev_color));
+  pixels[pixel_pos] = alpha_blended;
+}
+
+
+void
 draw_box(PixelColor * pixels,
          Rectangle render_region,
          Rectangle box,
@@ -317,9 +330,7 @@ draw_box(PixelColor * pixels,
   Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
   fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
 
-  Rectangle pixel_space;
-  pixel_space.start = (V2){(int32_t)fract_pixel_space.start.x, (int32_t)fract_pixel_space.start.y};
-  pixel_space.end   = (V2){(int32_t)fract_pixel_space.end.x,   (int32_t)fract_pixel_space.end.y};
+  Rectangle pixel_space = round_down(fract_pixel_space);
 
   for (uint32_t pixel_y = pixel_space.start.y;
        pixel_y <= pixel_space.end.y;
@@ -329,32 +340,26 @@ draw_box(PixelColor * pixels,
          pixel_x <= pixel_space.end.x;
          pixel_x++)
     {
-      float alpha = color.a / 255.0f;
+      V4 this_color = color;
 
       if (pixel_x == pixel_space.start.x)
       {
-        alpha *= (pixel_space.start.x + 1) - fract_pixel_space.start.x;
+        this_color.a *= (pixel_space.start.x + 1) - fract_pixel_space.start.x;
       }
       if (pixel_x == pixel_space.end.x)
       {
-        alpha *= fract_pixel_space.end.x - pixel_space.end.x;
+        this_color.a *= fract_pixel_space.end.x - pixel_space.end.x;
       }
       if (pixel_y == pixel_space.start.y)
       {
-        alpha *= (pixel_space.start.y + 1) - fract_pixel_space.start.y;
+        this_color.a *= (pixel_space.start.y + 1) - fract_pixel_space.start.y;
       }
       if (pixel_y == pixel_space.end.y)
       {
-        alpha *= fract_pixel_space.end.y - pixel_space.end.y;
+        this_color.a *= fract_pixel_space.end.y - pixel_space.end.y;
       }
 
-      uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
-
-      V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
-      V3 new_color = remove_alpha(color);
-
-      PixelColor alpha_blended = to_color((alpha * new_color) + ((1.0f - alpha) * prev_color));
-      pixels[pixel_pos] = alpha_blended;
+      set_pixel(pixels, pixel_x, pixel_y, this_color);
     }
   }
 }
@@ -401,37 +406,37 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
       V4 color = (V4){};
       switch (cell->type)
       {
-        case CELL_NULL:     color = (V4){0xFF, 0x00, 0x00, 0x00};
+        case CELL_NULL:     color = (V4){1, 0x00, 0x00, 0x00};
           break;
-        case CELL_START:    color = (V4){0xFF, 0x33, 0xAA, 0x55};
+        case CELL_START:    color = (V4){1, 0x33, 0xAA, 0x55};
           break;
-        case CELL_PATH:     color = (V4){0xFF, 0x55, 0x88, 0x22};
+        case CELL_PATH:     color = (V4){1, 0x55, 0x88, 0x22};
           break;
-        case CELL_WALL:     color = (V4){0xFF, 0x33, 0x33, 0x33};
+        case CELL_WALL:     color = (V4){1, 0x33, 0x33, 0x33};
           break;
-        case CELL_HOLE:     color = (V4){0xFF, 0xBB, 0x66, 0x44};
+        case CELL_HOLE:     color = (V4){1, 0xBB, 0x66, 0x44};
           break;
-        case CELL_SPLITTER: color = (V4){0xFF, 0x22, 0x44, 0x99};
+        case CELL_SPLITTER: color = (V4){1, 0x22, 0x44, 0x99};
           break;
-        case CELL_FUNCTION: color = (V4){0xFF, 0x66, 0x77, 0x88};
+        case CELL_FUNCTION: color = (V4){1, 0x66, 0x77, 0x88};
           break;
-        case CELL_ONCE:     color = (V4){0xFF, 0x88, 0x77, 0x66};
+        case CELL_ONCE:     color = (V4){1, 0x88, 0x77, 0x66};
           break;
-        case CELL_SIGNAL:   color = (V4){0xFF, 0x99, 0x99, 0x22};
+        case CELL_SIGNAL:   color = (V4){1, 0x99, 0x99, 0x22};
           break;
-        case CELL_INC:      color = (V4){0xFF, 0x33, 0x99, 0x22};
+        case CELL_INC:      color = (V4){1, 0x33, 0x99, 0x22};
           break;
-        case CELL_DEC:      color = (V4){0xFF, 0x99, 0x33, 0x22};
+        case CELL_DEC:      color = (V4){1, 0x99, 0x33, 0x22};
           break;
-        case CELL_UP:       color = (V4){0xFF, 0x22, 0x00, 0x00};
+        case CELL_UP:       color = (V4){1, 0x22, 0x00, 0x00};
           break;
-        case CELL_DOWN:     color = (V4){0xFF, 0x00, 0x22, 0x00};
+        case CELL_DOWN:     color = (V4){1, 0x00, 0x22, 0x00};
           break;
-        case CELL_LEFT:     color = (V4){0xFF, 0x00, 0x00, 0x22};
+        case CELL_LEFT:     color = (V4){1, 0x00, 0x00, 0x22};
           break;
-        case CELL_RIGHT:    color = (V4){0xFF, 0x00, 0x22, 0x22};
+        case CELL_RIGHT:    color = (V4){1, 0x00, 0x22, 0x22};
           break;
-        case CELL_PAUSE:    color = (V4){0xFF, 0x88, 0x88, 0x11};
+        case CELL_PAUSE:    color = (V4){1, 0x88, 0x88, 0x11};
           break;
       }
 
