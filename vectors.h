@@ -7,7 +7,6 @@ union V2
   };
 };
 
-
 V2
 operator*(float c, V2 vec)
 {
@@ -28,7 +27,6 @@ operator*=(V2 & vec, float c)
   vec = c * vec;
   return vec;
 }
-
 
 V2
 operator/(float c, V2 vec)
@@ -52,7 +50,6 @@ operator/=(V2 & vec, float c)
   vec = vec / c;
   return vec;
 }
-
 
 V2
 operator+(float c, V2 vec)
@@ -89,7 +86,6 @@ operator+=(V2 & a, V2 b)
   a = a + b;
   return a;
 }
-
 
 V2
 operator-(V2 vec)
@@ -138,7 +134,6 @@ operator-=(V2 & a, V2 b)
   return a;
 }
 
-
 V2
 min_V2(V2 a, V2 b)
 {
@@ -156,7 +151,6 @@ max_V2(V2 a, V2 b)
   result.y = fmax(a.y, b.y);
   return result;
 }
-
 
 V2
 round_down(V2 vec)
@@ -181,7 +175,6 @@ struct Rectangle
   V2 end;
 };
 
-
 Rectangle
 operator*(float c, Rectangle rect)
 {
@@ -202,7 +195,6 @@ operator*=(Rectangle & rect, float c)
   rect = c * rect;
   return rect;
 }
-
 
 Rectangle
 operator/(float c, Rectangle rect)
@@ -226,7 +218,6 @@ operator/=(Rectangle & rect, float c)
   rect = rect / c;
   return rect;
 }
-
 
 Rectangle
 operator+(float c, Rectangle rect)
@@ -263,7 +254,6 @@ operator+=(Rectangle & a, Rectangle b)
   a = a + b;
   return a;
 }
-
 
 Rectangle
 operator-(Rectangle rect)
@@ -312,7 +302,6 @@ operator-=(Rectangle & a, Rectangle b)
   return a;
 }
 
-
 Rectangle
 rectangle(V2 start, V2 size)
 {
@@ -322,16 +311,14 @@ rectangle(V2 start, V2 size)
   return result;
 }
 
-
 Rectangle
-round_down(Rectangle vec)
+round_down(Rectangle rect)
 {
   Rectangle result;
-  result.start = round_down(vec.start);
-  result.end = round_down(vec.end);
+  result.start = round_down(rect.start);
+  result.end = round_down(rect.end);
   return result;
 }
-
 
 bool
 in_rectangle(V2 test, Rectangle rect)
@@ -369,7 +356,6 @@ union V3
   };
 };
 
-
 V3
 operator*(float c, V3 vec)
 {
@@ -391,7 +377,6 @@ operator*=(V3 & vec, float c)
   vec = c * vec;
   return vec;
 }
-
 
 V3
 operator/(float c, V3 vec)
@@ -417,7 +402,6 @@ operator/=(V3 & vec, float c)
   vec = vec / c;
   return vec;
 }
-
 
 V3
 operator+(float c, V3 vec)
@@ -456,7 +440,6 @@ operator+=(V3 & a, V3 b)
   a = a + b;
   return a;
 }
-
 
 V3
 operator-(V3 vec)
@@ -509,7 +492,6 @@ operator-=(V3 & a, V3 b)
   return a;
 }
 
-
 V3
 min_V3(V3 a, V3 b)
 {
@@ -529,7 +511,6 @@ max_V3(V3 a, V3 b)
   result.z = fmax(a.z, b.z);
   return result;
 }
-
 
 V3
 round_down(V3 vec)
@@ -560,7 +541,6 @@ union V4
   };
 };
 
-
 V4
 operator*(float c, V4 vec)
 {
@@ -583,7 +563,6 @@ operator*=(V4 & vec, float c)
   vec = c * vec;
   return vec;
 }
-
 
 V4
 operator/(float c, V4 vec)
@@ -611,7 +590,6 @@ operator/=(V4 & vec, float c)
   vec = vec / c;
   return vec;
 }
-
 
 V4
 operator+(float c, V4 vec)
@@ -652,7 +630,6 @@ operator+=(V4 & a, V4 b)
   a = a + b;
   return a;
 }
-
 
 V4
 operator-(V4 vec)
@@ -709,7 +686,6 @@ operator-=(V4 & a, V4 b)
   return a;
 }
 
-
 V4
 min_V4(V4 a, V4 b)
 {
@@ -731,7 +707,6 @@ max_V4(V4 a, V4 b)
   result.z = fmax(a.z, b.z);
   return result;
 }
-
 
 V4
 round_down(V4 vec)
