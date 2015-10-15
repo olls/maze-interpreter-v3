@@ -167,6 +167,13 @@ round_down(V2 vec)
   return result;
 }
 
+float
+length_sq(V2 vec)
+{
+  float result = (vec.x * vec.x) + (vec.y * vec.y);
+  return result;
+}
+
 
 struct Rectangle
 {

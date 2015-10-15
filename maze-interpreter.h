@@ -32,6 +32,7 @@
 #include <math.h>
 
 #include "vectors.h"
+#include "maths.h"
 #include "blocks.h"
 
 

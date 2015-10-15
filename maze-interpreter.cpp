@@ -319,6 +319,56 @@ set_pixel(PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
 
 
 void
+draw_circle(PixelColor * pixels,
+            Rectangle render_region,
+            V2 world_pos,
+            float world_radius,
+            V4 color)
+{
+  // Into fractional pixel space
+  V2 fract_pixel_pos = world_pos * WORLD_COORDS_TO_PIXELS;
+  float fract_pixel_radius = world_radius * WORLD_COORDS_TO_PIXELS;
+
+  float fract_pixel_radius_sq = squared(fract_pixel_radius);
+  float fract_pixel_radius_minus_one_sq = squared(fract_pixel_radius - 1);
+
+  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
+
+  Rectangle fract_pixels_circle_region = {fract_pixel_pos - fract_pixel_radius,
+                                          fract_pixel_pos + fract_pixel_radius};
+  fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region_pixels);
+
+  Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);
+
+  for (uint32_t pixel_y = pixels_circle_region.start.y;
+       pixel_y <= pixels_circle_region.end.y;
+       pixel_y++)
+  {
+    for (uint32_t pixel_x = pixels_circle_region.start.x;
+         pixel_x <= pixels_circle_region.end.x;
+         pixel_x++)
+    {
+      V2 d_center = (V2){pixel_x, pixel_y} - fract_pixel_pos;
+      float dist_sq = length_sq(d_center);
+
+      if (dist_sq < fract_pixel_radius_sq)
+      {
+        V4 this_color = color;
+
+        if (dist_sq > fract_pixel_radius_minus_one_sq)
+        {
+          float diff = fract_pixel_radius - sqrt(dist_sq);
+          this_color.a *= diff;
+        }
+
+        set_pixel(pixels, pixel_x, pixel_y, this_color);
+      }
+    }
+  }
+}
+
+
+void
 draw_box(PixelColor * pixels,
          Rectangle render_region,
          Rectangle box,
@@ -368,7 +418,7 @@ draw_box(PixelColor * pixels,
 void
 render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * cars)
 {
-  uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN - CAR_SIZE) / 2;
+  uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN) / 2;
 
   // TODO: Loop through only relevent cars?
   for (uint32_t car_index = 0;
@@ -378,9 +428,8 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
     Car * car = cars->cars + car_index;
 
     V2 pos = car->pos + car_center_offset;
-    Rectangle car_box = rectangle(pos, (V2){CAR_SIZE, CAR_SIZE});
 
-    draw_box(pixels, render_region, car_box, (V4){0xFF, 0x99, 0x22, 0x77});
+    draw_circle(pixels, render_region, pos, (CAR_SIZE / 2), (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
