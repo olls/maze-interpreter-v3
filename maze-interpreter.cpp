@@ -19,20 +19,6 @@ get_us()
 }
 
 
-void
-init_car_mem(Cars * cars)
-{
-  Car * car = cars->cars;
-  for (uint32_t car_index = 0;
-       car_index < MAX_CARS;
-       ++car_index, ++car)
-  {
-    car->value = 0;
-  }
-  cars->next_free = 0;
-}
-
-
 Car *
 add_car(Cars * cars, V2 pos, Direction direction = UP)
 {
@@ -442,7 +428,6 @@ main(int32_t argc, char * argv[])
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
-  init_car_mem(cars);
 
   // TODO: When the cells are stored spatially properly, use this for looping through the cells:
   // // Add start cars
