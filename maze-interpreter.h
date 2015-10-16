@@ -1,3 +1,18 @@
+#define DEBUG
+
+#ifdef DEBUG
+#define S(x) #x
+#define S_(x) S(x)
+#define S__LINE__ S_(__LINE__)
+#define assert(x) ((void)(!(x) && printf("Assertion Failed: "__FILE__":"S__LINE__":  ("#x")\n") && (exit(1), 1)))
+#else
+#define assert(x) ((void)sizeof(x))
+#define printf(x, ...) ((void)sizeof(x))
+#endif
+
+#define invalid_code_path assert(!"Invalid Code Path! D:")
+
+
 #define kilobytes_to_bytes(n) (1024 * n)
 #define megabytes_to_bytes(n) (kilobytes_to_bytes(1024) * n)
 #define gigabytes_to_bytes(n) (megabytes_to_bytes(1024) * n)
@@ -14,26 +29,32 @@
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
-#define DEBUG
-
-#ifdef DEBUG
-#define S(x) #x
-#define S_(x) S(x)
-#define S__LINE__ S_(__LINE__)
-#define assert(x) ((void)(!(x) && printf("Assertion Failed: "__FILE__":"S__LINE__":  ("#x")\n") && (exit(1), 1)))
-#else
-#define assert(x) ((void)sizeof(x))
-#define printf(x, ...) ((void)sizeof(x))
-#endif
-
-#define invalid_code_path assert(!"Invalid Code Path! D:")
-
 
 #include <math.h>
 
 #include "vectors.h"
 #include "maths.h"
 #include "blocks.h"
+
+
+const uint32_t FPS = 30;
+const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
+
+const uint32_t WINDOW_WIDTH = 1024;
+const uint32_t WINDOW_HEIGHT = 600;
+
+// NOTE: 256 sub-pixel steps!
+const uint32_t PIXELS_TO_WORLD_COORDS = 256;
+const float WORLD_COORDS_TO_PIXELS = 1.0f / (float)PIXELS_TO_WORLD_COORDS;
+
+const uint32_t CELL_SPACING = 10000;
+const uint32_t CELL_MARGIN = 1000;
+
+const uint32_t CAR_SIZE = 6000;
+
+const char MAZE_FILENAME[] = "test.mz";
+// const char MAZE_FILENAME[] = "programs/test-big.mz";
+// const char MAZE_FILENAME[] = "programs/test-huge.mz";
 
 
 struct GameMemory
