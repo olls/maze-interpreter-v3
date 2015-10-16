@@ -20,8 +20,6 @@ enum CellType
 
 struct Cell
 {
-  // TODO: It's a shame these are stored here, maybe store the cells
-  //       within a quad-tree block in a grid?
   uint32_t x;
   uint32_t y;
   enum CellType type;
