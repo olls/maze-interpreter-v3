@@ -60,18 +60,13 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 
     if (car->update)
     {
-
       // TODO: Animation
-      // float delta_move_per_s = CELL_SPACING;
-      // float delta_move_per_us = delta_move_per_s / seconds_in_u(1);
-      // float delta_move_per_frame = delta_move_per_us * df;
-      // car->x += delta_move_per_frame;
 
       V2 cell_pos = round_down(car->pos / CELL_SPACING);
 
       Cell * current_cell = get_cell(game_memory, maze, cell_pos);
+      // TODO: Deal with race cars (conditions) ??
 
-      // TODO: Deal with race cars (conditions)
 
       switch (current_cell->type)
       {
@@ -170,27 +165,18 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
     }
     else
     {
+      // NOTE: Doesn't update cars which have been added this tick.
       car->update = true;
     }
   }
 
-  // // TODO: Stop looping through them so many times!
-
-  // car = cars->cars;
-  // for (uint32_t car_index = 0;
-  //      car_index < cars->next_free;
-  //      ++car_index, ++car)
-  // {
-  //   car->update = true;
-  // }
+  // TODO: Stop looping through them so many times!
 
   car = cars->cars;
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
        ++car_index, ++car)
   {
-
-    // Car movements
     if (car->direction == STATIONARY)
     {
       // They're stuck this way, FOREVER!
@@ -282,9 +268,11 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 void
 render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * cars)
 {
+  // NOTE: Car is positioned from the bottom left
   uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN) / 2;
 
-  // TODO: Loop through only relevent cars?
+  // TODO: Loop through only relevant cars?
+  //       i.e.: spacial partitioning the storage.
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
        ++car_index)
@@ -375,6 +363,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
         }
       }
 
+      // TODO: Should the cells be centred on their coords?
       Rectangle cell_box = rectangle(world_pos, (V2){cell_size, cell_size});
       draw_box(pixels, render_region, cell_box, color);
     }
@@ -449,6 +438,7 @@ main(int32_t argc, char * argv[])
   //   block = block->next;
   // }
 
+  // TODO: This is pretty dumb.
   for (uint32_t cell_y = 0;
        cell_y < maze->height;
        ++cell_y)
