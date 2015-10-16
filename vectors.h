@@ -7,6 +7,19 @@ union V2
   };
 };
 
+bool
+operator==(V2 a, V2 b)
+{
+  bool result = ((a.x == b.x) &&
+                 (a.y == b.y));
+  return result;
+}
+bool
+operator!=(V2 a, V2 b)
+{
+  bool result = !(a == b);
+  return result;
+}
 V2
 operator*(float c, V2 vec)
 {
@@ -175,6 +188,19 @@ struct Rectangle
   V2 end;
 };
 
+bool
+operator==(Rectangle a, Rectangle b)
+{
+  bool result = ((a.start == b.start) &&
+                 (a.end == b.end));
+  return result;
+}
+bool
+operator!=(Rectangle a, Rectangle b)
+{
+  bool result = !(a == b);
+  return result;
+}
 Rectangle
 operator*(float c, Rectangle rect)
 {
@@ -339,6 +365,53 @@ crop_to(Rectangle a, Rectangle bound)
   return result;
 }
 
+V2
+get_center(Rectangle rect)
+{
+  V2 result = rect.start + ((rect.end - rect.start) / 2);
+  return result;
+}
+
+Rectangle
+get_top_left(Rectangle rect)
+{
+  Rectangle result;
+  V2 center = get_center(rect);
+  result.start = (V2){rect.start.x, center.y};
+  result.end   = (V2){center.x, rect.end.y};
+  return result;
+}
+
+Rectangle
+get_top_right(Rectangle rect)
+{
+  Rectangle result;
+  V2 center = get_center(rect);
+  result.start = center;
+  result.end   = rect.end;
+  return result;
+}
+
+Rectangle
+get_bottom_right(Rectangle rect)
+{
+  Rectangle result;
+  V2 center = get_center(rect);
+  result.start = (V2){center.x, rect.start.y};
+  result.end   = (V2){rect.end.x, center.y};
+  return result;
+}
+
+Rectangle
+get_bottom_left(Rectangle rect)
+{
+  Rectangle result;
+  V2 center = get_center(rect);
+  result.start = rect.start;
+  result.end   = center;
+  return result;
+}
+
 
 union V3
 {
@@ -356,6 +429,20 @@ union V3
   };
 };
 
+bool
+operator==(V3 a, V3 b)
+{
+  bool result = ((a.x == b.x) &&
+                 (a.y == b.y) &&
+                 (a.z == b.z));
+  return result;
+}
+bool
+operator!=(V3 a, V3 b)
+{
+  bool result = !(a == b);
+  return result;
+}
 V3
 operator*(float c, V3 vec)
 {
@@ -541,6 +628,21 @@ union V4
   };
 };
 
+bool
+operator==(V4 a, V4 b)
+{
+  bool result = ((a.w == b.w) &&
+                 (a.x == b.x) &&
+                 (a.y == b.y) &&
+                 (a.z == b.z));
+  return result;
+}
+bool
+operator!=(V4 a, V4 b)
+{
+  bool result = !(a == b);
+  return result;
+}
 V4
 operator*(float c, V4 vec)
 {
