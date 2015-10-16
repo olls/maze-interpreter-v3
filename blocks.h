@@ -20,19 +20,26 @@ enum CellType
 
 struct Cell
 {
+  // TODO: It's a shame these are stored here, maybe store the cells
+  //       within a quad-tree block in a grid?
+  uint32_t x;
+  uint32_t y;
   enum CellType type;
   int32_t data;
 };
 
-const uint32_t BLOCK_NUM = 512;
-const uint32_t BLOCK_SIDE_LENGTH = 64;
-struct MazeBlock
+const uint32_t QUAD_STORE_N = 16;
+struct QuadTree
 {
-  bool used;
-  uint32_t x;
-  uint32_t y;
-  Cell cells[BLOCK_SIDE_LENGTH * BLOCK_SIDE_LENGTH];
-  MazeBlock * next;
+  Rectangle bounds;
+
+  uint32_t used;
+  Cell cells[QUAD_STORE_N];
+
+  QuadTree * top_right;
+  QuadTree * top_left;
+  QuadTree * bottom_right;
+  QuadTree * bottom_left;
 };
 
 struct Maze
@@ -40,9 +47,9 @@ struct Maze
   uint32_t width;
   uint32_t height;
 
-  MazeBlock hash[BLOCK_NUM];
+  QuadTree tree;
 
 #ifdef DEBUG
-  uint32_t collisions;
+  uint32_t subdivisions;
 #endif
 };

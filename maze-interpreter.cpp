@@ -20,7 +20,7 @@ get_us()
 
 
 Car *
-add_car(Cars * cars, V2 pos, Direction direction = UP)
+add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
 {
   assert(cars->next_free != MAX_CARS);
 
@@ -28,7 +28,8 @@ add_car(Cars * cars, V2 pos, Direction direction = UP)
   ++cars->next_free;
 
   car->update = false;
-  car->pos = pos;
+  car->cell_x = cell_x;
+  car->cell_y = cell_y;
   car->direction = direction;
 
   return car;
@@ -61,12 +62,9 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
     if (car->update)
     {
       // TODO: Animation
-
-      V2 cell_pos = round_down(car->pos / CELL_SPACING);
-
-      Cell * current_cell = get_cell(game_memory, maze, cell_pos);
       // TODO: Deal with race cars (conditions) ??
 
+      Cell * current_cell = get_cell(game_memory, maze, car->cell_x, car->cell_y);
 
       switch (current_cell->type)
       {
@@ -100,7 +98,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
         case (CELL_SPLITTER):
         {
           printf("Splitter\n");
-          add_car(cars, car->pos, RIGHT);
+          add_car(cars, car->cell_x, car->cell_y, RIGHT);
           car->direction = LEFT;
         } break;
 
@@ -183,8 +181,6 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
     }
     else
     {
-      V2 cell_pos = round_down(car->pos / CELL_SPACING);
-
       Direction directions[4];
       directions[0] = car->direction;
       directions[3] = reverse(car->direction);
@@ -202,10 +198,10 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       }
 
       bool walls[4];
-      walls[UP]    = get_cell(game_memory, maze, (V2){cell_pos.x, (cell_pos.y + 1)})->type == CELL_WALL;
-      walls[DOWN]  = get_cell(game_memory, maze, (V2){cell_pos.x, (cell_pos.y - 1)})->type == CELL_WALL;
-      walls[LEFT]  = get_cell(game_memory, maze, (V2){(cell_pos.x - 1), cell_pos.y})->type == CELL_WALL;
-      walls[RIGHT] = get_cell(game_memory, maze, (V2){(cell_pos.x + 1), cell_pos.y})->type == CELL_WALL;
+      walls[UP]    = get_cell(game_memory, maze, car->cell_x, (car->cell_y + 1))->type == CELL_WALL;
+      walls[DOWN]  = get_cell(game_memory, maze, car->cell_x, (car->cell_y - 1))->type == CELL_WALL;
+      walls[LEFT]  = get_cell(game_memory, maze, (car->cell_x - 1), car->cell_y)->type == CELL_WALL;
+      walls[RIGHT] = get_cell(game_memory, maze, (car->cell_x + 1), car->cell_y)->type == CELL_WALL;
 
       Direction test_direction;
       bool can_move = false;
@@ -228,22 +224,22 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
         {
           case UP:
           {
-            car->pos.y += CELL_SPACING;
+            ++car->cell_y;
           } break;
 
           case DOWN:
           {
-            car->pos.y -= CELL_SPACING;
+            --car->cell_y;
           } break;
 
           case LEFT:
           {
-            car->pos.x -= CELL_SPACING;
+            --car->cell_x;
           } break;
 
           case RIGHT:
           {
-            car->pos.x += CELL_SPACING;
+            ++car->cell_x;
           } break;
 
           case STATIONARY:
@@ -261,7 +257,12 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
 }
 
 
+V2
+cell_coord_to_world(uint32_t cell_x, uint32_t cell_y)
 {
+  // TODO: Is there any point in world space any more???
+  V2 result = ((V2){cell_x, cell_y} * CELL_SPACING);
+  return result;
 }
 
 
@@ -279,7 +280,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
   {
     Car * car = cars->cars + car_index;
 
-    V2 pos = car->pos + car_center_offset;
+    V2 pos = cell_coord_to_world(car->cell_x, car->cell_y) + car_center_offset;
 
     draw_circle(pixels, render_region, pos, (CAR_SIZE / 2), (V4){1, 0x99, 0x22, 0x77});
   }
@@ -302,7 +303,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
          cell_x < cells_end.x;
          cell_x++)
     {
-      Cell * cell = get_cell(game_memory, maze, (V2){cell_x, cell_y});
+      Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
 
       V4 color = (V4){};
       switch (cell->type)
@@ -341,8 +342,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
           break;
       }
 
-      // Into world space
-      V2 world_pos = (V2){cell_x, cell_y} * CELL_SPACING;
+      V2 world_pos = cell_coord_to_world(cell_x, cell_y);
 
       if ((mouse.x >= world_pos.x) &&
           (mouse.x < world_pos.x + cell_size) &&
@@ -364,8 +364,8 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
       }
 
       // TODO: Should the cells be centred on their coords?
-      Rectangle cell_box = rectangle(world_pos, (V2){cell_size, cell_size});
-      draw_box(pixels, render_region, cell_box, color);
+      Rectangle cell_bounds = rectangle(world_pos, (V2){cell_size, cell_size});
+      draw_box(pixels, render_region, cell_bounds, color);
     }
   }
 }
@@ -412,8 +412,7 @@ main(int32_t argc, char * argv[])
   PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (WINDOW_WIDTH * WINDOW_HEIGHT));
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
-
-  printf("Collisions: %d\n", maze->collisions);
+  printf("Subdivisions: %d\n", maze->subdivisions);
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
@@ -447,11 +446,10 @@ main(int32_t argc, char * argv[])
          cell_x < maze->width;
          ++cell_x)
     {
-      Cell * cell = get_cell(&game_memory, maze, (V2){cell_x, cell_y});
+      Cell * cell = get_cell(&game_memory, maze, cell_x, cell_y);
       if (cell->type == CELL_START)
       {
-        V2 pos = (V2){cell_x, cell_y} * CELL_SPACING;
-        add_car(cars, pos);
+        add_car(cars, cell_x, cell_y);
       }
     }
   }

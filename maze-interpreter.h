@@ -30,6 +30,7 @@
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
 
+#include <float.h>
 #include <math.h>
 
 #include "vectors.h"
@@ -172,10 +173,11 @@ struct Car
   bool update;
   int32_t value;
 
-  // TODO: These are in world space, might need more range?
-  //       1 byte per pixel + 1 byte per cell leaves 2 bytes (65536) for cell
-  //       grid range.
-  V2 pos;
+  uint32_t cell_x;
+  uint32_t cell_y;
+
+  // NOTE: Not currently used; to be used for sub-cell positioning.
+  V2 offset;
 
   Direction direction;
 };

@@ -1,57 +1,80 @@
-MazeBlock *
-get_block(GameMemory * game_memory, Maze * maze, V2 block_pos)
+Cell *
+get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 {
-  uint32_t block_x = (uint32_t)block_pos.x;
-  uint32_t block_y = (uint32_t)block_pos.y;
-
-  // TODO: Better hash function
-  // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x * 3) + (block_y * 7));
-  // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x << 3) + (block_y << 7));
-  // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x >> 3) + (block_y >> 7));
-  uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x * 0x1f1f1f1f) ^ block_y);
-  // uint32_t hash_value = (BLOCK_NUM - 1) & ((block_x * 7) + ((block_y * 31) + 1));
-
-  MazeBlock * block = maze->hash + hash_value;
-
-  if (block->used)
+  Cell * cell = 0;
+  for (uint32_t cell_index = 0;
+       cell_index < tree->used;
+       ++cell_index)
   {
-    // Collision, get next or new block
-    while (!(block->x == block_x && block->y == block_y))
+    Cell * test_cell = tree->cells + cell_index;
+    if ((test_cell->x == x) &&
+        (test_cell->y == y))
     {
-      if (block->next)
-      {
-        block = block->next;
-      }
-      else
-      {
-#ifdef DEBUG
-        ++maze->collisions;
-#endif
-        MazeBlock * new_block = take_struct_mem(game_memory, MazeBlock, 1);
-        block->next = new_block;
-        block = new_block;
-
-        break;
-      }
+      cell = test_cell;
+      break;
     }
   }
-
-  block->used = true;
-  block->x = block_x;
-  block->y = block_y;
-
-  return block;
+  if (!cell && tree->used != QUAD_STORE_N)
+  {
+    cell = tree->cells + tree->used++;
+    cell->x = x;
+    cell->y = y;
+  }
+  return cell;
 }
 
 
 Cell *
-get_cell(GameMemory * game_memory, Maze * maze, V2 cell_pos)
+get_cell(GameMemory * game_memory, Maze * maze, uint32_t x, uint32_t y)
 {
-  V2 block_pos = round_down(cell_pos / BLOCK_SIDE_LENGTH);
-  V2 cell_pos_in_block = cell_pos - (block_pos * BLOCK_SIDE_LENGTH);
+  QuadTree * tree = &maze->tree;
 
-  MazeBlock * block = get_block(game_memory, maze, block_pos);
-  Cell * cell = block->cells + (uint32_t)(cell_pos_in_block.x + (cell_pos_in_block.y * BLOCK_SIDE_LENGTH));
+  Cell * cell;
+  while (!(cell = get_cell(tree, x, y)))
+  {
+    if (!tree->top_right)
+    {
+      QuadTree * trees = take_struct_mem(game_memory, QuadTree, 4);
+      tree->top_right    = trees++;
+      tree->top_left     = trees++;
+      tree->bottom_right = trees++;
+      tree->bottom_left  = trees;
 
+      tree->top_right->bounds    = get_top_right(tree->bounds);
+      tree->top_left->bounds     = get_top_left(tree->bounds);
+      tree->bottom_right->bounds = get_bottom_right(tree->bounds);
+      tree->bottom_left->bounds  = get_bottom_left(tree->bounds);
+
+
+#ifdef DEBUG
+      ++maze->subdivisions;
+#endif
+
+    }
+
+    if (in_rectangle((V2){x, y}, tree->top_right->bounds))
+    {
+      tree = tree->top_right;
+      continue;
+    }
+    if (in_rectangle((V2){x, y}, tree->top_left->bounds))
+    {
+      tree = tree->top_left;
+      continue;
+    }
+    if (in_rectangle((V2){x, y}, tree->bottom_right->bounds))
+    {
+      tree = tree->bottom_right;
+      continue;
+    }
+    if (in_rectangle((V2){x, y}, tree->bottom_left->bounds))
+    {
+      tree = tree->bottom_left;
+      continue;
+    }
+
+    // If it gets here: it is in old-tree but not any of it's subdivisions
+    invalid_code_path;
+  }
   return cell;
 }

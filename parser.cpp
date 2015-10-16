@@ -24,6 +24,9 @@ parse(GameMemory * game_memory, const char * filename)
   assert(file != NULL);
 
   Maze * maze = take_struct_mem(game_memory, Maze, 1);
+  // maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){50, 50}};
+  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){FLT_MAX, FLT_MAX}};
+  maze->tree.used = 0;
   maze->width = 0;
   maze->height = 0;
 
@@ -39,7 +42,7 @@ parse(GameMemory * game_memory, const char * filename)
     uint32_t bytes_read = 0;
     while (sscanf((buffer + offset), "%2s %n", potential_cell, &bytes_read) != EOF)
     {
-      Cell new_cell;
+      Cell new_cell = {};
       new_cell.type = CELL_NULL;
 
       if ((potential_cell[0] == '^') &&
@@ -123,8 +126,11 @@ parse(GameMemory * game_memory, const char * filename)
       }
       else
       {
-        Cell * cell = get_cell(game_memory, maze, (V2){x, y});
-        *cell = new_cell;
+        Cell * cell = get_cell(game_memory, maze, x, y);
+
+        // NOTE: Doing them individually to avoid overwriting the x, y set in get_cell.
+        cell->type = new_cell.type;
+        cell->data = new_cell.data;
 
         offset += bytes_read;
         ++x;
