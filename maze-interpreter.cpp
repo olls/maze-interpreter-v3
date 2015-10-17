@@ -417,7 +417,8 @@ main(int32_t argc, char * argv[])
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
 
-  // TODO: When the cells are stored spatially properly, use this for looping through the cells:
+  // TODO: When the cells are stored spatially properly, use this for
+  //       looping through the cells:
   // // Add start cars
   // MazeBlock * block = maze->start;
   // for (uint32_t block_index = 0;

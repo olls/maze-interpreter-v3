@@ -45,6 +45,8 @@ const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
 // NOTE: 256 sub-pixel steps!
+// TODO: Should world coords be floats now we are using uint32s for
+//       the cell position?
 const uint32_t PIXELS_TO_WORLD_COORDS = 256;
 const float WORLD_COORDS_TO_PIXELS = 1.0f / (float)PIXELS_TO_WORLD_COORDS;
 

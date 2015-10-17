@@ -45,7 +45,6 @@ get_cell(GameMemory * game_memory, Maze * maze, uint32_t x, uint32_t y)
       tree->bottom_right->bounds = get_bottom_right(tree->bounds);
       tree->bottom_left->bounds  = get_bottom_left(tree->bounds);
 
-
 #ifdef DEBUG
       ++maze->subdivisions;
 #endif
@@ -73,7 +72,8 @@ get_cell(GameMemory * game_memory, Maze * maze, uint32_t x, uint32_t y)
       continue;
     }
 
-    // If it gets here: it is in old-tree but not any of it's subdivisions
+    // NOTE: If it gets here: it is in old-tree but not any of it's
+    //       subdivisions
     invalid_code_path;
   }
   return cell;
