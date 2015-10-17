@@ -26,19 +26,21 @@ draw_circle(PixelColor * pixels,
   float radius_minus_one_sq = squared(radius - 1);
 
   Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
+  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
 
   Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
                                           fract_pixel_pos + radius};
   fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region_pixels);
+  fract_pixels_circle_region = crop_to(fract_pixels_circle_region, window_region_pixels);
 
   Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);
 
   for (uint32_t pixel_y = pixels_circle_region.start.y;
-       pixel_y <= pixels_circle_region.end.y;
+       pixel_y < pixels_circle_region.end.y;
        pixel_y++)
   {
     for (uint32_t pixel_x = pixels_circle_region.start.x;
-         pixel_x <= pixels_circle_region.end.x;
+         pixel_x < pixels_circle_region.end.x;
          pixel_x++)
     {
       V2 d_center = (V2){pixel_x, pixel_y} - fract_pixel_pos;
@@ -71,16 +73,18 @@ draw_box(PixelColor * pixels,
   Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
 
   Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
+  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
   fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
+  fract_pixel_space = crop_to(fract_pixel_space, window_region_pixels);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
 
   for (uint32_t pixel_y = pixel_space.start.y;
-       pixel_y <= pixel_space.end.y;
+       pixel_y < pixel_space.end.y;
        pixel_y++)
   {
     for (uint32_t pixel_x = pixel_space.start.x;
-         pixel_x <= pixel_space.end.x;
+         pixel_x < pixel_space.end.x;
          pixel_x++)
     {
       V4 this_color = color;
