@@ -285,23 +285,18 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
 
 
 void
-render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
+render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
-  uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
-
-  // TODO: Don't do this loop?
-  V2 cells_start = max_V2(round_down(render_region.start / CELL_SPACING), (V2){0, 0});
-  V2 cells_end = min_V2((round_down(render_region.end / CELL_SPACING) + 1), (V2){maze->width, maze->height});
-
-  for (uint32_t cell_y = cells_start.y;
-       cell_y < cells_end.y;
-       cell_y++)
+  if (tree)
   {
-    for (uint32_t cell_x = cells_start.x;
-         cell_x < cells_end.x;
-         cell_x++)
+    // TODO: Leave if sub-tree isn't in render_region
+    uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
+
+    for (uint32_t cell_index = 0;
+         cell_index < tree->used;
+         ++cell_index)
     {
-      Cell * cell = get_cell(maze, cell_x, cell_y);
+      Cell * cell = tree->cells + cell_index;
 
       V4 color = (V4){};
       switch (cell->type)
@@ -341,7 +336,7 @@ render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mou
       }
 
       // NOTE: Tile centered on coord
-      V2 world_pos = cell_coord_to_world(cell_x, cell_y);
+      V2 world_pos = cell_coord_to_world(cell->x, cell->y);
       V2 world_screen_pos = world_pos + screen_offset;
       Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
 
@@ -363,7 +358,19 @@ render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mou
 
       draw_box(pixels, render_region, cell_bounds, color);
     }
+
+    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_right);
+    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_left);
+    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->bottom_right);
+    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->bottom_left);
   }
+}
+
+
+void
+render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
+{
+  render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, &(maze->tree));
 }
 
 

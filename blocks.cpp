@@ -27,7 +27,7 @@ get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 Cell *
 get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
 {
-  QuadTree * tree = &maze->tree;
+  QuadTree * tree = &(maze->tree);
 
   Cell * cell;
   while (!(cell = get_cell(tree, x, y)))
