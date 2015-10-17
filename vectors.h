@@ -338,6 +338,15 @@ rectangle(V2 start, V2 size)
 }
 
 Rectangle
+rectangle(V2 center, float radius)
+{
+  Rectangle result;
+  result.start = center - radius;
+  result.end = center + radius;
+  return result;
+}
+
+Rectangle
 round_down(Rectangle rect)
 {
   Rectangle result;

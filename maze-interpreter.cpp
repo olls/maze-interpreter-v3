@@ -267,11 +267,8 @@ cell_coord_to_world(uint32_t cell_x, uint32_t cell_y)
 
 
 void
-render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * cars)
+render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
 {
-  // NOTE: Car is positioned from the bottom left
-  uint32_t car_center_offset = (CELL_SPACING - CELL_MARGIN) / 2;
-
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   for (uint32_t car_index = 0;
@@ -279,19 +276,19 @@ render_cars(PixelColor * pixels, Rectangle render_region, uint32_t df, Cars * ca
        ++car_index)
   {
     Car * car = cars->cars + car_index;
-
-    V2 pos = cell_coord_to_world(car->cell_x, car->cell_y) + car_center_offset;
-
+    // NOTE: Car centered on coord
+    V2 pos = cell_coord_to_world(car->cell_x, car->cell_y) + car->offset + screen_offset;
     draw_circle(pixels, render_region, pos, (CAR_SIZE / 2), (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
 
 void
-render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, Mouse mouse, Maze * maze)
+render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
 {
-  uint32_t cell_size = CELL_SPACING - CELL_MARGIN;
+  uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
 
+  // TODO: Don't do this loop?
   V2 cells_start = max_V2(round_down(render_region.start / CELL_SPACING), (V2){0, 0});
   V2 cells_end = min_V2((round_down(render_region.end / CELL_SPACING) + 1), (V2){maze->width, maze->height});
 
@@ -342,12 +339,12 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
           break;
       }
 
+      // NOTE: Tile centered on coord
       V2 world_pos = cell_coord_to_world(cell_x, cell_y);
+      V2 world_screen_pos = world_pos + screen_offset;
+      Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
 
-      if ((mouse.x >= world_pos.x) &&
-          (mouse.x < world_pos.x + cell_size) &&
-          (mouse.y >= world_pos.y) &&
-          (mouse.y < world_pos.y + cell_size))
+      if (in_rectangle((V2){mouse.x, mouse.y}, cell_bounds))
       {
         if (color.r <= (0xFF - 0x20))
         {
@@ -363,8 +360,6 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
         }
       }
 
-      // TODO: Should the cells be centred on their coords?
-      Rectangle cell_bounds = rectangle(world_pos, (V2){cell_size, cell_size});
       draw_box(pixels, render_region, cell_bounds, color);
     }
   }
@@ -379,14 +374,13 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
   render_region.start = (V2){0, 0};
   render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * PIXELS_TO_WORLD_COORDS;
 
-  render_cells(game_memory, pixels, render_region, mouse, maze);
-
   if (frame_count % 2 == 0)
   {
     update_cars(game_memory, df, frame_count, keys, mouse, maze, cars);
   }
 
-  render_cars(pixels, render_region, df, cars);
+  render_cells(game_memory, pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), mouse, maze);
+  render_cars(pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), df, cars);
 }
 
 

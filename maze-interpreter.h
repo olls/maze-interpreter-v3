@@ -178,7 +178,7 @@ struct Car
   uint32_t cell_x;
   uint32_t cell_y;
 
-  // NOTE: Not currently used; to be used for sub-cell positioning.
+  // NOTE: Used for sub-cell positioning, in world space.
   V2 offset;
 
   Direction direction;
