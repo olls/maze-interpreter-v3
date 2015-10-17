@@ -49,7 +49,7 @@ rm_car(Cars * cars, uint32_t car_index)
 
 
 void
-update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
+update_cars(uint32_t df, uint32_t frame_count,
             Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
 
@@ -64,7 +64,7 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       // TODO: Animation
       // TODO: Deal with race cars (conditions) ??
 
-      Cell * current_cell = get_cell(game_memory, maze, car->cell_x, car->cell_y);
+      Cell * current_cell = get_cell(maze, car->cell_x, car->cell_y);
 
       switch (current_cell->type)
       {
@@ -198,10 +198,10 @@ update_cars(GameMemory * game_memory, uint32_t df, uint32_t frame_count,
       }
 
       bool walls[4];
-      walls[UP]    = get_cell(game_memory, maze, car->cell_x, (car->cell_y + 1))->type == CELL_WALL;
-      walls[DOWN]  = get_cell(game_memory, maze, car->cell_x, (car->cell_y - 1))->type == CELL_WALL;
-      walls[LEFT]  = get_cell(game_memory, maze, (car->cell_x - 1), car->cell_y)->type == CELL_WALL;
-      walls[RIGHT] = get_cell(game_memory, maze, (car->cell_x + 1), car->cell_y)->type == CELL_WALL;
+      walls[UP]    = get_cell(maze, car->cell_x, (car->cell_y + 1))->type == CELL_WALL;
+      walls[DOWN]  = get_cell(maze, car->cell_x, (car->cell_y - 1))->type == CELL_WALL;
+      walls[LEFT]  = get_cell(maze, (car->cell_x - 1), car->cell_y)->type == CELL_WALL;
+      walls[RIGHT] = get_cell(maze, (car->cell_x + 1), car->cell_y)->type == CELL_WALL;
 
       Direction test_direction;
       bool can_move = false;
@@ -271,6 +271,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
 {
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
+  //       Store the cars in the quad-tree?
   for (uint32_t car_index = 0;
        car_index < cars->next_free;
        ++car_index)
@@ -284,7 +285,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
 
 
 void
-render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
+render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
 {
   uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
 
@@ -300,7 +301,7 @@ render_cells(GameMemory * game_memory, PixelColor * pixels, Rectangle render_reg
          cell_x < cells_end.x;
          cell_x++)
     {
-      Cell * cell = get_cell(game_memory, maze, cell_x, cell_y);
+      Cell * cell = get_cell(maze, cell_x, cell_y);
 
       V4 color = (V4){};
       switch (cell->type)
@@ -376,10 +377,10 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
 
   if (frame_count % 2 == 0)
   {
-    update_cars(game_memory, df, frame_count, keys, mouse, maze, cars);
+    update_cars(df, frame_count, keys, mouse, maze, cars);
   }
 
-  render_cells(game_memory, pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), mouse, maze);
+  render_cells(pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), mouse, maze);
   render_cars(pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), df, cars);
 }
 
@@ -441,7 +442,7 @@ main(int32_t argc, char * argv[])
          cell_x < maze->width;
          ++cell_x)
     {
-      Cell * cell = get_cell(&game_memory, maze, cell_x, cell_y);
+      Cell * cell = get_cell(maze, cell_x, cell_y);
       if (cell->type == CELL_START)
       {
         add_car(cars, cell_x, cell_y);

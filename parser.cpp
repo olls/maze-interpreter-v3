@@ -126,7 +126,7 @@ parse(GameMemory * game_memory, const char * filename)
       }
       else
       {
-        Cell * cell = get_cell(game_memory, maze, x, y);
+        Cell * cell = get_cell(maze, x, y, game_memory);
 
         // NOTE: Doing them individually to avoid overwriting the x, y set in get_cell.
         cell->type = new_cell.type;

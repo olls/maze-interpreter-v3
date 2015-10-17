@@ -25,7 +25,7 @@ get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 
 
 Cell *
-get_cell(GameMemory * game_memory, Maze * maze, uint32_t x, uint32_t y)
+get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
 {
   QuadTree * tree = &maze->tree;
 
@@ -34,6 +34,11 @@ get_cell(GameMemory * game_memory, Maze * maze, uint32_t x, uint32_t y)
   {
     if (!tree->top_right)
     {
+      if (!game_memory)
+      {
+        return 0;
+      }
+
       QuadTree * trees = take_struct_mem(game_memory, QuadTree, 4);
       tree->top_right    = trees++;
       tree->top_left     = trees++;
