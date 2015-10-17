@@ -289,7 +289,8 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
 {
   if (tree)
   {
-    // TODO: Leave if sub-tree isn't in render_region
+    // TODO: Don't walk the sub-tree if it doesn't overlap the
+    //       render_region
     uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
 
     for (uint32_t cell_index = 0;
@@ -335,7 +336,7 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
           break;
       }
 
-      // NOTE: Tile centered on coord
+      // NOTE: Tile centred on coord
       V2 world_pos = cell_coord_to_world(cell->x, cell->y);
       V2 world_screen_pos = world_pos + screen_offset;
       Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
