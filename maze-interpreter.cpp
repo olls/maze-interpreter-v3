@@ -287,10 +287,11 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
 void
 render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
-  if (tree)
+  // TODO: There ARE bugs in the 'overlaps' pruning of the tree...
+  // if (tree && overlaps(render_region - 130000, (tree->bounds * CELL_SPACING)))
+  // if (tree && overlaps(render_region - 15000, (tree->bounds * CELL_SPACING)))
+  if (tree && overlaps(render_region, (tree->bounds * CELL_SPACING)))
   {
-    // TODO: Don't walk the sub-tree if it doesn't overlap the
-    //       render_region
     uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
 
     for (uint32_t cell_index = 0;
