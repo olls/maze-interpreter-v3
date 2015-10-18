@@ -59,27 +59,25 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
     if (in_rectangle((V2){x, y}, tree->top_right->bounds))
     {
       tree = tree->top_right;
-      continue;
     }
-    if (in_rectangle((V2){x, y}, tree->top_left->bounds))
+    else if (in_rectangle((V2){x, y}, tree->top_left->bounds))
     {
       tree = tree->top_left;
-      continue;
     }
-    if (in_rectangle((V2){x, y}, tree->bottom_right->bounds))
+    else if (in_rectangle((V2){x, y}, tree->bottom_right->bounds))
     {
       tree = tree->bottom_right;
-      continue;
     }
-    if (in_rectangle((V2){x, y}, tree->bottom_left->bounds))
+    else if (in_rectangle((V2){x, y}, tree->bottom_left->bounds))
     {
       tree = tree->bottom_left;
-      continue;
     }
-
-    // NOTE: If it gets here: it is in old-tree but not any of it's
-    //       subdivisions
-    invalid_code_path;
+    else
+    {
+      // NOTE: If it gets here: it is in old-tree but not any of it's
+      //       subdivisions
+      invalid_code_path;
+    }
   }
   return cell;
 }
