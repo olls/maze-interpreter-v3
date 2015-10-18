@@ -365,12 +365,37 @@ in_rectangle(V2 test, Rectangle rect)
   return result;
 }
 
+bool
+overlaps(Rectangle a, Rectangle b)
+{
+  V2 a_top_left = {a.start.x, a.end.y};
+  V2 a_bottom_right = {a.end.x, a.start.y};
+  V2 b_top_left = {b.start.x, b.end.y};
+  V2 b_bottom_right = {b.end.x, b.start.y};
+  bool result = (in_rectangle(a.start, b) ||
+                 in_rectangle(a.end, b) ||
+                 in_rectangle(a_top_left, b) ||
+                 in_rectangle(a_bottom_right, b) ||
+                 in_rectangle(b.start, a) ||
+                 in_rectangle(b.end, a) ||
+                 in_rectangle(b_top_left, a) ||
+                 in_rectangle(b_bottom_right, a));
+  return result;
+}
+
 Rectangle
-crop_to(Rectangle a, Rectangle bound)
+crop_to(Rectangle rect, Rectangle bound)
 {
   Rectangle result;
-  result.start = max_V2(a.start, bound.start);
-  result.end   = min_V2(a.end,   bound.end);
+  result.start = max_V2(rect.start, bound.start);
+  result.end   = min_V2(rect.end,   bound.end);
+  return result;
+}
+
+Rectangle
+get_overlap(Rectangle a, Rectangle b)
+{
+  Rectangle result = crop_to(a, b);
   return result;
 }
 

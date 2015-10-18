@@ -277,7 +277,7 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
        ++car_index)
   {
     Car * car = cars->cars + car_index;
-    // NOTE: Car centered on coord
+    // NOTE: Car centred on coord
     V2 pos = cell_coord_to_world(car->cell_x, car->cell_y) + car->offset + screen_offset;
     draw_circle(pixels, render_region, pos, (CAR_SIZE / 2), (V4){1, 0x99, 0x22, 0x77});
   }

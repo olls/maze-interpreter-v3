@@ -64,10 +64,7 @@ draw_circle(PixelColor * pixels,
 
 
 void
-draw_box(PixelColor * pixels,
-         Rectangle render_region,
-         Rectangle box,
-         V4 color)
+draw_box(PixelColor * pixels, Rectangle render_region, Rectangle box, V4 color)
 {
   // Into fractional pixel space
   Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
@@ -109,4 +106,117 @@ draw_box(PixelColor * pixels,
       set_pixel(pixels, pixel_x, pixel_y, this_color);
     }
   }
+}
+
+
+void
+draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
+{
+  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  V2 start = world_start * WORLD_COORDS_TO_PIXELS;
+  V2 end = world_end * WORLD_COORDS_TO_PIXELS;
+
+  if (start.x > end.x)
+  {
+    printf("Swap\n");
+    V2 temp = start;
+    start = end;
+    end = temp;
+  }
+
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  render_region = get_overlap(render_region, window_region);
+
+  bool start_in_region = in_rectangle(start, render_region);
+  bool end_in_region = in_rectangle(end, render_region);
+
+  if (start_in_region || end_in_region)
+  {
+    float x_gradient = (end.y - start.y) / (end.x - start.x);
+    float y_gradient = (end.x - start.x) / (end.y - start.y);
+    if (!start_in_region)
+    {
+      if (start.x < render_region.start.x)
+      {
+        start.y += (render_region.start.x - start.x) * x_gradient;
+        start.x = render_region.start.x;
+      }
+      else if (start.x >= render_region.end.x)
+      {
+        start.y += (render_region.end.x - start.x) * x_gradient;
+        start.x = render_region.end.x;
+      }
+      if (start.y < render_region.start.y)
+      {
+        start.x += (render_region.start.y - start.y) * y_gradient;
+        start.y = render_region.start.y;
+      }
+      else if (start.y >= render_region.end.y)
+      {
+        start.x += (render_region.end.y - start.y) * y_gradient;
+        start.y = render_region.end.y;
+      }
+    }
+    if (!end_in_region)
+    {
+      if (end.x < render_region.start.x)
+      {
+        end.y += (render_region.start.x - end.x) * x_gradient;
+        end.x = render_region.end.x;
+      }
+      else if (end.x >= render_region.end.x)
+      {
+        end.y += (render_region.end.x - end.x) * x_gradient;
+        end.x = render_region.end.x;
+      }
+      if (end.y < render_region.start.y)
+      {
+        end.x += (render_region.start.y - end.y) * y_gradient;
+        end.y = render_region.end.y;
+      }
+      else if (end.y >= render_region.end.y)
+      {
+        end.x += (render_region.end.y - end.y) * y_gradient;
+        end.y = render_region.end.y;
+      }
+    }
+
+    // TODO: IMPORTANT: Sub-pixel rendering!!!
+
+    V2 length_components = {(end.x - start.x),
+                            (end.y - start.y)};
+
+    float num_pixels = fmax(abs(length_components.x), abs(length_components.y));
+    V2 step = length_components / num_pixels;
+
+    V2 pixel_pos_fract = start;
+    for (uint32_t pixel_n = 0;
+         pixel_n < num_pixels;
+         ++pixel_n)
+    {
+      V2 pixel_pos = round_down(pixel_pos_fract);
+      set_pixel(pixels, pixel_pos.x, pixel_pos.y, color);
+      pixel_pos_fract += step;
+    }
+  }
+}
+
+
+void
+draw_box_outline(PixelColor * pixels, Rectangle render_region, Rectangle box, V4 color)
+{
+  // Into fractional pixel space
+  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+
+  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
+  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
+  fract_pixel_space = crop_to(fract_pixel_space, window_region_pixels);
+
+  Rectangle pixel_space = round_down(fract_pixel_space);
+
+  draw_line(pixels, render_region, box.start, (V2){box.start.x, box.end.y}, color);
+  draw_line(pixels, render_region, box.start, (V2){box.end.x, box.start.y}, color);
+  draw_line(pixels, render_region, (V2){box.start.x, box.end.y}, box.end, color);
+  draw_line(pixels, render_region, (V2){box.end.x, box.start.y}, box.end, color);
 }
