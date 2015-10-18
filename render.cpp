@@ -13,7 +13,7 @@ set_pixel(PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
 
 void
 draw_circle(PixelColor * pixels,
-            Rectangle render_region,
+            Rectangle render_region_world,
             V2 world_pos,
             float world_radius,
             V4 color)
@@ -25,13 +25,13 @@ draw_circle(PixelColor * pixels,
   float radius_sq = squared(radius);
   float radius_minus_one_sq = squared(radius - 1);
 
-  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
-  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  render_region = get_overlap(render_region, window_region);
 
   Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
                                           fract_pixel_pos + radius};
-  fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region_pixels);
-  fract_pixels_circle_region = crop_to(fract_pixels_circle_region, window_region_pixels);
+  fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region);
 
   Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);
 
@@ -64,15 +64,14 @@ draw_circle(PixelColor * pixels,
 
 
 void
-draw_box(PixelColor * pixels, Rectangle render_region, Rectangle box, V4 color)
+draw_box(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
-  // Into fractional pixel space
-  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  render_region = get_overlap(render_region, window_region);
 
-  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
-  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
-  fract_pixel_space = crop_to(fract_pixel_space, window_region_pixels);
+  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+  fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
 
@@ -112,7 +111,6 @@ draw_box(PixelColor * pixels, Rectangle render_region, Rectangle box, V4 color)
 void
 draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
 {
-  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
   V2 start = world_start * WORLD_COORDS_TO_PIXELS;
   V2 end = world_end * WORLD_COORDS_TO_PIXELS;
 
@@ -125,7 +123,8 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
   }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  render_region = get_overlap(render_region, window_region);
+  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  render_region = crop_to(render_region, window_region);
 
   bool start_in_region = in_rectangle(start, render_region);
   bool end_in_region = in_rectangle(end, render_region);
@@ -203,15 +202,14 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
 
 
 void
-draw_box_outline(PixelColor * pixels, Rectangle render_region, Rectangle box, V4 color)
+draw_box_outline(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
-  // Into fractional pixel space
-  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  render_region = crop_to(render_region, window_region);
 
-  Rectangle render_region_pixels = render_region * WORLD_COORDS_TO_PIXELS;
-  Rectangle window_region_pixels = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  fract_pixel_space = crop_to(fract_pixel_space, render_region_pixels);
-  fract_pixel_space = crop_to(fract_pixel_space, window_region_pixels);
+  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+  fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
 
