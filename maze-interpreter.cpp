@@ -364,7 +364,7 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
 #ifdef DEBUG
     draw_box_outline(pixels, render_region, (tree->bounds * CELL_SPACING), (V4){0.1f, 0, 0, 0});
 #endif
-    
+
     render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_right);
     render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_left);
     render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->bottom_right);
@@ -393,8 +393,11 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
     update_cars(df, frame_count, keys, mouse, maze, cars);
   }
 
-  render_cells(pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), mouse, maze);
-  render_cars(pixels, render_region, ((V2){CELL_SPACING, CELL_SPACING} / 2), df, cars);
+  V2 screen_offset = (V2){0.5, 0.5} * CELL_SPACING;
+  // screen_offset += (V2){mouse.x, mouse.y} - ((V2){maze->width, maze->height} * CELL_SPACING * 0.5f);
+
+  render_cells(pixels, render_region, screen_offset, mouse, maze);
+  render_cars(pixels, render_region, screen_offset, df, cars);
 }
 
 
