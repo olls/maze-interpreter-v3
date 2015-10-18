@@ -26,7 +26,7 @@ struct Cell
   int32_t data;
 };
 
-const uint32_t QUAD_STORE_N = 256;
+const uint32_t QUAD_STORE_N = 16;
 struct QuadTree
 {
   Rectangle bounds;
