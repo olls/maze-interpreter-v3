@@ -204,17 +204,8 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
 void
 draw_box_outline(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
-  render_region = crop_to(render_region, window_region);
-
-  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
-  fract_pixel_space = crop_to(fract_pixel_space, render_region);
-
-  Rectangle pixel_space = round_down(fract_pixel_space);
-
-  draw_line(pixels, render_region, box.start, (V2){box.start.x, box.end.y}, color);
-  draw_line(pixels, render_region, box.start, (V2){box.end.x, box.start.y}, color);
-  draw_line(pixels, render_region, (V2){box.start.x, box.end.y}, box.end, color);
-  draw_line(pixels, render_region, (V2){box.end.x, box.start.y}, box.end, color);
+  draw_line(pixels, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
+  draw_line(pixels, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);
+  draw_line(pixels, render_region_world, (V2){box.start.x, box.end.y}, box.end, color);
+  draw_line(pixels, render_region_world, (V2){box.end.x, box.start.y}, box.end, color);
 }
