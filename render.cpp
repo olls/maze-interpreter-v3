@@ -12,21 +12,22 @@ set_pixel(PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
 
 
 void
-draw_circle(PixelColor * pixels,
+draw_circle(GameSetup * setup,
+            PixelColor * pixels,
             Rectangle render_region_world,
             V2 world_pos,
             float world_radius,
             V4 color)
 {
   // Into fractional pixel space
-  V2 fract_pixel_pos = world_pos * WORLD_COORDS_TO_PIXELS;
+  V2 fract_pixel_pos = world_pos * setup->world_coords_to_pixels;
 
-  float radius = world_radius * WORLD_COORDS_TO_PIXELS;
+  float radius = world_radius * setup->world_coords_to_pixels;
   float radius_sq = squared(radius);
   float radius_minus_one_sq = squared(radius - 1);
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  Rectangle render_region = render_region_world * setup->world_coords_to_pixels;
   render_region = get_overlap(render_region, window_region);
 
   Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
@@ -64,13 +65,13 @@ draw_circle(PixelColor * pixels,
 
 
 void
-draw_box(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  Rectangle render_region = render_region_world * setup->world_coords_to_pixels;
   render_region = get_overlap(render_region, window_region);
 
-  Rectangle fract_pixel_space = box * WORLD_COORDS_TO_PIXELS;
+  Rectangle fract_pixel_space = box * setup->world_coords_to_pixels;
   fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
@@ -109,10 +110,10 @@ draw_box(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 c
 
 
 void
-draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
+draw_line(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
 {
-  V2 start = world_start * WORLD_COORDS_TO_PIXELS;
-  V2 end = world_end * WORLD_COORDS_TO_PIXELS;
+  V2 start = world_start * setup->world_coords_to_pixels;
+  V2 end = world_end * setup->world_coords_to_pixels;
 
   if (start.x > end.x)
   {
@@ -123,7 +124,7 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
   }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
-  Rectangle render_region = render_region_world * WORLD_COORDS_TO_PIXELS;
+  Rectangle render_region = render_region_world * setup->world_coords_to_pixels;
   render_region = crop_to(render_region, window_region);
 
   bool start_in_region = in_rectangle(start, render_region);
@@ -202,10 +203,10 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
 
 
 void
-draw_box_outline(PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box_outline(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
-  draw_line(pixels, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
-  draw_line(pixels, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);
-  draw_line(pixels, render_region_world, (V2){box.start.x, box.end.y}, box.end, color);
-  draw_line(pixels, render_region_world, (V2){box.end.x, box.start.y}, box.end, color);
+  draw_line(setup, pixels, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
+  draw_line(setup, pixels, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);
+  draw_line(setup, pixels, render_region_world, (V2){box.start.x, box.end.y}, box.end, color);
+  draw_line(setup, pixels, render_region_world, (V2){box.end.x, box.start.y}, box.end, color);
 }
