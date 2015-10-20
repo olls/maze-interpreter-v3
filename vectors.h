@@ -282,6 +282,27 @@ operator+=(Rectangle & a, Rectangle b)
 }
 
 Rectangle
+operator+(Rectangle rect, V2 vec)
+{
+  Rectangle result;
+  result.start = rect.start + vec;
+  result.end = rect.end + vec;
+  return result;
+}
+Rectangle
+operator+(V2 vec, Rectangle rect)
+{
+  Rectangle result = rect + vec;
+  return result;
+}
+Rectangle &
+operator+=(Rectangle & rect, V2 vec)
+{
+  rect = rect + vec;
+  return rect;
+}
+
+Rectangle
 operator-(Rectangle rect)
 {
   Rectangle result;
