@@ -1,5 +1,5 @@
 CC         = clang++
-CFLAGS     = -Werror -g -ffunction-sections -ferror-limit=1 -o0
+CFLAGS     = -Werror -g -ferror-limit=1 -o0
 LIBS       = -lSDL2
 SOURCES    = maze-interpreter.cpp
 EXECUTABLE = maze-interpreter
