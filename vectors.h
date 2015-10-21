@@ -169,8 +169,8 @@ V2
 round_down(V2 vec)
 {
   V2 result;
-  result.x = (uint32_t)vec.x;
-  result.y = (uint32_t)vec.y;
+  result.x = (int32_t)vec.x;
+  result.y = (int32_t)vec.y;
   return result;
 }
 
