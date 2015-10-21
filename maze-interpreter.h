@@ -44,20 +44,9 @@ const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
-// NOTE: 256 sub-pixel steps!
-// TODO: Should world coords be floats now we are using uint32s for
-//       the cell position?
-const uint32_t PIXELS_TO_WORLD_COORDS = 256;
-const float WORLD_COORDS_TO_PIXELS = 1.0f / (float)PIXELS_TO_WORLD_COORDS;
-
-const uint32_t CELL_SPACING = 10000;
-const uint32_t CELL_MARGIN = 1000;
-
-const uint32_t CAR_SIZE = 6000;
-
-const char MAZE_FILENAME[] = "test.mz";
-// const char MAZE_FILENAME[] = "programs/test-big.mz";
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
+// const char MAZE_FILENAME[] = "programs/test-big.mz";
+const char MAZE_FILENAME[] = "test.mz";
 
 
 struct GameMemory
@@ -122,6 +111,18 @@ struct Mouse
 
   bool l_down;
   bool r_down;
+};
+
+
+struct GameSetup
+{
+  uint32_t pixels_to_world_coords;
+  float world_coords_to_pixels;
+
+  uint32_t cell_spacing;
+  uint32_t cell_margin;
+
+  uint32_t car_size;
 };
 
 

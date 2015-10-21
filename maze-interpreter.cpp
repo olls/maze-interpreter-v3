@@ -253,16 +253,16 @@ update_cars(uint32_t df, uint32_t frame_count,
 
 
 V2
-cell_coord_to_world(uint32_t cell_x, uint32_t cell_y)
+cell_coord_to_world(GameSetup * setup, uint32_t cell_x, uint32_t cell_y)
 {
   // TODO: Is there any point in world space any more???
-  V2 result = ((V2){cell_x, cell_y} * CELL_SPACING);
+  V2 result = ((V2){cell_x, cell_y} * setup->cell_spacing);
   return result;
 }
 
 
 void
-render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
+render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
 {
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
@@ -273,21 +273,21 @@ render_cars(PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint
   {
     Car * car = cars->cars + car_index;
     // NOTE: Car centred on coord
-    V2 pos = cell_coord_to_world(car->cell_x, car->cell_y) + car->offset + screen_offset;
-    draw_circle(pixels, render_region, pos, (CAR_SIZE / 2), (V4){1, 0x99, 0x22, 0x77});
+    V2 pos = cell_coord_to_world(setup, car->cell_x, car->cell_y) + car->offset + screen_offset;
+    draw_circle(setup, pixels, render_region, pos, (setup->car_size / 2), (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
 
 void
-render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
+render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
   // TODO: There ARE bugs in the 'overlaps' pruning of the tree...
-  // if (tree && overlaps(render_region - 130000, (tree->bounds * CELL_SPACING)))
-  // if (tree && overlaps(render_region - 15000, (tree->bounds * CELL_SPACING)))
-  if (tree && overlaps(render_region, (tree->bounds * CELL_SPACING)))
+  // if (tree && overlaps(render_region - 130000, (tree->bounds * setup->cell_spacing)))
+  // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
+  if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))
   {
-    uint32_t cell_radius = (CELL_SPACING - CELL_MARGIN) / 2;
+    uint32_t cell_radius = (setup->cell_spacing - setup->cell_margin) / 2;
 
     for (uint32_t cell_index = 0;
          cell_index < tree->used;
@@ -333,7 +333,7 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
       }
 
       // NOTE: Tile centred on coord
-      V2 world_pos = cell_coord_to_world(cell->x, cell->y);
+      V2 world_pos = cell_coord_to_world(setup, cell->x, cell->y);
       V2 world_screen_pos = world_pos + screen_offset;
       Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
 
@@ -353,46 +353,46 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
         }
       }
 
-      draw_box(pixels, render_region, cell_bounds, color);
+      draw_box(setup, pixels, render_region, cell_bounds, color);
     }
 
 #ifdef DEBUG
-    draw_box_outline(pixels, render_region, (tree->bounds * CELL_SPACING) + screen_offset, (V4){0.1f, 0, 0, 0});
+    draw_box_outline(setup, pixels, render_region, (tree->bounds * setup->cell_spacing) + screen_offset, (V4){0.1f, 0, 0, 0});
 #endif
 
-    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_right);
-    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_left);
-    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->bottom_right);
-    render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->bottom_left);
+    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->top_right);
+    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->top_left);
+    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->bottom_right);
+    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->bottom_left);
   }
 }
 
 
 void
-render_cells(PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
+render_cells(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
 {
-  render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, &(maze->tree));
+  render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, &(maze->tree));
 }
 
 
 void
-update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, uint32_t frame_count,
+update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
   Rectangle render_region;
   render_region.start = (V2){0, 0};
-  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * PIXELS_TO_WORLD_COORDS;
+  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * setup->pixels_to_world_coords;
 
   if (frame_count % 2 == 0)
   {
     update_cars(df, frame_count, keys, mouse, maze, cars);
   }
 
-  V2 screen_offset = (V2){0.5, 0.5} * CELL_SPACING;
-  // screen_offset += (render_region.end - (V2){mouse.x, mouse.y}) - ((V2){maze->width, maze->height} * CELL_SPACING * 0.5f);
+  V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
+  screen_offset += (render_region.end - (V2){mouse.x, mouse.y}) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
 
-  render_cells(pixels, render_region, screen_offset, mouse, maze);
-  render_cars(pixels, render_region, screen_offset, df, cars);
+  render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
+  render_cars(setup, pixels, render_region, screen_offset, df, cars);
 }
 
 
@@ -419,6 +419,17 @@ main(int32_t argc, char * argv[])
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
   printf("Subdivisions: %d\n", maze->subdivisions);
+
+  GameSetup setup_;
+  GameSetup * setup = &setup_;
+  // NOTE: 256 sub-pixel steps!
+  // TODO: Should world coords be floats now we are using uint32s for
+  //       the cell position?
+  setup->pixels_to_world_coords = 256;
+  setup->world_coords_to_pixels = 1.0f / (float)setup->pixels_to_world_coords;
+  setup->cell_spacing = 1500;
+  setup->cell_margin = 300;
+  setup->car_size = setup->cell_spacing * 0.9;
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
@@ -594,8 +605,8 @@ main(int32_t argc, char * argv[])
         case SDL_MOUSEMOTION:
         {
           // NOTE: Remember our Y is inverted from SDL
-          mouse.x = PIXELS_TO_WORLD_COORDS * (event.motion.x);
-          mouse.y = PIXELS_TO_WORLD_COORDS * (WINDOW_HEIGHT - event.motion.y);
+          mouse.x = setup->pixels_to_world_coords * (event.motion.x);
+          mouse.y = setup->pixels_to_world_coords * (WINDOW_HEIGHT - event.motion.y);
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -656,7 +667,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, pixels, delta_frame, frame_count, keys, mouse, maze, cars);
+      update_and_render(&game_memory, setup, pixels, delta_frame, frame_count, keys, mouse, maze, cars);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;
