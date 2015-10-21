@@ -357,7 +357,7 @@ render_cells_in_tree(PixelColor * pixels, Rectangle render_region, V2 screen_off
     }
 
 #ifdef DEBUG
-    draw_box_outline(pixels, render_region, (tree->bounds * CELL_SPACING), (V4){0.1f, 0, 0, 0});
+    draw_box_outline(pixels, render_region, (tree->bounds * CELL_SPACING) + screen_offset, (V4){0.1f, 0, 0, 0});
 #endif
 
     render_cells_in_tree(pixels, render_region, screen_offset, mouse, maze, tree->top_right);
