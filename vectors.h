@@ -637,9 +637,9 @@ V3
 round_down(V3 vec)
 {
   V3 result;
-  result.x = (uint32_t)vec.x;
-  result.y = (uint32_t)vec.y;
-  result.z = (uint32_t)vec.z;
+  result.x = (int32_t)vec.x;
+  result.y = (int32_t)vec.y;
+  result.z = (int32_t)vec.z;
   return result;
 }
 
@@ -848,10 +848,10 @@ V4
 round_down(V4 vec)
 {
   V4 result;
-  result.w = (uint32_t)vec.w;
-  result.x = (uint32_t)vec.x;
-  result.y = (uint32_t)vec.y;
-  result.z = (uint32_t)vec.z;
+  result.w = (int32_t)vec.w;
+  result.x = (int32_t)vec.x;
+  result.y = (int32_t)vec.y;
+  result.z = (int32_t)vec.z;
   return result;
 }
 

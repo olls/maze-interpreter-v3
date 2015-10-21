@@ -25,7 +25,7 @@ parse(GameMemory * game_memory, const char * filename)
 
   Maze * maze = take_struct_mem(game_memory, Maze, 1);
   // maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){100, 100}};
-  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){FLT_MAX, FLT_MAX}};
+  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
   maze->tree.used = 0;
   maze->width = 0;
   maze->height = 0;
