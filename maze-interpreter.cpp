@@ -39,12 +39,7 @@ add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
 void
 rm_car(Cars * cars, uint32_t car_index)
 {
-  --cars->next_free;
-
-  Car * new_slot = cars->cars + car_index;
-  Car * last_car = cars->cars + cars->next_free;
-
-  *new_slot = *last_car;
+  cars[car_index] = cars[--cars->next_free];
 }
 
 
