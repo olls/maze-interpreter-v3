@@ -19,7 +19,6 @@ draw_circle(GameSetup * setup,
             float world_radius,
             V4 color)
 {
-  // Into fractional pixel space
   V2 fract_pixel_pos = world_pos * setup->world_coords_to_pixels;
 
   float radius = world_radius * setup->world_coords_to_pixels;

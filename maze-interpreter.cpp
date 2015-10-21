@@ -256,6 +256,7 @@ V2
 cell_coord_to_world(GameSetup * setup, uint32_t cell_x, uint32_t cell_y)
 {
   // TODO: Is there any point in world space any more???
+  //       Cars have cell_x/y and offset, is that all we need? (Help with precision?)
   V2 result = ((V2){cell_x, cell_y} * setup->cell_spacing);
   return result;
 }
@@ -282,8 +283,8 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
 void
 render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
-  // TODO: There ARE bugs in the 'overlaps' pruning of the tree...
-  // if (tree && overlaps(render_region - 130000, (tree->bounds * setup->cell_spacing)))
+  // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the tree...
+  // if (tree && overlaps(render_region - 140000, (tree->bounds * setup->cell_spacing)))
   // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
   if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))
   {
@@ -455,7 +456,7 @@ main(int32_t argc, char * argv[])
   //   block = block->next;
   // }
 
-  // TODO: This is pretty dumb.
+  // TODO: This is pretty dumb, can we add cars in the parser...?
   for (uint32_t cell_y = 0;
        cell_y < maze->height;
        ++cell_y)
@@ -472,7 +473,6 @@ main(int32_t argc, char * argv[])
     }
   }
 
-  // Initialise keys
   Keys keys;
   keys.space_down = false;
   keys.up_down = false;
@@ -485,7 +485,6 @@ main(int32_t argc, char * argv[])
   keys.s_down = false;
   keys.d_down = false;
 
-  // Initialise mouse
   Mouse mouse;
   mouse.x = -1;
   mouse.y = -1;
@@ -507,11 +506,9 @@ main(int32_t argc, char * argv[])
   {
     uint64_t now = get_us();
 
-    // Get inputs
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
-
       switch (event.type)
       {
         case SDL_QUIT:
@@ -646,14 +643,11 @@ main(int32_t argc, char * argv[])
       frame_count = 0;
     }
 
-    // Render
     if (now >= last_frame + (seconds_in_u(1)/FPS))
     {
       delta_frame = now - last_frame;
       last_frame = now;
       frame_count++;
-
-      // Clear screen to white
 
       for (uint32_t screen_y = 0;
            screen_y < WINDOW_HEIGHT;
@@ -692,20 +686,14 @@ main(int32_t argc, char * argv[])
 
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
-
     }
   }
-
-  printf("Quitting\n");
 
   SDL_DestroyTexture(texture);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
-
   free(game_memory.memory);
-
-  printf("Finished\n");
 
   return 0;
 }
