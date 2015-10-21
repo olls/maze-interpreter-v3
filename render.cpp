@@ -186,16 +186,20 @@ draw_line(PixelColor * pixels, Rectangle render_region_world, V2 world_start, V2
                             (end.y - start.y)};
 
     float num_pixels = fmax(abs(length_components.x), abs(length_components.y));
-    V2 step = length_components / num_pixels;
 
-    V2 pixel_pos_fract = start;
-    for (uint32_t pixel_n = 0;
-         pixel_n < num_pixels;
-         ++pixel_n)
+    if(num_pixels)
     {
-      V2 pixel_pos = round_down(pixel_pos_fract);
-      set_pixel(pixels, pixel_pos.x, pixel_pos.y, color);
-      pixel_pos_fract += step;
+      V2 step = length_components / num_pixels;
+
+      V2 pixel_pos_fract = start;
+      for (uint32_t pixel_n = 0;
+           pixel_n < num_pixels;
+           ++pixel_n)
+      {
+        V2 pixel_pos = round_down(pixel_pos_fract);
+        set_pixel(pixels, pixel_pos.x, pixel_pos.y, color);
+        pixel_pos_fract += step;
+      }
     }
   }
 }
