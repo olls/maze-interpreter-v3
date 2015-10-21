@@ -374,18 +374,10 @@ in_rectangle(V2 test, Rectangle rect)
 bool
 overlaps(Rectangle a, Rectangle b)
 {
-  V2 a_top_left = {a.start.x, a.end.y};
-  V2 a_bottom_right = {a.end.x, a.start.y};
-  V2 b_top_left = {b.start.x, b.end.y};
-  V2 b_bottom_right = {b.end.x, b.start.y};
-  bool result = (in_rectangle(a.start, b) ||
-                 in_rectangle(a.end, b) ||
-                 in_rectangle(a_top_left, b) ||
-                 in_rectangle(a_bottom_right, b) ||
-                 in_rectangle(b.start, a) ||
-                 in_rectangle(b.end, a) ||
-                 in_rectangle(b_top_left, a) ||
-                 in_rectangle(b_bottom_right, a));
+  bool result = !((b.end.x < a.start.x) ||
+                  (b.start.x > a.end.x) ||
+                  (b.end.y < a.start.y) ||
+                  (b.start.y > a.end.y));
   return result;
 }
 
