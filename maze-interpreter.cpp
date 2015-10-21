@@ -389,7 +389,7 @@ update_and_render(GameMemory * game_memory, PixelColor * pixels, uint32_t df, ui
   }
 
   V2 screen_offset = (V2){0.5, 0.5} * CELL_SPACING;
-  // screen_offset += (V2){mouse.x, mouse.y} - ((V2){maze->width, maze->height} * CELL_SPACING * 0.5f);
+  // screen_offset += (render_region.end - (V2){mouse.x, mouse.y}) - ((V2){maze->width, maze->height} * CELL_SPACING * 0.5f);
 
   render_cells(pixels, render_region, screen_offset, mouse, maze);
   render_cars(pixels, render_region, screen_offset, df, cars);
