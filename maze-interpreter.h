@@ -44,8 +44,8 @@ const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
 
-const uint32_t MAX_CELL_SPACING = 15000;
-const uint32_t MIN_CELL_SPACING = 300;
+const uint32_t MAX_WORLD_PER_PIXEL = 65536;
+const uint32_t MIN_WORLD_PER_PIXEL = 256;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
@@ -121,10 +121,9 @@ struct Mouse
 
 struct GameSetup
 {
-  uint32_t pixels_to_world_coords;
-  float world_coords_to_pixels;
+  uint32_t world_per_pixel;
 
-  // NOTE: All world sizes are scaled relatively to cell_spacing.
+  // NOTE: Things are scaled relatively to cell_spacing.
   uint32_t cell_spacing;
   float cell_margin;
 };

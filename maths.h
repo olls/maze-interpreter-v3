@@ -5,6 +5,7 @@ squared(float base)
   return result;
 }
 
+
 uint32_t
 clamp(uint32_t value, uint32_t min, uint32_t max)
 {
@@ -17,5 +18,13 @@ clamp(uint32_t value, uint32_t min, uint32_t max)
   {
     result = min;
   }
+  return result;
+}
+
+
+uint32_t
+lerp(uint32_t min, uint32_t max, float t)
+{
+  uint32_t result = ((1 - t) * min) + (t * max);
   return result;
 }

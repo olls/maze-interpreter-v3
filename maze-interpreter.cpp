@@ -291,7 +291,6 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
   // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
   if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))
   {
-    uint32_t cell_radius = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) / 2;
 
     for (uint32_t cell_index = 0;
          cell_index < tree->used;
@@ -335,6 +334,8 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
         case CELL_PAUSE:    color = (V4){1, 0x88, 0x88, 0x11};
           break;
       }
+
+      uint32_t cell_radius = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) / 2;
 
       // NOTE: Tile centred on coord
       V2 world_pos = cell_coord_to_world(setup, cell->x, cell->y);
@@ -385,23 +386,23 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
 {
   Rectangle render_region;
   render_region.start = (V2){0, 0};
-  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * setup->pixels_to_world_coords;
+  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * setup->world_per_pixel;
 
-  // TODO: Needs a square in here somewere, so it doesn't slow down
+  // TODO: Needs a square in here somewhere, so it doesn't slow down
   //       as it gets bigger.
-  uint32_t old_cell_spacing = setup->cell_spacing;
-  setup->cell_spacing += mouse.scroll.y * 100;
-  if (mouse.scroll.y > 0 && ((setup->cell_spacing > MAX_CELL_SPACING) ||
-                             (setup->cell_spacing < old_cell_spacing)))
+  uint32_t old_world_per_pixel = setup->world_per_pixel;
+  setup->world_per_pixel += mouse.scroll.y * 100;
+  if (mouse.scroll.y > 0 && ((setup->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
+                             (setup->world_per_pixel < old_world_per_pixel)))
   {
     mouse.scroll.y = 0;
-    setup->cell_spacing = MAX_CELL_SPACING;
+    setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
   }
-  else if (mouse.scroll.y < 0 && ((setup->cell_spacing < MIN_CELL_SPACING) ||
-                                  (setup->cell_spacing > old_cell_spacing)))
+  else if (mouse.scroll.y < 0 && ((setup->world_per_pixel < MIN_WORLD_PER_PIXEL) ||
+                                  (setup->world_per_pixel > old_world_per_pixel)))
   {
     mouse.scroll.y = 0;
-    setup->cell_spacing = MIN_CELL_SPACING;
+    setup->world_per_pixel = MIN_WORLD_PER_PIXEL;
   }
 
   if (frame_count % 2 == 0)
@@ -427,6 +428,16 @@ main(int32_t argc, char * argv[])
   SDL_Window * window = SDL_CreateWindow("A Maze Thingy",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
 
+  GameSetup setup_;
+  GameSetup * setup = &setup_;
+  // NOTE: 256 sub-pixel steps!
+  // TODO: Should world coords be floats now we are using uint32s for
+  //       the cell position?
+  // setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
+  setup->world_per_pixel = lerp(MIN_WORLD_PER_PIXEL, MAX_WORLD_PER_PIXEL, 0.5f);
+  setup->cell_spacing = 100000;
+  setup->cell_margin = 0.2f;
+
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
     SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -440,16 +451,6 @@ main(int32_t argc, char * argv[])
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
   printf("Subdivisions: %d\n", maze->subdivisions);
-
-  GameSetup setup_;
-  GameSetup * setup = &setup_;
-  // NOTE: 256 sub-pixel steps!
-  // TODO: Should world coords be floats now we are using uint32s for
-  //       the cell position?
-  setup->pixels_to_world_coords = 256;
-  setup->world_coords_to_pixels = 1.0f / (float)setup->pixels_to_world_coords;
-  setup->cell_spacing = 1500;
-  setup->cell_margin = 0.2f;
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
@@ -622,8 +623,8 @@ main(int32_t argc, char * argv[])
         case SDL_MOUSEMOTION:
         {
           // NOTE: Remember our Y is inverted from SDL
-          mouse.x = setup->pixels_to_world_coords * (event.motion.x);
-          mouse.y = setup->pixels_to_world_coords * (WINDOW_HEIGHT - event.motion.y);
+          mouse.x = setup->world_per_pixel * (event.motion.x);
+          mouse.y = setup->world_per_pixel * (WINDOW_HEIGHT - event.motion.y);
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
