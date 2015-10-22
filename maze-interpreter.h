@@ -38,11 +38,10 @@
 #include "blocks.h"
 
 
+const bool FULLSCREEN = true;
+
 const uint32_t FPS = 60;
 const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
-
-const uint32_t WINDOW_WIDTH = 1024;
-const uint32_t WINDOW_HEIGHT = 600;
 
 const uint32_t MAX_WORLD_PER_PIXEL = 65536;
 const uint32_t MIN_WORLD_PER_PIXEL = 256;
@@ -121,6 +120,9 @@ struct Mouse
 
 struct GameSetup
 {
+  uint32_t window_width;
+  uint32_t window_height;
+
   uint32_t world_per_pixel;
 
   // NOTE: Things are scaled relatively to cell_spacing.

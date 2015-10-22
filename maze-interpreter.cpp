@@ -386,7 +386,7 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
 {
   Rectangle render_region;
   render_region.start = (V2){0, 0};
-  render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * setup->world_per_pixel;
+  render_region.end = (V2){setup->window_width, setup->window_height} * setup->world_per_pixel;
 
   // TODO: Needs a square in here somewhere, so it doesn't slow down
   //       as it gets bigger.
@@ -425,11 +425,44 @@ main(int32_t argc, char * argv[])
 
   SDL_Init(SDL_INIT_VIDEO);
 
+  SDL_WindowFlags flags = SDL_WINDOW_SHOWN;
+  uint32_t window_width = 0;
+  uint32_t window_height = 0;
+  if (FULLSCREEN)
+  {
+    flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
+  }
+  else
+  {
+    window_width = 1024;
+    window_height = 600;
+  }
+
   SDL_Window * window = SDL_CreateWindow("A Maze Thingy",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, flags);
+
+  if (FULLSCREEN)
+  {
+    int32_t display_index = SDL_GetWindowDisplayIndex(window);
+    if (display_index < 0)
+    {
+      printf("Failed to get display index.\n");
+      exit(1);
+    }
+    SDL_Rect window_rect;
+    if (SDL_GetDisplayBounds(display_index, &window_rect))
+    {
+      printf("Failed to get display bounds.\n");
+      exit(1);
+    }
+    window_width = window_rect.w;
+    window_height = window_rect.h;
+  }
 
   GameSetup setup_;
   GameSetup * setup = &setup_;
+  setup->window_width = window_width;
+  setup->window_height = window_height;
   // NOTE: 256 sub-pixel steps!
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
@@ -438,16 +471,18 @@ main(int32_t argc, char * argv[])
   setup->cell_spacing = 100000;
   setup->cell_margin = 0.2f;
 
+  printV((V2){setup->window_width, setup->window_height});
+
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
-    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, WINDOW_WIDTH, WINDOW_HEIGHT);
+    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, setup->window_width, setup->window_height);
 
   // Init game memory
   GameMemory game_memory;
   init_mem(&game_memory, TOTAL_MEMORY);
 
   // The pixel buffer
-  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (WINDOW_WIDTH * WINDOW_HEIGHT));
+  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (setup->window_width * setup->window_height));
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
   printf("Subdivisions: %d\n", maze->subdivisions);
@@ -624,7 +659,7 @@ main(int32_t argc, char * argv[])
         {
           // NOTE: Remember our Y is inverted from SDL
           mouse.x = setup->world_per_pixel * (event.motion.x);
-          mouse.y = setup->world_per_pixel * (WINDOW_HEIGHT - event.motion.y);
+          mouse.y = setup->world_per_pixel * (setup->window_height - event.motion.y);
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -676,14 +711,14 @@ main(int32_t argc, char * argv[])
       frame_count++;
 
       for (uint32_t screen_y = 0;
-           screen_y < WINDOW_HEIGHT;
+           screen_y < setup->window_height;
            screen_y++)
       {
         for (uint32_t screen_x = 0;
-             screen_x < WINDOW_WIDTH;
+             screen_x < setup->window_width;
              screen_x++)
         {
-          pixels[screen_y * WINDOW_WIDTH + screen_x] = (PixelColor){255, 255, 255};
+          pixels[screen_y * setup->window_width + screen_x] = (PixelColor){255, 255, 255};
         }
       }
 
@@ -691,24 +726,24 @@ main(int32_t argc, char * argv[])
 
       // Flip pixels
       for (uint32_t pixel_y = 0;
-           pixel_y < WINDOW_HEIGHT / 2;
+           pixel_y < setup->window_height / 2;
            pixel_y++)
       {
         for (uint32_t pixel_x = 0;
-             pixel_x < WINDOW_WIDTH;
+             pixel_x < setup->window_width;
              pixel_x++)
         {
-          uint32_t top_pixel_pos = pixel_y * WINDOW_WIDTH + pixel_x;
+          uint32_t top_pixel_pos = pixel_y * setup->window_width + pixel_x;
           PixelColor top_pixel = pixels[top_pixel_pos];
 
-          uint32_t bottom_pixel_pos = (WINDOW_HEIGHT - pixel_y - 1) * WINDOW_WIDTH + pixel_x;
+          uint32_t bottom_pixel_pos = (setup->window_height - pixel_y - 1) * setup->window_width + pixel_x;
 
           pixels[top_pixel_pos] = pixels[bottom_pixel_pos];
           pixels[bottom_pixel_pos] = top_pixel;
         }
       }
 
-      SDL_UpdateTexture(texture, NULL, pixels, WINDOW_WIDTH * sizeof(PixelColor));
+      SDL_UpdateTexture(texture, NULL, pixels, setup->window_width * sizeof(PixelColor));
 
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);

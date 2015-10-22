@@ -1,7 +1,7 @@
 void
-set_pixel(PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
+set_pixel(GameSetup * setup, PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, V4 color)
 {
-  uint32_t pixel_pos = (pixel_y * WINDOW_WIDTH) + pixel_x;
+  uint32_t pixel_pos = (pixel_y * setup->window_width) + pixel_x;
 
   V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
   V3 new_color = remove_alpha(color);
@@ -28,7 +28,7 @@ draw_circle(GameSetup * setup,
   float radius_sq = squared(radius);
   float radius_minus_one_sq = squared(radius - 1);
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){setup->window_width, setup->window_height}};
   Rectangle render_region = render_region_world * (1.0f / setup->world_per_pixel);
   render_region = get_overlap(render_region, window_region);
 
@@ -59,7 +59,7 @@ draw_circle(GameSetup * setup,
           this_color.a *= diff;
         }
 
-        set_pixel(pixels, pixel_x, pixel_y, this_color);
+        set_pixel(setup, pixels, pixel_x, pixel_y, this_color);
       }
     }
   }
@@ -69,7 +69,7 @@ draw_circle(GameSetup * setup,
 void
 draw_box(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world, Rectangle box, V4 color)
 {
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){setup->window_width, setup->window_height}};
   Rectangle render_region = render_region_world * (1.0f / setup->world_per_pixel);
   render_region = get_overlap(render_region, window_region);
 
@@ -105,7 +105,7 @@ draw_box(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world, 
         this_color.a *= fract_pixel_space.end.y - pixel_space.end.y;
       }
 
-      set_pixel(pixels, pixel_x, pixel_y, this_color);
+      set_pixel(setup, pixels, pixel_x, pixel_y, this_color);
     }
   }
 }
@@ -125,7 +125,7 @@ draw_line(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world,
     end = temp;
   }
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){WINDOW_WIDTH, WINDOW_HEIGHT}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){setup->window_width, setup->window_height}};
   Rectangle render_region = render_region_world * (1.0f / setup->world_per_pixel);
   render_region = crop_to(render_region, window_region);
 
@@ -200,7 +200,7 @@ draw_line(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world,
            ++pixel_n)
       {
         V2 pixel_pos = round_down(pixel_pos_fract);
-        set_pixel(pixels, pixel_pos.x, pixel_pos.y, color);
+        set_pixel(setup, pixels, pixel_pos.x, pixel_pos.y, color);
         pixel_pos_fract += step;
       }
     }
