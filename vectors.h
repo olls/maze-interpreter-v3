@@ -181,12 +181,6 @@ length_sq(V2 vec)
   return result;
 }
 
-void
-printV(V2 vec)
-{
-  printf("(%f, %f)\n", vec.x, vec.y);
-}
-
 
 struct Rectangle
 {
@@ -465,12 +459,6 @@ get_bottom_left(Rectangle rect)
   return result;
 }
 
-void
-printR(Rectangle rect)
-{
-  printf("((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
-}
-
 
 union V3
 {
@@ -666,12 +654,6 @@ round_down(V3 vec)
   result.y = (int32_t)vec.y;
   result.z = (int32_t)vec.z;
   return result;
-}
-
-void
-printV(V3 vec)
-{
-  printf("(%f, %f, %f)\n", vec.x, vec.y, vec.z);
 }
 
 
@@ -884,12 +866,6 @@ round_down(V4 vec)
   result.y = (int32_t)vec.y;
   result.z = (int32_t)vec.z;
   return result;
-}
-
-void
-printV(V4 vec)
-{
-  printf("(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
 }
 
 

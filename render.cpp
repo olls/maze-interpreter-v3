@@ -19,6 +19,9 @@ draw_circle(GameSetup * setup,
             float world_radius,
             V4 color)
 {
+  // TODO: There seems to be some off-by-one bug in here, the right 
+  //       side of the circle seems to be clipped slightly sometimes.
+
   V2 fract_pixel_pos = world_pos * setup->world_coords_to_pixels;
 
   float radius = world_radius * setup->world_coords_to_pixels;

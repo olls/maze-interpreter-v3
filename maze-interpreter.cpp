@@ -256,7 +256,8 @@ V2
 cell_coord_to_world(GameSetup * setup, uint32_t cell_x, uint32_t cell_y)
 {
   // TODO: Is there any point in world space any more???
-  //       Cars have cell_x/y and offset, is that all we need? (Help with precision?)
+  //       Cars have cell_x/y and offset, is that all we need? (Help
+  //       with precision?)
   V2 result = ((V2){cell_x, cell_y} * setup->cell_spacing);
   return result;
 }
@@ -283,7 +284,8 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
 void
 render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
-  // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the tree...
+  // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
+  //                  tree...
   // if (tree && overlaps(render_region - 140000, (tree->bounds * setup->cell_spacing)))
   // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
   if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))

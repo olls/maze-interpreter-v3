@@ -192,3 +192,46 @@ struct Cars
   Car cars[MAX_CARS];
   uint32_t next_free;
 };
+
+
+void
+printF(float f)
+{
+  printf("%f\n", f);
+}
+
+void
+printU(uint32_t u)
+{
+  printf("%d\n", u);
+}
+
+void
+printI(int32_t i)
+{
+  printf("%d\n", i);
+}
+
+void
+printV(V4 vec)
+{
+  printf("(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
+}
+
+void
+printV(V2 vec)
+{
+  printf("(%f, %f)\n", vec.x, vec.y);
+}
+
+void
+printV(V3 vec)
+{
+  printf("(%f, %f, %f)\n", vec.x, vec.y, vec.z);
+}
+
+void
+printR(Rectangle rect)
+{
+  printf("((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
+}
