@@ -38,11 +38,14 @@
 #include "blocks.h"
 
 
-const uint32_t FPS = 30;
+const uint32_t FPS = 60;
 const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 
 const uint32_t WINDOW_WIDTH = 1024;
 const uint32_t WINDOW_HEIGHT = 600;
+
+const uint32_t MAX_CELL_SPACING = 15000;
+const uint32_t MIN_CELL_SPACING = 300;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
@@ -111,6 +114,8 @@ struct Mouse
 
   bool l_down;
   bool r_down;
+
+  V2 scroll;
 };
 
 
@@ -119,10 +124,9 @@ struct GameSetup
   uint32_t pixels_to_world_coords;
   float world_coords_to_pixels;
 
+  // NOTE: All world sizes are scaled relatively to cell_spacing.
   uint32_t cell_spacing;
-  uint32_t cell_margin;
-
-  uint32_t car_size;
+  float cell_margin;
 };
 
 

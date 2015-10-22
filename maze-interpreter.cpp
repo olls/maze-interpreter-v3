@@ -266,6 +266,7 @@ cell_coord_to_world(GameSetup * setup, uint32_t cell_x, uint32_t cell_y)
 void
 render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
 {
+  uint32_t car_raduis = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
@@ -276,7 +277,7 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
     Car * car = cars->cars + car_index;
     // NOTE: Car centred on coord
     V2 pos = cell_coord_to_world(setup, car->cell_x, car->cell_y) + car->offset + screen_offset;
-    draw_circle(setup, pixels, render_region, pos, (setup->car_size / 2), (V4){1, 0x99, 0x22, 0x77});
+    draw_circle(setup, pixels, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
@@ -290,7 +291,7 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
   // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
   if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))
   {
-    uint32_t cell_radius = (setup->cell_spacing - setup->cell_margin) / 2;
+    uint32_t cell_radius = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) / 2;
 
     for (uint32_t cell_index = 0;
          cell_index < tree->used;
@@ -386,6 +387,23 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   render_region.start = (V2){0, 0};
   render_region.end = (V2){WINDOW_WIDTH, WINDOW_HEIGHT} * setup->pixels_to_world_coords;
 
+  // TODO: Needs a square in here somewere, so it doesn't slow down
+  //       as it gets bigger.
+  uint32_t old_cell_spacing = setup->cell_spacing;
+  setup->cell_spacing += mouse.scroll.y * 100;
+  if (mouse.scroll.y > 0 && ((setup->cell_spacing > MAX_CELL_SPACING) ||
+                             (setup->cell_spacing < old_cell_spacing)))
+  {
+    mouse.scroll.y = 0;
+    setup->cell_spacing = MAX_CELL_SPACING;
+  }
+  else if (mouse.scroll.y < 0 && ((setup->cell_spacing < MIN_CELL_SPACING) ||
+                                  (setup->cell_spacing > old_cell_spacing)))
+  {
+    mouse.scroll.y = 0;
+    setup->cell_spacing = MIN_CELL_SPACING;
+  }
+
   if (frame_count % 2 == 0)
   {
     update_cars(df, frame_count, keys, mouse, maze, cars);
@@ -431,8 +449,7 @@ main(int32_t argc, char * argv[])
   setup->pixels_to_world_coords = 256;
   setup->world_coords_to_pixels = 1.0f / (float)setup->pixels_to_world_coords;
   setup->cell_spacing = 1500;
-  setup->cell_margin = 300;
-  setup->car_size = setup->cell_spacing * 0.9;
+  setup->cell_margin = 0.2f;
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
@@ -492,6 +509,7 @@ main(int32_t argc, char * argv[])
   mouse.y = -1;
   mouse.l_down = false;
   mouse.r_down = false;
+  mouse.scroll = (V2){0, 0};
 
   // For average FPS measurement
   uint64_t last_measure = get_us();
@@ -633,6 +651,11 @@ main(int32_t argc, char * argv[])
               break;
           }
         } break;
+        case SDL_MOUSEWHEEL:
+        {
+          mouse.scroll.x += event.wheel.x;
+          mouse.scroll.y += event.wheel.y;
+        } break;
       }
     }
 
@@ -689,6 +712,9 @@ main(int32_t argc, char * argv[])
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
     }
+
+    mouse.scroll -= mouse.scroll / 4;
+
   }
 
   SDL_DestroyTexture(texture);
