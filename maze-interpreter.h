@@ -129,7 +129,7 @@ struct GameSetup
   uint32_t cell_spacing;
   float cell_margin;
 
-  V2 mouse_offset;
+  V2 last_mouse;
 };
 
 

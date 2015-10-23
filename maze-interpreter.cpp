@@ -192,8 +192,7 @@ update_cars(uint32_t df, uint32_t frame_count,
         }
       }
 
-
-      // TODO: Maybe grab the cells in chuncks, so we don't have to get the
+      // TODO: Maybe grab the cells in chunks, so we don't have to get the
       //       cells multiple times...
 
       bool walls[4];
@@ -417,9 +416,9 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
   if (mouse.l_down)
   {
-    setup->mouse_offset = (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - (V2){mouse.x, mouse.y})) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+    setup->last_mouse = (V2){mouse.x, mouse.y};
   }
-  screen_offset += setup->mouse_offset;
+  screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - setup->last_mouse)) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
 
   render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
   render_cars(setup, pixels, render_region, screen_offset, df, cars);
@@ -520,8 +519,8 @@ main(int32_t argc, char * argv[])
   // }
 
   // TODO: This is pretty dumb, can we add cars in the parser...?
-  //        Noo, add the cars in update_cells, pass something in, or set a 
-  //        flag in the cell make it only happen once? Or not... 
+  //       Noo, add the cars in update_cells, pass something in, or set a
+  //       flag in the cell make it only happen once? Or not...
   for (uint32_t cell_y = 0;
        cell_y < maze->height;
        ++cell_y)
