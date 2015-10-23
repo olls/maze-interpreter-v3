@@ -411,7 +411,7 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
 
   if (frame_count % 2 == 0)
   {
-    // update_cars(df, frame_count, keys, mouse, maze, cars);
+    update_cars(df, frame_count, keys, mouse, maze, cars);
   }
 
   V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
