@@ -286,7 +286,8 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
 
 
 void
-render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
+render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region,
+                     V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
   bool selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
