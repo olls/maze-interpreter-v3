@@ -24,7 +24,7 @@ draw_circle(GameSetup * setup,
 
   V2 fract_pixel_pos = world_pos / setup->world_per_pixel;
 
-  float radius = world_radius setup->world_per_pixel;
+  float radius = world_radius / setup->world_per_pixel;
   float radius_sq = squared(radius);
   float radius_minus_one_sq = squared(radius - 1);
 
