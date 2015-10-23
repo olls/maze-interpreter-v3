@@ -288,6 +288,7 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
 void
 render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
 {
+  bool selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
   //                  tree...
   // if (tree && overlaps(render_region - 140000, (tree->bounds * setup->cell_spacing)))
@@ -347,6 +348,7 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
 
       if (in_rectangle(((V2){mouse.x, mouse.y} * setup->world_per_pixel), cell_bounds))
       {
+        selected = true;
         if (color.r <= (0xFF - 0x20))
         {
           color.r += 0x20;
@@ -365,7 +367,14 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
     }
 
 #ifdef DEBUG
-    draw_box_outline(setup, pixels, render_region, (tree->bounds * setup->cell_spacing) + screen_offset, (V4){0.1f, 0, 0, 0});
+    V4 box_color = (V4){0.1f, 0, 0, 0};
+    Rectangle world_tree_bounds = (tree->bounds * setup->cell_spacing) + screen_offset;
+    if (selected)
+    {
+      box_color.a = 1;
+      box_color.r = 0xFF;
+    }
+    draw_box_outline(setup, pixels, render_region, world_tree_bounds, box_color);
 #endif
 
     render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->top_right);
