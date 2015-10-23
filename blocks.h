@@ -46,8 +46,4 @@ struct Maze
   uint32_t height;
 
   QuadTree tree;
-
-#ifdef DEBUG
-  uint32_t subdivisions;
-#endif
 };

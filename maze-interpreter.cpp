@@ -501,7 +501,6 @@ main(int32_t argc, char * argv[])
   PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (setup->window_width * setup->window_height));
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
-  printf("Subdivisions: %d\n", maze->subdivisions);
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
