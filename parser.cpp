@@ -158,6 +158,7 @@ parse(GameMemory * game_memory, const char * filename)
   }
 
   // Account for last line
+  // TODO: IMORTANT: This is still broken! >:(
   printf("\n");
   maze->height = y + 1;
 

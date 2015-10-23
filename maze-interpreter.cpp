@@ -512,6 +512,8 @@ main(int32_t argc, char * argv[])
   // }
 
   // TODO: This is pretty dumb, can we add cars in the parser...?
+  //        Noo, add the cars in update_cells, pass something in, or set a 
+  //        flag in the cell make it only happen once? Or not... 
   for (uint32_t cell_y = 0;
        cell_y < maze->height;
        ++cell_y)
@@ -689,8 +691,8 @@ main(int32_t argc, char * argv[])
         } break;
         case SDL_MOUSEWHEEL:
         {
-          mouse.scroll.x += event.wheel.x;
-          mouse.scroll.y += event.wheel.y;
+          mouse.scroll.x -= event.wheel.x;
+          mouse.scroll.y -= event.wheel.y;
         } break;
       }
     }
