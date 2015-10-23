@@ -119,7 +119,6 @@ draw_line(GameSetup * setup, PixelColor * pixels, Rectangle render_region_world,
 
   if (start.x > end.x)
   {
-    printf("Swap\n");
     V2 temp = start;
     start = end;
     end = temp;
