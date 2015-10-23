@@ -128,6 +128,8 @@ struct GameSetup
   // NOTE: Things are scaled relatively to cell_spacing.
   uint32_t cell_spacing;
   float cell_margin;
+
+  V2 mouse_offset;
 };
 
 

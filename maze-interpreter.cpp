@@ -415,7 +415,11 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   }
 
   V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
-  screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - (V2){mouse.x, mouse.y})) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+  if (mouse.l_down)
+  {
+    setup->mouse_offset = (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - (V2){mouse.x, mouse.y})) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+  }
+  screen_offset += setup->mouse_offset;
 
   render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
   render_cars(setup, pixels, render_region, screen_offset, df, cars);
