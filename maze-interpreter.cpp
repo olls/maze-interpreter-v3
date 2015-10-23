@@ -192,6 +192,10 @@ update_cars(uint32_t df, uint32_t frame_count,
         }
       }
 
+
+      // TODO: Maybe grab the cells in chuncks, so we don't have to get the
+      //       cells multiple times...
+
       bool walls[4];
       walls[UP]    = get_cell(maze, car->cell_x, (car->cell_y + 1))->type == CELL_WALL;
       walls[DOWN]  = get_cell(maze, car->cell_x, (car->cell_y - 1))->type == CELL_WALL;
@@ -407,11 +411,11 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
 
   if (frame_count % 2 == 0)
   {
-    update_cars(df, frame_count, keys, mouse, maze, cars);
+    // update_cars(df, frame_count, keys, mouse, maze, cars);
   }
 
   V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
-  screen_offset += (render_region.end - (V2){mouse.x, mouse.y}) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+  screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - (V2){mouse.x, mouse.y})) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
 
   render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
   render_cars(setup, pixels, render_region, screen_offset, df, cars);
@@ -467,7 +471,7 @@ main(int32_t argc, char * argv[])
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
   // setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
-  setup->world_per_pixel = lerp(MIN_WORLD_PER_PIXEL, MAX_WORLD_PER_PIXEL, 0.5f);
+  setup->world_per_pixel = lerp(MIN_WORLD_PER_PIXEL, MAX_WORLD_PER_PIXEL, 0.25f);
   setup->cell_spacing = 100000;
   setup->cell_margin = 0.2f;
 
@@ -660,8 +664,8 @@ main(int32_t argc, char * argv[])
         case SDL_MOUSEMOTION:
         {
           // NOTE: Remember our Y is inverted from SDL
-          mouse.x = setup->world_per_pixel * (event.motion.x);
-          mouse.y = setup->world_per_pixel * (setup->window_height - event.motion.y);
+          mouse.x = event.motion.x;
+          mouse.y = setup->window_height - event.motion.y;
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
