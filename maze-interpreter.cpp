@@ -346,7 +346,7 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
       V2 world_screen_pos = world_pos + screen_offset;
       Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
 
-      if (in_rectangle((V2){mouse.x, mouse.y}, cell_bounds))
+      if (in_rectangle(((V2){mouse.x, mouse.y} * setup->world_per_pixel), cell_bounds))
       {
         if (color.r <= (0xFF - 0x20))
         {
