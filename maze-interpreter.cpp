@@ -293,7 +293,7 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
   //                  tree...
   // if (tree && overlaps(render_region - 140000, (tree->bounds * setup->cell_spacing)))
   // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
-  if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing)))
+  if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing) + screen_offset))
   {
 
     for (uint32_t cell_index = 0;
