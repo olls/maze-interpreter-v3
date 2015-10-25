@@ -401,10 +401,9 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   render_region.start = (V2){0, 0};
   render_region.end = (V2){setup->window_width, setup->window_height} * setup->world_per_pixel;
 
-  // TODO: Needs a square in here somewhere, so it doesn't slow down
-  //       as it gets bigger.
   uint32_t old_world_per_pixel = setup->world_per_pixel;
-  setup->world_per_pixel += mouse.scroll.y * 100;
+  setup->zoom += mouse.scroll.y;
+  setup->world_per_pixel = squared(setup->zoom);
   if (mouse.scroll.y > 0 && ((setup->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
                              (setup->world_per_pixel < old_world_per_pixel)))
   {
@@ -480,11 +479,9 @@ main(int32_t argc, char * argv[])
   GameSetup * setup = &setup_;
   setup->window_width = window_width;
   setup->window_height = window_height;
-  // NOTE: 256 sub-pixel steps!
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
-  // setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
-  setup->world_per_pixel = lerp(MIN_WORLD_PER_PIXEL, MAX_WORLD_PER_PIXEL, 0.25f);
+  setup->zoom = 16; // NOTE: Square-root of MIN_WORLD_PER_PIXEL: gives max size.
   setup->cell_spacing = 100000;
   setup->cell_margin = 0.2f;
 
