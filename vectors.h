@@ -20,6 +20,37 @@ operator!=(V2 a, V2 b)
   bool result = !(a == b);
   return result;
 }
+
+bool
+operator>(V2 a, V2 b)
+{
+  bool result = ((a.x > b.x) &&
+                 (a.y > b.y));
+  return result;
+}
+bool
+operator<(V2 a, V2 b)
+{
+  bool result = ((a.x < b.x) &&
+                 (a.y < b.y));
+  return result;
+}
+
+bool
+operator>=(V2 a, V2 b)
+{
+  bool result = ((a.x >= b.x) &&
+                 (a.y >= b.y));
+  return result;
+}
+bool
+operator<=(V2 a, V2 b)
+{
+  bool result = ((a.x <= b.x) &&
+                 (a.y <= b.y));
+  return result;
+}
+
 V2
 operator*(float c, V2 vec)
 {

@@ -427,7 +427,11 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   {
     setup->last_mouse = (V2){mouse.x, mouse.y};
   }
-  screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - setup->last_mouse)) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+  // NOTE: If mouse hasn't been set yet.
+  if (setup->last_mouse >= (V2){0, 0})
+  {
+    screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - setup->last_mouse)) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+  }
 
   render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
   render_cars(setup, pixels, render_region, screen_offset, df, cars);
@@ -484,6 +488,7 @@ main(int32_t argc, char * argv[])
   setup->zoom = 16; // NOTE: Square-root of MIN_WORLD_PER_PIXEL: gives max size.
   setup->cell_spacing = 100000;
   setup->cell_margin = 0.2f;
+  setup->last_mouse = (V2){-1, -1};
 
   printV((V2){setup->window_width, setup->window_height});
 
