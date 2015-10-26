@@ -771,8 +771,8 @@ main(int32_t argc, char * argv[])
       SDL_RenderPresent(renderer);
     }
 
-    mouse.scroll -= mouse.scroll / 8;
-    float epsilon = 5.0f;
+    mouse.scroll -= mouse.scroll / 6;
+    float epsilon = 3.0f;
     if (abs(mouse.scroll.y) < epsilon)
     {
       mouse.scroll.y = 0;
