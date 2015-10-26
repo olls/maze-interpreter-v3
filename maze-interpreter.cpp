@@ -771,8 +771,16 @@ main(int32_t argc, char * argv[])
       SDL_RenderPresent(renderer);
     }
 
-    mouse.scroll -= mouse.scroll / 4;
-
+    mouse.scroll -= mouse.scroll / 8;
+    float epsilon = 5.0f;
+    if (abs(mouse.scroll.y) < epsilon)
+    {
+      mouse.scroll.y = 0;
+    }
+    if (abs(mouse.scroll.x) < epsilon)
+    {
+      mouse.scroll.x = 0;
+    }
   }
 
   SDL_DestroyTexture(texture);
