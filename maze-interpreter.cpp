@@ -397,10 +397,6 @@ void
 update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Mouse mouse, Maze * maze, Cars * cars)
 {
-  Rectangle render_region;
-  render_region.start = (V2){0, 0};
-  render_region.end = (V2){setup->window_width, setup->window_height} * setup->world_per_pixel;
-
   uint32_t old_world_per_pixel = setup->world_per_pixel;
   setup->zoom += mouse.scroll.y;
   setup->world_per_pixel = squared(setup->zoom);
@@ -432,6 +428,10 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   {
     screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - setup->last_mouse)) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
   }
+
+  Rectangle render_region;
+  render_region.start = (V2){0, 0};
+  render_region.end = (V2){setup->window_width, setup->window_height} * setup->world_per_pixel;
 
   render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
   render_cars(setup, pixels, render_region, screen_offset, df, cars);
