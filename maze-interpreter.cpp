@@ -407,12 +407,14 @@ update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixe
   if (mouse.scroll.y > 0 && ((setup->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
                              (setup->world_per_pixel < old_world_per_pixel)))
   {
+    setup->zoom -= mouse.scroll.y;
     mouse.scroll.y = 0;
     setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
   }
   else if (mouse.scroll.y < 0 && ((setup->world_per_pixel < MIN_WORLD_PER_PIXEL) ||
                                   (setup->world_per_pixel > old_world_per_pixel)))
   {
+    setup->zoom -= mouse.scroll.y;
     mouse.scroll.y = 0;
     setup->world_per_pixel = MIN_WORLD_PER_PIXEL;
   }
