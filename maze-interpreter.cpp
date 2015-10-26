@@ -367,7 +367,7 @@ render_cells_in_tree(Game * game, PixelColor * pixels, Rectangle render_region,
     }
 
 #ifdef DEBUG
-    V4 box_color = (V4){0.5f, 0, 0, 0};
+    V4 box_color = (V4){0.1f, 0, 0, 0};
     Rectangle world_tree_bounds = (tree->bounds * game->cell_spacing) + screen_offset;
     if (selected)
     {
@@ -490,7 +490,7 @@ main(int32_t argc, char * argv[])
   game->cell_spacing = 100000;
   game->cell_margin = 0.2f;
   game->last_mouse_pos = (V2){-1, -1};
-
+  
   game->mouse.x = -1;
   game->mouse.y = -1;
   game->mouse.l_down = false;
