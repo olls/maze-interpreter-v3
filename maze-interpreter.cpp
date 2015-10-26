@@ -404,14 +404,14 @@ update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uin
   uint32_t old_world_per_pixel = game->world_per_pixel;
   game->zoom += game->mouse.scroll.y;
   game->world_per_pixel = squared(game->zoom);
-  if (game->mouse.scroll.y > 0 && ((game->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
-                             (game->world_per_pixel < old_world_per_pixel)))
+  if (game->mouse.scroll.y > 0 && ((game->world_per_pixel >= MAX_WORLD_PER_PIXEL) ||
+                                   (game->world_per_pixel < old_world_per_pixel)))
   {
     game->zoom -= game->mouse.scroll.y;
     game->world_per_pixel = MAX_WORLD_PER_PIXEL;
   }
-  else if (game->mouse.scroll.y < 0 && ((game->world_per_pixel < MIN_WORLD_PER_PIXEL) ||
-                                  (game->world_per_pixel > old_world_per_pixel)))
+  else if (game->mouse.scroll.y < 0 && ((game->world_per_pixel <= MIN_WORLD_PER_PIXEL) ||
+                                        (game->world_per_pixel > old_world_per_pixel)))
   {
     game->zoom -= game->mouse.scroll.y;
     game->world_per_pixel = MIN_WORLD_PER_PIXEL;
