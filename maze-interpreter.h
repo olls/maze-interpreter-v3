@@ -46,6 +46,7 @@ const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 // NOTE: 256 sub-pixel steps!
 //       MIN means biggest... think about it.
 const uint32_t MIN_WORLD_PER_PIXEL = 256;
+// const uint32_t MIN_WORLD_PER_PIXEL = 4096;
 const uint32_t MAX_WORLD_PER_PIXEL = 65536;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
@@ -120,7 +121,7 @@ struct Mouse
 };
 
 
-struct GameSetup
+struct Game
 {
   uint32_t window_width;
   uint32_t window_height;
@@ -132,7 +133,8 @@ struct GameSetup
   uint32_t cell_spacing;
   float cell_margin;
 
-  V2 last_mouse;
+  Mouse mouse;
+  V2 last_mouse_pos;
 };
 
 

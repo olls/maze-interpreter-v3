@@ -44,8 +44,7 @@ rm_car(Cars * cars, uint32_t car_index)
 
 
 void
-update_cars(uint32_t df, uint32_t frame_count,
-            Keys keys, Mouse mouse, Maze * maze, Cars * cars)
+update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * cars)
 {
 
   Car * car = cars->cars;
@@ -256,20 +255,20 @@ update_cars(uint32_t df, uint32_t frame_count,
 
 
 V2
-cell_coord_to_world(GameSetup * setup, uint32_t cell_x, uint32_t cell_y)
+cell_coord_to_world(Game * game, uint32_t cell_x, uint32_t cell_y)
 {
   // TODO: Is there any point in world space any more???
   //       Cars have cell_x/y and offset, is that all we need? (Help
   //       with precision?)
-  V2 result = ((V2){cell_x, cell_y} * setup->cell_spacing);
+  V2 result = ((V2){cell_x, cell_y} * game->cell_spacing);
   return result;
 }
 
 
 void
-render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
+render_cars(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
 {
-  uint32_t car_raduis = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) * 0.35f;
+  uint32_t car_raduis = (game->cell_spacing - (game->cell_spacing * game->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
@@ -279,22 +278,22 @@ render_cars(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 
   {
     Car * car = cars->cars + car_index;
     // NOTE: Car centred on coord
-    V2 pos = cell_coord_to_world(setup, car->cell_x, car->cell_y) + car->offset + screen_offset;
-    draw_circle(setup, pixels, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
+    V2 pos = cell_coord_to_world(game, car->cell_x, car->cell_y) + car->offset + screen_offset;
+    draw_circle(game, pixels, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
 
 void
-render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_region,
-                     V2 screen_offset, Mouse mouse, Maze * maze, QuadTree * tree)
+render_cells_in_tree(Game * game, PixelColor * pixels, Rectangle render_region,
+                     V2 screen_offset, Maze * maze, QuadTree * tree)
 {
   bool selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
   //                  tree...
-  // if (tree && overlaps(render_region - 140000, (tree->bounds * setup->cell_spacing)))
-  // if (tree && overlaps(render_region - 15000, (tree->bounds * setup->cell_spacing)))
-  if (tree && overlaps(render_region, (tree->bounds * setup->cell_spacing) + screen_offset))
+  // if (tree && overlaps(render_region - 140000, (tree->bounds * game->cell_spacing)))
+  // if (tree && overlaps(render_region - 15000, (tree->bounds * game->cell_spacing)))
+  if (tree && overlaps(render_region, (tree->bounds * game->cell_spacing) + screen_offset))
   {
 
     for (uint32_t cell_index = 0;
@@ -340,14 +339,14 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
           break;
       }
 
-      uint32_t cell_radius = (setup->cell_spacing - (setup->cell_spacing * setup->cell_margin)) / 2;
+      uint32_t cell_radius = (game->cell_spacing - (game->cell_spacing * game->cell_margin)) / 2;
 
       // NOTE: Tile centred on coord
-      V2 world_pos = cell_coord_to_world(setup, cell->x, cell->y);
+      V2 world_pos = cell_coord_to_world(game, cell->x, cell->y);
       V2 world_screen_pos = world_pos + screen_offset;
       Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
 
-      if (in_rectangle(((V2){mouse.x, mouse.y} * setup->world_per_pixel), cell_bounds))
+      if (in_rectangle(((V2){game->mouse.x, game->mouse.y} * game->world_per_pixel), cell_bounds))
       {
         selected = true;
         if (color.r <= (0xFF - 0x20))
@@ -364,79 +363,77 @@ render_cells_in_tree(GameSetup * setup, PixelColor * pixels, Rectangle render_re
         }
       }
 
-      draw_box(setup, pixels, render_region, cell_bounds, color);
+      draw_box(game, pixels, render_region, cell_bounds, color);
     }
 
 #ifdef DEBUG
-    V4 box_color = (V4){0.1f, 0, 0, 0};
-    Rectangle world_tree_bounds = (tree->bounds * setup->cell_spacing) + screen_offset;
+    V4 box_color = (V4){0.5f, 0, 0, 0};
+    Rectangle world_tree_bounds = (tree->bounds * game->cell_spacing) + screen_offset;
     if (selected)
     {
       box_color.a = 1;
       box_color.r = 0xFF;
     }
-    draw_box_outline(setup, pixels, render_region, world_tree_bounds, box_color);
+    draw_box_outline(game, pixels, render_region, world_tree_bounds, box_color);
 #endif
 
-    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->top_right);
-    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->top_left);
-    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->bottom_right);
-    render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, tree->bottom_left);
+    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->top_right);
+    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->top_left);
+    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->bottom_right);
+    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->bottom_left);
   }
 }
 
 
 void
-render_cells(GameSetup * setup, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Mouse mouse, Maze * maze)
+render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Maze * maze)
 {
-  render_cells_in_tree(setup, pixels, render_region, screen_offset, mouse, maze, &(maze->tree));
+  render_cells_in_tree(game, pixels, render_region, screen_offset, maze, &(maze->tree));
 }
 
 
 void
-update_and_render(GameMemory * game_memory, GameSetup * setup, PixelColor * pixels, uint32_t df, uint32_t frame_count,
-                  Keys keys, Mouse mouse, Maze * maze, Cars * cars)
+update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uint32_t df, uint32_t frame_count,
+                  Keys keys, Maze * maze, Cars * cars)
 {
-  uint32_t old_world_per_pixel = setup->world_per_pixel;
-  setup->zoom += mouse.scroll.y;
-  setup->world_per_pixel = squared(setup->zoom);
-  if (mouse.scroll.y > 0 && ((setup->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
-                             (setup->world_per_pixel < old_world_per_pixel)))
-  {
-    setup->zoom -= mouse.scroll.y;
-    mouse.scroll.y = 0;
-    setup->world_per_pixel = MAX_WORLD_PER_PIXEL;
-  }
-  else if (mouse.scroll.y < 0 && ((setup->world_per_pixel < MIN_WORLD_PER_PIXEL) ||
-                                  (setup->world_per_pixel > old_world_per_pixel)))
-  {
-    setup->zoom -= mouse.scroll.y;
-    mouse.scroll.y = 0;
-    setup->world_per_pixel = MIN_WORLD_PER_PIXEL;
-  }
-
   if (frame_count % 2 == 0)
   {
-    update_cars(df, frame_count, keys, mouse, maze, cars);
+    update_cars(df, frame_count, keys, maze, cars);
   }
 
-  V2 screen_offset = (V2){0.5, 0.5} * setup->cell_spacing;
-  if (mouse.l_down)
+  uint32_t old_world_per_pixel = game->world_per_pixel;
+  game->zoom += game->mouse.scroll.y;
+  game->world_per_pixel = squared(game->zoom);
+  if (game->mouse.scroll.y > 0 && ((game->world_per_pixel > MAX_WORLD_PER_PIXEL) ||
+                             (game->world_per_pixel < old_world_per_pixel)))
   {
-    setup->last_mouse = (V2){mouse.x, mouse.y};
+    game->zoom -= game->mouse.scroll.y;
+    game->world_per_pixel = MAX_WORLD_PER_PIXEL;
+  }
+  else if (game->mouse.scroll.y < 0 && ((game->world_per_pixel < MIN_WORLD_PER_PIXEL) ||
+                                  (game->world_per_pixel > old_world_per_pixel)))
+  {
+    game->zoom -= game->mouse.scroll.y;
+    game->world_per_pixel = MIN_WORLD_PER_PIXEL;
+  }
+
+  V2 screen_offset = (V2){0.5, 0.5} * game->cell_spacing;
+  if (game->mouse.l_down)
+  {
+    game->last_mouse_pos = (V2){game->mouse.x, game->mouse.y};
   }
   // NOTE: If mouse hasn't been set yet.
-  if (setup->last_mouse >= (V2){0, 0})
+  if (game->last_mouse_pos >= (V2){0, 0})
   {
-    screen_offset += (setup->world_per_pixel * ((V2){setup->window_width, setup->window_height} - setup->last_mouse)) - ((V2){maze->width, maze->height} * setup->cell_spacing * 0.5f);
+    screen_offset += (game->world_per_pixel * ((V2){game->window_width, game->window_height} - game->last_mouse_pos)) - ((V2){maze->width, maze->height} * game->cell_spacing * 0.5f);
   }
 
   Rectangle render_region;
   render_region.start = (V2){0, 0};
-  render_region.end = (V2){setup->window_width, setup->window_height} * setup->world_per_pixel;
+  render_region.end = (V2){game->window_width, game->window_height} * game->world_per_pixel;
 
-  render_cells(setup, pixels, render_region, screen_offset, mouse, maze);
-  render_cars(setup, pixels, render_region, screen_offset, df, cars);
+  render_cells(game, pixels, render_region, screen_offset, maze);
+  render_cars(game, pixels, render_region, screen_offset, df, cars);
 }
 
 
@@ -481,29 +478,35 @@ main(int32_t argc, char * argv[])
     window_height = window_rect.h;
   }
 
-  GameSetup setup_;
-  GameSetup * setup = &setup_;
-  setup->window_width = window_width;
-  setup->window_height = window_height;
+  Game game_;
+  Game * game = &game_;
+  game->window_width = window_width;
+  game->window_height = window_height;
+  printV((V2){game->window_width, game->window_height});
+
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
-  setup->zoom = 16; // NOTE: Square-root of MIN_WORLD_PER_PIXEL: gives max size.
-  setup->cell_spacing = 100000;
-  setup->cell_margin = 0.2f;
-  setup->last_mouse = (V2){-1, -1};
+  game->zoom = 16; // NOTE: Square-root of MIN_WORLD_PER_PIXEL: gives max size.
+  game->cell_spacing = 100000;
+  game->cell_margin = 0.2f;
+  game->last_mouse_pos = (V2){-1, -1};
 
-  printV((V2){setup->window_width, setup->window_height});
+  game->mouse.x = -1;
+  game->mouse.y = -1;
+  game->mouse.l_down = false;
+  game->mouse.r_down = false;
+  game->mouse.scroll = (V2){0, 0};
 
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_Texture * texture = SDL_CreateTexture(renderer,
-    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, setup->window_width, setup->window_height);
+    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, game->window_width, game->window_height);
 
   // Init game memory
   GameMemory game_memory;
   init_mem(&game_memory, TOTAL_MEMORY);
 
   // The pixel buffer
-  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (setup->window_width * setup->window_height));
+  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (game->window_width * game->window_height));
 
   Maze * maze = parse(&game_memory, MAZE_FILENAME);
 
@@ -561,13 +564,6 @@ main(int32_t argc, char * argv[])
   keys.a_down = false;
   keys.s_down = false;
   keys.d_down = false;
-
-  Mouse mouse;
-  mouse.x = -1;
-  mouse.y = -1;
-  mouse.l_down = false;
-  mouse.r_down = false;
-  mouse.scroll = (V2){0, 0};
 
   // For average FPS measurement
   uint64_t last_measure = get_us();
@@ -680,8 +676,8 @@ main(int32_t argc, char * argv[])
         case SDL_MOUSEMOTION:
         {
           // NOTE: Remember our Y is inverted from SDL
-          mouse.x = event.motion.x;
-          mouse.y = setup->window_height - event.motion.y;
+          game->mouse.x = event.motion.x;
+          game->mouse.y = game->window_height - event.motion.y;
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -689,10 +685,10 @@ main(int32_t argc, char * argv[])
           switch (event.button.button)
           {
             case SDL_BUTTON_LEFT:
-              mouse.l_down = true;
+              game->mouse.l_down = true;
               break;
             case SDL_BUTTON_RIGHT:
-              mouse.r_down = true;
+              game->mouse.r_down = true;
               break;
           }
         } break;
@@ -702,17 +698,17 @@ main(int32_t argc, char * argv[])
           switch (event.button.button)
           {
             case SDL_BUTTON_LEFT:
-              mouse.l_down = false;
+              game->mouse.l_down = false;
               break;
             case SDL_BUTTON_RIGHT:
-              mouse.r_down = false;
+              game->mouse.r_down = false;
               break;
           }
         } break;
         case SDL_MOUSEWHEEL:
         {
-          mouse.scroll.x -= event.wheel.x;
-          mouse.scroll.y -= event.wheel.y;
+          game->mouse.scroll.x -= event.wheel.x;
+          game->mouse.scroll.y -= event.wheel.y;
         } break;
       }
     }
@@ -733,53 +729,53 @@ main(int32_t argc, char * argv[])
       frame_count++;
 
       for (uint32_t screen_y = 0;
-           screen_y < setup->window_height;
+           screen_y < game->window_height;
            screen_y++)
       {
         for (uint32_t screen_x = 0;
-             screen_x < setup->window_width;
+             screen_x < game->window_width;
              screen_x++)
         {
-          pixels[screen_y * setup->window_width + screen_x] = (PixelColor){255, 255, 255};
+          pixels[screen_y * game->window_width + screen_x] = (PixelColor){255, 255, 255};
         }
       }
 
-      update_and_render(&game_memory, setup, pixels, delta_frame, frame_count, keys, mouse, maze, cars);
+      update_and_render(&game_memory, game, pixels, delta_frame, frame_count, keys, maze, cars);
 
       // Flip pixels
       for (uint32_t pixel_y = 0;
-           pixel_y < setup->window_height / 2;
+           pixel_y < game->window_height / 2;
            pixel_y++)
       {
         for (uint32_t pixel_x = 0;
-             pixel_x < setup->window_width;
+             pixel_x < game->window_width;
              pixel_x++)
         {
-          uint32_t top_pixel_pos = pixel_y * setup->window_width + pixel_x;
+          uint32_t top_pixel_pos = pixel_y * game->window_width + pixel_x;
           PixelColor top_pixel = pixels[top_pixel_pos];
 
-          uint32_t bottom_pixel_pos = (setup->window_height - pixel_y - 1) * setup->window_width + pixel_x;
+          uint32_t bottom_pixel_pos = (game->window_height - pixel_y - 1) * game->window_width + pixel_x;
 
           pixels[top_pixel_pos] = pixels[bottom_pixel_pos];
           pixels[bottom_pixel_pos] = top_pixel;
         }
       }
 
-      SDL_UpdateTexture(texture, NULL, pixels, setup->window_width * sizeof(PixelColor));
+      SDL_UpdateTexture(texture, NULL, pixels, game->window_width * sizeof(PixelColor));
 
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
     }
 
-    mouse.scroll -= mouse.scroll / 6;
+    game->mouse.scroll -= game->mouse.scroll / 6.0f;
     float epsilon = 3.0f;
-    if (abs(mouse.scroll.y) < epsilon)
+    if (abs(game->mouse.scroll.y) < epsilon)
     {
-      mouse.scroll.y = 0;
+      game->mouse.scroll.y = 0;
     }
-    if (abs(mouse.scroll.x) < epsilon)
+    if (abs(game->mouse.scroll.x) < epsilon)
     {
-      mouse.scroll.x = 0;
+      game->mouse.scroll.x = 0;
     }
   }
 
