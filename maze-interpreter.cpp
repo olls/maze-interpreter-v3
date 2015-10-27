@@ -519,7 +519,8 @@ main(int32_t argc, char * argv[])
 
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
-  game->zoom = 16; // NOTE: Square-root of MIN_WORLD_PER_PIXEL: gives max size.
+  // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
+  game->zoom = 64;
   game->cell_spacing = 100000;
   game->cell_margin = 0.2f;
   game->last_mouse_pos = (V2){-1, -1};
