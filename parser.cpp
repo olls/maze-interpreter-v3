@@ -19,8 +19,7 @@ Maze *
 parse(GameMemory * game_memory, const char * filename)
 {
   // TODO: How to get it the right way up?!
-  // TODO: This (and everything else?) needs to deal with non square
-  //       mazes.
+  // TODO: Deal with gaps.
 
   FILE * file = fopen(filename, "r");
   assert(file != NULL);
