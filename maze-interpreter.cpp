@@ -287,8 +287,7 @@ render_cars(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen
 
 
 void
-render_cells_in_tree(Game * game, PixelColor * pixels, Rectangle render_region,
-                     V2 screen_offset, Maze * maze, QuadTree * tree)
+render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, QuadTree * tree)
 {
   bool selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
@@ -379,18 +378,11 @@ render_cells_in_tree(Game * game, PixelColor * pixels, Rectangle render_region,
     draw_box_outline(game, pixels, render_region, world_tree_bounds, box_color);
 #endif
 
-    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->top_right);
-    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->top_left);
-    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->bottom_right);
-    render_cells_in_tree(game, pixels, render_region, screen_offset, maze, tree->bottom_left);
+    render_cells(game, pixels, render_region, screen_offset, tree->top_right);
+    render_cells(game, pixels, render_region, screen_offset, tree->top_left);
+    render_cells(game, pixels, render_region, screen_offset, tree->bottom_right);
+    render_cells(game, pixels, render_region, screen_offset, tree->bottom_left);
   }
-}
-
-
-void
-render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Maze * maze)
-{
-  render_cells_in_tree(game, pixels, render_region, screen_offset, maze, &(maze->tree));
 }
 
 
@@ -399,8 +391,9 @@ add_start_cars(QuadTree * tree, Cars * cars)
 {
   // TODO: - Can we add cars in the parser...?
   //       - Noooo, add the cars in update_cells, pass something in,
-  //         or set a flag in the cell make it only happen once? Or 
+  //         or set a flag in the cell make it only happen once? Or
   //         not...
+  //       - It will probably be used for more than just start cars?
   //       - This recursive structure is so simple maybe it doesn't
   //         matter that it is duplicated?
   if (tree)
@@ -465,7 +458,7 @@ update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uin
   render_region.start = (V2){0, 0};
   render_region.end = (V2){game->window_width, game->window_height} * game->world_per_pixel;
 
-  render_cells(game, pixels, render_region, screen_offset, maze);
+  render_cells(game, pixels, render_region, screen_offset, &(maze->tree));
   render_cars(game, pixels, render_region, screen_offset, df, cars);
 }
 
@@ -524,7 +517,7 @@ main(int32_t argc, char * argv[])
   game->cell_spacing = 100000;
   game->cell_margin = 0.2f;
   game->last_mouse_pos = (V2){-1, -1};
-  
+
   game->mouse.x = -1;
   game->mouse.y = -1;
   game->mouse.l_down = false;
