@@ -395,6 +395,37 @@ render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 scree
 
 
 void
+add_start_cars(QuadTree * tree, Cars * cars)
+{
+  // TODO: - Can we add cars in the parser...?
+  //       - Noooo, add the cars in update_cells, pass something in,
+  //         or set a flag in the cell make it only happen once? Or 
+  //         not...
+  //       - This recursive structure is so simple maybe it doesn't
+  //         matter that it is duplicated?
+  if (tree)
+  {
+    for (uint32_t cell_index = 0;
+         cell_index < tree->used;
+         ++cell_index)
+    {
+      Cell * cell = tree->cells + cell_index;
+
+      if (cell->type == CELL_START)
+      {
+        add_car(cars, cell->x, cell->y);
+      }
+    }
+
+    add_start_cars(tree->top_right, cars);
+    add_start_cars(tree->top_left, cars);
+    add_start_cars(tree->bottom_right, cars);
+    add_start_cars(tree->bottom_left, cars);
+  }
+}
+
+
+void
 update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Maze * maze, Cars * cars)
 {
@@ -515,45 +546,7 @@ main(int32_t argc, char * argv[])
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
 
-  // TODO: When the cells are stored spatially properly, use this for
-  //       looping through the cells:
-  // // Add start cars
-  // MazeBlock * block = maze->start;
-  // for (uint32_t block_index = 0;
-  //      block->next;
-  //      ++block)
-  // {
-  //   Cell * cell = block->cells;
-  //   for (uint32_t cell_index = 0;
-  //        cell_index < array_count(block->cells);
-  //        ++cell_index, ++cell)
-  //   {
-  //     if (cell->type == CELL_START)
-  //     {
-  //       Car * car = add_car(cars, cell->x, cell->y);
-  //     }
-  //   }
-  //   block = block->next;
-  // }
-
-  // TODO: This is pretty dumb, can we add cars in the parser...?
-  //       Noo, add the cars in update_cells, pass something in, or set a
-  //       flag in the cell make it only happen once? Or not...
-  for (uint32_t cell_y = 0;
-       cell_y < maze->height;
-       ++cell_y)
-  {
-    for (uint32_t cell_x = 0;
-         cell_x < maze->width;
-         ++cell_x)
-    {
-      Cell * cell = get_cell(maze, cell_x, cell_y);
-      if (cell->type == CELL_START)
-      {
-        add_car(cars, cell_x, cell_y);
-      }
-    }
-  }
+  add_start_cars(&(maze->tree), cars);
 
   Keys keys;
   keys.space_down = false;

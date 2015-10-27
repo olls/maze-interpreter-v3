@@ -126,8 +126,6 @@ parse(GameMemory * game_memory, const char * filename)
       else
       {
         Cell * cell = get_cell(maze, x, y, game_memory);
-
-        // NOTE: Doing them individually to avoid overwriting the x, y set in get_cell.
         cell->type = new_cell.type;
         cell->data = new_cell.data;
 
@@ -159,6 +157,8 @@ parse(GameMemory * game_memory, const char * filename)
 
   // Account for last line
   // TODO: IMORTANT: This is still broken! >:(
+  // TODO: IMPORTANT: This is complete rubbish! It gets an extra line
+  //                  sometimes!! WHY?!?
   printf("\n");
   maze->height = y + 1;
 
