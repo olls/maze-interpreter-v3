@@ -119,10 +119,12 @@ parse(GameMemory * game_memory, const char * filename)
       {
         if (bytes_read <= 1)
         {
-          // We must have reached the end of the file: there are no more characters OR whitespace.
+          // We must have reached the end of the file: there are no
+          //   more characters OR whitespace.
           break;
         }
-        // If we havent't found a valid cell only move on by one char instead of two.
+        // If we haven't found a valid cell only move on by one char
+        //   instead of two.
         offset += bytes_read - 1;
       }
       else
