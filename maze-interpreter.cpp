@@ -541,7 +541,16 @@ main(int32_t argc, char * argv[])
   // The pixel buffer
   PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (game->window_width * game->window_height));
 
-  Maze * maze = parse(&game_memory, MAZE_FILENAME);
+  Maze * maze;
+  if (argc > 1)
+  {
+    maze = parse(&game_memory, argv[1]);
+  }
+  else
+  {
+    maze = parse(&game_memory, MAZE_FILENAME);
+  }
+
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
