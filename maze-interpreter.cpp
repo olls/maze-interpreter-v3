@@ -194,24 +194,26 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
       // TODO: Maybe grab the cells in chunks, so we don't have to get the
       //       cells multiple times...
 
-      bool walls[4];
-      walls[UP]    = get_cell(maze, car->cell_x, (car->cell_y + 1))->type == CELL_WALL;
-      walls[DOWN]  = get_cell(maze, car->cell_x, (car->cell_y - 1))->type == CELL_WALL;
-      walls[LEFT]  = get_cell(maze, (car->cell_x - 1), car->cell_y)->type == CELL_WALL;
-      walls[RIGHT] = get_cell(maze, (car->cell_x + 1), car->cell_y)->type == CELL_WALL;
+      V2 dir_components[] = {{ 0, 1}, {0, -1},
+                             {-1, 0}, {1,  0}};
 
-      Direction test_direction;
       bool can_move = false;
       for (uint32_t direction_index = 0;
            direction_index < 4;
            direction_index++)
       {
-        test_direction = directions[direction_index];
-        if (!walls[test_direction])
+        Direction test_direction = directions[direction_index];
+        V2 test_comp = dir_components[test_direction];
+
+        Cell * test_cell = get_cell(maze, (car->cell_x + test_comp.x), (car->cell_y + test_comp.y));
+        if (test_cell)
         {
-          can_move = true;
-          car->direction = test_direction;
-          break;
+          if (test_cell->type != CELL_WALL)
+          {
+            can_move = true;
+            car->direction = test_direction;
+            break;
+          }
         }
       }
 

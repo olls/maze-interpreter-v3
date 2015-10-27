@@ -33,10 +33,6 @@ create_tree(GameMemory * game_memory, Rectangle bounds)
     tree = (QuadTree *)take_struct_mem(game_memory, QuadTree, 1);
     tree->bounds = bounds;
   }
-  else
-  {
-    assert(!"Cell doesn't exist yet, need to pass game_memory to create new one!");
-  }
   return tree;
 }
 
@@ -46,8 +42,8 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
 {
   QuadTree * tree = &(maze->tree);
 
-  Cell * cell;
-  while (!(cell = get_cell(tree, x, y)))
+  Cell * cell = 0;
+  while (tree && !(cell = get_cell(tree, x, y)))
   {
     Rectangle top_right_bounds    = get_top_right(tree->bounds);
     Rectangle top_left_bounds     = get_top_left(tree->bounds);
