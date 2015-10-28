@@ -200,8 +200,8 @@ struct Car
   Direction unpause_direction;
 };
 
+// TODO: We probably want something better than this.
 #define MAX_CARS (10000)
-
 struct Cars
 {
   Car cars[MAX_CARS];
@@ -236,6 +236,7 @@ struct Cell
   enum CellType type;
   union {
     uint32_t pause;
+    uint32_t function;
   } data;
 };
 

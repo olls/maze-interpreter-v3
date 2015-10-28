@@ -15,6 +15,41 @@ isLetter(char character)
 }
 
 
+const uint32_t MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
+
+uint32_t
+get_function_index(char name[2])
+{
+  uint32_t result;
+
+  if (name[0] <= 'Z')
+  {
+    result = name[0] - 'A';
+  }
+  else
+  {
+    result = name[0] - 'a';
+  }
+  result *= ((26 * 2) + 10);  // The number of combinations in the second digit.
+
+  if (name[1] <= '9')
+  {
+    result += name[1] - '0';
+  }
+  else if (name[1] <=  'Z')
+  {
+    result += name[1] - 'A';
+  }
+  else
+  {
+    result += name[1] - 'a';
+  }
+
+  assert(result < MAX_FUNCTIONS);
+  return result;
+}
+
+
 Maze *
 parse(GameMemory * game_memory, const char * filename)
 {
@@ -69,9 +104,11 @@ parse(GameMemory * game_memory, const char * filename)
       {
         new_cell.type = CELL_SPLITTER;
       }
-      else if (isLetter(potential_cell[0]) && isLetter(potential_cell[1]))
+      else if (isLetter(potential_cell[0]) && (isLetter(potential_cell[1]) ||
+                                               isNum(potential_cell[1])))
       {
         new_cell.type = CELL_FUNCTION;
+        new_cell.data.function = get_function_index(potential_cell);
       }
       else if ((potential_cell[0] == '-') && (potential_cell[1] == '-'))
       {
@@ -163,7 +200,7 @@ parse(GameMemory * game_memory, const char * filename)
   }
 
   // Account for last line
-  // TODO: IMORTANT: This is still broken! >:(
+  // TODO: IMPORTANT: This is still broken! >:(
   // TODO: IMPORTANT: This is complete rubbish! It gets an extra line
   //                  sometimes!! WHY?!?
   printf("\n");
