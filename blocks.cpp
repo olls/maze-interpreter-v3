@@ -1,3 +1,6 @@
+#include "blocks.h"
+
+
 Cell *
 get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 {

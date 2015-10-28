@@ -1,33 +1,3 @@
-enum CellType
-{
-  CELL_NULL,
-  CELL_START,
-  CELL_PATH,
-  CELL_WALL,
-  CELL_HOLE,
-  CELL_SPLITTER,
-  CELL_FUNCTION,
-  CELL_ONCE,
-  CELL_SIGNAL,
-  CELL_INC,
-  CELL_DEC,
-  CELL_UP,
-  CELL_DOWN,
-  CELL_LEFT,
-  CELL_RIGHT,
-  CELL_PAUSE
-};
-
-struct Cell
-{
-  uint32_t x;
-  uint32_t y;
-  enum CellType type;
-  union {
-    uint32_t pause;
-  } data;
-};
-
 const uint32_t QUAD_STORE_N = 16;
 struct QuadTree
 {
@@ -41,6 +11,7 @@ struct QuadTree
   QuadTree * bottom_right;
   QuadTree * bottom_left;
 };
+
 
 struct Maze
 {
