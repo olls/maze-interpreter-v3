@@ -28,9 +28,12 @@ add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
   ++cars->next_free;
 
   car->update = false;
+  car->value = 0;
   car->cell_x = cell_x;
   car->cell_y = cell_y;
   car->direction = direction;
+  car->pause_left = 0;
+  car->unpause_direction = STATIONARY;
 
   return car;
 }
@@ -150,8 +153,28 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
 
         case (CELL_PAUSE):
         {
-          printf("Pause\n");
-          // TODO: Actually pause...
+          if (car->pause_left != 0)
+          {
+            --car->pause_left;
+          }
+
+          if (car->pause_left == 0)
+          {
+            if (car->unpause_direction == STATIONARY)
+            {
+              // Start Pause
+              car->pause_left = current_cell->data.pause;
+              car->unpause_direction = car->direction;
+              car->direction = STATIONARY;
+            }
+            else
+            {
+              // End Pause
+              car->direction = car->unpause_direction;
+              car->unpause_direction = STATIONARY;
+            }
+          }
+          printf("Pause: %d/%d\n", car->pause_left, current_cell->data.pause);
         } break;
       }
     }

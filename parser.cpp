@@ -112,7 +112,10 @@ parse(GameMemory * game_memory, const char * filename)
       else if (isNum(potential_cell[0]) && isNum(potential_cell[1]))
       {
         new_cell.type = CELL_PAUSE;
-        new_cell.data = 0;
+
+        uint32_t digit0 = potential_cell[0] - '0';
+        uint32_t digit1 = potential_cell[1] - '0';
+        new_cell.data.pause = (10 * digit0) + digit1;
       }
 
       if (new_cell.type == CELL_NULL)

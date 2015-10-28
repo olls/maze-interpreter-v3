@@ -196,6 +196,9 @@ struct Car
   V2 offset;
 
   Direction direction;
+
+  uint32_t pause_left;
+  Direction unpause_direction;
 };
 
 #define MAX_CARS (10000)
