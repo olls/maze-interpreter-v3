@@ -15,8 +15,6 @@ isLetter(char character)
 }
 
 
-const uint32_t MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
-
 uint32_t
 get_function_index(char name[2])
 {
@@ -69,6 +67,8 @@ parse(GameMemory * game_memory, const char * filename)
   uint32_t x = 0;
   uint32_t y = 0;
 
+  Function functions[MAX_FUNCTIONS];
+
   char buffer[256];
   while (fgets(buffer, sizeof(buffer), file) != NULL)
   {
@@ -107,8 +107,12 @@ parse(GameMemory * game_memory, const char * filename)
       else if (isLetter(potential_cell[0]) && (isLetter(potential_cell[1]) ||
                                                isNum(potential_cell[1])))
       {
+        uint32_t function_index = get_function_index(potential_cell);
+        Function * function = functions + function_index;
+        function->type = FunctionAssignment;
+        
         new_cell.type = CELL_FUNCTION;
-        new_cell.data.function = get_function_index(potential_cell);
+        new_cell.data.function_index = function_index;
       }
       else if ((potential_cell[0] == '-') && (potential_cell[1] == '-'))
       {

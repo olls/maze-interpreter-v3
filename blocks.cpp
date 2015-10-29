@@ -1,4 +1,4 @@
-#include "blocks.h"
+#include "maze.h"
 
 
 Cell *
