@@ -55,6 +55,9 @@ parse(GameMemory * game_memory, const char * filename)
   // TODO: Deal with gaps.
   // TODO: Also, don't forget it isn't parsing tree-big properly...
 
+  // TODO: IMPORTANT: It can split a cell in two stupid! This parsing function
+  //                    really needs unstupiding. >:(
+
   FILE * file = fopen(filename, "r");
   assert(file != NULL);
 
@@ -66,8 +69,6 @@ parse(GameMemory * game_memory, const char * filename)
 
   uint32_t x = 0;
   uint32_t y = 0;
-
-  Function functions[MAX_FUNCTIONS];
 
   char buffer[256];
   while (fgets(buffer, sizeof(buffer), file) != NULL)
@@ -108,11 +109,21 @@ parse(GameMemory * game_memory, const char * filename)
                                                isNum(potential_cell[1])))
       {
         uint32_t function_index = get_function_index(potential_cell);
-        Function * function = functions + function_index;
-        function->type = FunctionAssignment;
-        
-        new_cell.type = CELL_FUNCTION;
-        new_cell.data.function_index = function_index;
+        uint32_t function_parse_bytes_read = 0;
+        if ((sscanf((buffer + offset + bytes_read), " -> %n", &function_parse_bytes_read) != EOF) && (function_parse_bytes_read > 0))
+        {
+          Function * function = maze->functions + function_index;
+          function->type = FunctionAssignment;
+          function->name[0] = potential_cell[0];
+          function->name[1] = potential_cell[1];
+
+          bytes_read += function_parse_bytes_read;
+        }
+        else
+        {
+          new_cell.type = CELL_FUNCTION;
+          new_cell.data.function_index = function_index;
+        }
       }
       else if ((potential_cell[0] == '-') && (potential_cell[1] == '-'))
       {

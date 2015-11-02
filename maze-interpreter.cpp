@@ -101,7 +101,8 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
 
         case (CELL_FUNCTION):
         {
-          printf("Function\n");
+          Function * function = maze->functions + current_cell->data.function_index;
+          printf("Function: %s\n", function->name);
         } break;
 
         case (CELL_ONCE):

@@ -58,6 +58,7 @@ const uint32_t MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
 struct Function
 {
   FunctionType type;
+  char name[2];
 };
 
 
