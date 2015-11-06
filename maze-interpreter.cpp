@@ -187,6 +187,9 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
   }
 
   // TODO: Stop looping through them so many times!
+  //         I need to deal with all the movements, before I update 
+  //         the cars... Therefore two loops are probably 
+  //         necessary...
 
   car = cars->cars;
   for (uint32_t car_index = 0;
@@ -303,7 +306,6 @@ render_cars(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen
        ++car_index)
   {
     Car * car = cars->cars + car_index;
-    // NOTE: Car centred on coord
     V2 pos = cell_coord_to_world(game, car->cell_x, car->cell_y) + car->offset + screen_offset;
     draw_circle(game, pixels, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
   }

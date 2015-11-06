@@ -53,8 +53,8 @@ parse(GameMemory * game_memory, const char * filename)
 {
   // TODO: How to get it the right way up?!
   // TODO: Deal with gaps.
-  // TODO: Also, don't forget it isn't parsing tree-big properly...
 
+  // TODO: Also, don't forget it isn't parsing tree-big properly...
   // TODO: IMPORTANT: It can split a cell in two stupid! This parsing function
   //                    really needs unstupiding. >:(
 
