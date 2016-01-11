@@ -415,6 +415,7 @@ render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 scree
 void
 add_start_cars(QuadTree * tree, Cars * cars)
 {
+  // IMPORTANT: Too slow!
   // TODO: - Can we add cars in the parser...?
   //       - Noooo, add the cars in update_cells, pass something in,
   //         or set a flag in the cell make it only happen once? Or
@@ -494,47 +495,8 @@ main(int32_t argc, char * argv[])
 {
   srand(time(NULL));
 
-  SDL_Init(SDL_INIT_VIDEO);
-
-  SDL_WindowFlags flags = SDL_WINDOW_SHOWN;
-  uint32_t window_width = 0;
-  uint32_t window_height = 0;
-  if (FULLSCREEN)
-  {
-    flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
-  }
-  else
-  {
-    window_width = 1024;
-    window_height = 600;
-  }
-
-  SDL_Window * window = SDL_CreateWindow("A Maze Thingy",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, flags);
-
-  if (FULLSCREEN)
-  {
-    int32_t display_index = SDL_GetWindowDisplayIndex(window);
-    if (display_index < 0)
-    {
-      printf("Failed to get display index.\n");
-      exit(1);
-    }
-    SDL_Rect window_rect;
-    if (SDL_GetDisplayBounds(display_index, &window_rect))
-    {
-      printf("Failed to get display bounds.\n");
-      exit(1);
-    }
-    window_width = window_rect.w;
-    window_height = window_rect.h;
-  }
-
   Game game_;
   Game * game = &game_;
-  game->window_width = window_width;
-  game->window_height = window_height;
-  printV((V2){game->window_width, game->window_height});
 
   // TODO: Should world coords be floats now we are using uint32s for
   //       the cell position?
@@ -550,16 +512,8 @@ main(int32_t argc, char * argv[])
   game->mouse.r_down = false;
   game->mouse.scroll = (V2){0, 0};
 
-  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
-  SDL_Texture * texture = SDL_CreateTexture(renderer,
-    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, game->window_width, game->window_height);
-
-  // Init game memory
   GameMemory game_memory;
   init_mem(&game_memory, TOTAL_MEMORY);
-
-  // The pixel buffer
-  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (game->window_width * game->window_height));
 
   Maze * maze;
   if (argc > 1)
@@ -571,11 +525,52 @@ main(int32_t argc, char * argv[])
     maze = parse(&game_memory, MAZE_FILENAME);
   }
 
+  printf("Parsing Done\n");
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
 
   add_start_cars(&(maze->tree), cars);
+
+  SDL_Init(SDL_INIT_VIDEO);
+
+  SDL_WindowFlags flags = SDL_WINDOW_SHOWN;
+  if (FULLSCREEN)
+  {
+    flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
+  }
+  else
+  {
+    game->window_width = 1024;
+    game->window_height = 600;
+  }
+
+  SDL_Window * window = SDL_CreateWindow("A Maze Thingy",
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, game->window_width, game->window_height, flags);
+
+  if (FULLSCREEN)
+  {
+    int32_t display_index = SDL_GetWindowDisplayIndex(window);
+    if (display_index < 0)
+    {
+      printf("Failed to get display index.\n");
+      exit(1);
+    }
+    SDL_Rect window_rect;
+    if (SDL_GetDisplayBounds(display_index, &window_rect))
+    {
+      printf("Failed to get display bounds.\n");
+      exit(1);
+    }
+    game->window_width = window_rect.w;
+    game->window_height = window_rect.h;
+  }
+
+  PixelColor * pixels = take_struct_mem(&game_memory, PixelColor, (game->window_width * game->window_height));
+
+  SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+  SDL_Texture * texture = SDL_CreateTexture(renderer,
+    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, game->window_width, game->window_height);
 
   Keys keys;
   keys.space_down = false;
