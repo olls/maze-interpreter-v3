@@ -64,6 +64,7 @@ struct Function
 
 struct Maze
 {
+  // TODO: Not actually used ATM, get rid of?
   uint32_t width;
   uint32_t height;
 

@@ -6,6 +6,7 @@ set_pixel(Game * game, PixelColor * pixels, uint32_t pixel_x, uint32_t pixel_y, 
   V3 prev_color = pixel_color_to_V3(pixels[pixel_pos]);
   V3 new_color = remove_alpha(color);
 
+  // TODO: Pre-multiplied alpha
   PixelColor alpha_blended = to_color((color.a * new_color) + ((1.0f - color.a) * prev_color));
   pixels[pixel_pos] = alpha_blended;
 }

@@ -393,7 +393,7 @@ render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 scree
       draw_box(game, pixels, render_region, cell_bounds, color);
     }
 
-#ifdef DEBUG
+#if 0
     V4 box_color = (V4){0.1f, 0, 0, 0};
     Rectangle world_tree_bounds = (tree->bounds * game->cell_spacing) + screen_offset;
     if (selected)
