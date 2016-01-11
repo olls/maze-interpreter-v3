@@ -42,7 +42,11 @@ add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
 void
 rm_car(Cars * cars, uint32_t car_index)
 {
-  cars[car_index] = cars[--cars->next_free];
+  --cars->next_free;
+  if (car_index != cars->next_free)
+  {
+    cars[car_index] = cars[cars->next_free];
+  }
 }
 
 
@@ -529,7 +533,7 @@ main(int32_t argc, char * argv[])
 
   // The car list
   Cars * cars = take_struct_mem(&game_memory, Cars, 1);
-
+  cars->next_free = 0;
   add_start_cars(&(maze->tree), cars);
 
   SDL_Init(SDL_INIT_VIDEO);

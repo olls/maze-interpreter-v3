@@ -49,9 +49,9 @@ const uint32_t MAX_WORLD_PER_PIXEL = 65536;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
-const char MAZE_FILENAME[] = "programs/tree-big.mz";
+// const char MAZE_FILENAME[] = "programs/tree-big.mz";
 // const char MAZE_FILENAME[] = "programs/non-square.mz";
-// const char MAZE_FILENAME[] = "test.mz";
+const char MAZE_FILENAME[] = "test.mz";
 
 
 struct GameMemory
@@ -201,7 +201,7 @@ struct Car
 };
 
 // TODO: We probably want something better than this.
-#define MAX_CARS (10000)
+#define MAX_CARS (1000)
 struct Cars
 {
   Car cars[MAX_CARS];
