@@ -81,7 +81,7 @@ parse(GameMemory * game_memory, const char * filename)
     exit(1);
   }
 
-  char * file = (char * )mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  char * file = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
   if (file == MAP_FAILED)
   {
     printf("Failed to open file.\n");
@@ -90,34 +90,33 @@ parse(GameMemory * game_memory, const char * filename)
 
   char cell_str[3] = {};
   char * f_ptr = file;
-  while (f_ptr < (file + sb.st_size))
+  char * f_end = f_ptr + sb.st_size;
+  while (f_ptr < f_end)
   {
     cell_str[0] = f_ptr[0];
     cell_str[1] = f_ptr[1];
-    
+
     Cell new_cell = {};
     new_cell.type = CELL_NULL;
 
-    if ((cell_str[0] == '^') &&
-        (cell_str[1] == '^'))
+    if (strncmp(cell_str, "^^", 2) == 0)
     {
       new_cell.type = CELL_START;
     }
-    else if ((cell_str[0] == '.') &&
-             (cell_str[1] == '.'))
+    else if (strncmp(cell_str, "..", 2) == 0)
     {
       new_cell.type = CELL_PATH;
     }
-    else if (((cell_str[0] == '#') && (cell_str[1] == '#')) ||
-             ((cell_str[0] == '`') && (cell_str[1] == '`')))
+    else if (strncmp(cell_str, "##", 2) == 0 ||
+             strncmp(cell_str, "``", 2) == 0)
     {
       new_cell.type = CELL_WALL;
     }
-    else if ((cell_str[0] == '(') && (cell_str[1] == ')'))
+    else if (strncmp(cell_str, "()", 2) == 0)
     {
       new_cell.type = CELL_HOLE;
     }
-    else if ((cell_str[0] == '<') && (cell_str[1] == '>'))
+    else if (strncmp(cell_str, "<>", 2) == 0)
     {
       new_cell.type = CELL_SPLITTER;
     }
@@ -144,15 +143,15 @@ parse(GameMemory * game_memory, const char * filename)
     {
       new_cell.type = CELL_ONCE;
     }
-    else if ((cell_str[0] == '*') && (cell_str[1] == '*'))
+    else if (strncmp(cell_str, "**", 2) == 0)
     {
       new_cell.type = CELL_SIGNAL;
     }
-    else if ((cell_str[0] == '>') && (cell_str[1] == '>'))
+    else if (strncmp(cell_str, ">>", 2) == 0)
     {
       new_cell.type = CELL_INC;
     }
-    else if ((cell_str[0] == '<') && (cell_str[1] == '<'))
+    else if (strncmp(cell_str, "<<", 2) == 0)
     {
       new_cell.type = CELL_DEC;
     }
