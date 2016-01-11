@@ -105,8 +105,8 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
 
         case (CELL_FUNCTION):
         {
-          Function * function = maze->functions + current_cell->data.function_index;
-          printf("Function: %s\n", function->name);
+          Function * function = maze->functions + current_cell->function_index;
+          printf("Function: %s, %d\n", function->name, (int)function->type);
         } break;
 
         case (CELL_ONCE):
@@ -168,7 +168,7 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
             if (car->unpause_direction == STATIONARY)
             {
               // Start Pause
-              car->pause_left = current_cell->data.pause;
+              car->pause_left = current_cell->pause;
               car->unpause_direction = car->direction;
               car->direction = STATIONARY;
             }
@@ -179,7 +179,7 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
               car->unpause_direction = STATIONARY;
             }
           }
-          printf("Pause: %d/%d\n", car->pause_left, current_cell->data.pause);
+          printf("Pause: %d/%d\n", car->pause_left, current_cell->pause);
         } break;
       }
     }

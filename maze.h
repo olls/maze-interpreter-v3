@@ -26,7 +26,7 @@ struct Cell
   union {
     uint32_t pause;
     uint32_t function_index;
-  } data;
+  };
 };
 
 

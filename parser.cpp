@@ -182,7 +182,7 @@ parse(GameMemory * game_memory, const char * filename)
 
       uint32_t digit0 = cell_str[0] - '0';
       uint32_t digit1 = cell_str[1] - '0';
-      new_cell.data.pause = (10 * digit0) + digit1;
+      new_cell.pause = (10 * digit0) + digit1;
     }
 
     if (new_cell.type == CELL_NULL)
