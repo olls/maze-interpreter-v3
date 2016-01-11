@@ -43,7 +43,6 @@ const uint32_t FPS = 60;
 const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
 
 // NOTE: 256 sub-pixel steps!
-//       MIN means biggest... think about it.
 const uint32_t MIN_WORLD_PER_PIXEL = 256;
 // const uint32_t MIN_WORLD_PER_PIXEL = 4096;
 const uint32_t MAX_WORLD_PER_PIXEL = 65536;
