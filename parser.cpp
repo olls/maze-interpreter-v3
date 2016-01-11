@@ -211,6 +211,7 @@ parse(GameMemory * game_memory, const char * filename)
       // printf("%s ", cell_str);
     }
   }
+  maze->height = y;
 
   printf("(%d, %d)\n", maze->width, maze->height);
 
