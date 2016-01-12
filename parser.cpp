@@ -143,13 +143,13 @@ parse(GameMemory * game_memory, const char * filename)
   uint32_t x = 0;
   uint32_t y = 0;
 
-  int fd = open(filename, O_RDONLY);
+  uint32_t fd = open(filename, O_RDONLY);
   if (fd == -1)
   {
     printf("Failed to open file.\n");
     exit(1);
   }
-  
+
   struct stat sb;
   if (fstat(fd, &sb) == -1)
   {

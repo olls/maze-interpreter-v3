@@ -106,7 +106,7 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
         case (CELL_FUNCTION):
         {
           Function * function = maze->functions + current_cell->function_index;
-          printf("Function: %s, %d\n", function->name, (int)function->type);
+          printf("Function: %s, %d\n", function->name, (uint32_t)function->type);
         } break;
 
         case (CELL_ONCE):
@@ -191,8 +191,8 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
   }
 
   // TODO: Stop looping through them so many times!
-  //         I need to deal with all the movements, before I update 
-  //         the cars... Therefore two loops are probably 
+  //         I need to deal with all the movements, before I update
+  //         the cars... Therefore two loops are probably
   //         necessary...
 
   car = cars->cars;
