@@ -225,8 +225,8 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
       // TODO: Maybe grab the cells in chunks, so we don't have to get the
       //       cells multiple times...
 
-      V2 dir_components[] = {{ 0, 1}, {0, -1},
-                             {-1, 0}, {1,  0}};
+      V2 dir_components[] = {{ 0, -1}, {0, 1},
+                             {-1,  0}, {1, 0}};
 
       bool can_move = false;
       for (uint32_t direction_index = 0;
@@ -254,12 +254,12 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
         {
           case UP:
           {
-            ++car->cell_y;
+            --car->cell_y;
           } break;
 
           case DOWN:
           {
-            --car->cell_y;
+            ++car->cell_y;
           } break;
 
           case LEFT:
@@ -698,9 +698,8 @@ main(int32_t argc, char * argv[])
 
         case SDL_MOUSEMOTION:
         {
-          // NOTE: Remember our Y is inverted from SDL
           game->mouse.x = event.motion.x;
-          game->mouse.y = game->window_height - event.motion.y;
+          game->mouse.y = event.motion.y;
         } break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -765,27 +764,7 @@ main(int32_t argc, char * argv[])
 
       update_and_render(&game_memory, game, pixels, delta_frame, frame_count, keys, maze, cars);
 
-      // Flip pixels
-      for (uint32_t pixel_y = 0;
-           pixel_y < game->window_height / 2;
-           pixel_y++)
-      {
-        for (uint32_t pixel_x = 0;
-             pixel_x < game->window_width;
-             pixel_x++)
-        {
-          uint32_t top_pixel_pos = pixel_y * game->window_width + pixel_x;
-          PixelColor top_pixel = pixels[top_pixel_pos];
-
-          uint32_t bottom_pixel_pos = (game->window_height - pixel_y - 1) * game->window_width + pixel_x;
-
-          pixels[top_pixel_pos] = pixels[bottom_pixel_pos];
-          pixels[bottom_pixel_pos] = top_pixel;
-        }
-      }
-
       SDL_UpdateTexture(texture, NULL, pixels, game->window_width * sizeof(PixelColor));
-
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
     }
