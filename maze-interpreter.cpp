@@ -538,7 +538,7 @@ main(int32_t argc, char * argv[])
 
   SDL_Init(SDL_INIT_VIDEO);
 
-  SDL_WindowFlags flags = SDL_WINDOW_SHOWN;
+  SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
   if (FULLSCREEN)
   {
     flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
