@@ -499,7 +499,7 @@ main(int32_t argc, char * argv[])
 {
   srand(time(NULL));
 
-  Game game_;
+  Game game_ = {};
   Game * game = &game_;
 
   // TODO: Should world coords be floats now we are using uint32s for
