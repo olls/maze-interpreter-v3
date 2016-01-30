@@ -334,68 +334,72 @@ render_cells(Game * game, PixelColor * pixels, Rectangle render_region, V2 scree
     {
       Cell * cell = tree->cells + cell_index;
 
-      V4 color = (V4){};
-      switch (cell->type)
+      if (cell->type != CELL_WALL)
       {
-        case CELL_NULL:     color = (V4){1, 0x00, 0x00, 0x00};
-          break;
-        case CELL_START:    color = (V4){1, 0x33, 0xAA, 0x55};
-          break;
-        case CELL_PATH:     color = (V4){1, 0x55, 0x88, 0x22};
-          break;
-        case CELL_WALL:     color = (V4){1, 0x33, 0x33, 0x33};
-          break;
-        case CELL_HOLE:     color = (V4){1, 0xBB, 0x66, 0x44};
-          break;
-        case CELL_SPLITTER: color = (V4){1, 0x22, 0x44, 0x99};
-          break;
-        case CELL_FUNCTION: color = (V4){1, 0x66, 0x77, 0x88};
-          break;
-        case CELL_ONCE:     color = (V4){1, 0x88, 0x77, 0x66};
-          break;
-        case CELL_SIGNAL:   color = (V4){1, 0x99, 0x99, 0x22};
-          break;
-        case CELL_INC:      color = (V4){1, 0x33, 0x99, 0x22};
-          break;
-        case CELL_DEC:      color = (V4){1, 0x99, 0x33, 0x22};
-          break;
-        case CELL_UP:       color = (V4){1, 0x22, 0x00, 0x00};
-          break;
-        case CELL_DOWN:     color = (V4){1, 0x00, 0x22, 0x00};
-          break;
-        case CELL_LEFT:     color = (V4){1, 0x00, 0x00, 0x22};
-          break;
-        case CELL_RIGHT:    color = (V4){1, 0x00, 0x22, 0x22};
-          break;
-        case CELL_PAUSE:    color = (V4){1, 0x88, 0x88, 0x11};
-          break;
+
+        V4 color = (V4){};
+        switch (cell->type)
+        {
+          case CELL_NULL:     color = (V4){1, 0x00, 0x00, 0x00};
+            break;
+          case CELL_START:    color = (V4){1, 0x33, 0xAA, 0x55};
+            break;
+          case CELL_PATH:     color = (V4){1, 0x55, 0x88, 0x22};
+            break;
+          case CELL_WALL:     color = (V4){1, 0x33, 0x33, 0x33};
+            break;
+          case CELL_HOLE:     color = (V4){1, 0xBB, 0x66, 0x44};
+            break;
+          case CELL_SPLITTER: color = (V4){1, 0x22, 0x44, 0x99};
+            break;
+          case CELL_FUNCTION: color = (V4){1, 0x66, 0x77, 0x88};
+            break;
+          case CELL_ONCE:     color = (V4){1, 0x88, 0x77, 0x66};
+            break;
+          case CELL_SIGNAL:   color = (V4){1, 0x99, 0x99, 0x22};
+            break;
+          case CELL_INC:      color = (V4){1, 0x33, 0x99, 0x22};
+            break;
+          case CELL_DEC:      color = (V4){1, 0x99, 0x33, 0x22};
+            break;
+          case CELL_UP:       color = (V4){1, 0x22, 0x00, 0x00};
+            break;
+          case CELL_DOWN:     color = (V4){1, 0x00, 0x22, 0x00};
+            break;
+          case CELL_LEFT:     color = (V4){1, 0x00, 0x00, 0x22};
+            break;
+          case CELL_RIGHT:    color = (V4){1, 0x00, 0x22, 0x22};
+            break;
+          case CELL_PAUSE:    color = (V4){1, 0x88, 0x88, 0x11};
+            break;
+        }
+
+        uint32_t cell_radius = (game->cell_spacing - (game->cell_spacing * game->cell_margin)) / 2;
+
+        // NOTE: Tile centred on coord
+        V2 world_pos = cell_coord_to_world(game, cell->x, cell->y);
+        V2 world_screen_pos = world_pos + screen_offset;
+        Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
+
+        if (in_rectangle(((V2){game->mouse.x, game->mouse.y} * game->world_per_pixel), cell_bounds))
+        {
+          selected = true;
+          if (color.r <= (0xFF - 0x20))
+          {
+            color.r += 0x20;
+          }
+          if (color.g <= (0xFF - 0x20))
+          {
+            color.g += 0x20;
+          }
+          if (color.b <= (0xFF - 0x20))
+          {
+            color.b += 0x20;
+          }
+        }
+
+        draw_box(game, pixels, render_region, cell_bounds, color);
       }
-
-      uint32_t cell_radius = (game->cell_spacing - (game->cell_spacing * game->cell_margin)) / 2;
-
-      // NOTE: Tile centred on coord
-      V2 world_pos = cell_coord_to_world(game, cell->x, cell->y);
-      V2 world_screen_pos = world_pos + screen_offset;
-      Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
-
-      if (in_rectangle(((V2){game->mouse.x, game->mouse.y} * game->world_per_pixel), cell_bounds))
-      {
-        selected = true;
-        if (color.r <= (0xFF - 0x20))
-        {
-          color.r += 0x20;
-        }
-        if (color.g <= (0xFF - 0x20))
-        {
-          color.g += 0x20;
-        }
-        if (color.b <= (0xFF - 0x20))
-        {
-          color.b += 0x20;
-        }
-      }
-
-      draw_box(game, pixels, render_region, cell_bounds, color);
     }
 
 #if 0

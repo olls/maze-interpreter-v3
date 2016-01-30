@@ -149,6 +149,7 @@ parse(GameMemory * game_memory, const char * filename)
       new_cell.type = CELL_PATH;
     }
     else if (strncmp(cell_str, "##", 2) == 0 ||
+             strncmp(cell_str, "  ", 2) == 0 ||
              strncmp(cell_str, "``", 2) == 0)
     {
       new_cell.type = CELL_WALL;
