@@ -186,6 +186,8 @@ reverse(Direction d)
 struct Car
 {
   bool update;
+  bool dead;
+
   int32_t value;
 
   uint32_t cell_x;

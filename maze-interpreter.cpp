@@ -29,6 +29,7 @@ add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
   ++cars->next_free;
 
   car->update = false;
+  car->dead = false;
   car->value = 0;
   car->cell_x = cell_x;
   car->cell_y = cell_y;
@@ -94,7 +95,7 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
         case (CELL_HOLE):
         {
           printf("Hole\n");
-          rm_car(cars, car_index);
+          car->dead = true;
         } break;
 
         case (CELL_SPLITTER):
@@ -201,6 +202,17 @@ update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * ca
        car_index < cars->next_free;
        ++car_index, ++car)
   {
+
+    // Delete cars
+    while (car->dead && cars->next_free != car_index)
+    {
+      rm_car(cars, car_index);
+    }
+    if (cars->next_free == car_index)
+    {
+      break;
+    }
+
     if (car->direction == STATIONARY)
     {
       // They're stuck this way, FOREVER!
