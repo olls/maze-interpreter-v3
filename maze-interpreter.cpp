@@ -470,6 +470,7 @@ void
 update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uint32_t df, uint32_t frame_count,
                   Keys keys, Maze * maze, Cars * cars)
 {
+  // TODO: Set speed properly
   if (frame_count % 2 == 0)
   {
     update_cars(df, frame_count, keys, maze, cars);
