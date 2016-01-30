@@ -46,7 +46,7 @@ rm_car(Cars * cars, uint32_t car_index)
   --cars->next_free;
   if (car_index != cars->next_free)
   {
-    cars[car_index] = cars[cars->next_free];
+    cars->cars[car_index] = cars->cars[cars->next_free];
   }
 }
 
