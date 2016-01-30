@@ -6,6 +6,7 @@
 #include "maze-interpreter.h"
 
 #include "render.cpp"
+#include "functions.cpp"
 #include "maze.cpp"
 #include "parser.cpp"
 
