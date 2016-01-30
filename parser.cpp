@@ -132,8 +132,6 @@ get_direction(char * ptr, enum Direction * result)
 Maze *
 parse(GameMemory * game_memory, const char * filename)
 {
-  // TODO: How to get it the right way up?!
-
   Maze * maze = take_struct_mem(game_memory, Maze, 1);
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
   maze->tree.used = 0;
