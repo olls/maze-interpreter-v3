@@ -53,7 +53,7 @@ rm_car(Cars * cars, uint32_t car_index)
 
 
 void
-update_cars(uint32_t df, uint32_t frame_count, Keys keys, Maze * maze, Cars * cars)
+update_cars(Maze * maze, Cars * cars)
 {
 
   Car * car = cars->cars;
@@ -312,7 +312,7 @@ cell_coord_to_world(Game * game, uint32_t cell_x, uint32_t cell_y)
 
 
 void
-render_cars(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, uint32_t df, Cars * cars)
+render_cars(Game * game, PixelColor * pixels, Rectangle render_region, V2 screen_offset, Cars * cars)
 {
   uint32_t car_raduis = (game->cell_spacing - (game->cell_spacing * game->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
@@ -467,15 +467,8 @@ add_start_cars(QuadTree * tree, Cars * cars)
 
 
 void
-update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uint32_t df, uint32_t frame_count,
-                  Keys keys, Maze * maze, Cars * cars)
+render(Game * game, PixelColor * pixels, Maze * maze, Cars * cars)
 {
-  // TODO: Set speed properly
-  if (frame_count % 2 == 0)
-  {
-    update_cars(df, frame_count, keys, maze, cars);
-  }
-
   uint32_t old_world_per_pixel = game->world_per_pixel;
   game->zoom += game->mouse.scroll.y;
   game->world_per_pixel = squared(game->zoom);
@@ -508,7 +501,7 @@ update_and_render(GameMemory * game_memory,Game * game, PixelColor * pixels, uin
   render_region.end = (V2){game->window_width, game->window_height} * game->world_per_pixel;
 
   render_cells(game, pixels, render_region, screen_offset, &(maze->tree));
-  render_cars(game, pixels, render_region, screen_offset, df, cars);
+  render_cars(game, pixels, render_region, screen_offset, cars);
 }
 
 
@@ -606,13 +599,13 @@ main(int32_t argc, char * argv[])
   keys.s_down = false;
   keys.d_down = false;
 
-  // For average FPS measurement
   uint64_t last_measure = get_us();
   uint32_t frame_count = 0;
 
-  // For FPS timing
   uint64_t last_frame = get_us();
   uint32_t delta_frame;
+
+  uint64_t last_update = get_us();
 
   printf("Starting\n");
 
@@ -762,7 +755,13 @@ main(int32_t argc, char * argv[])
       frame_count = 0;
     }
 
-    if (now >= last_frame + (seconds_in_u(1)/FPS))
+    if (now >= last_update + (seconds_in_u(1) / CAR_CELL_PER_S))
+    {
+      last_update = now;
+      update_cars(maze, cars);
+    }
+
+    if (now >= last_frame + (seconds_in_u(1) / FPS))
     {
       delta_frame = now - last_frame;
       last_frame = now;
@@ -780,7 +779,7 @@ main(int32_t argc, char * argv[])
         }
       }
 
-      update_and_render(&game_memory, game, pixels, delta_frame, frame_count, keys, maze, cars);
+      render(game, pixels, maze, cars);
 
       SDL_UpdateTexture(texture, NULL, pixels, game->window_width * sizeof(PixelColor));
       SDL_RenderCopy(renderer, texture, NULL, NULL);

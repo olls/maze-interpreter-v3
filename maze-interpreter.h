@@ -53,6 +53,8 @@ const uint32_t MAX_WORLD_PER_PIXEL = 65536;
 // const char MAZE_FILENAME[] = "programs/non-square.mz";
 const char MAZE_FILENAME[] = "test.mz";
 
+const uint32_t CAR_CELL_PER_S = 20;
+
 
 struct GameMemory
 {
