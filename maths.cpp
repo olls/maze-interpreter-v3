@@ -1,15 +1,15 @@
-float
-squared(float base)
+r32
+squared(r32 base)
 {
-  float result = base * base;
+  r32 result = base * base;
   return result;
 }
 
 
-uint32_t
-clamp(uint32_t value, uint32_t min, uint32_t max)
+u32
+clamp(u32 value, u32 min, u32 max)
 {
-  uint32_t result = value;
+  u32 result = value;
   if (value > max)
   {
     result = max;
@@ -22,29 +22,29 @@ clamp(uint32_t value, uint32_t min, uint32_t max)
 }
 
 
-uint32_t
-lerp(uint32_t min, uint32_t max, float t)
+u32
+lerp(u32 min, u32 max, r32 t)
 {
-  uint32_t result = ((1 - t) * min) + (t * max);
+  u32 result = ((1 - t) * min) + (t * max);
   return result;
 }
 
 
 
 void
-printF(float f)
+printF(r32 f)
 {
   printf("%f\n", f);
 }
 
 void
-printU(uint32_t u)
+printU(u32 u)
 {
   printf("%d\n", u);
 }
 
 void
-printI(int32_t i)
+printI(s32 i)
 {
   printf("%d\n", i);
 }

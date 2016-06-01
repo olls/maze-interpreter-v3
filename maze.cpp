@@ -1,8 +1,8 @@
 Cell *
-get_cell(QuadTree * tree, uint32_t x, uint32_t y)
+get_cell(QuadTree * tree, u32 x, u32 y)
 {
   Cell * cell = 0;
-  for (uint32_t cell_index = 0;
+  for (u32 cell_index = 0;
        cell_index < tree->used;
        ++cell_index)
   {
@@ -38,7 +38,7 @@ create_tree(Memory * memory, Rectangle bounds)
 
 
 Cell *
-get_cell(Maze * maze, uint32_t x, uint32_t y, Memory * memory = 0)
+get_cell(Maze * maze, u32 x, u32 y, Memory * memory = 0)
 {
   QuadTree * tree = &(maze->tree);
 

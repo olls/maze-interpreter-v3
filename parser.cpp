@@ -8,46 +8,46 @@
 #define consume_while(ptr, func, end) while (func(*(ptr)) && (ptr) < end) ++(ptr)
 
 
-bool
+b32
 isNum(char character)
 {
-  bool result = (character >= '0') && (character <= '9');
+  b32 result = (character >= '0') && (character <= '9');
   return result;
 }
 
 
-bool
+b32
 isLetter(char character)
 {
-  bool result = (((character >= 'a') && (character <= 'z')) ||
+  b32 result = (((character >= 'a') && (character <= 'z')) ||
                  ((character >= 'A') && (character <= 'Z')));
   return result;
 }
 
 
-bool
+b32
 isNewline(char character)
 {
-  bool result = (character == '\n') || (character == '\r');
+  b32 result = (character == '\n') || (character == '\r');
   return result;
 }
 
 
 char *
-get_num(char * ptr, char * f_end, uint32_t * result)
+get_num(char * ptr, char * f_end, u32 * result)
 {
   char * num_start = ptr;
 
   consume_while(ptr, isNum, f_end);
 
   *result = 0;
-  uint32_t num_length = ptr - num_start;
+  u32 num_length = ptr - num_start;
 
-  for (uint32_t num_pos = 0;
+  for (u32 num_pos = 0;
        num_pos < num_length;
        ++num_pos)
   {
-    uint32_t digit = *(num_start + num_pos) - '0';
+    u32 digit = *(num_start + num_pos) - '0';
     *result += digit * pow(10, (num_length - num_pos - 1));
   }
 
@@ -104,10 +104,10 @@ parse(Maze * maze, Memory * memory, const char * filename)
   maze->width = 0;
   maze->height = 0;
 
-  uint32_t x = 0;
-  uint32_t y = 0;
+  u32 x = 0;
+  u32 y = 0;
 
-  uint32_t fd = open(filename, O_RDONLY);
+  u32 fd = open(filename, O_RDONLY);
   if (fd == -1)
   {
     printf("Failed to open file.\n");
@@ -163,8 +163,8 @@ parse(Maze * maze, Memory * memory, const char * filename)
     }
     else if (isLetter(cell_str[0]) && (isLetter(cell_str[1]) || isNum(cell_str[1])))
     {
-      uint32_t function_index = get_function_index(cell_str);
-      uint32_t function_parse_bytes_read = 0;
+      u32 function_index = get_function_index(cell_str);
+      u32 function_parse_bytes_read = 0;
 
       char * ptr = f_ptr + 2;
       consume_whitespace(ptr, f_end);
@@ -233,8 +233,8 @@ parse(Maze * maze, Memory * memory, const char * filename)
           consume_whitespace(ptr, f_end);
 
           FunctionType conditional_func_type;
-          bool valid_condition = true;
-          bool value_required = true;
+          b32 valid_condition = true;
+          b32 value_required = true;
           if (strncmp(ptr, "<=", 2) == 0)
           {
             ptr += 2;
@@ -277,7 +277,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
             valid_condition = false;
           }
 
-          uint32_t condition_value;
+          u32 condition_value;
           if (value_required && valid_condition)
           {
             consume_whitespace(ptr, f_end);
@@ -380,8 +380,8 @@ parse(Maze * maze, Memory * memory, const char * filename)
     {
       new_cell.type = CELL_PAUSE;
 
-      uint32_t digit0 = cell_str[0] - '0';
-      uint32_t digit1 = cell_str[1] - '0';
+      u32 digit0 = cell_str[0] - '0';
+      u32 digit1 = cell_str[1] - '0';
       new_cell.pause = (10 * digit0) + digit1;
     }
 

@@ -15,17 +15,17 @@ enum FunctionType
 };
 
 
-const uint32_t MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
+const u32 MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
 struct Function
 {
   char name[2];
   FunctionType type;
   union
   {
-    uint32_t value;
+    u32 value;
     struct
     {
-      uint32_t condition_value;
+      u32 condition_value;
       Direction true_direction;
       Direction false_direction;
     } conditional;

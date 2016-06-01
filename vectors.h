@@ -2,8 +2,8 @@ union V2
 {
   struct
   {
-    float x;
-    float y;
+    r32 x;
+    r32 y;
   };
 };
 
@@ -19,15 +19,15 @@ union V3
 {
   struct
   {
-    float x;
-    float y;
-    float z;
+    r32 x;
+    r32 y;
+    r32 z;
   };
   struct
   {
-    float r;
-    float g;
-    float b;
+    r32 r;
+    r32 g;
+    r32 b;
   };
 };
 
@@ -36,17 +36,17 @@ union V4
 {
   struct
   {
-    float w;
-    float x;
-    float y;
-    float z;
+    r32 w;
+    r32 x;
+    r32 y;
+    r32 z;
   };
   struct
   {
-    float a;
-    float r;
-    float g;
-    float b;
+    r32 a;
+    r32 r;
+    r32 g;
+    r32 b;
   };
 };
 
@@ -55,11 +55,11 @@ union PixelColor
 {
   struct
   {
-    uint8_t b;
-    uint8_t g;
-    uint8_t r;
+    u8 b;
+    u8 g;
+    u8 r;
   };
-  uint32_t pad;
+  u32 pad;
 };
 
 

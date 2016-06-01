@@ -1,7 +1,7 @@
 // NOTE: 256 sub-pixel steps!
-const uint32_t MIN_WORLD_PER_PIXEL = 256;
-// const uint32_t MIN_WORLD_PER_PIXEL = 4096;
-const uint32_t MAX_WORLD_PER_PIXEL = 65536;
+const u32 MIN_WORLD_PER_PIXEL = 256;
+// const u32 MIN_WORLD_PER_PIXEL = 4096;
+const u32 MAX_WORLD_PER_PIXEL = 65536;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
@@ -9,25 +9,25 @@ const uint32_t MAX_WORLD_PER_PIXEL = 65536;
 // const char MAZE_FILENAME[] = "programs/non-square.mz";
 const char MAZE_FILENAME[] = "test.mz";
 
-const uint32_t CAR_CELL_PER_S = 20;
+const u32 CAR_CELL_PER_S = 20;
 
 
 struct Car
 {
-  bool update;
-  bool dead;
+  b32 update;
+  b32 dead;
 
-  int32_t value;
+  s32 value;
 
-  uint32_t cell_x;
-  uint32_t cell_y;
+  u32 cell_x;
+  u32 cell_y;
 
   // NOTE: Used for sub-cell positioning, in world space.
   V2 offset;
 
   Direction direction;
 
-  uint32_t pause_left;
+  u32 pause_left;
   Direction unpause_direction;
 };
 
@@ -36,25 +36,25 @@ struct Car
 struct Cars
 {
   Car cars[MAX_CARS];
-  uint32_t next_free;
+  u32 next_free;
 };
 
 
 struct GameState
 {
-  bool init;
+  b32 init;
 
-  uint32_t world_per_pixel;
+  u32 world_per_pixel;
 
   // NOTE: Things are scaled relatively to cell_spacing.
-  float zoom;
-  uint32_t cell_spacing;
-  float cell_margin;
+  r32 zoom;
+  u32 cell_spacing;
+  r32 cell_margin;
 
   V2 last_mouse_pos;
 
   Maze maze;
 
   Cars cars;
-  uint64_t last_car_update;
+  u64 last_car_update;
 };

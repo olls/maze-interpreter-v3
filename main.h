@@ -30,46 +30,28 @@
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
 
-struct FrameBuffer
-{
-  uint32_t width;
-  uint32_t height;
-
-  PixelColor * buffer;
-};
-
-
-struct Renderer
-{
-  SDL_Renderer * sdlRenderer;
-  SDL_Texture * sdlTexture;
-
-  FrameBuffer frame_buffer;
-};
-
-
 struct Keys
 {
-  bool space;
-  bool up;
-  bool down;
-  bool left;
-  bool right;
-  bool p;
-  bool w;
-  bool s;
-  bool a;
-  bool d;
+  b32 space;
+  b32 up;
+  b32 down;
+  b32 left;
+  b32 right;
+  b32 p;
+  b32 w;
+  b32 s;
+  b32 a;
+  b32 d;
 };
 
 
 struct Mouse
 {
-  uint32_t x;
-  uint32_t y;
+  u32 x;
+  u32 y;
 
-  bool l_down;
-  bool r_down;
+  b32 l_down;
+  b32 r_down;
 
   V2 scroll;
 };

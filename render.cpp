@@ -1,12 +1,11 @@
 void
-set_pixel(FrameBuffer * frame_buffer, uint32_t pixel_x, uint32_t pixel_y, V4 color)
+set_pixel(FrameBuffer * frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 {
-  uint32_t pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
+  u32 pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
 
   V3 prev_color = pixel_color_to_V3(frame_buffer->buffer[pixel_pos]);
   V3 new_color = remove_alpha(color);
 
-  // TODO: Pre-multiplied alpha
   PixelColor alpha_blended = to_color((color.a * new_color) + ((1.0f - color.a) * prev_color));
   frame_buffer->buffer[pixel_pos] = alpha_blended;
 }
@@ -14,10 +13,10 @@ set_pixel(FrameBuffer * frame_buffer, uint32_t pixel_x, uint32_t pixel_y, V4 col
 
 void
 draw_circle(FrameBuffer * frame_buffer,
-            uint32_t world_per_pixel,
+            u32 world_per_pixel,
             Rectangle render_region_world,
             V2 world_pos,
-            float world_radius,
+            r32 world_radius,
             V4 color)
 {
   // TODO: There seems to be some off-by-one bug in here, the right
@@ -25,9 +24,9 @@ draw_circle(FrameBuffer * frame_buffer,
 
   V2 fract_pixel_pos = world_pos / world_per_pixel;
 
-  float radius = world_radius / world_per_pixel;
-  float radius_sq = squared(radius);
-  float radius_minus_one_sq = squared(radius - 1);
+  r32 radius = world_radius / world_per_pixel;
+  r32 radius_sq = squared(radius);
+  r32 radius_minus_one_sq = squared(radius - 1);
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_region_world / world_per_pixel;
@@ -39,16 +38,16 @@ draw_circle(FrameBuffer * frame_buffer,
 
   Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);
 
-  for (uint32_t pixel_y = pixels_circle_region.start.y;
+  for (u32 pixel_y = pixels_circle_region.start.y;
        pixel_y < pixels_circle_region.end.y;
        pixel_y++)
   {
-    for (uint32_t pixel_x = pixels_circle_region.start.x;
+    for (u32 pixel_x = pixels_circle_region.start.x;
          pixel_x < pixels_circle_region.end.x;
          pixel_x++)
     {
       V2 d_center = (V2){pixel_x, pixel_y} - fract_pixel_pos;
-      float dist_sq = length_sq(d_center);
+      r32 dist_sq = length_sq(d_center);
 
       if (dist_sq < radius_sq)
       {
@@ -56,7 +55,7 @@ draw_circle(FrameBuffer * frame_buffer,
 
         if (dist_sq > radius_minus_one_sq)
         {
-          float diff = radius - sqrt(dist_sq);
+          r32 diff = radius - sqrt(dist_sq);
           this_color.a *= diff;
         }
 
@@ -68,7 +67,7 @@ draw_circle(FrameBuffer * frame_buffer,
 
 
 void
-draw_box(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_region_world / world_per_pixel;
@@ -79,11 +78,11 @@ draw_box(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render_
 
   Rectangle pixel_space = round_down(fract_pixel_space);
 
-  for (uint32_t pixel_y = pixel_space.start.y;
+  for (u32 pixel_y = pixel_space.start.y;
        pixel_y < pixel_space.end.y;
        pixel_y++)
   {
-    for (uint32_t pixel_x = pixel_space.start.x;
+    for (u32 pixel_x = pixel_space.start.x;
          pixel_x < pixel_space.end.x;
          pixel_x++)
     {
@@ -113,7 +112,7 @@ draw_box(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render_
 
 
 void
-draw_line(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
+draw_line(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
 {
   V2 start = world_start / world_per_pixel;
   V2 end = world_end / world_per_pixel;
@@ -129,13 +128,13 @@ draw_line(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render
   Rectangle render_region = render_region_world / world_per_pixel;
   render_region = crop_to(render_region, window_region);
 
-  bool start_in_region = in_rectangle(start, render_region);
-  bool end_in_region = in_rectangle(end, render_region);
+  b32 start_in_region = in_rectangle(start, render_region);
+  b32 end_in_region = in_rectangle(end, render_region);
 
   if (start_in_region || end_in_region)
   {
-    float x_gradient = (end.y - start.y) / (end.x - start.x);
-    float y_gradient = (end.x - start.x) / (end.y - start.y);
+    r32 x_gradient = (end.y - start.y) / (end.x - start.x);
+    r32 y_gradient = (end.x - start.x) / (end.y - start.y);
     if (!start_in_region)
     {
       if (start.x < render_region.start.x)
@@ -188,14 +187,14 @@ draw_line(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render
     V2 length_components = {(end.x - start.x),
                             (end.y - start.y)};
 
-    float num_pixels = fmax(abs(length_components.x), abs(length_components.y));
+    r32 num_pixels = fmax(abs(length_components.x), abs(length_components.y));
 
     if(num_pixels)
     {
       V2 step = length_components / num_pixels;
 
       V2 pixel_pos_fract = start;
-      for (uint32_t pixel_n = 0;
+      for (u32 pixel_n = 0;
            pixel_n < num_pixels;
            ++pixel_n)
       {
@@ -209,7 +208,7 @@ draw_line(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render
 
 
 void
-draw_box_outline(FrameBuffer * frame_buffer, uint32_t world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box_outline(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
 {
   draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
   draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);

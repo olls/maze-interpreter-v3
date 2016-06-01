@@ -2,8 +2,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
-#include <float.h>
-#include <math.h>
 
 // Game Independent
 #include "platform.h"
@@ -26,26 +24,26 @@
 #include "maze-interpreter.cpp"
 
 
-const bool FULLSCREEN = true;
+const b32 FULLSCREEN = true;
 
-const uint32_t FPS = 60;
-const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
+const u32 FPS = 60;
+const u32 TOTAL_MEMORY = megabytes_to_bytes(50);
 
 
-uint64_t
+u64
 get_us()
 {
   struct timeval tv;
   gettimeofday(&tv, 0);
-  return ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec;
+  return ((u64)tv.tv_sec * (u64)1000000) + (u64)tv.tv_usec;
 }
 
 
-bool
+b32
 process_keys(Keys *keys, SDL_Event event)
 {
-  bool quit = false;
-  bool pressed = (event.type == SDL_KEYDOWN);
+  b32 quit = false;
+  b32 pressed = (event.type == SDL_KEYDOWN);
 
   if ((pressed && event.key.keysym.sym == 'w' && event.key.keysym.mod == KMOD_LCTRL) ||
       (pressed && event.key.keysym.sym == SDLK_F4 && event.key.keysym.mod == KMOD_LALT))
@@ -107,7 +105,7 @@ process_mouse(Mouse * mouse, SDL_Event event)
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
     {
-      bool down = (event.type == SDL_MOUSEBUTTONDOWN);
+      b32 down = (event.type == SDL_MOUSEBUTTONDOWN);
 
       if (event.button.button == SDL_BUTTON_LEFT)
       {
@@ -129,12 +127,12 @@ process_mouse(Mouse * mouse, SDL_Event event)
 
 
 void
-game_loop(Memory * memory, Renderer * renderer, uint32_t argc, char * argv[])
+game_loop(Memory * memory, Renderer * renderer, u32 argc, char * argv[])
 {
-  bool running = true;
+  b32 running = true;
 
-  uint32_t frame_rate = 30;
-  uint32_t useconds_per_frame = 1000000 / frame_rate;
+  u32 frame_rate = 30;
+  u32 useconds_per_frame = 1000000 / frame_rate;
 
   GameState game_state = {};
   Keys keys = {};
@@ -144,7 +142,7 @@ game_loop(Memory * memory, Renderer * renderer, uint32_t argc, char * argv[])
 
   while (running)
   {
-    uint64_t last_frame_end = get_us();
+    u64 last_frame_end = get_us();
 
     SDL_Event event;
     while(SDL_PollEvent(&event))
@@ -174,11 +172,11 @@ game_loop(Memory * memory, Renderer * renderer, uint32_t argc, char * argv[])
 
     update_and_render(memory, &game_state, &(renderer->frame_buffer), &keys, &mouse, last_frame_end, argc, argv);
 
-    SDL_UpdateTexture(renderer->sdlTexture, 0, renderer->frame_buffer.buffer, renderer->frame_buffer.width * sizeof(uint32_t));
+    SDL_UpdateTexture(renderer->sdlTexture, 0, renderer->frame_buffer.buffer, renderer->frame_buffer.width * sizeof(u32));
     SDL_RenderCopy(renderer->sdlRenderer, renderer->sdlTexture, 0, 0);
     SDL_RenderPresent(renderer->sdlRenderer);
 
-    uint32_t frame_dt = get_us() - last_frame_end;
+    u32 frame_dt = get_us() - last_frame_end;
 
     if (frame_dt < useconds_per_frame)
     {
@@ -199,7 +197,7 @@ main(int argc, char * argv[])
 
   Memory memory;
   memory.total = TOTAL_MEMORY;
-  memory.memory = (uint8_t *)malloc(memory.total);
+  memory.memory = (u8 *)malloc(memory.total);
   memory.used = 0;
 
   Renderer renderer;
@@ -222,7 +220,7 @@ main(int argc, char * argv[])
 
   if (FULLSCREEN)
   {
-    int32_t display_index = SDL_GetWindowDisplayIndex(window);
+    s32 display_index = SDL_GetWindowDisplayIndex(window);
     if (display_index < 0)
     {
       printf("Failed to get display index.\n");

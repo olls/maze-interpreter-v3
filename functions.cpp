@@ -1,7 +1,7 @@
-uint32_t
+u32
 get_function_index(char name[2])
 {
-  uint32_t result;
+  u32 result;
 
   if (name[0] <= 'Z')
   {

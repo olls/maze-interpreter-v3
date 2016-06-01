@@ -5,7 +5,7 @@
 
 
 Car *
-add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
+add_car(Cars * cars, u32 cell_x, u32 cell_y, Direction direction = UP)
 {
   assert(cars->next_free != MAX_CARS);
 
@@ -26,7 +26,7 @@ add_car(Cars * cars, uint32_t cell_x, uint32_t cell_y, Direction direction = UP)
 
 
 void
-rm_car(Cars * cars, uint32_t car_index)
+rm_car(Cars * cars, u32 car_index)
 {
   --cars->next_free;
   if (car_index != cars->next_free)
@@ -41,7 +41,7 @@ update_cars(Maze * maze, Cars * cars)
 {
 
   Car * car = cars->cars;
-  for (uint32_t car_index = 0;
+  for (u32 car_index = 0;
        car_index < cars->next_free;
        ++car_index, ++car)
   {
@@ -92,7 +92,7 @@ update_cars(Maze * maze, Cars * cars)
         case (CELL_FUNCTION):
         {
           Function * function = maze->functions + current_cell->function_index;
-          printf("Function: %s, %d\n", function->name, (uint32_t)function->type);
+          printf("Function: %s, %d\n", function->name, (u32)function->type);
         } break;
 
         case (CELL_ONCE):
@@ -182,7 +182,7 @@ update_cars(Maze * maze, Cars * cars)
   //         necessary...
 
   car = cars->cars;
-  for (uint32_t car_index = 0;
+  for (u32 car_index = 0;
        car_index < cars->next_free;
        ++car_index, ++car)
   {
@@ -207,8 +207,8 @@ update_cars(Maze * maze, Cars * cars)
       directions[0] = car->direction;
       directions[3] = reverse(car->direction);
 
-      uint32_t i = 1;
-      for (uint32_t direction = 0;
+      u32 i = 1;
+      for (u32 direction = 0;
            direction < 4;
            direction++)
       {
@@ -225,8 +225,8 @@ update_cars(Maze * maze, Cars * cars)
       V2 dir_components[] = {{ 0, -1}, {0, 1},
                              {-1,  0}, {1, 0}};
 
-      bool can_move = false;
-      for (uint32_t direction_index = 0;
+      b32 can_move = false;
+      for (u32 direction_index = 0;
            direction_index < 4;
            direction_index++)
       {
@@ -285,7 +285,7 @@ update_cars(Maze * maze, Cars * cars)
 
 
 V2
-cell_coord_to_world(GameState * game_state, uint32_t cell_x, uint32_t cell_y)
+cell_coord_to_world(GameState * game_state, u32 cell_x, u32 cell_y)
 {
   // TODO: Is there any point in world space any more???
   //       Cars have cell_x/y and offset, is that all we need? (Help
@@ -298,11 +298,11 @@ cell_coord_to_world(GameState * game_state, uint32_t cell_x, uint32_t cell_y)
 void
 render_cars(GameState * game_state, FrameBuffer * frame_buffer, Rectangle render_region, V2 screen_offset, Cars * cars)
 {
-  uint32_t car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
+  u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
-  for (uint32_t car_index = 0;
+  for (u32 car_index = 0;
        car_index < cars->next_free;
        ++car_index)
   {
@@ -316,7 +316,7 @@ render_cars(GameState * game_state, FrameBuffer * frame_buffer, Rectangle render
 void
 render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, Rectangle render_region, V2 screen_offset, QuadTree * tree)
 {
-  bool selected = false;
+  b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
   //                  tree...
   // if (tree && overlaps(render_region - 140000, (tree->bounds * game_state->cell_spacing)))
@@ -324,7 +324,7 @@ render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, 
   if (tree && overlaps(render_region, (tree->bounds * game_state->cell_spacing) + screen_offset))
   {
 
-    for (uint32_t cell_index = 0;
+    for (u32 cell_index = 0;
          cell_index < tree->used;
          ++cell_index)
     {
@@ -370,7 +370,7 @@ render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, 
             break;
         }
 
-        uint32_t cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
+        u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
 
         // NOTE: Tile centred on coord
         V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
@@ -430,7 +430,7 @@ add_initial_cars(QuadTree * tree, Cars * cars)
   //         matter that it is duplicated?
   if (tree)
   {
-    for (uint32_t cell_index = 0;
+    for (u32 cell_index = 0;
          cell_index < tree->used;
          ++cell_index)
     {
@@ -453,7 +453,7 @@ add_initial_cars(QuadTree * tree, Cars * cars)
 void
 render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
 {
-  uint32_t old_world_per_pixel = game_state->world_per_pixel;
+  u32 old_world_per_pixel = game_state->world_per_pixel;
 
   game_state->zoom += mouse->scroll.y;
   game_state->world_per_pixel = squared(game_state->zoom);
@@ -491,11 +491,11 @@ render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
 
 
 void
-init_game(Memory * memory, GameState * game_state, uint32_t argc, char * argv[])
+init_game(Memory * memory, GameState * game_state, u32 argc, char * argv[])
 {
   game_state->init = true;
 
-  // TODO: Should world coords be floats now we are using uint32s for
+  // TODO: Should world coords be r32s now we are using uint32s for
   //       the cell position?
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
   game_state->zoom = 64;
@@ -518,7 +518,7 @@ init_game(Memory * memory, GameState * game_state, uint32_t argc, char * argv[])
 
 
 void
-update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_buffer, Keys * keys, Mouse * mouse, uint64_t time_us, uint32_t argc, char * argv[])
+update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_buffer, Keys * keys, Mouse * mouse, u64 time_us, u32 argc, char * argv[])
 {
   if (!game_state->init)
   {
@@ -531,11 +531,11 @@ update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_b
     update_cars(&(game_state->maze), &(game_state->cars));
   }
 
-  for (uint32_t screen_y = 0;
+  for (u32 screen_y = 0;
        screen_y < frame_buffer->height;
        screen_y++)
   {
-    for (uint32_t screen_x = 0;
+    for (u32 screen_x = 0;
          screen_x < frame_buffer->width;
          screen_x++)
     {
@@ -545,7 +545,7 @@ update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_b
   render(game_state, frame_buffer, mouse);
 
   mouse->scroll -= mouse->scroll / 6.0f;
-  float epsilon = 3.0f;
+  r32 epsilon = 3.0f;
   if (abs(mouse->scroll.y) < epsilon)
   {
     mouse->scroll.y = 0;

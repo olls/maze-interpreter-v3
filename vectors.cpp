@@ -1,49 +1,49 @@
-bool
+b32
 operator==(V2 a, V2 b)
 {
-  bool result = ((a.x == b.x) &&
+  b32 result = ((a.x == b.x) &&
                  (a.y == b.y));
   return result;
 }
-bool
+b32
 operator!=(V2 a, V2 b)
 {
-  bool result = !(a == b);
+  b32 result = !(a == b);
   return result;
 }
 
-bool
+b32
 operator>(V2 a, V2 b)
 {
-  bool result = ((a.x > b.x) &&
+  b32 result = ((a.x > b.x) &&
                  (a.y > b.y));
   return result;
 }
-bool
+b32
 operator<(V2 a, V2 b)
 {
-  bool result = ((a.x < b.x) &&
+  b32 result = ((a.x < b.x) &&
                  (a.y < b.y));
   return result;
 }
 
-bool
+b32
 operator>=(V2 a, V2 b)
 {
-  bool result = ((a.x >= b.x) &&
+  b32 result = ((a.x >= b.x) &&
                  (a.y >= b.y));
   return result;
 }
-bool
+b32
 operator<=(V2 a, V2 b)
 {
-  bool result = ((a.x <= b.x) &&
+  b32 result = ((a.x <= b.x) &&
                  (a.y <= b.y));
   return result;
 }
 
 V2
-operator*(float c, V2 vec)
+operator*(r32 c, V2 vec)
 {
   V2 result;
   result.x = c * vec.x;
@@ -51,20 +51,20 @@ operator*(float c, V2 vec)
   return result;
 }
 V2
-operator*(V2 vec, float c)
+operator*(V2 vec, r32 c)
 {
   V2 result = c * vec;
   return result;
 }
 V2 &
-operator*=(V2 & vec, float c)
+operator*=(V2 & vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
 V2
-operator/(float c, V2 vec)
+operator/(r32 c, V2 vec)
 {
   V2 result;
   result.x = c / vec.x;
@@ -72,7 +72,7 @@ operator/(float c, V2 vec)
   return result;
 }
 V2
-operator/(V2 vec, float c)
+operator/(V2 vec, r32 c)
 {
   V2 result;
   result.x = vec.x / c;
@@ -80,14 +80,14 @@ operator/(V2 vec, float c)
   return result;
 }
 V2 &
-operator/=(V2 & vec, float c)
+operator/=(V2 & vec, r32 c)
 {
   vec = vec / c;
   return vec;
 }
 
 V2
-operator+(float c, V2 vec)
+operator+(r32 c, V2 vec)
 {
   V2 result;
   result.x = c + vec.x;
@@ -95,13 +95,13 @@ operator+(float c, V2 vec)
   return result;
 }
 V2
-operator+(V2 vec, float c)
+operator+(V2 vec, r32 c)
 {
   V2 result = c + vec;
   return result;
 }
 V2 &
-operator+=(V2 & vec, float c)
+operator+=(V2 & vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -132,7 +132,7 @@ operator-(V2 vec)
 }
 
 V2
-operator-(float c, V2 vec)
+operator-(r32 c, V2 vec)
 {
   V2 result;
   result.x = c - vec.x;
@@ -140,7 +140,7 @@ operator-(float c, V2 vec)
   return result;
 }
 V2
-operator-(V2 vec, float c)
+operator-(V2 vec, r32 c)
 {
   V2 result;
   result.x = vec.x - c;
@@ -148,7 +148,7 @@ operator-(V2 vec, float c)
   return result;
 }
 V2 &
-operator-=(V2 & vec, float c)
+operator-=(V2 & vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -191,34 +191,34 @@ V2
 round_down(V2 vec)
 {
   V2 result;
-  result.x = (int32_t)vec.x;
-  result.y = (int32_t)vec.y;
+  result.x = (s32)vec.x;
+  result.y = (s32)vec.y;
   return result;
 }
 
-float
+r32
 length_sq(V2 vec)
 {
-  float result = (vec.x * vec.x) + (vec.y * vec.y);
+  r32 result = (vec.x * vec.x) + (vec.y * vec.y);
   return result;
 }
 
 
-bool
+b32
 operator==(Rectangle a, Rectangle b)
 {
-  bool result = ((a.start == b.start) &&
+  b32 result = ((a.start == b.start) &&
                  (a.end == b.end));
   return result;
 }
-bool
+b32
 operator!=(Rectangle a, Rectangle b)
 {
-  bool result = !(a == b);
+  b32 result = !(a == b);
   return result;
 }
 Rectangle
-operator*(float c, Rectangle rect)
+operator*(r32 c, Rectangle rect)
 {
   Rectangle result;
   result.start = c * rect.start;
@@ -226,20 +226,20 @@ operator*(float c, Rectangle rect)
   return result;
 }
 Rectangle
-operator*(Rectangle rect, float c)
+operator*(Rectangle rect, r32 c)
 {
   Rectangle result = c * rect;
   return result;
 }
 Rectangle &
-operator*=(Rectangle & rect, float c)
+operator*=(Rectangle & rect, r32 c)
 {
   rect = c * rect;
   return rect;
 }
 
 Rectangle
-operator/(float c, Rectangle rect)
+operator/(r32 c, Rectangle rect)
 {
   Rectangle result;
   result.start = c / rect.start;
@@ -247,7 +247,7 @@ operator/(float c, Rectangle rect)
   return result;
 }
 Rectangle
-operator/(Rectangle rect, float c)
+operator/(Rectangle rect, r32 c)
 {
   Rectangle result;
   result.start = rect.start / c;
@@ -255,14 +255,14 @@ operator/(Rectangle rect, float c)
   return result;
 }
 Rectangle &
-operator/=(Rectangle & rect, float c)
+operator/=(Rectangle & rect, r32 c)
 {
   rect = rect / c;
   return rect;
 }
 
 Rectangle
-operator+(float c, Rectangle rect)
+operator+(r32 c, Rectangle rect)
 {
   Rectangle result;
   result.start = c + rect.start;
@@ -270,13 +270,13 @@ operator+(float c, Rectangle rect)
   return result;
 }
 Rectangle
-operator+(Rectangle rect, float c)
+operator+(Rectangle rect, r32 c)
 {
   Rectangle result = c + rect;
   return result;
 }
 Rectangle &
-operator+=(Rectangle & rect, float c)
+operator+=(Rectangle & rect, r32 c)
 {
   rect = rect + c;
   return rect;
@@ -328,7 +328,7 @@ operator-(Rectangle rect)
 }
 
 Rectangle
-operator-(float c, Rectangle rect)
+operator-(r32 c, Rectangle rect)
 {
   Rectangle result;
   result.start = c - rect.start;
@@ -336,7 +336,7 @@ operator-(float c, Rectangle rect)
   return result;
 }
 Rectangle
-operator-(Rectangle rect, float c)
+operator-(Rectangle rect, r32 c)
 {
   Rectangle result;
   result.start = rect.start - c;
@@ -344,7 +344,7 @@ operator-(Rectangle rect, float c)
   return result;
 }
 Rectangle &
-operator-=(Rectangle & rect, float c)
+operator-=(Rectangle & rect, r32 c)
 {
   rect = rect - c;
   return rect;
@@ -375,7 +375,7 @@ rectangle(V2 start, V2 size)
 }
 
 Rectangle
-rectangle(V2 center, float radius)
+rectangle(V2 center, r32 radius)
 {
   Rectangle result;
   result.start = center - radius;
@@ -392,20 +392,20 @@ round_down(Rectangle rect)
   return result;
 }
 
-bool
+b32
 in_rectangle(V2 test, Rectangle rect)
 {
-  bool result = ((test.x >= rect.start.x) &&
+  b32 result = ((test.x >= rect.start.x) &&
                  (test.x < rect.end.x) &&
                  (test.y >= rect.start.y) &&
                  (test.y < rect.end.y));
   return result;
 }
 
-bool
+b32
 overlaps(Rectangle a, Rectangle b)
 {
-  bool result = !((b.end.x < a.start.x) ||
+  b32 result = !((b.end.x < a.start.x) ||
                   (b.start.x > a.end.x) ||
                   (b.end.y < a.start.y) ||
                   (b.start.y > a.end.y));
@@ -476,22 +476,22 @@ get_bottom_left(Rectangle rect)
 }
 
 
-bool
+b32
 operator==(V3 a, V3 b)
 {
-  bool result = ((a.x == b.x) &&
+  b32 result = ((a.x == b.x) &&
                  (a.y == b.y) &&
                  (a.z == b.z));
   return result;
 }
-bool
+b32
 operator!=(V3 a, V3 b)
 {
-  bool result = !(a == b);
+  b32 result = !(a == b);
   return result;
 }
 V3
-operator*(float c, V3 vec)
+operator*(r32 c, V3 vec)
 {
   V3 result;
   result.x = c * vec.x;
@@ -500,20 +500,20 @@ operator*(float c, V3 vec)
   return result;
 }
 V3
-operator*(V3 vec, float c)
+operator*(V3 vec, r32 c)
 {
   V3 result = c * vec;
   return result;
 }
 V3 &
-operator*=(V3 & vec, float c)
+operator*=(V3 & vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
 V3
-operator/(float c, V3 vec)
+operator/(r32 c, V3 vec)
 {
   V3 result;
   result.x = c / vec.x;
@@ -522,7 +522,7 @@ operator/(float c, V3 vec)
   return result;
 }
 V3
-operator/(V3 vec, float c)
+operator/(V3 vec, r32 c)
 {
   V3 result;
   result.x = vec.x / c;
@@ -531,14 +531,14 @@ operator/(V3 vec, float c)
   return result;
 }
 V3 &
-operator/=(V3 & vec, float c)
+operator/=(V3 & vec, r32 c)
 {
   vec = vec / c;
   return vec;
 }
 
 V3
-operator+(float c, V3 vec)
+operator+(r32 c, V3 vec)
 {
   V3 result;
   result.x = c + vec.x;
@@ -547,13 +547,13 @@ operator+(float c, V3 vec)
   return result;
 }
 V3
-operator+(V3 vec, float c)
+operator+(V3 vec, r32 c)
 {
   V3 result = c + vec;
   return result;
 }
 V3 &
-operator+=(V3 & vec, float c)
+operator+=(V3 & vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -586,7 +586,7 @@ operator-(V3 vec)
 }
 
 V3
-operator-(float c, V3 vec)
+operator-(r32 c, V3 vec)
 {
   V3 result;
   result.x = c - vec.x;
@@ -595,7 +595,7 @@ operator-(float c, V3 vec)
   return result;
 }
 V3
-operator-(V3 vec, float c)
+operator-(V3 vec, r32 c)
 {
   V3 result;
   result.x = vec.x - c;
@@ -604,7 +604,7 @@ operator-(V3 vec, float c)
   return result;
 }
 V3 &
-operator-=(V3 & vec, float c)
+operator-=(V3 & vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -650,29 +650,29 @@ V3
 round_down(V3 vec)
 {
   V3 result;
-  result.x = (int32_t)vec.x;
-  result.y = (int32_t)vec.y;
-  result.z = (int32_t)vec.z;
+  result.x = (s32)vec.x;
+  result.y = (s32)vec.y;
+  result.z = (s32)vec.z;
   return result;
 }
 
-bool
+b32
 operator==(V4 a, V4 b)
 {
-  bool result = ((a.w == b.w) &&
+  b32 result = ((a.w == b.w) &&
                  (a.x == b.x) &&
                  (a.y == b.y) &&
                  (a.z == b.z));
   return result;
 }
-bool
+b32
 operator!=(V4 a, V4 b)
 {
-  bool result = !(a == b);
+  b32 result = !(a == b);
   return result;
 }
 V4
-operator*(float c, V4 vec)
+operator*(r32 c, V4 vec)
 {
   V4 result;
   result.w = c * vec.w;
@@ -682,20 +682,20 @@ operator*(float c, V4 vec)
   return result;
 }
 V4
-operator*(V4 vec, float c)
+operator*(V4 vec, r32 c)
 {
   V4 result = c * vec;
   return result;
 }
 V4 &
-operator*=(V4 & vec, float c)
+operator*=(V4 & vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
 V4
-operator/(float c, V4 vec)
+operator/(r32 c, V4 vec)
 {
   V4 result;
   result.w = c / vec.w;
@@ -705,7 +705,7 @@ operator/(float c, V4 vec)
   return result;
 }
 V4
-operator/(V4 vec, float c)
+operator/(V4 vec, r32 c)
 {
   V4 result;
   result.w = vec.w / c;
@@ -715,14 +715,14 @@ operator/(V4 vec, float c)
   return result;
 }
 V4 &
-operator/=(V4 & vec, float c)
+operator/=(V4 & vec, r32 c)
 {
   vec = vec / c;
   return vec;
 }
 
 V4
-operator+(float c, V4 vec)
+operator+(r32 c, V4 vec)
 {
   V4 result;
   result.w = c + vec.w;
@@ -732,13 +732,13 @@ operator+(float c, V4 vec)
   return result;
 }
 V4
-operator+(V4 vec, float c)
+operator+(V4 vec, r32 c)
 {
   V4 result = c + vec;
   return result;
 }
 V4 &
-operator+=(V4 & vec, float c)
+operator+=(V4 & vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -773,7 +773,7 @@ operator-(V4 vec)
 }
 
 V4
-operator-(float c, V4 vec)
+operator-(r32 c, V4 vec)
 {
   V4 result;
   result.w = c - vec.w;
@@ -783,7 +783,7 @@ operator-(float c, V4 vec)
   return result;
 }
 V4
-operator-(V4 vec, float c)
+operator-(V4 vec, r32 c)
 {
   V4 result;
   result.w = vec.w - c;
@@ -793,7 +793,7 @@ operator-(V4 vec, float c)
   return result;
 }
 V4 &
-operator-=(V4 & vec, float c)
+operator-=(V4 & vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -842,10 +842,10 @@ V4
 round_down(V4 vec)
 {
   V4 result;
-  result.w = (int32_t)vec.w;
-  result.x = (int32_t)vec.x;
-  result.y = (int32_t)vec.y;
-  result.z = (int32_t)vec.z;
+  result.w = (s32)vec.w;
+  result.x = (s32)vec.x;
+  result.y = (s32)vec.y;
+  result.z = (s32)vec.z;
   return result;
 }
 

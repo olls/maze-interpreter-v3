@@ -20,22 +20,22 @@ enum CellType
 
 struct Cell
 {
-  uint32_t x;
-  uint32_t y;
+  u32 x;
+  u32 y;
   enum CellType type;
   union {
-    uint32_t pause;
-    uint32_t function_index;
+    u32 pause;
+    u32 function_index;
   };
 };
 
 
-const uint32_t QUAD_STORE_N = 16;
+const u32 QUAD_STORE_N = 16;
 struct QuadTree
 {
   Rectangle bounds;
 
-  uint32_t used;
+  u32 used;
   Cell cells[QUAD_STORE_N];
 
   QuadTree * top_right;
@@ -48,8 +48,8 @@ struct QuadTree
 struct Maze
 {
   // TODO: Not actually used ATM, get rid of?
-  uint32_t width;
-  uint32_t height;
+  u32 width;
+  u32 height;
 
   QuadTree tree;
   Function functions[MAX_FUNCTIONS];
