@@ -1,6 +1,3 @@
-#include "maze.h"
-
-
 Cell *
 get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 {
@@ -28,12 +25,12 @@ get_cell(QuadTree * tree, uint32_t x, uint32_t y)
 
 
 QuadTree *
-create_tree(GameMemory * game_memory, Rectangle bounds)
+create_tree(Memory * memory, Rectangle bounds)
 {
   QuadTree * tree = 0;
-  if (game_memory)
+  if (memory)
   {
-    tree = (QuadTree *)take_struct_mem(game_memory, QuadTree, 1);
+    tree = push_struct(memory, QuadTree);
     tree->bounds = bounds;
   }
   return tree;
@@ -41,7 +38,7 @@ create_tree(GameMemory * game_memory, Rectangle bounds)
 
 
 Cell *
-get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
+get_cell(Maze * maze, uint32_t x, uint32_t y, Memory * memory = 0)
 {
   QuadTree * tree = &(maze->tree);
 
@@ -57,7 +54,7 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
     {
       if (!tree->top_right)
       {
-        tree->top_right = create_tree(game_memory, top_right_bounds);
+        tree->top_right = create_tree(memory, top_right_bounds);
       }
       tree = tree->top_right;
     }
@@ -65,7 +62,7 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
     {
       if (!tree->top_left)
       {
-        tree->top_left = create_tree(game_memory, top_left_bounds);
+        tree->top_left = create_tree(memory, top_left_bounds);
       }
       tree = tree->top_left;
     }
@@ -73,7 +70,7 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
     {
       if (!tree->bottom_right)
       {
-        tree->bottom_right = create_tree(game_memory, bottom_right_bounds);
+        tree->bottom_right = create_tree(memory, bottom_right_bounds);
       }
       tree = tree->bottom_right;
     }
@@ -81,7 +78,7 @@ get_cell(Maze * maze, uint32_t x, uint32_t y, GameMemory * game_memory = 0)
     {
       if (!tree->bottom_left)
       {
-        tree->bottom_left = create_tree(game_memory, bottom_left_bounds);
+        tree->bottom_left = create_tree(memory, bottom_left_bounds);
       }
       tree = tree->bottom_left;
     }

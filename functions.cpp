@@ -1,6 +1,3 @@
-#include "functions.h"
-
-
 uint32_t
 get_function_index(char name[2])
 {

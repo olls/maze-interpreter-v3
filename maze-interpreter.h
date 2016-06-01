@@ -1,47 +1,3 @@
-#define DEBUG
-
-#ifdef DEBUG
-#define S(x) #x
-#define S_(x) S(x)
-#define S__LINE__ S_(__LINE__)
-#define assert(x) ((void)(!(x) && printf("Assertion Failed: "__FILE__":"S__LINE__":  ("#x")\n") && (exit(1), 1)))
-#else
-#define assert(x) ((void)sizeof(x))
-#define printf(x, ...) ((void)sizeof(x))
-#endif
-
-#define invalid_code_path assert(!"Invalid Code Path! D:")
-
-
-#define kilobytes_to_bytes(n) (1024 * (n))
-#define megabytes_to_bytes(n) (kilobytes_to_bytes(1024) * (n))
-#define gigabytes_to_bytes(n) (megabytes_to_bytes(1024) * (n))
-
-#define bytes_to_kilobytes(n) ((n) / 1024)
-#define bytes_to_megabytes(n) ((n) / kilobytes_to_bytes(1024))
-#define bytes_to_gigabytes(n) ((n) / bytes_to_megabytes(1024))
-
-#define seconds_in_m(n) (1000 * (n))
-#define seconds_in_u(n) (seconds_in_m(1000) * (n))
-
-#define m_in_seconds(n) ((n) / (real32)seconds_in_m(1))
-#define u_in_seconds(n) ((n) / (real32)seconds_in_u(1))
-
-#define array_count(array) (sizeof(array) / sizeof((array)[0]))
-
-
-#include <float.h>
-#include <math.h>
-
-#include "vectors.h"
-#include "maths.h"
-
-
-const bool FULLSCREEN = true;
-
-const uint32_t FPS = 60;
-const uint32_t TOTAL_MEMORY = megabytes_to_bytes(50);
-
 // NOTE: 256 sub-pixel steps!
 const uint32_t MIN_WORLD_PER_PIXEL = 256;
 // const uint32_t MIN_WORLD_PER_PIXEL = 4096;
@@ -55,135 +11,6 @@ const char MAZE_FILENAME[] = "test.mz";
 
 const uint32_t CAR_CELL_PER_S = 20;
 
-
-struct GameMemory
-{
-  size_t total;
-  uint8_t * memory;
-  size_t used;
-};
-
-
-void
-init_mem(GameMemory * game_memory, size_t total)
-{
-  game_memory->total = total;
-  game_memory->memory = (uint8_t *)malloc(total);
-  game_memory->used = 0;
-
-  assert(game_memory->memory != NULL);
-}
-
-
-#define take_struct_mem(game_memory, struct_, num) {(struct_ *)take_mem(game_memory, (sizeof(struct_) * num))}
-void *
-take_mem(GameMemory * game_memory, size_t size)
-{
-  void * result = game_memory->memory + game_memory->used;
-  game_memory->used += size;
-
-  assert(game_memory->used < game_memory->total);
-  // printf("Used %lumb\n", bytes_to_megabytes(game_memory->used));
-
-  return result;
-}
-
-
-struct FpsMeasurement
-{
-  uint64_t last_measure;
-  uint32_t frame_count;
-};
-
-
-struct Keys
-{
-  bool space_down;
-  bool up_down;
-  bool down_down;
-  bool left_down;
-  bool right_down;
-  bool p_down;
-  bool w_down;
-  bool s_down;
-  bool a_down;
-  bool d_down;
-};
-
-
-struct Mouse
-{
-  uint32_t x;
-  uint32_t y;
-
-  bool l_down;
-  bool r_down;
-
-  V2 scroll;
-};
-
-
-struct Game
-{
-  uint32_t window_width;
-  uint32_t window_height;
-
-  uint32_t world_per_pixel;
-
-  // NOTE: Things are scaled relatively to cell_spacing.
-  float zoom;
-  uint32_t cell_spacing;
-  float cell_margin;
-
-  Mouse mouse;
-  V2 last_mouse_pos;
-};
-
-
-enum Direction
-{
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-  STATIONARY
-};
-
-Direction
-reverse(Direction d)
-{
-  Direction result;
-
-  switch (d)
-  {
-    case UP:
-    {
-      result = DOWN;
-    } break;
-
-    case DOWN:
-    {
-      result = UP;
-    } break;
-
-    case LEFT:
-    {
-      result = RIGHT;
-    } break;
-
-    case RIGHT:
-    {
-      result = LEFT;
-    } break;
-
-    default:
-    {
-      result = STATIONARY;
-    } break;
-  }
-
-  return result;
-}
 
 struct Car
 {
@@ -213,44 +40,21 @@ struct Cars
 };
 
 
-void
-printF(float f)
+struct GameState
 {
-  printf("%f\n", f);
-}
+  bool init;
 
-void
-printU(uint32_t u)
-{
-  printf("%d\n", u);
-}
+  uint32_t world_per_pixel;
 
-void
-printI(int32_t i)
-{
-  printf("%d\n", i);
-}
+  // NOTE: Things are scaled relatively to cell_spacing.
+  float zoom;
+  uint32_t cell_spacing;
+  float cell_margin;
 
-void
-printV(V4 vec)
-{
-  printf("(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
-}
+  V2 last_mouse_pos;
 
-void
-printV(V2 vec)
-{
-  printf("(%f, %f)\n", vec.x, vec.y);
-}
+  Maze maze;
 
-void
-printV(V3 vec)
-{
-  printf("(%f, %f, %f)\n", vec.x, vec.y, vec.z);
-}
-
-void
-printR(Rectangle rect)
-{
-  printf("((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
-}
+  Cars cars;
+  uint64_t last_car_update;
+};

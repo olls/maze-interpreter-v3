@@ -96,10 +96,9 @@ get_direction(char * ptr, enum Direction * result)
 }
 
 
-Maze *
-parse(GameMemory * game_memory, const char * filename)
+void
+parse(Maze * maze, Memory * memory, const char * filename)
 {
-  Maze * maze = take_struct_mem(game_memory, Maze, 1);
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
   maze->tree.used = 0;
   maze->width = 0;
@@ -388,7 +387,7 @@ parse(GameMemory * game_memory, const char * filename)
 
     if (new_cell.type != CELL_NULL)
     {
-      Cell * cell = get_cell(maze, x, y, game_memory);
+      Cell * cell = get_cell(maze, x, y, memory);
       cell->type = new_cell.type;
       cell->pause = new_cell.pause;
       cell->function_index = new_cell.function_index;
@@ -416,6 +415,4 @@ parse(GameMemory * game_memory, const char * filename)
   maze->height = y;
 
   printf("(%d, %d)\n", maze->width, maze->height);
-
-  return maze;
 }
