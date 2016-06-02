@@ -450,22 +450,22 @@ render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
     game_state->world_per_pixel = MIN_WORLD_PER_PIXEL;
   }
 
-  V2 screen_offset = (V2){0.5, 0.5} * game_state->cell_spacing;
+  V2 d_mouse = (V2){mouse->x, mouse->y} - game_state->last_mouse_pos;
+  game_state->last_mouse_pos = (V2){mouse->x, mouse->y};
+
   if (mouse->l_down)
   {
-    game_state->last_mouse_pos = (V2){mouse->x, mouse->y};
+    game_state->maze_pos += d_mouse;
   }
-  if (game_state->last_mouse_pos >= (V2){0, 0})
-  {
-    screen_offset += (game_state->world_per_pixel * ((V2){frame_buffer->width, frame_buffer->height} - game_state->last_mouse_pos)) - ((V2){game_state->maze.width, game_state->maze.height} * game_state->cell_spacing * 0.5f);
-  }
+
+  V2 maze_pos_world = game_state->world_per_pixel * game_state->maze_pos;
 
   Rectangle render_region;
   render_region.start = (V2){0, 0};
   render_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
 
-  update_and_render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, &(game_state->maze.tree));
-  render_cars(game_state, frame_buffer, render_region, screen_offset, &(game_state->cars));
+  update_and_render_cells(game_state, mouse, frame_buffer, render_region, maze_pos_world, &(game_state->maze.tree));
+  render_cars(game_state, frame_buffer, render_region, maze_pos_world, &(game_state->cars));
 }
 
 
@@ -480,7 +480,6 @@ init_game(Memory * memory, GameState * game_state, u32 argc, char * argv[])
   game_state->zoom = 64;
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
-  game_state->last_mouse_pos = (V2){-1, -1};
 
   if (argc > 1)
   {

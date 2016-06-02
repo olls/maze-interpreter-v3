@@ -51,6 +51,7 @@ struct GameState
   u32 cell_spacing;
   r32 cell_margin;
 
+  V2 maze_pos;
   V2 last_mouse_pos;
 
   Maze maze;
