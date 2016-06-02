@@ -132,8 +132,7 @@ game_loop(Memory * memory, Renderer * renderer, u32 argc, char * argv[])
 {
   b32 running = true;
 
-  u32 frame_rate = 30;
-  u32 useconds_per_frame = 1000000 / frame_rate;
+  u32 useconds_per_frame = 1000000 / FPS;
 
   GameState game_state = {};
   Keys keys = {};
