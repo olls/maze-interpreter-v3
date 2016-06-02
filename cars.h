@@ -1,9 +1,8 @@
-const u32 CAR_CELL_PER_S = 20;
+const u32 CAR_CELL_PER_S = 2;
 
 
 struct Car
 {
-  b32 update;
   b32 dead;
 
   s32 value;

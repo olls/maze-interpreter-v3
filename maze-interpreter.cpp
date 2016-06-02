@@ -225,11 +225,7 @@ update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_b
     init_game(memory, game_state, argc, argv);
   }
 
-  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_CELL_PER_S))
-  {
-    game_state->last_car_update = time_us;
-    update_cars(&(game_state->maze), &(game_state->cars));
-  }
+  update_cars(game_state, time_us);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
