@@ -395,7 +395,7 @@ render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, 
       box_color.a = 1;
       box_color.r = 0xFF;
     }
-    draw_box_outline(game, pixels, render_region, world_tree_bounds, box_color);
+    draw_box_outline(frame_buffer, game_state->world_per_pixel, render_region, world_tree_bounds, box_color);
 #endif
 
     render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, tree->top_right);
