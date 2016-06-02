@@ -112,6 +112,32 @@ draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_regio
 
 
 void
+fast_draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+{
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle render_region = render_region_world / world_per_pixel;
+  render_region = get_overlap(render_region, window_region);
+
+  Rectangle fract_pixel_space = box / world_per_pixel;
+  fract_pixel_space = crop_to(fract_pixel_space, render_region);
+
+  Rectangle pixel_space = round_down(fract_pixel_space);
+
+  for (u32 pixel_y = pixel_space.start.y;
+       pixel_y < pixel_space.end.y;
+       pixel_y++)
+  {
+    for (u32 pixel_x = pixel_space.start.x;
+         pixel_x < pixel_space.end.x;
+         pixel_x++)
+    {
+      frame_buffer->buffer[pixel_x + pixel_y * frame_buffer->width] = to_color(remove_alpha(color));
+    }
+  }
+}
+
+
+void
 draw_line(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
 {
   V2 start = world_start / world_per_pixel;

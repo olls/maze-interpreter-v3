@@ -230,7 +230,7 @@ update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_b
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
   render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
-  draw_box(frame_buffer, 1, render_region_pixels, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
+  fast_draw_box(frame_buffer, 1, render_region_pixels, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
 
   render(game_state, frame_buffer, mouse);
 
