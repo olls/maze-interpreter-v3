@@ -1,5 +1,5 @@
 void
-set_pixel(FrameBuffer * frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
+set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 {
   u32 pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
 
@@ -12,7 +12,7 @@ set_pixel(FrameBuffer * frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 
 
 void
-draw_circle(FrameBuffer * frame_buffer,
+draw_circle(FrameBuffer *frame_buffer,
             u32 world_per_pixel,
             Rectangle render_region_world,
             V2 world_pos,
@@ -67,7 +67,7 @@ draw_circle(FrameBuffer * frame_buffer,
 
 
 void
-draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_region_world / world_per_pixel;
@@ -112,7 +112,7 @@ draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_regio
 
 
 void
-fast_draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+fast_draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_region_world / world_per_pixel;
@@ -138,7 +138,7 @@ fast_draw_box(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_
 
 
 void
-draw_line(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
+draw_line(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
 {
   V2 start = world_start / world_per_pixel;
   V2 end = world_end / world_per_pixel;
@@ -234,7 +234,7 @@ draw_line(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_regi
 
 
 void
-draw_box_outline(FrameBuffer * frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box_outline(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
 {
   draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
   draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);

@@ -38,10 +38,10 @@ struct QuadTree
   u32 used;
   Cell cells[QUAD_STORE_N];
 
-  QuadTree * top_right;
-  QuadTree * top_left;
-  QuadTree * bottom_right;
-  QuadTree * bottom_left;
+  QuadTree *top_right;
+  QuadTree *top_left;
+  QuadTree *bottom_right;
+  QuadTree *bottom_left;
 };
 
 

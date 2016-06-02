@@ -6,7 +6,7 @@
 
 
 V2
-cell_coord_to_world(GameState * game_state, u32 cell_x, u32 cell_y)
+cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 {
   // TODO: Is there any point in world space any more???
   //       Cars have cell_x/y and offset, is that all we need? (Help
@@ -17,7 +17,7 @@ cell_coord_to_world(GameState * game_state, u32 cell_x, u32 cell_y)
 
 
 void
-render_cars(GameState * game_state, FrameBuffer * frame_buffer, Rectangle render_region, V2 screen_offset, Cars * cars)
+render_cars(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset, Cars *cars)
 {
   u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
@@ -27,7 +27,7 @@ render_cars(GameState * game_state, FrameBuffer * frame_buffer, Rectangle render
        car_index < cars->next_free;
        ++car_index)
   {
-    Car * car = cars->cars + car_index;
+    Car *car = cars->cars + car_index;
     V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset + screen_offset;
     draw_circle(frame_buffer, game_state->world_per_pixel, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
   }
@@ -35,7 +35,7 @@ render_cars(GameState * game_state, FrameBuffer * frame_buffer, Rectangle render
 
 
 void
-update_cell(Cell * cell, Cars * cars, b32 first_frame=false)
+update_cell(Cell *cell, Cars *cars, b32 first_frame=false)
 {
   if (first_frame)
   {
@@ -48,7 +48,7 @@ update_cell(Cell * cell, Cars * cars, b32 first_frame=false)
 
 
 b32
-render_cell(Cell * cell, GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, Rectangle render_region, V2 screen_offset)
+render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset)
 {
   b32 selected = false;
   if (cell->type != CELL_WALL)
@@ -111,7 +111,7 @@ render_cell(Cell * cell, GameState * game_state, Mouse * mouse, FrameBuffer * fr
 }
 
 
-void update_and_render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, Rectangle render_region, V2 screen_offset, QuadTree * tree)
+void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset, QuadTree * tree)
 {
   b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
@@ -125,7 +125,7 @@ void update_and_render_cells(GameState * game_state, Mouse * mouse, FrameBuffer 
          cell_index < tree->used;
          ++cell_index)
     {
-      Cell * cell = tree->cells + cell_index;
+      Cell *cell = tree->cells + cell_index;
 
       update_cell(cell, &(game_state->cars), (game_state->frame_count == 0));
       selected = render_cell(cell, game_state, mouse, frame_buffer, render_region, screen_offset);
@@ -151,7 +151,7 @@ void update_and_render_cells(GameState * game_state, Mouse * mouse, FrameBuffer 
 
 
 void
-render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
+render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
 {
   // TODO: Center zoom on mouse
 
@@ -193,7 +193,7 @@ render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
 
 
 void
-init_game(Memory * memory, GameState * game_state, u32 argc, char * argv[])
+init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
   game_state->init = true;
 
@@ -218,7 +218,7 @@ init_game(Memory * memory, GameState * game_state, u32 argc, char * argv[])
 
 
 void
-update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_buffer, Keys * keys, Mouse * mouse, u64 time_us, u32 argc, char * argv[])
+update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 argc, char *argv[])
 {
   if (!game_state->init)
   {

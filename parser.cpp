@@ -20,7 +20,7 @@ b32
 isLetter(char character)
 {
   b32 result = (((character >= 'a') && (character <= 'z')) ||
-                 ((character >= 'A') && (character <= 'Z')));
+                ((character >= 'A') && (character <= 'Z')));
   return result;
 }
 
@@ -34,9 +34,9 @@ isNewline(char character)
 
 
 char *
-get_num(char * ptr, char * f_end, u32 * result)
+get_num(char *ptr, char *f_end, u32 *result)
 {
-  char * num_start = ptr;
+  char *num_start = ptr;
 
   consume_while(ptr, isNum, f_end);
 
@@ -56,7 +56,7 @@ get_num(char * ptr, char * f_end, u32 * result)
 
 
 char *
-get_direction(char * ptr, enum Direction * result)
+get_direction(char *ptr, enum Direction *result)
 {
   *result = STATIONARY;
 
@@ -97,7 +97,7 @@ get_direction(char * ptr, enum Direction * result)
 
 
 void
-parse(Maze * maze, Memory * memory, const char * filename)
+parse(Maze *maze, Memory *memory, const char *filename)
 {
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
   maze->tree.used = 0;
@@ -121,7 +121,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
     exit(1);
   }
 
-  char * file = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  char *file = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
   if (file == MAP_FAILED)
   {
     printf("Failed to open file.\n");
@@ -129,8 +129,8 @@ parse(Maze * maze, Memory * memory, const char * filename)
   }
 
   char cell_str[3] = {};
-  char * f_ptr = file;
-  char * f_end = f_ptr + sb.st_size;
+  char *f_ptr = file;
+  char *f_end = f_ptr + sb.st_size;
   while (f_ptr < f_end)
   {
     cell_str[0] = f_ptr[0];
@@ -166,7 +166,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
       u32 function_index = get_function_index(cell_str);
       u32 function_parse_bytes_read = 0;
 
-      char * ptr = f_ptr + 2;
+      char *ptr = f_ptr + 2;
       consume_whitespace(ptr, f_end);
 
       if (ptr[0] == '-' &&
@@ -174,7 +174,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
       {
         // Function Definition
         ptr += 2;
-        Function * function = maze->functions + function_index;
+        Function *function = maze->functions + function_index;
         function->name[0] = cell_str[0];
         function->name[1] = cell_str[1];
 
@@ -282,7 +282,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
           {
             consume_whitespace(ptr, f_end);
 
-            char * num_start = ptr;
+            char *num_start = ptr;
             ptr = get_num(ptr, f_end, &(condition_value));
             if (num_start == ptr)
             {
@@ -387,7 +387,7 @@ parse(Maze * maze, Memory * memory, const char * filename)
 
     if (new_cell.type != CELL_NULL)
     {
-      Cell * cell = get_cell(maze, x, y, memory);
+      Cell *cell = get_cell(maze, x, y, memory);
       cell->type = new_cell.type;
       cell->pause = new_cell.pause;
       cell->function_index = new_cell.function_index;

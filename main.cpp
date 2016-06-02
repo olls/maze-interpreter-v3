@@ -94,7 +94,7 @@ process_keys(Keys *keys, SDL_Event event)
 
 
 void
-process_mouse(Mouse * mouse, SDL_Event event)
+process_mouse(Mouse *mouse, SDL_Event event)
 {
   switch (event.type) {
     case SDL_MOUSEMOTION:
@@ -128,7 +128,7 @@ process_mouse(Mouse * mouse, SDL_Event event)
 
 
 void
-game_loop(Memory * memory, Renderer * renderer, u32 argc, char * argv[])
+game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
 {
   b32 running = true;
 
@@ -191,7 +191,7 @@ game_loop(Memory * memory, Renderer * renderer, u32 argc, char * argv[])
 
 
 int
-main(int argc, char * argv[])
+main(int argc, char *argv[])
 {
   srand(time(0));
 
@@ -215,7 +215,7 @@ main(int argc, char * argv[])
     renderer.frame_buffer.height = 1080;
   }
 
-  SDL_Window * window = SDL_CreateWindow("2D Game",
+  SDL_Window *window = SDL_CreateWindow("2D Game",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.frame_buffer.width, renderer.frame_buffer.height, flags);
 
   if (FULLSCREEN)

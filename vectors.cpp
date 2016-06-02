@@ -57,7 +57,7 @@ operator*(V2 vec, r32 c)
   return result;
 }
 V2 &
-operator*=(V2 & vec, r32 c)
+operator*=(V2 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
@@ -80,7 +80,7 @@ operator/(V2 vec, r32 c)
   return result;
 }
 V2 &
-operator/=(V2 & vec, r32 c)
+operator/=(V2 &vec, r32 c)
 {
   vec = vec / c;
   return vec;
@@ -101,7 +101,7 @@ operator+(V2 vec, r32 c)
   return result;
 }
 V2 &
-operator+=(V2 & vec, r32 c)
+operator+=(V2 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -116,7 +116,7 @@ operator+(V2 a, V2 b)
   return result;
 }
 V2 &
-operator+=(V2 & a, V2 b)
+operator+=(V2 &a, V2 b)
 {
   a = a + b;
   return a;
@@ -148,7 +148,7 @@ operator-(V2 vec, r32 c)
   return result;
 }
 V2 &
-operator-=(V2 & vec, r32 c)
+operator-=(V2 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -163,7 +163,7 @@ operator-(V2 a, V2 b)
   return result;
 }
 V2 &
-operator-=(V2 & a, V2 b)
+operator-=(V2 &a, V2 b)
 {
   a = a - b;
   return a;
@@ -241,7 +241,7 @@ operator*(Rectangle rect, r32 c)
   return result;
 }
 Rectangle &
-operator*=(Rectangle & rect, r32 c)
+operator*=(Rectangle &rect, r32 c)
 {
   rect = c * rect;
   return rect;
@@ -264,7 +264,7 @@ operator/(Rectangle rect, r32 c)
   return result;
 }
 Rectangle &
-operator/=(Rectangle & rect, r32 c)
+operator/=(Rectangle &rect, r32 c)
 {
   rect = rect / c;
   return rect;
@@ -285,7 +285,7 @@ operator+(Rectangle rect, r32 c)
   return result;
 }
 Rectangle &
-operator+=(Rectangle & rect, r32 c)
+operator+=(Rectangle &rect, r32 c)
 {
   rect = rect + c;
   return rect;
@@ -306,7 +306,7 @@ operator+(V2 vec, Rectangle rect)
   return result;
 }
 Rectangle &
-operator+=(Rectangle & rect, V2 vec)
+operator+=(Rectangle &rect, V2 vec)
 {
   rect = rect + vec;
   return rect;
@@ -321,7 +321,7 @@ operator+(Rectangle a, Rectangle b)
   return result;
 }
 Rectangle &
-operator+=(Rectangle & a, Rectangle b)
+operator+=(Rectangle &a, Rectangle b)
 {
   a = a + b;
   return a;
@@ -353,7 +353,7 @@ operator-(Rectangle rect, r32 c)
   return result;
 }
 Rectangle &
-operator-=(Rectangle & rect, r32 c)
+operator-=(Rectangle &rect, r32 c)
 {
   rect = rect - c;
   return rect;
@@ -368,7 +368,7 @@ operator-(Rectangle a, Rectangle b)
   return result;
 }
 Rectangle &
-operator-=(Rectangle & a, Rectangle b)
+operator-=(Rectangle &a, Rectangle b)
 {
   a = a - b;
   return a;
@@ -489,8 +489,8 @@ b32
 operator==(V3 a, V3 b)
 {
   b32 result = ((a.x == b.x) &&
-                 (a.y == b.y) &&
-                 (a.z == b.z));
+                (a.y == b.y) &&
+                (a.z == b.z));
   return result;
 }
 b32
@@ -515,7 +515,7 @@ operator*(V3 vec, r32 c)
   return result;
 }
 V3 &
-operator*=(V3 & vec, r32 c)
+operator*=(V3 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
@@ -540,7 +540,7 @@ operator/(V3 vec, r32 c)
   return result;
 }
 V3 &
-operator/=(V3 & vec, r32 c)
+operator/=(V3 &vec, r32 c)
 {
   vec = vec / c;
   return vec;
@@ -562,7 +562,7 @@ operator+(V3 vec, r32 c)
   return result;
 }
 V3 &
-operator+=(V3 & vec, r32 c)
+operator+=(V3 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -578,7 +578,7 @@ operator+(V3 a, V3 b)
   return result;
 }
 V3 &
-operator+=(V3 & a, V3 b)
+operator+=(V3 &a, V3 b)
 {
   a = a + b;
   return a;
@@ -613,7 +613,7 @@ operator-(V3 vec, r32 c)
   return result;
 }
 V3 &
-operator-=(V3 & vec, r32 c)
+operator-=(V3 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -629,7 +629,7 @@ operator-(V3 a, V3 b)
   return result;
 }
 V3 &
-operator-=(V3 & a, V3 b)
+operator-=(V3 &a, V3 b)
 {
   a = a - b;
   return a;
@@ -669,9 +669,9 @@ b32
 operator==(V4 a, V4 b)
 {
   b32 result = ((a.w == b.w) &&
-                 (a.x == b.x) &&
-                 (a.y == b.y) &&
-                 (a.z == b.z));
+                (a.x == b.x) &&
+                (a.y == b.y) &&
+                (a.z == b.z));
   return result;
 }
 b32
@@ -697,7 +697,7 @@ operator*(V4 vec, r32 c)
   return result;
 }
 V4 &
-operator*=(V4 & vec, r32 c)
+operator*=(V4 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
@@ -724,7 +724,7 @@ operator/(V4 vec, r32 c)
   return result;
 }
 V4 &
-operator/=(V4 & vec, r32 c)
+operator/=(V4 &vec, r32 c)
 {
   vec = vec / c;
   return vec;
@@ -747,7 +747,7 @@ operator+(V4 vec, r32 c)
   return result;
 }
 V4 &
-operator+=(V4 & vec, r32 c)
+operator+=(V4 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
@@ -764,7 +764,7 @@ operator+(V4 a, V4 b)
   return result;
 }
 V4 &
-operator+=(V4 & a, V4 b)
+operator+=(V4 &a, V4 b)
 {
   a = a + b;
   return a;
@@ -802,7 +802,7 @@ operator-(V4 vec, r32 c)
   return result;
 }
 V4 &
-operator-=(V4 & vec, r32 c)
+operator-=(V4 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
@@ -819,7 +819,7 @@ operator-(V4 a, V4 b)
   return result;
 }
 V4 &
-operator-=(V4 & a, V4 b)
+operator-=(V4 &a, V4 b)
 {
   a = a - b;
   return a;

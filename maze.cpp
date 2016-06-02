@@ -1,12 +1,12 @@
 Cell *
 get_cell(QuadTree * tree, u32 x, u32 y)
 {
-  Cell * cell = 0;
+  Cell *cell = 0;
   for (u32 cell_index = 0;
        cell_index < tree->used;
        ++cell_index)
   {
-    Cell * test_cell = tree->cells + cell_index;
+    Cell *test_cell = tree->cells + cell_index;
     if ((test_cell->x == x) &&
         (test_cell->y == y))
     {
@@ -25,7 +25,7 @@ get_cell(QuadTree * tree, u32 x, u32 y)
 
 
 QuadTree *
-create_tree(Memory * memory, Rectangle bounds)
+create_tree(Memory *memory, Rectangle bounds)
 {
   QuadTree * tree = 0;
   if (memory)
@@ -38,11 +38,11 @@ create_tree(Memory * memory, Rectangle bounds)
 
 
 Cell *
-get_cell(Maze * maze, u32 x, u32 y, Memory * memory = 0)
+get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
 {
   QuadTree * tree = &(maze->tree);
 
-  Cell * cell = 0;
+  Cell *cell = 0;
   while (tree && !(cell = get_cell(tree, x, y)))
   {
     Rectangle top_right_bounds    = get_top_right(tree->bounds);

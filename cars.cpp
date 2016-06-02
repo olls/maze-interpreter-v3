@@ -1,9 +1,9 @@
 Car *
-add_car(Cars * cars, u32 cell_x, u32 cell_y, Direction direction = UP)
+add_car(Cars *cars, u32 cell_x, u32 cell_y, Direction direction = UP)
 {
   assert(cars->next_free != MAX_CARS);
 
-  Car * car = cars->cars + cars->next_free;
+  Car *car = cars->cars + cars->next_free;
   ++cars->next_free;
 
   car->dead = false;
@@ -23,7 +23,7 @@ add_car(Cars * cars, u32 cell_x, u32 cell_y, Direction direction = UP)
 
 
 void
-rm_car(Cars * cars, u32 car_index)
+rm_car(Cars *cars, u32 car_index)
 {
   --cars->next_free;
   if (car_index != cars->next_free)
@@ -34,7 +34,7 @@ rm_car(Cars * cars, u32 car_index)
 
 
 void
-car_movements(Maze * maze, Car * car)
+car_movements(Maze *maze, Car *car)
 {
   if (car->direction == STATIONARY)
   {
@@ -73,7 +73,7 @@ car_movements(Maze * maze, Car * car)
       Direction test_direction = directions[direction_index];
       V2 test_comp = dir_components[test_direction];
 
-      Cell * test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
+      Cell *test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
       if (test_cell)
       {
         if (test_cell->type != CELL_WALL)
@@ -124,11 +124,11 @@ car_movements(Maze * maze, Car * car)
 
 
 void
-car_cell_interactions(Maze * maze, Cars * cars, Car * car)
+car_cell_interactions(Maze *maze, Cars *cars, Car *car)
 {
   // TODO: Deal with race cars (conditions) ??
 
-  Cell * current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+  Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
 
   switch (current_cell->type)
   {
@@ -168,7 +168,7 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
 
     case (CELL_FUNCTION):
     {
-      Function * function = maze->functions + current_cell->function_index;
+      Function *function = maze->functions + current_cell->function_index;
       printf("Function: %s, %d\n", function->name, (u32)function->type);
     } break;
 
@@ -249,7 +249,7 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
 
 
 void
-re_canonicalise_car_pos(GameState * game_state, Car * car)
+re_canonicalise_car_pos(GameState *game_state, Car *car)
 {
   if (abs(car->offset.x) >= game_state->cell_spacing)
   {
@@ -265,7 +265,7 @@ re_canonicalise_car_pos(GameState * game_state, Car * car)
 
 
 void
-update_car_position(GameState * game_state, Car * car)
+update_car_position(GameState *game_state, Car *car)
 {
   u32 total_cell_dx = car->target_cell_x - car->cell_x;
   u32 total_cell_dy = car->target_cell_y - car->cell_y;
@@ -274,7 +274,7 @@ update_car_position(GameState * game_state, Car * car)
 
   // TODO: Calculate speed from FPS, CAR_TICKS_PER_S ...
   r32 speed = 25000;
-  car->offset += target_direction * speed;
+  car->offset += target_direction *speed;
   re_canonicalise_car_pos(game_state, car);
 
   // TODO: Correct if overshot
@@ -282,10 +282,10 @@ update_car_position(GameState * game_state, Car * car)
 
 
 void
-update_cars(GameState * game_state, u64 time_us)
+update_cars(GameState *game_state, u64 time_us)
 {
-  Cars * cars = &(game_state->cars);
-  Maze * maze = &(game_state->maze);
+  Cars *cars = &(game_state->cars);
+  Maze *maze = &(game_state->maze);
 
   b32 car_tick = false;
   if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_TICKS_PER_S))
@@ -304,7 +304,7 @@ update_cars(GameState * game_state, u64 time_us)
          car_index < n_cars;
          ++car_index)
     {
-      Car * car = cars->cars + car_index;
+      Car *car = cars->cars + car_index;
       car_cell_interactions(maze, cars, car);
     }
 
@@ -313,11 +313,11 @@ update_cars(GameState * game_state, u64 time_us)
          car_index < cars->next_free;
          ++car_index)
     {
-      Car * car = cars->cars + car_index;
+      Car *car = cars->cars + car_index;
 
       if (car->updated_cell_type != CELL_NULL)
       {
-        Cell * current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+        Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
         current_cell->type = car->updated_cell_type;
         car->updated_cell_type = CELL_NULL;
       }
@@ -332,7 +332,7 @@ update_cars(GameState * game_state, u64 time_us)
          car_index < cars->next_free;
          ++car_index)
     {
-      Car * car = cars->cars + car_index;
+      Car *car = cars->cars + car_index;
 
       // Delete cars
       while (car->dead && cars->next_free != car_index)
@@ -352,7 +352,7 @@ update_cars(GameState * game_state, u64 time_us)
        car_index < cars->next_free;
        ++car_index)
   {
-    Car * car = cars->cars + car_index;
+    Car *car = cars->cars + car_index;
     update_car_position(game_state, car);
   }
 }
