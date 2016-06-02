@@ -24,7 +24,7 @@
 #include "maze-interpreter.cpp"
 
 
-const b32 FULLSCREEN = true;
+const b32 FULLSCREEN = false;
 
 const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(50);
