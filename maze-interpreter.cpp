@@ -520,17 +520,11 @@ update_and_render(Memory * memory, GameState * game_state, FrameBuffer * frame_b
     update_cars(&(game_state->maze), &(game_state->cars));
   }
 
-  for (u32 screen_y = 0;
-       screen_y < frame_buffer->height;
-       screen_y++)
-  {
-    for (u32 screen_x = 0;
-         screen_x < frame_buffer->width;
-         screen_x++)
-    {
-      frame_buffer->buffer[screen_y * frame_buffer->width + screen_x] = (PixelColor){255, 255, 255};
-    }
-  }
+  Rectangle render_region_pixels;
+  render_region_pixels.start = (V2){0, 0};
+  render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
+  draw_box(frame_buffer, 1, render_region_pixels, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
+
   render(game_state, frame_buffer, mouse);
 
   mouse->scroll -= mouse->scroll / 6.0f;
