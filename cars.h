@@ -20,6 +20,8 @@ struct Car
 
   u32 pause_left;
   Direction unpause_direction;
+
+  CellType updated_cell_type;
 };
 
 

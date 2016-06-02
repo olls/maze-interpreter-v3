@@ -16,6 +16,7 @@ add_car(Cars * cars, u32 cell_x, u32 cell_y, Direction direction = UP)
   car->direction = direction;
   car->pause_left = 0;
   car->unpause_direction = STATIONARY;
+  car->updated_cell_type = CELL_NULL;
 
   return car;
 }
@@ -59,6 +60,7 @@ car_movements(Maze * maze, Car * car)
 
     // TODO: Maybe grab the cells in chunks, so we don't have to get the
     //       cells multiple times...
+    //       Or cache them in maze.cpp
 
     V2 dir_components[] = {{ 0, -1}, {0, 1},
                            {-1,  0}, {1, 0}};
@@ -173,7 +175,7 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
     case (CELL_ONCE):
     {
       printf("Once\n");
-      current_cell->type = CELL_WALL; // TODO: This causes a race condition: multiple cars on this cell on a tick
+      car->updated_cell_type = CELL_WALL;
     } break;
 
     case (CELL_SIGNAL):
@@ -305,6 +307,21 @@ update_cars(GameState * game_state, u64 time_us)
       Car * car = cars->cars + car_index;
       car_cell_interactions(maze, cars, car);
     }
+
+    // Update cell types
+    for (u32 car_index = 0;
+         car_index < cars->next_free;
+         ++car_index)
+    {
+      Car * car = cars->cars + car_index;
+
+      if (car->updated_cell_type != CELL_NULL)
+      {
+        Cell * current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+        current_cell->type = car->updated_cell_type;
+        car->updated_cell_type = CELL_NULL;
+      }
+    }
   }
 
   // Car deletion / movement
@@ -338,5 +355,4 @@ update_cars(GameState * game_state, u64 time_us)
     Car * car = cars->cars + car_index;
     update_car_position(game_state, car);
   }
-
 }
