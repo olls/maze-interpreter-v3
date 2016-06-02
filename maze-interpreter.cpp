@@ -380,18 +380,7 @@ render_cells(GameState * game_state, Mouse * mouse, FrameBuffer * frame_buffer, 
         if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
         {
           selected = true;
-          if (color.r <= (0xFF - 0x20))
-          {
-            color.r += 0x20;
-          }
-          if (color.g <= (0xFF - 0x20))
-          {
-            color.g += 0x20;
-          }
-          if (color.b <= (0xFF - 0x20))
-          {
-            color.b += 0x20;
-          }
+          color = clamp(add_color(color, 0x20), 0xff);
         }
 
         draw_box(frame_buffer, game_state->world_per_pixel, render_region, cell_bounds, color);

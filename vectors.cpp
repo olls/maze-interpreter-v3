@@ -839,6 +839,13 @@ max_V4(V4 a, V4 b)
 }
 
 V4
+clamp(V4 vec, u32 max)
+{
+  V4 result = min_V4(vec, (V4){max, max, max, max});
+  return result;
+}
+
+V4
 round_down(V4 vec)
 {
   V4 result;
@@ -879,6 +886,15 @@ to_color(V3 vec)
   result.r = vec.r;
   result.g = vec.g;
   result.b = vec.b;
+  return result;
+}
+
+
+V4
+add_color(V4 colour, u32 x)
+{
+  V4 result = colour + x;
+  result.a = colour.a;
   return result;
 }
 
