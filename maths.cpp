@@ -30,6 +30,17 @@ lerp(u32 min, u32 max, r32 t)
 }
 
 
+r32
+div_or_0(r32 n, r32 d)
+{
+  r32 result = 0;
+  if (d != 0)
+  {
+    result = n / d;
+  }
+  return result;
+}
+
 
 void
 printF(r32 f)

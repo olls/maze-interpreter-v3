@@ -1,4 +1,4 @@
-const u32 CAR_CELL_PER_S = 2;
+const u32 CAR_TICKS_PER_S = 20;
 
 
 struct Car
@@ -9,6 +9,9 @@ struct Car
 
   u32 cell_x;
   u32 cell_y;
+
+  u32 target_cell_x;
+  u32 target_cell_y;
 
   // NOTE: Used for sub-cell positioning, in world space.
   V2 offset;

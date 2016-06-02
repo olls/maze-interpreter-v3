@@ -5,8 +5,8 @@
 
 // Game Independent
 #include "platform.h"
-#include "vectors.h"
 #include "maths.h"
+#include "vectors.h"
 
 // Game Related
 #include "functions.h"
@@ -19,8 +19,8 @@
 #include "main.h"
 
 #include "platform.cpp"
-#include "vectors.cpp"
 #include "maths.cpp"
+#include "vectors.cpp"
 
 #include "maze-interpreter.cpp"
 

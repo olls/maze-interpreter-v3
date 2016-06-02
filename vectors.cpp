@@ -203,6 +203,15 @@ length_sq(V2 vec)
   return result;
 }
 
+V2
+unit_vector(V2 vec)
+{
+  V2 result = vec;
+  result.x = div_or_0(result.x, abs(result.x));
+  result.y = div_or_0(result.y, abs(result.y));
+  return result;
+}
+
 
 b32
 operator==(Rectangle a, Rectangle b)

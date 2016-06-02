@@ -10,6 +10,8 @@ add_car(Cars * cars, u32 cell_x, u32 cell_y, Direction direction = UP)
   car->value = 0;
   car->cell_x = cell_x;
   car->cell_y = cell_y;
+  car->target_cell_x = cell_x;
+  car->target_cell_y = cell_y;
   car->offset = (V2){0, 0};
   car->direction = direction;
   car->pause_left = 0;
@@ -31,7 +33,7 @@ rm_car(Cars * cars, u32 car_index)
 
 
 void
-move_car(Maze * maze, Car * car)
+car_movements(Maze * maze, Car * car)
 {
   if (car->direction == STATIONARY)
   {
@@ -69,7 +71,7 @@ move_car(Maze * maze, Car * car)
       Direction test_direction = directions[direction_index];
       V2 test_comp = dir_components[test_direction];
 
-      Cell * test_cell = get_cell(maze, (car->cell_x + test_comp.x), (car->cell_y + test_comp.y));
+      Cell * test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
       if (test_cell)
       {
         if (test_cell->type != CELL_WALL)
@@ -87,22 +89,22 @@ move_car(Maze * maze, Car * car)
       {
         case UP:
         {
-          --car->cell_y;
+          --car->target_cell_y;
         } break;
 
         case DOWN:
         {
-          ++car->cell_y;
+          ++car->target_cell_y;
         } break;
 
         case LEFT:
         {
-          --car->cell_x;
+          --car->target_cell_x;
         } break;
 
         case RIGHT:
         {
-          ++car->cell_x;
+          ++car->target_cell_x;
         } break;
 
         case STATIONARY:
@@ -124,7 +126,7 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
 {
   // TODO: Deal with race cars (conditions) ??
 
-  Cell * current_cell = get_cell(maze, car->cell_x, car->cell_y);
+  Cell * current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
 
   switch (current_cell->type)
   {
@@ -158,7 +160,7 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
     case (CELL_SPLITTER):
     {
       printf("Splitter\n");
-      add_car(cars, car->cell_x, car->cell_y, RIGHT);
+      add_car(cars, car->target_cell_x, car->target_cell_y, RIGHT);
       car->direction = LEFT;
     } break;
 
@@ -245,37 +247,67 @@ car_cell_interactions(Maze * maze, Cars * cars, Car * car)
 
 
 void
+re_canonicalise_car_pos(GameState * game_state, Car * car)
+{
+  if (abs(car->offset.x) >= game_state->cell_spacing)
+  {
+    car->cell_x += (s32)car->offset.x / (s32)game_state->cell_spacing;
+    car->offset.x = (s32)car->offset.x % (s32)game_state->cell_spacing;
+  }
+  if (abs(car->offset.y) >= game_state->cell_spacing)
+  {
+    car->cell_y += (s32)car->offset.y / (s32)game_state->cell_spacing;
+    car->offset.y = (s32)car->offset.y % (s32)game_state->cell_spacing;
+  }
+}
+
+
+void
+update_car_position(GameState * game_state, Car * car)
+{
+  u32 total_cell_dx = car->target_cell_x - car->cell_x;
+  u32 total_cell_dy = car->target_cell_y - car->cell_y;
+
+  V2 target_direction = unit_vector((V2){total_cell_dx, total_cell_dy});
+
+  // TODO: Calculate speed from FPS, CAR_TICKS_PER_S ...
+  r32 speed = 25000;
+  car->offset += target_direction * speed;
+  re_canonicalise_car_pos(game_state, car);
+
+  // TODO: Correct if overshot
+}
+
+
+void
 update_cars(GameState * game_state, u64 time_us)
 {
   Cars * cars = &(game_state->cars);
   Maze * maze = &(game_state->maze);
 
   b32 car_tick = false;
-  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_CELL_PER_S))
+  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_TICKS_PER_S))
   {
     game_state->last_car_update = time_us;
     car_tick = true;
   }
 
-  // Animation and car-cell interactions
+  // Car/cell interactions
 
-  // NOTE: Store n_cars so cars added within the loop aren't looped over.
-  u32 n_cars = cars->next_free;
-  for (u32 car_index = 0;
-       car_index < n_cars;
-       ++car_index)
+  if (car_tick)
   {
-    Car * car = cars->cars + car_index;
-
-    // TODO: Animation
-
-    if (car_tick)
+    // NOTE: Store n_cars so cars added within the loop aren't looped over.
+    u32 n_cars = cars->next_free;
+    for (u32 car_index = 0;
+         car_index < n_cars;
+         ++car_index)
     {
+      Car * car = cars->cars + car_index;
       car_cell_interactions(maze, cars, car);
     }
   }
 
-  // Car movement
+  // Car deletion / movement
 
   if (car_tick)
   {
@@ -295,7 +327,16 @@ update_cars(GameState * game_state, u64 time_us)
         break;
       }
 
-      move_car(maze, car);
+      car_movements(maze, car);
     }
   }
+
+  for (u32 car_index = 0;
+       car_index < cars->next_free;
+       ++car_index)
+  {
+    Car * car = cars->cars + car_index;
+    update_car_position(game_state, car);
+  }
+
 }
