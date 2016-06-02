@@ -11,6 +11,7 @@
 // Game Related
 #include "functions.h"
 #include "maze.h"
+#include "cars.h"
 #include "maze-interpreter.h"
 #include "render.h"
 #include "parser.h"
