@@ -58,10 +58,6 @@ car_movements(Maze *maze, Car *car)
       }
     }
 
-    // TODO: Maybe grab the cells in chunks, so we don't have to get the
-    //       cells multiple times...
-    //       Or cache them in maze.cpp
-
     V2 dir_components[] = {{ 0, -1}, {0, 1},
                            {-1,  0}, {1, 0}};
 

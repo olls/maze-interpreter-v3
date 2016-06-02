@@ -45,11 +45,14 @@ struct QuadTree
 };
 
 
+const u32 CELL_CACHE_SIZE = 512;
 struct Maze
 {
   // TODO: Not actually used ATM, get rid of?
   u32 width;
   u32 height;
+
+  Cell *cache_hash[CELL_CACHE_SIZE];
 
   QuadTree tree;
   Function functions[MAX_FUNCTIONS];
