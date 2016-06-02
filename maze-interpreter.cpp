@@ -432,6 +432,8 @@ void update_and_render_cells(GameState * game_state, Mouse * mouse, FrameBuffer 
 void
 render(GameState * game_state, FrameBuffer * frame_buffer, Mouse * mouse)
 {
+  // TODO: Center zoom on mouse
+
   u32 old_world_per_pixel = game_state->world_per_pixel;
 
   game_state->zoom += mouse->scroll.y;
