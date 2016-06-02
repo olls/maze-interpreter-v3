@@ -58,11 +58,9 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
   if (hash_cell && hash_cell->x == x && hash_cell->y == y)
   {
     cell = hash_cell;
-    printf("Found\n");
   }
   else
   {
-    printf("Not Found\n");
     while (tree && !(cell = get_cell(tree, x, y)))
     {
       Rectangle top_right_bounds    = get_top_right(tree->bounds);
