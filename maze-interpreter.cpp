@@ -17,7 +17,7 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 
 
 void
-render_cars(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset, Cars *cars)
+render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars)
 {
   u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
   // TODO: Loop through only relevant cars?
@@ -28,8 +28,8 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_r
        ++car_index)
   {
     Car *car = cars->cars + car_index;
-    V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset + screen_offset;
-    draw_circle(frame_buffer, game_state->world_per_pixel, render_region, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
+    V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
+    draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
   }
 }
 
@@ -48,7 +48,7 @@ update_cell(Cell *cell, Cars *cars, b32 first_frame=false)
 
 
 b32
-render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset)
+render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis)
 {
   b32 selected = false;
   if (cell->type != CELL_WALL)
@@ -95,8 +95,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
     // NOTE: Tile centred on coord
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
-    V2 world_screen_pos = world_pos + screen_offset;
-    Rectangle cell_bounds = rectangle(world_screen_pos, cell_radius);
+    Rectangle cell_bounds = rectangle(world_pos, cell_radius);
 
     if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
     {
@@ -104,21 +103,19 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
       color = clamp(add_color(color, 0x20), 0xff);
     }
 
-    draw_box(frame_buffer, game_state->world_per_pixel, render_region, cell_bounds, color);
+    draw_box(frame_buffer, render_basis, cell_bounds, color);
   }
 
   return selected;
 }
 
 
-void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Rectangle render_region, V2 screen_offset, QuadTree * tree)
+void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree * tree)
 {
   b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
   //                  tree...
-  // if (tree && overlaps(render_region - 140000, (tree->bounds * game_state->cell_spacing)))
-  // if (tree && overlaps(render_region - 15000, (tree->bounds * game_state->cell_spacing)))
-  if (tree && overlaps(render_region, (tree->bounds * game_state->cell_spacing) + screen_offset))
+  if (tree && overlaps(render_basis->clip_region, (tree->bounds * game_state->cell_spacing) + render_basis->origin))
   {
 
     for (u32 cell_index = 0;
@@ -128,7 +125,7 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
       Cell *cell = tree->cells + cell_index;
 
       update_cell(cell, &(game_state->cars), (game_state->frame_count == 0));
-      selected = render_cell(cell, game_state, mouse, frame_buffer, render_region, screen_offset);
+      selected = render_cell(cell, game_state, mouse, frame_buffer, render_basis);
    }
 
 #if 0
@@ -142,10 +139,10 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
     draw_box_outline(frame_buffer, game_state->world_per_pixel, render_region, world_tree_bounds, box_color);
 #endif
 
-    update_and_render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, tree->top_right);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, tree->top_left);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, tree->bottom_right);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_region, screen_offset, tree->bottom_left);
+    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_right);
+    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_left);
+    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
+    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
   }
 }
 
@@ -181,14 +178,16 @@ render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
     game_state->maze_pos += d_mouse;
   }
 
-  V2 maze_pos_world = game_state->world_per_pixel * game_state->maze_pos;
+  RenderBasis render_basis;
+  render_basis.scale = game_state->world_per_pixel;
 
-  Rectangle render_region;
-  render_region.start = (V2){0, 0};
-  render_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
+  render_basis.origin = game_state->world_per_pixel * game_state->maze_pos;
 
-  update_and_render_cells(game_state, mouse, frame_buffer, render_region, maze_pos_world, &(game_state->maze.tree));
-  render_cars(game_state, frame_buffer, render_region, maze_pos_world, &(game_state->cars));
+  render_basis.clip_region.start = (V2){0, 0};
+  render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
+
+  update_and_render_cells(game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
+  render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars));
 }
 
 
@@ -230,7 +229,13 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
   render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
-  fast_draw_box(frame_buffer, 1, render_region_pixels, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
+
+  RenderBasis clear_basis;
+  clear_basis.origin = (V2){0 ,0};
+  clear_basis.scale = 1;
+  clear_basis.clip_region = render_region_pixels;
+
+  fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
 
   render(game_state, frame_buffer, mouse);
 

@@ -13,8 +13,7 @@ set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 
 void
 draw_circle(FrameBuffer *frame_buffer,
-            u32 world_per_pixel,
-            Rectangle render_region_world,
+            RenderBasis *render_basis,
             V2 world_pos,
             r32 world_radius,
             V4 color)
@@ -22,14 +21,14 @@ draw_circle(FrameBuffer *frame_buffer,
   // TODO: There seems to be some off-by-one bug in here, the right
   //       side of the circle seems to be clipped slightly sometimes.
 
-  V2 fract_pixel_pos = world_pos / world_per_pixel;
+  V2 fract_pixel_pos = (world_pos + render_basis->origin) / render_basis->scale;
 
-  r32 radius = world_radius / world_per_pixel;
+  r32 radius = world_radius / render_basis->scale;
   r32 radius_sq = squared(radius);
   r32 radius_minus_one_sq = squared(radius - 1);
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
-  Rectangle render_region = render_region_world / world_per_pixel;
+  Rectangle render_region = render_basis->clip_region / render_basis->scale;
   render_region = get_overlap(render_region, window_region);
 
   Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
@@ -67,13 +66,13 @@ draw_circle(FrameBuffer *frame_buffer,
 
 
 void
-draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
-  Rectangle render_region = render_region_world / world_per_pixel;
+  Rectangle render_region = render_basis->clip_region / render_basis->scale;
   render_region = get_overlap(render_region, window_region);
 
-  Rectangle fract_pixel_space = box / world_per_pixel;
+  Rectangle fract_pixel_space = (box + render_basis->origin) / render_basis->scale;
   fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
@@ -112,13 +111,13 @@ draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region
 
 
 void
-fast_draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
-  Rectangle render_region = render_region_world / world_per_pixel;
+  Rectangle render_region = render_basis->clip_region / render_basis->scale;
   render_region = get_overlap(render_region, window_region);
 
-  Rectangle fract_pixel_space = box / world_per_pixel;
+  Rectangle fract_pixel_space = (box + render_basis->origin) / render_basis->scale;
   fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
@@ -138,10 +137,10 @@ fast_draw_box(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_r
 
 
 void
-draw_line(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, V2 world_start, V2 world_end, V4 color)
+draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
 {
-  V2 start = world_start / world_per_pixel;
-  V2 end = world_end / world_per_pixel;
+  V2 start = (world_start + render_basis->origin) / render_basis->scale;
+  V2 end = (world_end + render_basis->origin) / render_basis->scale;
 
   if (start.x > end.x)
   {
@@ -151,7 +150,7 @@ draw_line(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_regio
   }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
-  Rectangle render_region = render_region_world / world_per_pixel;
+  Rectangle render_region = render_basis->clip_region / render_basis->scale;
   render_region = crop_to(render_region, window_region);
 
   b32 start_in_region = in_rectangle(start, render_region);
@@ -234,10 +233,10 @@ draw_line(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_regio
 
 
 void
-draw_box_outline(FrameBuffer *frame_buffer, u32 world_per_pixel, Rectangle render_region_world, Rectangle box, V4 color)
+draw_box_outline(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
 {
-  draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.start.x, box.end.y}, color);
-  draw_line(frame_buffer, world_per_pixel, render_region_world, box.start, (V2){box.end.x, box.start.y}, color);
-  draw_line(frame_buffer, world_per_pixel, render_region_world, (V2){box.start.x, box.end.y}, box.end, color);
-  draw_line(frame_buffer, world_per_pixel, render_region_world, (V2){box.end.x, box.start.y}, box.end, color);
+  draw_line(frame_buffer, render_basis, box.start, (V2){box.start.x, box.end.y}, color);
+  draw_line(frame_buffer, render_basis, box.start, (V2){box.end.x, box.start.y}, color);
+  draw_line(frame_buffer, render_basis, (V2){box.start.x, box.end.y}, box.end, color);
+  draw_line(frame_buffer, render_basis, (V2){box.end.x, box.start.y}, box.end, color);
 }
