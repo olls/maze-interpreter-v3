@@ -115,8 +115,9 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
   b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
   //                  tree...
-  if (tree && overlaps(render_basis->clip_region, (tree->bounds * game_state->cell_spacing) + render_basis->origin))
+  if (tree)
   {
+    b32 on_screen = overlaps(render_basis->clip_region, (tree->bounds * game_state->cell_spacing) + render_basis->origin);
 
     for (u32 cell_index = 0;
          cell_index < tree->used;
@@ -125,7 +126,11 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
       Cell *cell = tree->cells + cell_index;
 
       update_cell(cell, &(game_state->cars), (game_state->frame_count == 0));
-      selected = render_cell(cell, game_state, mouse, frame_buffer, render_basis);
+
+      if (on_screen)
+      {
+        selected = render_cell(cell, game_state, mouse, frame_buffer, render_basis);
+      }
    }
 
 #if 0
