@@ -360,6 +360,29 @@ operator-=(Rectangle &rect, r32 c)
 }
 
 Rectangle
+operator-(V2 c, Rectangle rect)
+{
+  Rectangle result;
+  result.start = c - rect.start;
+  result.end = c - rect.end;
+  return result;
+}
+Rectangle
+operator-(Rectangle rect, V2 c)
+{
+  Rectangle result;
+  result.start = rect.start - c;
+  result.end = rect.end - c;
+  return result;
+}
+Rectangle &
+operator-=(Rectangle &rect, V2 c)
+{
+  rect = rect - c;
+  return rect;
+}
+
+Rectangle
 operator-(Rectangle a, Rectangle b)
 {
   Rectangle result;

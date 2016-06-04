@@ -1,7 +1,9 @@
 struct RenderBasis
 {
   V2 origin;
-  u32 scale;
+  u32 world_per_pixel;
+  r32 scale;
+  V2 scale_focus;
   Rectangle clip_region;
 };
 

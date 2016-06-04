@@ -47,6 +47,7 @@ struct Keys
 
 struct Mouse
 {
+  // TODO: Vector?
   u32 x;
   u32 y;
 

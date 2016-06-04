@@ -1,7 +1,9 @@
 // NOTE: 256 sub-pixel steps!
 const u32 MIN_WORLD_PER_PIXEL = 256;
-// const u32 MIN_WORLD_PER_PIXEL = 4096;
 const u32 MAX_WORLD_PER_PIXEL = 65536;
+
+const r32 MIN_ZOOM = 10;
+const r32 MAX_ZOOM = 200;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
@@ -15,9 +17,11 @@ struct GameState
   b32 init;
 
   u32 world_per_pixel;
+  u32 zoom;
+  r32 scale;
+  V2 scale_focus;
 
   // NOTE: Things are scaled relatively to cell_spacing.
-  r32 zoom;
   u32 cell_spacing;
   r32 cell_margin;
 

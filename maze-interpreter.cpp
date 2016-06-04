@@ -155,38 +155,43 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
 void
 render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
 {
-  // TODO: Center zoom on mouse
-
-  u32 old_world_per_pixel = game_state->world_per_pixel;
-
+  u32 old_zoom = game_state->zoom;
   game_state->zoom += mouse->scroll.y;
-  game_state->world_per_pixel = squared(game_state->zoom);
 
-  if (mouse->scroll.y > 0 && ((game_state->world_per_pixel >= MAX_WORLD_PER_PIXEL) ||
-                             (game_state->world_per_pixel < old_world_per_pixel)))
+  if (mouse->scroll.y > 0 && ((game_state->zoom >= MAX_ZOOM) ||
+                              (game_state->zoom < old_zoom)))
   {
-    game_state->zoom -= mouse->scroll.y;
-    game_state->world_per_pixel = MAX_WORLD_PER_PIXEL;
+    game_state->zoom = MAX_ZOOM;
   }
-  else if (mouse->scroll.y < 0 && ((game_state->world_per_pixel <= MIN_WORLD_PER_PIXEL) ||
-                                  (game_state->world_per_pixel > old_world_per_pixel)))
+  else if (mouse->scroll.y < 0 && ((game_state->zoom <= MIN_ZOOM) ||
+                                   (game_state->zoom > old_zoom)))
   {
-    game_state->zoom -= mouse->scroll.y;
-    game_state->world_per_pixel = MIN_WORLD_PER_PIXEL;
+    game_state->zoom = MIN_ZOOM;
   }
+  game_state->scale = squared(game_state->zoom / 30.0f);
 
-  V2 d_mouse = (V2){mouse->x, mouse->y} - game_state->last_mouse_pos;
-  game_state->last_mouse_pos = (V2){mouse->x, mouse->y};
+  V2 screen_mouse_pixels = (V2){mouse->x, mouse->y};
+  V2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
+
+  game_state->last_mouse_pos = screen_mouse_pixels;
 
   if (mouse->l_down)
   {
-    game_state->maze_pos += d_mouse;
+    game_state->maze_pos += d_screen_mouse_pixels;
   }
 
-  RenderBasis render_basis;
-  render_basis.scale = game_state->world_per_pixel;
+  RenderBasis render_basis = {};
+  render_basis.world_per_pixel = game_state->world_per_pixel;
 
-  render_basis.origin = game_state->world_per_pixel * game_state->maze_pos;
+  render_basis.scale_focus = game_state->scale_focus;
+  if (old_zoom != game_state->zoom)
+  {
+    game_state->scale_focus = screen_mouse_pixels;
+    render_basis.scale_focus = screen_mouse_pixels;
+  }
+  render_basis.scale = game_state->scale;
+
+  render_basis.origin = (game_state->maze_pos / render_basis.scale) * game_state->world_per_pixel;
 
   render_basis.clip_region.start = (V2){0, 0};
   render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
@@ -204,7 +209,8 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   // TODO: Should world coords be r32s now we are using uint32s for
   //       the cell position?
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
-  game_state->zoom = 64;
+  game_state->zoom = 30;
+  game_state->world_per_pixel = 64*64;
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
 
@@ -235,8 +241,9 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   render_region_pixels.start = (V2){0, 0};
   render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
 
-  RenderBasis clear_basis;
+  RenderBasis clear_basis = {};
   clear_basis.origin = (V2){0 ,0};
+  clear_basis.world_per_pixel = 1;
   clear_basis.scale = 1;
   clear_basis.clip_region = render_region_pixels;
 

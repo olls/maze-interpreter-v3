@@ -7,7 +7,7 @@ squared(r32 base)
 
 
 u32
-clamp(u32 value, u32 min, u32 max)
+clamp(u32 min, u32 value, u32 max)
 {
   u32 result = value;
   if (value > max)
