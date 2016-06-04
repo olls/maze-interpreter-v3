@@ -156,16 +156,20 @@ void
 render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
 {
   u32 old_zoom = game_state->zoom;
-  game_state->zoom += mouse->scroll.y;
+  game_state->d_zoom += mouse->scroll.y;
+  game_state->zoom += game_state->d_zoom;
+  game_state->d_zoom *= 0.5f;
 
   if (mouse->scroll.y > 0 && ((game_state->zoom >= MAX_ZOOM) ||
                               (game_state->zoom < old_zoom)))
   {
+    game_state->d_zoom = 0;
     game_state->zoom = MAX_ZOOM;
   }
   else if (mouse->scroll.y < 0 && ((game_state->zoom <= MIN_ZOOM) ||
                                    (game_state->zoom > old_zoom)))
   {
+    game_state->d_zoom = 0;
     game_state->zoom = MIN_ZOOM;
   }
   game_state->scale = squared(game_state->zoom / 30.0f);
@@ -184,8 +188,9 @@ render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
   render_basis.world_per_pixel = game_state->world_per_pixel;
 
   render_basis.scale_focus = game_state->scale_focus;
-  if (old_zoom != game_state->zoom)
+  if (game_state->d_zoom > .2f)
   {
+    game_state->d_zoom = 0;
     game_state->scale_focus = screen_mouse_pixels;
     render_basis.scale_focus = screen_mouse_pixels;
   }
