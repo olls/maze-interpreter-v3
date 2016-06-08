@@ -4,7 +4,7 @@ set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
   u32 pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
 
   V3 prev_color = pixel_color_to_V3(frame_buffer->buffer[pixel_pos]);
-  V3 new_color = remove_alpha(color);
+  V3 new_color = remove_alpha(color) * 255.0;
 
   PixelColor alpha_blended = to_color((color.a * new_color) + ((1.0f - color.a) * prev_color));
   frame_buffer->buffer[pixel_pos] = alpha_blended;
@@ -129,7 +129,7 @@ draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4
 
 
 void
-fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
+fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, PixelColor color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -148,7 +148,7 @@ fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle bo
          pixel_x < pixel_space.end.x;
          pixel_x++)
     {
-      frame_buffer->buffer[pixel_x + pixel_y * frame_buffer->width] = to_color(remove_alpha(color));
+      frame_buffer->buffer[pixel_x + pixel_y * frame_buffer->width] = color;
     }
   }
 }

@@ -29,7 +29,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
   {
     Car *car = cars->cars + car_index;
     V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
-    draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0x99, 0x22, 0x77});
+    draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
   }
 }
 
@@ -57,37 +57,37 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     V4 color = (V4){};
     switch (cell->type)
     {
-      case CELL_NULL:     color = (V4){1, 0x00, 0x00, 0x00};
+      case CELL_NULL:     color = (V4){1, 0.00, 0.00, 0.00};
         break;
-      case CELL_START:    color = (V4){1, 0x33, 0xAA, 0x55};
+      case CELL_START:    color = (V4){1, 0.20, 0.67, 0.33};
         break;
-      case CELL_PATH:     color = (V4){1, 0x55, 0x88, 0x22};
+      case CELL_PATH:     color = (V4){1, 0.33, 0.53, 0.13};
         break;
-      case CELL_WALL:     color = (V4){1, 0x33, 0x33, 0x33};
+      case CELL_WALL:     color = (V4){1, 0.20, 0.20, 0.20};
         break;
-      case CELL_HOLE:     color = (V4){1, 0xBB, 0x66, 0x44};
+      case CELL_HOLE:     color = (V4){1, 0.73, 0.40, 0.27};
         break;
-      case CELL_SPLITTER: color = (V4){1, 0x22, 0x44, 0x99};
+      case CELL_SPLITTER: color = (V4){1, 0.13, 0.27, 0.60};
         break;
-      case CELL_FUNCTION: color = (V4){1, 0x66, 0x77, 0x88};
+      case CELL_FUNCTION: color = (V4){1, 0.40, 0.47, 0.53};
         break;
-      case CELL_ONCE:     color = (V4){1, 0x88, 0x77, 0x66};
+      case CELL_ONCE:     color = (V4){1, 0.53, 0.47, 0.40};
         break;
-      case CELL_SIGNAL:   color = (V4){1, 0x99, 0x99, 0x22};
+      case CELL_SIGNAL:   color = (V4){1, 0.60, 0.60, 0.13};
         break;
-      case CELL_INC:      color = (V4){1, 0x33, 0x99, 0x22};
+      case CELL_INC:      color = (V4){1, 0.20, 0.60, 0.13};
         break;
-      case CELL_DEC:      color = (V4){1, 0x99, 0x33, 0x22};
+      case CELL_DEC:      color = (V4){1, 0.60, 0.20, 0.13};
         break;
-      case CELL_UP:       color = (V4){1, 0x22, 0x00, 0x00};
+      case CELL_UP:       color = (V4){1, 0.13, 0.00, 0.00};
         break;
-      case CELL_DOWN:     color = (V4){1, 0x00, 0x22, 0x00};
+      case CELL_DOWN:     color = (V4){1, 0.00, 0.13, 0.00};
         break;
-      case CELL_LEFT:     color = (V4){1, 0x00, 0x00, 0x22};
+      case CELL_LEFT:     color = (V4){1, 0.00, 0.00, 0.13};
         break;
-      case CELL_RIGHT:    color = (V4){1, 0x00, 0x22, 0x22};
+      case CELL_RIGHT:    color = (V4){1, 0.00, 0.13, 0.13};
         break;
-      case CELL_PAUSE:    color = (V4){1, 0x88, 0x88, 0x11};
+      case CELL_PAUSE:    color = (V4){1, 0.53, 0.53, 0.07};
         break;
     }
 
@@ -252,7 +252,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   clear_basis.scale = 1;
   clear_basis.clip_region = render_region_pixels;
 
-  fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (V4){1, 0xff, 0xff, 0xff});
+  fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
   render(game_state, frame_buffer, mouse);
 
