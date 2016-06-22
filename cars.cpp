@@ -23,17 +23,8 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
     }
 
     block->next_free_in_block = 0;
-    block->next_block = 0;
-    block->prev_block = 0;
 
-    if (cars->first_block)
-    {
-      CarsBlock *second_block = cars->first_block;
-
-      second_block->prev_block = block;
-      block->next_block = second_block;
-    }
-
+    block->next_block = cars->first_block;
     cars->first_block = block;
   }
 
@@ -70,6 +61,8 @@ void
 update_dead_cars(Cars *cars)
 {
   CarsBlock *cars_block = cars->first_block;
+  CarsBlock *prev_block = 0;
+
   u32 first_car_not_checked_in_block = 0;
 
   while (cars_block)
@@ -85,23 +78,17 @@ update_dead_cars(Cars *cars)
       {
         printf("Deallocating car block\n");
 
-        CarsBlock *next_block = cars_block->next_block;
-
-        // Reconnect previous and next block's links
-        if (cars_block->next_block)
-        {
-          cars_block->next_block->prev_block = cars_block->prev_block;
-        }
-        if (cars_block->prev_block)
-        {
-          cars_block->prev_block->next_block = cars_block->next_block;
-        }
-
-        // Re-link start if deallocated block was first block
+        // Reconnect previous block's link
         if (cars->first_block == cars_block)
         {
           cars->first_block = cars_block->next_block;
         }
+        else
+        {
+          prev_block->next_block = cars_block->next_block;
+        }
+
+        CarsBlock *next_block = cars_block->next_block;
 
         cars_block->next_block = cars->free_chain;
         cars->free_chain = cars_block;
@@ -120,6 +107,7 @@ update_dead_cars(Cars *cars)
     if (first_car_not_checked_in_block >= cars_block->next_free_in_block)
     {
       first_car_not_checked_in_block = 0;
+      prev_block = cars_block;
       cars_block = cars_block->next_block;
     }
   }

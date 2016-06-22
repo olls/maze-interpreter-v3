@@ -51,7 +51,6 @@ struct CarsBlock
 {
   Car cars[CARS_PER_BLOCK];
   u32 next_free_in_block;
-  CarsBlock *prev_block;
   CarsBlock *next_block;
 };
 
