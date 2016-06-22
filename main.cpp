@@ -215,8 +215,7 @@ main(int argc, char *argv[])
     renderer.frame_buffer.height = 1080;
   }
 
-  SDL_Window *window = SDL_CreateWindow("2D Game",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.frame_buffer.width, renderer.frame_buffer.height, flags);
+  SDL_Window *window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.frame_buffer.width, renderer.frame_buffer.height, flags);
 
   if (FULLSCREEN)
   {
@@ -239,8 +238,7 @@ main(int argc, char *argv[])
   renderer.frame_buffer.buffer = push_structs(&memory, PixelColor, renderer.frame_buffer.width * renderer.frame_buffer.height);
 
   renderer.sdlRenderer = SDL_CreateRenderer(window, -1, 0);
-  renderer.sdlTexture = SDL_CreateTexture(renderer.sdlRenderer,
-    SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, renderer.frame_buffer.width, renderer.frame_buffer.height);
+  renderer.sdlTexture = SDL_CreateTexture(renderer.sdlRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, renderer.frame_buffer.width, renderer.frame_buffer.height);
 
   game_loop(&memory, &renderer, argc, argv);
 

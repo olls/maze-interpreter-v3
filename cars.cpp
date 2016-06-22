@@ -123,7 +123,6 @@ update_dead_cars(Cars *cars)
       cars_block = cars_block->next_block;
     }
   }
-
 }
 
 
@@ -163,6 +162,7 @@ car_movements(Maze *maze, Car *car)
       Direction test_direction = directions[direction_index];
       V2 test_comp = dir_components[test_direction];
 
+      // TODO: Errors if accesses non-existing cell
       Cell *test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
       if (test_cell)
       {
@@ -357,6 +357,7 @@ re_canonicalise_car_pos(GameState *game_state, Car *car)
 void
 update_car_position(GameState *game_state, Car *car)
 {
+#if 1
   u32 total_cell_dx = car->target_cell_x - car->cell_x;
   u32 total_cell_dy = car->target_cell_y - car->cell_y;
 
@@ -368,6 +369,14 @@ update_car_position(GameState *game_state, Car *car)
   re_canonicalise_car_pos(game_state, car);
 
   // TODO: Correct if overshot
+
+#else
+  // Disable animations
+
+  car->cell_x = car->target_cell_x;
+  car->cell_y = car->target_cell_y;
+  car->offset = (V2){0};
+#endif
 }
 
 
@@ -376,7 +385,7 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
-
+  // TODO: Check this actually working!
   b32 car_tick = false;
   if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_TICKS_PER_S))
   {

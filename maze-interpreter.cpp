@@ -103,6 +103,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
     Rectangle cell_bounds = rectangle(world_pos, cell_radius);
 
+    // TODO: Unproject the mouse coords correctly
     if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
     {
       selected = true;
@@ -161,6 +162,8 @@ void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse
 void
 render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse)
 {
+  // TODO: Give zoom velocity, to make it smooth
+
   u32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
   game_state->zoom += game_state->d_zoom;
