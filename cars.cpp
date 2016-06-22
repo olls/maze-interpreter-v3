@@ -87,33 +87,24 @@ update_dead_cars(Cars *cars)
 
         CarsBlock *next_block = cars_block->next_block;
 
-        if (cars_block->prev_block == 0 && cars_block->next_block == 0)
+        // Reconnect previous and next block's links
+        if (cars_block->next_block)
         {
-          // This was the last block
-          cars->first_block = 0;
+          cars_block->next_block->prev_block = cars_block->prev_block;
         }
-        else
+        if (cars_block->prev_block)
         {
-
-          // Reconnect previous and next block's links
-          if (cars_block->next_block)
-          {
-            cars_block->next_block->prev_block = cars_block->prev_block;
-          }
-          if (cars_block->prev_block)
-          {
-            cars_block->prev_block->next_block = cars_block->next_block;
-          }
-
-          // Re-link start if deallocated block was first block
-          if (cars->first_block == cars_block)
-          {
-            cars->first_block = cars_block->next_block;
-          }
-
-          cars_block->next_block = cars->free_chain;
-          cars->free_chain = cars_block;
+          cars_block->prev_block->next_block = cars_block->next_block;
         }
+
+        // Re-link start if deallocated block was first block
+        if (cars->first_block == cars_block)
+        {
+          cars->first_block = cars_block->next_block;
+        }
+
+        cars_block->next_block = cars->free_chain;
+        cars->free_chain = cars_block;
 
         first_car_not_checked_in_block = 0;
         cars_block = next_block;
