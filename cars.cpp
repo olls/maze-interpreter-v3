@@ -346,17 +346,16 @@ void
 update_car_position(GameState *game_state, Car *car)
 {
 #if 1
-  u32 total_cell_dx = car->target_cell_x - car->cell_x;
-  u32 total_cell_dy = car->target_cell_y - car->cell_y;
+  s32 total_cell_dx = car->target_cell_x - car->cell_x;
+  s32 total_cell_dy = car->target_cell_y - car->cell_y;
 
   V2 target_direction = unit_vector((V2){total_cell_dx, total_cell_dy});
 
-  // TODO: Calculate speed from FPS, CAR_TICKS_PER_S ...
-  r32 speed = 25000;
-  car->offset += target_direction *speed;
-  re_canonicalise_car_pos(game_state, car);
+  r32 distance = game_state->cell_spacing * sqrt(squared(total_cell_dx) + squared(total_cell_dy));
+  r32 speed = (1.0f / FPS) * CAR_TICKS_PER_S * distance;
 
-  // TODO: Correct if overshot
+  car->offset += target_direction * speed;
+  re_canonicalise_car_pos(game_state, car);
 
 #else
   // Disable animations

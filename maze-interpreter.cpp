@@ -34,6 +34,11 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 
       V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
       draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+
+#if 0 // Show real location
+      pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
+      draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0, 1, 0});
+#endif
     }
     cars_block = cars_block->next_block;
   }

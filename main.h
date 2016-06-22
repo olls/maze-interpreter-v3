@@ -30,6 +30,12 @@
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
 
+const b32 FULLSCREEN = false;
+
+const u32 FPS = 60;
+const u32 TOTAL_MEMORY = megabytes_to_bytes(50);
+
+
 struct Keys
 {
   b32 space;
