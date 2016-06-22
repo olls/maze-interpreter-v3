@@ -1,6 +1,6 @@
 const u32 CAR_TICKS_PER_S = 20;
 
-const u32 CARS_PER_BLOCK = 3;
+const u32 CARS_PER_BLOCK = 512;
 
 // Car storage needs to:
 // - Add car
