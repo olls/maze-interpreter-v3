@@ -23,25 +23,31 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
-  for (u32 car_index = 0;
-       car_index < cars->next_free;
-       ++car_index)
+  CarsBlock *cars_block = cars->first_block;
+  while (cars_block != 0)
   {
-    Car *car = cars->cars + car_index;
-    V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
-    draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+    for (u32 car_index = 0;
+         car_index < cars_block->next_free_in_block;
+         ++car_index)
+    {
+      Car *car = cars_block->cars + car_index;
+
+      V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
+      draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+    }
+    cars_block = cars_block->next_block;
   }
 }
 
 
 void
-update_cell(Cell *cell, Cars *cars, b32 first_frame=false)
+update_cell(Memory *memory, Cell *cell, Cars *cars, b32 first_frame=false)
 {
   if (first_frame)
   {
     if (cell->type == CELL_START)
     {
-      add_car(cars, cell->x, cell->y);
+      add_car(memory, cars, cell->x, cell->y);
     }
   }
 }
@@ -110,7 +116,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 }
 
 
-void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree * tree)
+void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree * tree)
 {
   b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
@@ -125,13 +131,13 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
     {
       Cell *cell = tree->cells + cell_index;
 
-      update_cell(cell, &(game_state->cars), (game_state->frame_count == 0));
+      update_cell(memory, cell, &(game_state->cars), (game_state->frame_count == 0));
 
       if (on_screen)
       {
         selected = render_cell(cell, game_state, mouse, frame_buffer, render_basis);
       }
-   }
+    }
 
 #if 0
     V4 box_color = (V4){0.1f, 0, 0, 0};
@@ -144,16 +150,16 @@ void update_and_render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *f
     draw_box_outline(frame_buffer, game_state->world_per_pixel, render_region, world_tree_bounds, box_color);
 #endif
 
-    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_right);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_left);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
-    update_and_render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
+    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_right);
+    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_left);
+    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
+    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
   }
 }
 
 
 void
-render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
+render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse)
 {
   u32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
@@ -201,7 +207,7 @@ render(GameState *game_state, FrameBuffer *frame_buffer, Mouse *mouse)
   render_basis.clip_region.start = (V2){0, 0};
   render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
 
-  update_and_render_cells(game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
+  update_and_render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars));
 }
 
@@ -228,7 +234,8 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
     parse(&(game_state->maze), memory, MAZE_FILENAME);
   }
 
-  game_state->cars.next_free = 0;
+  game_state->cars.first_block = 0;
+  game_state->cars.free_chain = 0;
 }
 
 
@@ -240,7 +247,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     init_game(memory, game_state, argc, argv);
   }
 
-  update_cars(game_state, time_us);
+  update_cars(memory, game_state, time_us);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
@@ -254,7 +261,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
-  render(game_state, frame_buffer, mouse);
+  render(memory, game_state, frame_buffer, render_region_pixels, mouse);
 
   mouse->scroll -= mouse->scroll / 6.0f;
   r32 epsilon = 3.0f;

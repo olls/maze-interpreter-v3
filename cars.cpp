@@ -1,10 +1,43 @@
 Car *
-add_car(Cars *cars, u32 cell_x, u32 cell_y, Direction direction = UP)
+add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction = DOWN)
 {
-  assert(cars->next_free != MAX_CARS);
+  CarsBlock *block = cars->first_block;
+  while (block && block->next_free_in_block == CARS_PER_BLOCK)
+  {
+    block = block->next_block;
+  }
 
-  Car *car = cars->cars + cars->next_free;
-  ++cars->next_free;
+  if (!block)
+  {
+    // No blocks left
+    if (cars->free_chain)
+    {
+      block = cars->free_chain;
+      cars->free_chain = block->next_block;
+      printf("Getting car block from free chain\n");
+    }
+    else
+    {
+      block = push_struct(memory, CarsBlock);
+      printf("Allocating new car block\n");
+    }
+
+    block->next_free_in_block = 0;
+    block->next_block = 0;
+    block->prev_block = 0;
+
+    if (cars->first_block)
+    {
+      CarsBlock *second_block = cars->first_block;
+
+      second_block->prev_block = block;
+      block->next_block = second_block;
+    }
+
+    cars->first_block = block;
+  }
+
+  Car *car = block->cars + block->next_free_in_block++;
 
   car->dead = false;
   car->value = 0;
@@ -23,13 +56,83 @@ add_car(Cars *cars, u32 cell_x, u32 cell_y, Direction direction = UP)
 
 
 void
-rm_car(Cars *cars, u32 car_index)
+rm_car(CarsBlock *block, u32 index_in_block)
 {
-  --cars->next_free;
-  if (car_index != cars->next_free)
+  --block->next_free_in_block;
+  if (index_in_block != block->next_free_in_block)
   {
-    cars->cars[car_index] = cars->cars[cars->next_free];
+    block->cars[index_in_block] = block->cars[block->next_free_in_block];
   }
+}
+
+
+void
+update_dead_cars(Cars *cars)
+{
+  CarsBlock *cars_block = cars->first_block;
+  u32 first_car_not_checked_in_block = 0;
+
+  while (cars_block)
+  {
+    Car *car = cars_block->cars + first_car_not_checked_in_block;
+
+    if (car->dead)
+    {
+      printf("Deleting car\n");
+      rm_car(cars_block, first_car_not_checked_in_block);
+
+      if (cars_block->next_free_in_block == 0)
+      {
+        printf("Deallocating car block\n");
+
+        CarsBlock *next_block = cars_block->next_block;
+
+        if (cars_block->prev_block == 0 && cars_block->next_block == 0)
+        {
+          // This was the last block
+          cars->first_block = 0;
+        }
+        else
+        {
+
+          // Reconnect previous and next block's links
+          if (cars_block->next_block)
+          {
+            cars_block->next_block->prev_block = cars_block->prev_block;
+          }
+          if (cars_block->prev_block)
+          {
+            cars_block->prev_block->next_block = cars_block->next_block;
+          }
+
+          // Re-link start if deallocated block was first block
+          if (cars->first_block == cars_block)
+          {
+            cars->first_block = cars_block->next_block;
+          }
+
+          cars_block->next_block = cars->free_chain;
+          cars->free_chain = cars_block;
+        }
+
+        first_car_not_checked_in_block = 0;
+        cars_block = next_block;
+        continue;
+      }
+
+    }
+    else
+    {
+      ++first_car_not_checked_in_block;
+    }
+
+    if (first_car_not_checked_in_block >= cars_block->next_free_in_block)
+    {
+      first_car_not_checked_in_block = 0;
+      cars_block = cars_block->next_block;
+    }
+  }
+
 }
 
 
@@ -120,7 +223,7 @@ car_movements(Maze *maze, Car *car)
 
 
 void
-car_cell_interactions(Maze *maze, Cars *cars, Car *car)
+car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
 {
   // TODO: Deal with race cars (conditions) ??
 
@@ -158,7 +261,7 @@ car_cell_interactions(Maze *maze, Cars *cars, Car *car)
     case (CELL_SPLITTER):
     {
       printf("Splitter\n");
-      add_car(cars, car->target_cell_x, car->target_cell_y, RIGHT);
+      add_car(memory, cars, car->target_cell_x, car->target_cell_y, RIGHT);
       car->direction = LEFT;
     } break;
 
@@ -278,7 +381,7 @@ update_car_position(GameState *game_state, Car *car)
 
 
 void
-update_cars(GameState *game_state, u64 time_us)
+update_cars(Memory *memory, GameState *game_state, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
@@ -292,31 +395,45 @@ update_cars(GameState *game_state, u64 time_us)
 
   // Car/cell interactions
 
+  CarsBlock *cars_block;
+
   if (car_tick)
   {
-    // NOTE: Store n_cars so cars added within the loop aren't looped over.
-    u32 n_cars = cars->next_free;
-    for (u32 car_index = 0;
-         car_index < n_cars;
-         ++car_index)
+
+    cars_block = cars->first_block;
+    while (cars_block != 0)
     {
-      Car *car = cars->cars + car_index;
-      car_cell_interactions(maze, cars, car);
+      // NOTE: Store n_cars so cars added within the loop aren't looped over.
+      u32 n_cars = cars_block->next_free_in_block;
+      for (u32 car_index = 0;
+           car_index < n_cars;
+           ++car_index)
+      {
+        Car *car = cars_block->cars + car_index;
+
+        car_cell_interactions(memory, maze, cars, car);
+      }
+      cars_block = cars_block->next_block;
     }
 
     // Update cell types
-    for (u32 car_index = 0;
-         car_index < cars->next_free;
-         ++car_index)
+    cars_block = cars->first_block;
+    while (cars_block != 0)
     {
-      Car *car = cars->cars + car_index;
-
-      if (car->updated_cell_type != CELL_NULL)
+      for (u32 car_index = 0;
+           car_index < cars_block->next_free_in_block;
+           ++car_index)
       {
-        Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
-        current_cell->type = car->updated_cell_type;
-        car->updated_cell_type = CELL_NULL;
+        Car *car = cars_block->cars + car_index;
+
+        if (car->updated_cell_type != CELL_NULL)
+        {
+          Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+          current_cell->type = car->updated_cell_type;
+          car->updated_cell_type = CELL_NULL;
+        }
       }
+      cars_block = cars_block->next_block;
     }
   }
 
@@ -324,31 +441,35 @@ update_cars(GameState *game_state, u64 time_us)
 
   if (car_tick)
   {
-    for (u32 car_index = 0;
-         car_index < cars->next_free;
-         ++car_index)
+    cars_block = cars->first_block;
+    while (cars_block != 0)
     {
-      Car *car = cars->cars + car_index;
-
-      // Delete cars
-      while (car->dead && cars->next_free != car_index)
+      for (u32 car_index = 0;
+           car_index < cars_block->next_free_in_block;
+           ++car_index)
       {
-        rm_car(cars, car_index);
-      }
-      if (cars->next_free == car_index)
-      {
-        break;
-      }
+        Car *car = cars_block->cars + car_index;
 
-      car_movements(maze, car);
+        update_car_position(game_state, car);
+        car_movements(maze, car);
+      }
+      cars_block = cars_block->next_block;
     }
+
+    update_dead_cars(cars);
   }
 
-  for (u32 car_index = 0;
-       car_index < cars->next_free;
-       ++car_index)
+  cars_block = cars->first_block;
+  while (cars_block != 0)
   {
-    Car *car = cars->cars + car_index;
-    update_car_position(game_state, car);
+    for (u32 car_index = 0;
+         car_index < cars_block->next_free_in_block;
+         ++car_index)
+    {
+      Car *car = cars_block->cars + car_index;
+
+      update_car_position(game_state, car);
+    }
+    cars_block = cars_block->next_block;
   }
 }

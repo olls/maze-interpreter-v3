@@ -1,5 +1,27 @@
 const u32 CAR_TICKS_PER_S = 20;
 
+const u32 CARS_PER_BLOCK = 3;
+
+// Car storage needs to:
+// - Add car
+// - Remove car (Remove all cars with marker)
+// - Loop through all cars
+//
+// Therefore linked list of blocks, with free list for deallocated blocks.
+// - When adding a car:
+//   - Loop through blocks until found one with space
+//   - If all blocks full
+//     - Try get block from free_chain
+//       - Else allocate new block
+//     - Add to start of chain
+// - When removing a car:
+//   - Set dead flag
+//   - update_dead_cars routine:
+//     - For all cars with dead flag:
+//       - If no cars left in block
+//         - Add to start of free_chain
+//         - Re-link previous block to next block
+
 
 struct Car
 {
@@ -25,10 +47,17 @@ struct Car
 };
 
 
-// TODO: We probably want something better than this.
-#define MAX_CARS (1000)
+struct CarsBlock
+{
+  Car cars[CARS_PER_BLOCK];
+  u32 next_free_in_block;
+  CarsBlock *prev_block;
+  CarsBlock *next_block;
+};
+
+
 struct Cars
 {
-  Car cars[MAX_CARS];
-  u32 next_free;
+  CarsBlock *first_block;
+  CarsBlock *free_chain;
 };
