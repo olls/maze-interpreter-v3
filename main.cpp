@@ -205,8 +205,8 @@ main(int argc, char *argv[])
   }
   else
   {
-    renderer.frame_buffer.width = 1920;
-    renderer.frame_buffer.height = 1080;
+    renderer.frame_buffer.width = WINDOW_WIDTH;
+    renderer.frame_buffer.height = WINDOW_HEIGHT;
   }
 
   SDL_Window *window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.frame_buffer.width, renderer.frame_buffer.height, flags);
