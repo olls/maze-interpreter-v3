@@ -17,15 +17,16 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 
 
 void
-draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 pos)
+draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 pos, u64 time_us)
 {
   u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
-  draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+
+  draw_circle(frame_buffer, render_basis, pos, car_raduis + (sin(time_us / 100000) * car_raduis * 0.5), (V4){1, 0.60, 0.13, 0.47});
 }
 
 
 void
-render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars)
+render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars, u64 time_us)
 {
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
@@ -40,7 +41,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
       Car *car = cars_block->cars + car_index;
 
       V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
-      draw_car(game_state, frame_buffer, render_basis, pos);
+      draw_car(game_state, frame_buffer, render_basis, pos, time_us);
 
 #if 0 // Show real location
       pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
@@ -172,7 +173,7 @@ void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse
 
 
 void
-render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse)
+render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse, u64 time_us)
 {
   // TODO: Give zoom velocity, to make it smooth
 
@@ -223,7 +224,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
 
   update_and_render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
-  render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars));
+  render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
 }
 
 
@@ -276,7 +277,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
-  render(memory, game_state, frame_buffer, render_region_pixels, mouse);
+  render(memory, game_state, frame_buffer, render_region_pixels, mouse, time_us);
 
   mouse->scroll -= mouse->scroll / 6.0f;
   r32 epsilon = 3.0f;
