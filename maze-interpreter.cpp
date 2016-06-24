@@ -17,9 +17,16 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 
 
 void
-render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars)
+draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 pos)
 {
   u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
+  draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+}
+
+
+void
+render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars)
+{
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
@@ -33,7 +40,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
       Car *car = cars_block->cars + car_index;
 
       V2 pos = cell_coord_to_world(game_state, car->cell_x, car->cell_y) + car->offset;
-      draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0.60, 0.13, 0.47});
+      draw_car(game_state, frame_buffer, render_basis, pos);
 
 #if 0 // Show real location
       pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
