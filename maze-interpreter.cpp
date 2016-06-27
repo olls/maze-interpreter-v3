@@ -17,11 +17,11 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 
 
 void
-draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 pos, u64 time_us)
+draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 pos, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
   u32 car_raduis = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
 
-  draw_circle(frame_buffer, render_basis, pos, car_raduis + (sin(time_us / 100000) * car_raduis * 0.5), (V4){1, 0.60, 0.13, 0.47});
+  draw_circle(frame_buffer, render_basis, pos, car_raduis + (sin(time_us / 100000) * car_raduis * 0.5), colour);
 }
 
 
@@ -45,7 +45,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 
 #if 0 // Show real location
       pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
-      draw_circle(frame_buffer, render_basis, pos, car_raduis, (V4){1, 0, 1, 0});
+      draw_car(game_state, frame_buffer, render_basis, pos, 0, (V4){1, 0, 1, 0});
 #endif
     }
     cars_block = cars_block->next_block;
