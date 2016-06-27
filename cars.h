@@ -25,6 +25,7 @@ const u32 CARS_PER_BLOCK = 512;
 
 struct Car
 {
+  b32 update_next_frame;
   b32 dead;
 
   s32 value;
