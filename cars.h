@@ -1,5 +1,3 @@
-const u32 CAR_TICKS_PER_S = 20;
-
 const u32 CARS_PER_BLOCK = 512;
 
 // Car storage needs to:
@@ -60,4 +58,6 @@ struct Cars
 {
   CarsBlock *first_block;
   CarsBlock *free_chain;
+
+  u32 car_ticks_per_s;
 };

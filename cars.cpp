@@ -353,7 +353,7 @@ update_car_position(GameState *game_state, Car *car)
   V2 target_direction = unit_vector((V2){total_cell_dx, total_cell_dy});
 
   r32 distance = game_state->cell_spacing * sqrt(squared(total_cell_dx) + squared(total_cell_dy));
-  r32 speed = (1.0f / FPS) * CAR_TICKS_PER_S * distance;
+  r32 speed = (1.0f / FPS) * game_state->cars.car_ticks_per_s * distance;
 
   car->offset += target_direction * speed;
   re_canonicalise_car_pos(game_state, car);
@@ -411,8 +411,18 @@ update_cars(Memory *memory, GameState *game_state, Input *input, u64 time_us)
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
 
+  if (game_state->input.car_ticks_inc)
+  {
+    ++cars->car_ticks_per_s;
+  }
+  if (game_state->input.car_ticks_dec)
+  {
+    --cars->car_ticks_per_s;
+  }
+  cars->car_ticks_per_s = clamp(1, cars->car_ticks_per_s, 50);
+
   b32 car_tick = false;
-  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_TICKS_PER_S))
+  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / cars->car_ticks_per_s))
   {
     if (game_state->single_step)
     {

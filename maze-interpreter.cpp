@@ -231,11 +231,17 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 void
 process_input(Keys *keys, Input *input, u64 time_us)
 {
+  // NOTE: This functions purpose is to map the keyboard buttons to
+  //         their meaning in the context of the game.
+
 #define GET_INPUT_DOWN(inp, letter) inp = keys->alpha[letter - 'a'].down
 #define GET_INPUT_ON_UP(inp, letter) inp = keys->alpha[letter - 'a'].on_up
 
   GET_INPUT_DOWN(input->step, 'j');
-  GET_INPUT_ON_UP(input->step_mode_toggle, 's');
+  GET_INPUT_ON_UP(input->step_mode_toggle, 'k');
+
+  input->car_ticks_inc = keys->up.down;
+  input->car_ticks_dec = keys->down.down;
 }
 
 
@@ -251,7 +257,7 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->world_per_pixel = 64*64;
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
-  game_state->single_step = true;
+  game_state->single_step = false;
 
   if (argc > 1)
   {
@@ -262,6 +268,7 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
     parse(&(game_state->maze), memory, MAZE_FILENAME);
   }
 
+  game_state->cars.car_ticks_per_s = 5;
   game_state->cars.first_block = 0;
   game_state->cars.free_chain = 0;
 }
