@@ -328,17 +328,17 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
 
 
 void
-re_canonicalise_car_pos(GameState *game_state, Car *car)
+re_canonicalise_car_pos(u32 cell_spacing, Car *car)
 {
-  if (abs(car->offset.x) >= game_state->cell_spacing)
+  if (abs(car->offset.x) >= cell_spacing)
   {
-    car->cell_x += (s32)car->offset.x / (s32)game_state->cell_spacing;
-    car->offset.x = (s32)car->offset.x % (s32)game_state->cell_spacing;
+    car->cell_x += (s32)car->offset.x / (s32)cell_spacing;
+    car->offset.x = (s32)car->offset.x % (s32)cell_spacing;
   }
-  if (abs(car->offset.y) >= game_state->cell_spacing)
+  if (abs(car->offset.y) >= cell_spacing)
   {
-    car->cell_y += (s32)car->offset.y / (s32)game_state->cell_spacing;
-    car->offset.y = (s32)car->offset.y % (s32)game_state->cell_spacing;
+    car->cell_y += (s32)car->offset.y / (s32)cell_spacing;
+    car->offset.y = (s32)car->offset.y % (s32)cell_spacing;
   }
 }
 
@@ -356,7 +356,9 @@ update_car_position(GameState *game_state, Car *car)
   r32 speed = (1.0f / FPS) * game_state->cars.car_ticks_per_s * distance;
 
   car->offset += target_direction * speed;
-  re_canonicalise_car_pos(game_state, car);
+  re_canonicalise_car_pos(game_state->cell_spacing, car);
+
+  // TODO: Deal with overshooting
 
 #else
   // Disable animations
