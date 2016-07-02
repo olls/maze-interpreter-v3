@@ -45,11 +45,7 @@ struct Keys
   b32 down;
   b32 left;
   b32 right;
-  b32 p;
-  b32 w;
-  b32 s;
-  b32 a;
-  b32 d;
+  b32 alpha[26];
 };
 
 

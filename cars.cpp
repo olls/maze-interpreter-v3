@@ -406,7 +406,7 @@ cars_iterator(Cars *cars, CarsIterator *iterator)
 
 
 void
-update_cars(Memory *memory, GameState *game_state, u64 time_us)
+update_cars(Memory *memory, GameState *game_state, Input *input, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
@@ -414,8 +414,19 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
   b32 car_tick = false;
   if (time_us >= game_state->last_car_update + (seconds_in_u(1) / CAR_TICKS_PER_S))
   {
-    game_state->last_car_update = time_us;
-    car_tick = true;
+    if (game_state->single_step)
+    {
+      if (input->step)
+      {
+        game_state->last_car_update = time_us;
+        car_tick = true;
+      }
+    }
+    else
+    {
+      game_state->last_car_update = time_us;
+      car_tick = true;
+    }
   }
 
   // Car/cell interactions

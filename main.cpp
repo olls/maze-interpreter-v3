@@ -47,8 +47,13 @@ process_keys(Keys *keys, SDL_Event event)
   }
   else
   {
+    SDL_Keysym key = event.key.keysym;
+    if (key.sym >= 'a' && key.sym <= 'z')
+    {
+      keys->alpha[key.sym - 'a'] = pressed;
+    }
 
-    switch (event.key.keysym.sym)
+    switch (key.sym)
     {
     case ' ':
       keys->space = pressed;
@@ -64,21 +69,6 @@ process_keys(Keys *keys, SDL_Event event)
       break;
     case SDLK_RIGHT:
       keys->right = pressed;
-      break;
-    case 'p':
-      keys->p = pressed;
-      break;
-    case 'w':
-      keys->w = pressed;
-      break;
-    case 'a':
-      keys->a = pressed;
-      break;
-    case 's':
-      keys->s = pressed;
-      break;
-    case 'd':
-      keys->d = pressed;
       break;
     }
   }

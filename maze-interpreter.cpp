@@ -229,6 +229,29 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
 
 void
+process_input(Keys *keys, Input *input, u64 time_us)
+{
+#define SET_INPUT(inp, letter) inp = keys->alpha[letter - 'a']
+
+  SET_INPUT(input->step, 'j');
+
+  if (input->step_mode_switch.value)
+  {
+    input->step_mode_switch.value = false;
+  }
+  else if (keys->alpha['s' - 'a'])
+  {
+    if (time_us >= input->step_mode_switch.last_update + (seconds_in_u(1) / TOGGLE_DEBOUNCE_RATE))
+    {
+      SET_INPUT(input->step_mode_switch.value, 's');
+      input->step_mode_switch.last_update = time_us;
+    }
+  }
+
+}
+
+
+void
 init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
   game_state->init = true;
@@ -240,6 +263,7 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->world_per_pixel = 64*64;
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
+  game_state->single_step = true;
 
   if (argc > 1)
   {
@@ -263,7 +287,15 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     init_game(memory, game_state, argc, argv);
   }
 
-  update_cars(memory, game_state, time_us);
+  process_input(keys, &game_state->input, time_us);
+
+  if (game_state->input.step_mode_switch.value)
+  {
+    printf("Changing stepping mode\n");
+    game_state->single_step = !game_state->single_step;
+  }
+
+  update_cars(memory, game_state, &game_state->input, time_us);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
