@@ -3,6 +3,7 @@
 #include "maze.cpp"
 #include "parser.cpp"
 #include "cars.cpp"
+#include "input.cpp"
 
 
 V2
@@ -229,23 +230,6 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
 
 void
-process_input(Keys *keys, Input *input, u64 time_us)
-{
-  // NOTE: This functions purpose is to map the keyboard buttons to
-  //         their meaning in the context of the game.
-
-#define GET_INPUT_DOWN(inp, letter) inp = keys->alpha[letter - 'a'].down
-#define GET_INPUT_ON_UP(inp, letter) inp = keys->alpha[letter - 'a'].on_up
-
-  GET_INPUT_DOWN(input->step, 'j');
-  GET_INPUT_ON_UP(input->step_mode_toggle, 'k');
-
-  input->car_ticks_inc = keys->up.down;
-  input->car_ticks_dec = keys->down.down;
-}
-
-
-void
 init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
   game_state->init = true;
@@ -294,7 +278,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     printf("Changing stepping mode\n");
   }
 
-  update_cars(memory, game_state, &game_state->input, time_us);
+  update_cars(memory, game_state, time_us);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
