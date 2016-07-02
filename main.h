@@ -38,14 +38,23 @@ const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(50);
 
 
+struct Key
+{
+  b32 down;
+  b32 on_up;
+  b32 on_down;
+};
+
 struct Keys
 {
-  b32 space;
-  b32 up;
-  b32 down;
-  b32 left;
-  b32 right;
-  b32 alpha[26];
+  b32 updated;
+
+  Key space;
+  Key up;
+  Key down;
+  Key left;
+  Key right;
+  Key alpha[26];
 };
 
 

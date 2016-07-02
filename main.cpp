@@ -34,6 +34,28 @@ get_us()
 }
 
 
+void
+set_keys(Keys *keys)
+{
+  keys->updated = false;
+
+  keys->space.on_up = false;
+  keys->down.on_up = false;
+  keys->left.on_up = false;
+  keys->right.on_up = false;
+  keys->space.on_down = false;
+  keys->down.on_down = false;
+  keys->left.on_down = false;
+  keys->right.on_down = false;
+
+  for (u32 i = 0; i < array_count(keys->alpha); ++i)
+  {
+    keys->alpha[i].on_up = false;
+    keys->alpha[i].on_down = false;
+  }
+}
+
+
 b32
 process_keys(Keys *keys, SDL_Event event)
 {
@@ -47,30 +69,40 @@ process_keys(Keys *keys, SDL_Event event)
   }
   else
   {
+    Key *input;
     SDL_Keysym key = event.key.keysym;
     if (key.sym >= 'a' && key.sym <= 'z')
     {
-      keys->alpha[key.sym - 'a'] = pressed;
+      input = &(keys->alpha[key.sym - 'a']);
+    }
+    else
+    {
+      switch (key.sym)
+      {
+      case ' ':
+        input = &keys->space;
+        break;
+      case SDLK_UP:
+        input = &keys->up;
+        break;
+      case SDLK_DOWN:
+        input = &keys->down;
+        break;
+      case SDLK_LEFT:
+        input = &keys->left;
+        break;
+      case SDLK_RIGHT:
+        input = &keys->right;
+        break;
+      }
     }
 
-    switch (key.sym)
-    {
-    case ' ':
-      keys->space = pressed;
-      break;
-    case SDLK_UP:
-      keys->up = pressed;
-      break;
-    case SDLK_DOWN:
-      keys->down = pressed;
-      break;
-    case SDLK_LEFT:
-      keys->left = pressed;
-      break;
-    case SDLK_RIGHT:
-      keys->right = pressed;
-      break;
-    }
+    input->on_up = !pressed && input->down;
+    input->on_down = pressed && !input->down;
+
+    keys->updated |= input->on_up || input->on_down;
+
+    input->down = pressed;
   }
 
   return quit;
@@ -127,6 +159,8 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
   while (running)
   {
     u64 last_frame_end = get_us();
+
+    set_keys(&keys);
 
     SDL_Event event;
     while(SDL_PollEvent(&event))

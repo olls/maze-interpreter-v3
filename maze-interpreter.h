@@ -12,19 +12,10 @@ const r32 MAX_ZOOM = 200;
 const char MAZE_FILENAME[] = "test.mz";
 
 
-const u32 TOGGLE_DEBOUNCE_RATE = 2;
-
-struct DebouncedToggle
-{
-  b32 value;
-  u64 last_update;
-};
-
-
 struct Input
 {
   b32 step;
-  DebouncedToggle step_mode_switch;
+  b32 step_mode_toggle;
 };
 
 
