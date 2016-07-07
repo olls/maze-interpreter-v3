@@ -32,24 +32,17 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
   //       Store the cars in the quad-tree?
-  CarsBlock *cars_block = cars->first_block;
-  while (cars_block != 0)
+  CarsIterator iter = {};
+  Car *car;
+  while ((car = cars_iterator(cars, &iter)))
   {
-    for (u32 car_index = 0;
-         car_index < cars_block->next_free_in_block;
-         ++car_index)
-    {
-      Car *car = cars_block->cars + car_index;
-
-      V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset;
-      draw_car(game_state, frame_buffer, render_basis, pos, time_us);
+    V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset;
+    draw_car(game_state, frame_buffer, render_basis, pos, time_us);
 
 #if 0 // Show real location
-      V2 target_pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
-      draw_car(game_state, frame_buffer, render_basis, target_pos, 0, (V4){0.2, 1, 0, 0});
+    V2 target_pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
+    draw_car(game_state, frame_buffer, render_basis, target_pos, 0, (V4){0.2, 1, 0, 0});
 #endif
-    }
-    cars_block = cars_block->next_block;
   }
 }
 
