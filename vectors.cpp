@@ -206,6 +206,18 @@ length_sq(V2 vec)
 V2
 unit_vector(V2 vec)
 {
+  V2 result = {0};
+  r32 length = sqrt(length_sq(vec));
+  if (length != 0)
+  {
+    result = vec / length;
+  }
+  return result;
+}
+
+V2
+vector_direction(V2 vec)
+{
   V2 result = vec;
   result.x = div_or_0(result.x, abs(result.x));
   result.y = div_or_0(result.y, abs(result.y));

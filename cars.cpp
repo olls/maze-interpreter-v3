@@ -33,8 +33,6 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
   car->update_next_frame = false;
   car->dead = false;
   car->value = 0;
-  car->cell_x = cell_x;
-  car->cell_y = cell_y;
   car->target_cell_x = cell_x;
   car->target_cell_y = cell_y;
   car->offset = (V2){0, 0};
@@ -116,7 +114,16 @@ update_dead_cars(Cars *cars)
 
 
 void
-calculate_car_direction(Maze *maze, Car *car)
+change_car_pos(GameState *game_state, Car *car, V2 d)
+{
+  car->offset = -d * game_state->cell_spacing;
+  car->target_cell_x += d.x;
+  car->target_cell_y += d.y;
+}
+
+
+void
+calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 {
   if (car->direction == STATIONARY)
   {
@@ -166,26 +173,28 @@ calculate_car_direction(Maze *maze, Car *car)
 
     if (can_move)
     {
+      V2 d_car_pos = {0};
+
       switch (car->direction)
       {
         case UP:
         {
-          --car->target_cell_y;
+          --d_car_pos.y;
         } break;
 
         case DOWN:
         {
-          ++car->target_cell_y;
+          ++d_car_pos.y;
         } break;
 
         case LEFT:
         {
-          --car->target_cell_x;
+          --d_car_pos.x;
         } break;
 
         case RIGHT:
         {
-          ++car->target_cell_x;
+          ++d_car_pos.x;
         } break;
 
         case STATIONARY:
@@ -197,6 +206,8 @@ calculate_car_direction(Maze *maze, Car *car)
           invalid_code_path;
         }
       }
+
+      change_car_pos(game_state, car, d_car_pos);
     }
   }
 }
@@ -328,43 +339,34 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
 
 
 void
-re_canonicalise_car_pos(u32 cell_spacing, Car *car)
-{
-  if (abs(car->offset.x) >= cell_spacing)
-  {
-    car->cell_x += (s32)car->offset.x / (s32)cell_spacing;
-    car->offset.x = (s32)car->offset.x % (s32)cell_spacing;
-  }
-  if (abs(car->offset.y) >= cell_spacing)
-  {
-    car->cell_y += (s32)car->offset.y / (s32)cell_spacing;
-    car->offset.y = (s32)car->offset.y % (s32)cell_spacing;
-  }
-}
-
-
-void
 update_car_position(GameState *game_state, Car *car)
 {
 #if 1
-  s32 total_cell_dx = car->target_cell_x - car->cell_x;
-  s32 total_cell_dy = car->target_cell_y - car->cell_y;
+  // TODO: Why this isn't fast enough?
+  r32 speed = (1.0f / FPS) * game_state->cars.car_ticks_per_s * game_state->cell_spacing;
+  V2 direction = -unit_vector(car->offset);
 
-  V2 target_direction = unit_vector((V2){total_cell_dx, total_cell_dy});
+  V2 movement = direction * speed;
 
-  r32 distance = game_state->cell_spacing * sqrt(squared(total_cell_dx) + squared(total_cell_dy));
-  r32 speed = (1.0f / FPS) * game_state->cars.car_ticks_per_s * distance;
+  if (abs(car->offset.x) >= abs(movement.x))
+  {
+    car->offset.x += movement.x;
+  }
+  else
+  {
+    car->offset.x = 0;
+  }
 
-  car->offset += target_direction * speed;
-  re_canonicalise_car_pos(game_state->cell_spacing, car);
-
-  // TODO: Deal with overshooting
+  if (abs(car->offset.y) >= abs(movement.y))
+  {
+    car->offset.y += movement.y;
+  }
+  else
+  {
+    car->offset.y = 0;
+  }
 
 #else
-  // Disable animations
-
-  car->cell_x = car->target_cell_x;
-  car->cell_y = car->target_cell_y;
   car->offset = (V2){0};
 #endif
 }
@@ -477,7 +479,7 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
 
     while ((car = cars_iterator(cars, &iter)))
     {
-      calculate_car_direction(maze, car);
+      calculate_car_direction(game_state, maze, car);
     }
   }
 

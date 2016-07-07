@@ -28,9 +28,6 @@ struct Car
 
   s32 value;
 
-  u32 cell_x;
-  u32 cell_y;
-
   u32 target_cell_x;
   u32 target_cell_y;
 
