@@ -50,7 +50,7 @@ draw_circle(FrameBuffer *frame_buffer,
   render_region = get_overlap(render_region, window_region);
 
   Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
-                                          fract_pixel_pos + radius};
+                                          fract_pixel_pos + radius + 1};
   fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region);
 
   Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);
