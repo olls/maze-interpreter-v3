@@ -49,6 +49,8 @@ struct Keys
 {
   b32 updated;
 
+  Key minus;
+  Key equals;
   Key space;
   Key up;
   Key down;

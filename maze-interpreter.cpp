@@ -189,6 +189,15 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
   u32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
+  if (game_state->input.zoom_in)
+  {
+    game_state->d_zoom += .2;
+  }
+  if (game_state->input.zoom_out)
+  {
+    game_state->d_zoom -= .2;
+  }
+
   game_state->zoom += game_state->d_zoom;
   game_state->d_zoom *= 0.5f;
 

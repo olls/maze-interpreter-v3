@@ -48,6 +48,8 @@ set_keys(Keys *keys)
   keys->down.on_down = false;
   keys->left.on_down = false;
   keys->right.on_down = false;
+  keys->minus.on_down = false;
+  keys->equals.on_down = false;
 
   for (u32 i = 0; i < array_count(keys->alpha); ++i)
   {

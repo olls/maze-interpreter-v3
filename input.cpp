@@ -12,4 +12,7 @@ process_input(Keys *keys, Input *input, u64 time_us)
 
   input->car_ticks_inc = keys->up.down;
   input->car_ticks_dec = keys->down.down;
+
+  input->zoom_in = keys->equals.down;
+  input->zoom_out = keys->minus.down;
 }
