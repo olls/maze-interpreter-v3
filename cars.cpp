@@ -459,10 +459,16 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
       {
         car_cell_interactions(memory, maze, cars, car);
       }
-      else
-      {
-        car->update_next_frame = true;
-      }
+    }
+
+    while ((car = cars_iterator(cars, &iter)))
+    {
+      // NOTE: Necessary to do this loop separate from the previous
+      //         loop to set all new cells (including those in new
+      //         blocks - which would not have been iterated over in the
+      //         same loop) update_next_frame to true.
+
+      car->update_next_frame = true;
     }
 
     update_dead_cars(cars);
