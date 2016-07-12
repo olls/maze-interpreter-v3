@@ -26,6 +26,8 @@ struct Car
   b32 update_next_frame;
   b32 dead;
 
+  u32 id; // NOTE: For debugging purposes only
+
   s32 value;
 
   u32 target_cell_x;

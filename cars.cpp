@@ -28,11 +28,13 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
     cars->first_block = block;
   }
 
+  static u32 cars_id = 0;
   Car *car = block->cars + block->next_free_in_block++;
 
   car->update_next_frame = false;
   car->dead = false;
   car->value = 0;
+  car->id = cars_id++;
   car->target_cell_x = cell_x;
   car->target_cell_y = cell_y;
   car->offset = (V2){0, 0};
