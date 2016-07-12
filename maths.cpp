@@ -22,6 +22,22 @@ clamp(u32 min, u32 value, u32 max)
 }
 
 
+r32
+clamp(r32 min, r32 value, r32 max)
+{
+  r32 result = value;
+  if (value > max)
+  {
+    result = max;
+  }
+  else if (value < min)
+  {
+    result = min;
+  }
+  return result;
+}
+
+
 u32
 lerp(u32 min, u32 max, r32 t)
 {

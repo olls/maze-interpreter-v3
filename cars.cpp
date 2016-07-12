@@ -454,16 +454,16 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
 
   if (game_state->input.car_ticks_inc)
   {
-    ++cars->car_ticks_per_s;
+    cars->car_ticks_per_s += .5f;
   }
   if (game_state->input.car_ticks_dec)
   {
-    --cars->car_ticks_per_s;
+    cars->car_ticks_per_s -= .5f;
   }
-  cars->car_ticks_per_s = clamp(1, cars->car_ticks_per_s, 50);
+  cars->car_ticks_per_s = clamp(.5, cars->car_ticks_per_s, 20);
 
   b32 car_tick = false;
-  if (time_us >= game_state->last_car_update + (seconds_in_u(1) / cars->car_ticks_per_s))
+  if (time_us >= game_state->last_car_update + (u32)(seconds_in_u(1) / cars->car_ticks_per_s))
   {
     if (game_state->single_step)
     {

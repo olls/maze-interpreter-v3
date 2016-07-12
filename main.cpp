@@ -44,6 +44,9 @@ set_keys(Keys *keys)
   keys->down.on_up = false;
   keys->left.on_up = false;
   keys->right.on_up = false;
+  keys->minus.on_up = false;
+  keys->equals.on_up = false;
+
   keys->space.on_down = false;
   keys->down.on_down = false;
   keys->left.on_down = false;

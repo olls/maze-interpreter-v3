@@ -62,5 +62,5 @@ struct Cars
   CarsBlock *first_block;
   CarsBlock *free_chain;
 
-  u32 car_ticks_per_s;
+  r32 car_ticks_per_s;
 };

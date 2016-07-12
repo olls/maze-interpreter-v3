@@ -290,8 +290,9 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   if (keys->updated)
   {
-    process_input(keys, &game_state->input, time_us);
+    process_changed_input(keys, &game_state->input, time_us);
   }
+  update_input(keys, &game_state->input, time_us);
 
   if (game_state->input.step_mode_toggle)
   {
