@@ -419,7 +419,7 @@ rectangle(V2 start, V2 size)
 }
 
 Rectangle
-rectangle(V2 center, r32 radius)
+radius_rectangle(V2 center, r32 radius)
 {
   Rectangle result;
   result.start = center - radius;

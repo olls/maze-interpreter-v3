@@ -124,7 +124,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
     // NOTE: Tile centred on coord
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
-    Rectangle cell_bounds = rectangle(world_pos, cell_radius);
+    Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
     // TODO: Unproject the mouse coords correctly
     if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
