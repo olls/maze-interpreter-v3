@@ -8,6 +8,8 @@
 #include "maths.h"
 #include "vectors.h"
 
+#include "main.h"
+
 // Game Related
 #include "functions.h"
 #include "maze.h"
@@ -16,8 +18,6 @@
 #include "maze-interpreter.h"
 #include "render.h"
 #include "parser.h"
-
-#include "main.h"
 
 #include "platform.cpp"
 #include "maths.cpp"

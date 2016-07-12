@@ -50,6 +50,10 @@ struct CarsBlock
   Car cars[CARS_PER_BLOCK];
   u32 next_free_in_block;
   CarsBlock *next_block;
+
+#ifdef DEBUG_BLOCK_COLORS
+  V4 c;
+#endif
 };
 
 

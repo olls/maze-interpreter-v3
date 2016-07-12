@@ -53,7 +53,11 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
   Car *car;
   while ((car = cars_iterator(cars, &iter)))
   {
+#ifdef DEBUG_BLOCK_COLORS
+    draw_car(game_state, frame_buffer, render_basis, car, time_us, iter.cars_block->c);
+#else
     draw_car(game_state, frame_buffer, render_basis, car, time_us);
+#endif
 
 #if 0 // Show real location
     V2 target_pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y);
