@@ -3,14 +3,21 @@ u32 key_repeat_rate_limit = 10;
 
 struct Input
 {
-  b32 step;
-  b32 step_mode_toggle;
+  b32 active;
+  b32 *key_press;
+  u32 rate_limit;
+  u64 last_active;
+};
 
-  b32 zoom_in;
-  b32 zoom_out;
 
-  u64 last_car_ticks_inc;
-  b32 car_ticks_inc;
-  u64 last_car_ticks_dec;
-  b32 car_ticks_dec;
+enum Inputs
+{
+  STEP,
+  STEP_MODE_TOGGLE,
+  ZOOM_IN,
+  ZOOM_OUT,
+  CAR_TICKS_INC,
+  CAR_TICKS_DEC,
+
+  N_INPUTS
 };

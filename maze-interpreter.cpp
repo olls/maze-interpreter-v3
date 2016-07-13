@@ -193,11 +193,11 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
   u32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
-  if (game_state->input.zoom_in)
+  if (game_state->inputs[ZOOM_IN].active)
   {
     game_state->d_zoom += .2;
   }
-  if (game_state->input.zoom_out)
+  if (game_state->inputs[ZOOM_OUT].active)
   {
     game_state->d_zoom -= .2;
   }
@@ -252,7 +252,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
 
 void
-init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
+init_game(Memory *memory, GameState *game_state, Keys *keys, u32 argc, char *argv[])
 {
   game_state->init = true;
 
@@ -277,6 +277,8 @@ init_game(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->cars.car_ticks_per_s = 5;
   game_state->cars.first_block = 0;
   game_state->cars.free_chain = 0;
+
+  setup_inputs(keys, game_state->inputs);
 }
 
 
@@ -285,18 +287,13 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 {
   if (!game_state->init)
   {
-    init_game(memory, game_state, argc, argv);
+    init_game(memory, game_state, keys, argc, argv);
   }
 
-  if (keys->updated)
-  {
-    process_changed_input(keys, &game_state->input, time_us);
-  }
-  update_input(keys, &game_state->input, time_us);
+  update_inputs(keys, game_state->inputs, time_us);
 
-  if (game_state->input.step_mode_toggle)
+  if (game_state->inputs[STEP_MODE_TOGGLE].active)
   {
-    game_state->input.step_mode_toggle = false;
     game_state->single_step = !game_state->single_step;
     printf("Changing stepping mode\n");
   }

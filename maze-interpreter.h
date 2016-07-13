@@ -31,7 +31,7 @@ struct GameState
 
   b32 single_step;
 
-  Input input;
+  Input inputs[N_INPUTS];
 
   Maze maze;
 

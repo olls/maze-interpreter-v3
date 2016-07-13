@@ -452,11 +452,11 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
 
-  if (game_state->input.car_ticks_inc)
+  if (game_state->inputs[CAR_TICKS_INC].active)
   {
     cars->car_ticks_per_s += .5f;
   }
-  if (game_state->input.car_ticks_dec)
+  if (game_state->inputs[CAR_TICKS_DEC].active)
   {
     cars->car_ticks_per_s -= .5f;
   }
@@ -467,7 +467,7 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
   {
     if (game_state->single_step)
     {
-      if (game_state->input.step)
+      if (game_state->inputs[STEP].active)
       {
         game_state->last_car_update = time_us;
         car_tick = true;

@@ -1,40 +1,49 @@
 void
-process_changed_input(Keys *keys, Input *input, u64 time_us)
+setup_inputs(Keys *keys, Input inputs[])
 {
-  // NOTE: This functions purpose is to map the keyboard buttons to
-  //         their meaning in the context of the game.
+#define GET_ALPHA_KEY(letter) (keys->alpha + (letter - 'a'))
 
-#define GET_INPUT_DOWN(inp, letter) inp = keys->alpha[letter - 'a'].down
-#define GET_INPUT_ON_UP(inp, letter) inp = keys->alpha[letter - 'a'].on_up
+  inputs[STEP].key_press = &(GET_ALPHA_KEY('j')->down);
+  inputs[STEP].rate_limit = key_repeat_rate_limit;
 
-  GET_INPUT_DOWN(input->step, 'j');
-  GET_INPUT_ON_UP(input->step_mode_toggle, 'k');
+  inputs[STEP_MODE_TOGGLE].key_press = &(GET_ALPHA_KEY('k')->on_up);
 
-  input->zoom_in = keys->equals.down;
-  input->zoom_out = keys->minus.down;
+  inputs[ZOOM_IN].key_press = &(keys->equals.down);
+  inputs[ZOOM_IN].rate_limit = key_repeat_rate_limit;
+
+  inputs[ZOOM_OUT].key_press = &(keys->minus.down);
+  inputs[ZOOM_OUT].rate_limit = key_repeat_rate_limit;
+
+  inputs[CAR_TICKS_INC].key_press = &(keys->up.down);
+  inputs[CAR_TICKS_INC].rate_limit = key_repeat_rate_limit;
+
+  inputs[CAR_TICKS_DEC].key_press = &(keys->down.down);
+  inputs[CAR_TICKS_DEC].rate_limit = key_repeat_rate_limit;
 }
 
 
 void
-update_input(Keys *keys, Input *input, u64 time_us)
+update_inputs(Keys *keys, Input inputs[], u64 time_us)
 {
-  if (keys->up.down && time_us >= input->last_car_ticks_inc + (seconds_in_u(1) / key_repeat_rate_limit))
+  for (u32 i = 0; i < N_INPUTS; ++i)
   {
-    input->car_ticks_inc = true;
-    input->last_car_ticks_inc = time_us;
-  }
-  else
-  {
-    input->car_ticks_inc = false;
-  }
+    Input *input = inputs + i;
 
-  if (keys->down.down && time_us >= input->last_car_ticks_dec + (seconds_in_u(1) / key_repeat_rate_limit))
-  {
-    input->car_ticks_dec = true;
-    input->last_car_ticks_dec = time_us;
-  }
-  else
-  {
-    input->car_ticks_dec = false;
+    if (input->rate_limit != 0)
+    {
+      if (*(input->key_press) && time_us >= input->last_active + (seconds_in_u(1) / input->rate_limit))
+      {
+        input->active = true;
+        input->last_active = time_us;
+      }
+      else
+      {
+        input->active = false;
+      }
+    }
+    else
+    {
+      input->active = *(input->key_press);
+    }
   }
 }
