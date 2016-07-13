@@ -14,7 +14,7 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
     {
       block = cars->free_chain;
       cars->free_chain = block->next_block;
-      printf("Getting car block from free chain\n");
+      log(L_CarsStorage, "Getting car block from free chain");
     }
     else
     {
@@ -54,7 +54,7 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
       C %= 8;
 #endif
 
-      printf("Allocating new car block\n");
+      log(L_CarsStorage, "Allocating new car block");
     }
 
     block->next_free_in_block = 0;
@@ -123,12 +123,12 @@ update_dead_cars(Cars *cars)
 
     if (car->dead)
     {
-      printf("Deleting car\n");
+      log(L_CarsStorage, "Deleting car");
       rm_car(cars_block, first_car_not_checked_in_block);
 
       if (cars_block->next_free_in_block == 0)
       {
-        printf("Deallocating car block\n");
+        log(L_CarsStorage, "Deallocating car block");
 
         // Reconnect previous block's link
         if (cars->first_block == cars_block)
@@ -277,19 +277,19 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
   {
     case (CELL_NULL):
     {
-      printf("Null\n");
+      log(L_CarsSim, "Null");
       invalid_code_path;
     } break;
 
     case (CELL_WALL):
     {
-      printf("Wall\n");
+      log(L_CarsSim, "Wall");
       invalid_code_path;
     } break;
 
     case (CELL_START):
     {
-      printf("Start\n");
+      log(L_CarsSim, "Start");
     } break;
 
     case (CELL_PATH):
@@ -298,13 +298,13 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
 
     case (CELL_HOLE):
     {
-      printf("Hole\n");
+      log(L_CarsSim, "Hole");
       car->dead = true;
     } break;
 
     case (CELL_SPLITTER):
     {
-      printf("Splitter\n");
+      log(L_CarsSim, "Splitter");
       add_car(memory, cars, car->target_cell_x, car->target_cell_y, RIGHT);
       car->direction = LEFT;
     } break;
@@ -312,53 +312,53 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
     case (CELL_FUNCTION):
     {
       Function *function = maze->functions + current_cell->function_index;
-      printf("Function: %s, %d\n", function->name, (u32)function->type);
+      log(L_CarsSim, "Function: %s, %d", function->name, (u32)function->type);
     } break;
 
     case (CELL_ONCE):
     {
-      printf("Once\n");
+      log(L_CarsSim, "Once");
       car->updated_cell_type = CELL_WALL;
     } break;
 
     case (CELL_SIGNAL):
     {
-      printf("Signal\n");
+      log(L_CarsSim, "Signal");
     } break;
 
     case (CELL_INC):
     {
-      printf("Increment\n");
+      log(L_CarsSim, "Increment");
       ++car->value;
     } break;
 
     case (CELL_DEC):
     {
-      printf("Decrement\n");
+      log(L_CarsSim, "Decrement");
       --car->value;
     } break;
 
     case (CELL_UP):
     {
-      printf("Up\n");
+      log(L_CarsSim, "Up");
       car->direction = UP;
     } break;
 
     case (CELL_DOWN):
     {
-      printf("Down\n");
+      log(L_CarsSim, "Down");
       car->direction = DOWN;
     } break;
 
     case (CELL_LEFT):
     {
-      printf("Left\n");
+      log(L_CarsSim, "Left");
       car->direction = LEFT;
     } break;
 
     case (CELL_RIGHT):
     {
-      printf("Right\n");
+      log(L_CarsSim, "Right");
       car->direction = RIGHT;
     } break;
 
@@ -385,7 +385,7 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
           car->unpause_direction = STATIONARY;
         }
       }
-      printf("Pause: %d/%d\n", car->pause_left, current_cell->pause);
+      log(L_CarsSim, "Pause: %d/%d", car->pause_left, current_cell->pause);
     } break;
   }
 }

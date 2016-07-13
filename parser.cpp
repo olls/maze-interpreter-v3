@@ -273,7 +273,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
           }
           else
           {
-            printf("Conditional \n");
+            log(L_Parser, "Conditional");
             valid_condition = false;
           }
 
@@ -392,7 +392,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
       cell->pause = new_cell.pause;
       cell->function_index = new_cell.function_index;
 
-      printf("%s ", cell_str);
+      log_s(L_Parser, "%s ", cell_str);
 
       f_ptr += 2;
       ++x;
@@ -407,12 +407,12 @@ parse(Maze *maze, Memory *memory, const char *filename)
         }
         x = 0;
         ++y;
-        printf("\n");
+        log_s(L_Parser, "\n");
       }
       f_ptr += 1;
     }
   }
   maze->height = y;
 
-  printf("(%d, %d)\n", maze->width, maze->height);
+  log(L_Parser, "(%d, %d)", maze->width, maze->height);
 }

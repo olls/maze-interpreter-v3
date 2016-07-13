@@ -349,7 +349,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (game_state->inputs[STEP_MODE_TOGGLE].active)
   {
     game_state->single_step = !game_state->single_step;
-    printf("Changing stepping mode\n");
+    log(L_GameLoop, "Changing stepping mode");
   }
 
   if (game_state->inputs[SIM_TICKS_INC].active)

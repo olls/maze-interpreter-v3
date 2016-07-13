@@ -5,6 +5,7 @@
 
 // Game Independent
 #include "platform.h"
+#include "logging.cpp"
 #include "maths.h"
 #include "vectors.h"
 
@@ -217,7 +218,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
     }
     else
     {
-      printf("Missed frame rate: %d\n", frame_dt);
+      log(L_Main, "Missed frame rate: %d", frame_dt);
     }
   }
 }
@@ -255,13 +256,13 @@ main(int argc, char *argv[])
     s32 display_index = SDL_GetWindowDisplayIndex(window);
     if (display_index < 0)
     {
-      printf("Failed to get display index.\n");
+      log(L_Main, "Failed to get display index.");
       exit(1);
     }
     SDL_Rect window_rect;
     if (SDL_GetDisplayBounds(display_index, &window_rect))
     {
-      printf("Failed to get display bounds.\n");
+      log(L_Main, "Failed to get display bounds.");
       exit(1);
     }
     renderer.frame_buffer.width = window_rect.w;

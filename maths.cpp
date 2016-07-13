@@ -59,19 +59,19 @@ div_or_0(r32 n, r32 d)
 
 
 void
-printF(r32 f)
+printF(LoggingChannel channel, r32 f)
 {
-  printf("%f\n", f);
+  log(channel, "%f", f);
 }
 
 void
-printU(u32 u)
+printU(LoggingChannel channel, u32 u)
 {
-  printf("%d\n", u);
+  log(channel, "%d", u);
 }
 
 void
-printI(s32 i)
+printI(LoggingChannel channel, s32 i)
 {
-  printf("%d\n", i);
+  log(channel, "%d", i);
 }

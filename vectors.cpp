@@ -981,25 +981,25 @@ reverse(Direction d)
 
 
 void
-printV(V4 vec)
+printV(LoggingChannel channel, V4 vec)
 {
-  printf("(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
+  log(channel, "(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
 }
 
 void
-printV(V2 vec)
+printV(LoggingChannel channel, V2 vec)
 {
-  printf("(%f, %f)\n", vec.x, vec.y);
+  log(channel, "(%f, %f)\n", vec.x, vec.y);
 }
 
 void
-printV(V3 vec)
+printV(LoggingChannel channel, V3 vec)
 {
-  printf("(%f, %f, %f)\n", vec.x, vec.y, vec.z);
+  log(channel, "(%f, %f, %f)\n", vec.x, vec.y, vec.z);
 }
 
 void
-printR(Rectangle rect)
+printR(LoggingChannel channel, Rectangle rect)
 {
-  printf("((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
+  log(channel, "((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
 }

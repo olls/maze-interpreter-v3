@@ -9,7 +9,7 @@ push_mem(Memory *memory, size_t bytes)
 
   if (memory->used >= memory->total)
   {
-    printf("%ld\n", bytes);
+    log(L_Main, "%ld\n", bytes);
     assert(!"Out of memory");
   }
 
