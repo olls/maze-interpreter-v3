@@ -96,13 +96,16 @@ rm_car(CarsBlock *block, u32 index_in_block)
 void delete_all_cars(Cars *cars)
 {
   CarsBlock *block = cars->first_block;
-  while (block->next_block)
+  if (block)
   {
-    block = block->next_block;
+    while (block->next_block)
+    {
+      block = block->next_block;
+    }
+    block->next_block = cars->free_chain;
+    cars->free_chain = cars->first_block;
+    cars->first_block = 0;
   }
-  block->next_block = cars->free_chain;
-  cars->free_chain = cars->first_block;
-  cars->first_block = 0;
 }
 
 
