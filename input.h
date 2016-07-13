@@ -1,4 +1,5 @@
-u32 key_repeat_rate_limit = 10;
+u32 fast_key_repeat_rate_limit = 10;
+u32 slow_key_repeat_rate_limit = 5;
 
 
 struct Input
