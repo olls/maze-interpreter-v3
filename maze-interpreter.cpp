@@ -68,9 +68,9 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 
 
 void
-update_cell(Memory *memory, Cell *cell, Cars *cars, b32 first_frame=false)
+update_cell(Memory *memory, Cell *cell, Cars *cars, u32 sim_steps)
 {
-  if (first_frame)
+  if (sim_steps == 0)
   {
     if (cell->type == CELL_START)
     {
@@ -159,7 +159,7 @@ void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse
     {
       Cell *cell = tree->cells + cell_index;
 
-      update_cell(memory, cell, &(game_state->cars), (game_state->frame_count == 0));
+      update_cell(memory, cell, &(game_state->cars), game_state->sim_steps);
 
       if (on_screen)
       {
@@ -292,6 +292,13 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   update_inputs(keys, game_state->inputs, time_us);
 
+  if (game_state->inputs[RESTART].active)
+  {
+    delete_all_cars(&(game_state->cars));
+    game_state->last_car_update = time_us;
+    game_state->sim_steps = 0;
+  }
+
   if (game_state->inputs[STEP_MODE_TOGGLE].active)
   {
     game_state->single_step = !game_state->single_step;
@@ -324,6 +331,4 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   {
     mouse->scroll.x = 0;
   }
-
-  ++game_state->frame_count;
 }

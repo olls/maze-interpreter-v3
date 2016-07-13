@@ -38,5 +38,5 @@ struct GameState
   Cars cars;
   u64 last_car_update;
 
-  u32 frame_count;
+  u32 sim_steps;
 };

@@ -12,6 +12,7 @@ struct Input
 
 enum Inputs
 {
+  RESTART,
   STEP,
   STEP_MODE_TOGGLE,
   ZOOM_IN,
