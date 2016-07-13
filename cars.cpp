@@ -396,7 +396,7 @@ update_car_position(GameState *game_state, Car *car)
 {
 #if 1
   // TODO: Why this isn't fast enough?
-  r32 speed = (1.0f / FPS) * game_state->cars.car_ticks_per_s * game_state->cell_spacing;
+  r32 speed = (1.0f / FPS) * game_state->sim_ticks_per_s * game_state->cell_spacing;
   V2 direction = -unit_vector(car->offset);
 
   V2 movement = direction * speed;
@@ -463,89 +463,61 @@ cars_iterator(Cars *cars, CarsIterator *iterator)
 
 
 void
-update_cars(Memory *memory, GameState *game_state, u64 time_us)
+update_cars(Memory *memory, GameState *game_state)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
-
-  if (game_state->inputs[CAR_TICKS_INC].active)
-  {
-    cars->car_ticks_per_s += .5f;
-  }
-  if (game_state->inputs[CAR_TICKS_DEC].active)
-  {
-    cars->car_ticks_per_s -= .5f;
-  }
-  cars->car_ticks_per_s = clamp(.5, cars->car_ticks_per_s, 20);
-
-  b32 car_tick = false;
-  if (time_us >= game_state->last_car_update + (u32)(seconds_in_u(1) / cars->car_ticks_per_s))
-  {
-    if (game_state->single_step)
-    {
-      if (game_state->inputs[STEP].active)
-      {
-        game_state->last_car_update = time_us;
-        car_tick = true;
-      }
-    }
-    else
-    {
-      game_state->last_car_update = time_us;
-      car_tick = true;
-    }
-  }
 
   // Car/cell interactions
 
   CarsIterator iter = {};
   Car *car;
 
-  if (car_tick)
+  while ((car = cars_iterator(cars, &iter)))
   {
-
-    while ((car = cars_iterator(cars, &iter)))
+    if (car->update_next_frame)
     {
-      if (car->update_next_frame)
-      {
-        car_cell_interactions(memory, maze, cars, car);
-      }
+      car_cell_interactions(memory, maze, cars, car);
     }
-
-    while ((car = cars_iterator(cars, &iter)))
-    {
-      // NOTE: Necessary to do this loop separate from the previous
-      //         loop to set all new cells (including those in new
-      //         blocks - which would not have been iterated over in the
-      //         same loop) update_next_frame to true.
-
-      car->update_next_frame = true;
-    }
-
-    update_dead_cars(cars);
-
-    // Break loop here in case of multiple cars on the same cell
-
-    while ((car = cars_iterator(cars, &iter)))
-    {
-      if (car->updated_cell_type != CELL_NULL)
-      {
-        Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
-        current_cell->type = car->updated_cell_type;
-        car->updated_cell_type = CELL_NULL;
-      }
-    }
-
-    while ((car = cars_iterator(cars, &iter)))
-    {
-      calculate_car_direction(game_state, maze, car);
-    }
-
-    ++game_state->sim_steps;
   }
 
-  // Animation
   while ((car = cars_iterator(cars, &iter)))
+  {
+    // NOTE: Necessary to do this loop separate from the previous
+    //         loop to set all new cells (including those in new
+    //         blocks - which would not have been iterated over in the
+    //         same loop) update_next_frame to true.
+
+    car->update_next_frame = true;
+  }
+
+  update_dead_cars(cars);
+
+  // Break loop here in case of multiple cars on the same cell
+
+  while ((car = cars_iterator(cars, &iter)))
+  {
+    if (car->updated_cell_type != CELL_NULL)
+    {
+      Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+      current_cell->type = car->updated_cell_type;
+      car->updated_cell_type = CELL_NULL;
+    }
+  }
+
+  while ((car = cars_iterator(cars, &iter)))
+  {
+    calculate_car_direction(game_state, maze, car);
+  }
+}
+
+
+void
+annimate_cars(GameState *game_state)
+{
+  CarsIterator iter = {};
+  Car *car;
+  while ((car = cars_iterator(&game_state->cars, &iter)))
   {
     update_car_position(game_state, car);
   }

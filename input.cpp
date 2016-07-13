@@ -16,11 +16,11 @@ setup_inputs(Keys *keys, Input inputs[])
   inputs[ZOOM_OUT].key_press = &(keys->minus.down);
   inputs[ZOOM_OUT].rate_limit = key_repeat_rate_limit;
 
-  inputs[CAR_TICKS_INC].key_press = &(keys->up.down);
-  inputs[CAR_TICKS_INC].rate_limit = key_repeat_rate_limit;
+  inputs[SIM_TICKS_INC].key_press = &(keys->up.down);
+  inputs[SIM_TICKS_INC].rate_limit = key_repeat_rate_limit;
 
-  inputs[CAR_TICKS_DEC].key_press = &(keys->down.down);
-  inputs[CAR_TICKS_DEC].rate_limit = key_repeat_rate_limit;
+  inputs[SIM_TICKS_DEC].key_press = &(keys->down.down);
+  inputs[SIM_TICKS_DEC].rate_limit = key_repeat_rate_limit;
 }
 
 

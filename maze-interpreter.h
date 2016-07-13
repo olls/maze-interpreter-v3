@@ -30,13 +30,14 @@ struct GameState
   V2 last_mouse_pos;
 
   b32 single_step;
+  u64 last_sim_tick;
+  r32 sim_ticks_per_s;
 
   Input inputs[N_INPUTS];
 
   Maze maze;
 
   Cars cars;
-  u64 last_car_update;
 
   u32 sim_steps;
 };

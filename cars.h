@@ -61,6 +61,4 @@ struct Cars
 {
   CarsBlock *first_block;
   CarsBlock *free_chain;
-
-  r32 car_ticks_per_s;
 };

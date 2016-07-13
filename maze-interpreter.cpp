@@ -144,7 +144,30 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 }
 
 
-void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree * tree)
+void
+update_cells(Memory *memory, GameState *game_state, QuadTree *tree)
+{
+  if (tree)
+  {
+    for (u32 cell_index = 0;
+         cell_index < tree->used;
+         ++cell_index)
+    {
+      Cell *cell = tree->cells + cell_index;
+
+      update_cell(memory, cell, &(game_state->cars), game_state->sim_steps);
+    }
+
+    update_cells(memory, game_state, tree->top_right);
+    update_cells(memory, game_state, tree->top_left);
+    update_cells(memory, game_state, tree->bottom_right);
+    update_cells(memory, game_state, tree->bottom_left);
+  }
+}
+
+
+void
+render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree)
 {
   b32 selected = false;
   // TODO: IMPORTANT: There ARE bugs in the 'overlaps' pruning of the
@@ -158,8 +181,6 @@ void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse
          ++cell_index)
     {
       Cell *cell = tree->cells + cell_index;
-
-      update_cell(memory, cell, &(game_state->cars), game_state->sim_steps);
 
       if (on_screen)
       {
@@ -178,10 +199,10 @@ void update_and_render_cells(Memory *memory, GameState *game_state, Mouse *mouse
     draw_box_outline(frame_buffer, game_state->world_per_pixel, render_region, world_tree_bounds, box_color);
 #endif
 
-    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_right);
-    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_left);
-    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
-    update_and_render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
+    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_right);
+    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_left);
+    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
+    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
   }
 }
 
@@ -246,8 +267,34 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_basis.clip_region.start = (V2){0, 0};
   render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
 
-  update_and_render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
+  render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
+}
+
+
+b32
+sim_tick(GameState *game_state, u64 time_us)
+{
+  b32 result = false;
+
+  if (time_us >= game_state->last_sim_tick + (u32)(seconds_in_u(1) / game_state->sim_ticks_per_s))
+  {
+    if (game_state->single_step)
+    {
+      if (game_state->inputs[STEP].active)
+      {
+        game_state->last_sim_tick = time_us;
+        result = true;
+      }
+    }
+    else
+    {
+      game_state->last_sim_tick = time_us;
+      result = true;
+    }
+  }
+
+  return result;
 }
 
 
@@ -264,6 +311,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u32 argc, char *arg
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
   game_state->single_step = false;
+  game_state->sim_ticks_per_s = 5;
 
   if (argc > 1)
   {
@@ -274,7 +322,6 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u32 argc, char *arg
     parse(&(game_state->maze), memory, MAZE_FILENAME);
   }
 
-  game_state->cars.car_ticks_per_s = 5;
   game_state->cars.first_block = 0;
   game_state->cars.free_chain = 0;
 
@@ -295,7 +342,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (game_state->inputs[RESTART].active)
   {
     delete_all_cars(&(game_state->cars));
-    game_state->last_car_update = time_us;
+    game_state->last_sim_tick = 0;
     game_state->sim_steps = 0;
   }
 
@@ -305,7 +352,25 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     printf("Changing stepping mode\n");
   }
 
-  update_cars(memory, game_state, time_us);
+  if (game_state->inputs[SIM_TICKS_INC].active)
+  {
+    game_state->sim_ticks_per_s += .5f;
+  }
+  if (game_state->inputs[SIM_TICKS_DEC].active)
+  {
+    game_state->sim_ticks_per_s -= .5f;
+  }
+  game_state->sim_ticks_per_s = clamp(.5, game_state->sim_ticks_per_s, 20);
+
+  if (sim_tick(game_state, time_us))
+  {
+    update_cells(memory, game_state, &(game_state->maze.tree));
+    update_cars(memory, game_state);
+
+    ++game_state->sim_steps;
+  }
+
+  annimate_cars(game_state);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
