@@ -65,6 +65,6 @@ log(LoggingChannel channel, const char *text, ...)
     vsnprintf(buf, 256, text, aptr);
     va_end(aptr);
 
-    printf("\e[01;30m%s\e[0m -> %s\n", LOGGING_CHANNELS[channel], buf);
+    printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, LOGGING_CHANNELS[channel], buf);
   }
 }
