@@ -91,9 +91,11 @@ draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4
   render_region = get_overlap(render_region, window_region);
 
   Rectangle fract_pixel_space = transform_coord_rect(render_basis, box);
-  fract_pixel_space = crop_to(fract_pixel_space, render_region);
 
   Rectangle pixel_space = round_down(fract_pixel_space);
+  pixel_space = (Rectangle){pixel_space.start, pixel_space.end + 1};
+
+  pixel_space = crop_to(pixel_space, render_region);
 
   for (u32 pixel_y = pixel_space.start.y;
        pixel_y < pixel_space.end.y;
@@ -109,17 +111,17 @@ draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4
       {
         this_color.a *= (pixel_space.start.x + 1) - fract_pixel_space.start.x;
       }
-      if (pixel_x == pixel_space.end.x)
+      if (pixel_x == pixel_space.end.x-1)
       {
-        this_color.a *= fract_pixel_space.end.x - pixel_space.end.x;
+        this_color.a *= fract_pixel_space.end.x - (pixel_space.end.x - 1);
       }
       if (pixel_y == pixel_space.start.y)
       {
         this_color.a *= (pixel_space.start.y + 1) - fract_pixel_space.start.y;
       }
-      if (pixel_y == pixel_space.end.y)
+      if (pixel_y == pixel_space.end.y-1)
       {
-        this_color.a *= fract_pixel_space.end.y - pixel_space.end.y;
+        this_color.a *= fract_pixel_space.end.y - (pixel_space.end.y - 1);
       }
 
       set_pixel(frame_buffer, pixel_x, pixel_y, this_color);

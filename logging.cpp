@@ -3,6 +3,7 @@
           CHANNEL(L_CarsStorage) \
           CHANNEL(L_CarsSim) \
           CHANNEL(L_Parser) \
+          CHANNEL(L_Render) \
           CHANNEL(L_GameLoop) \
           CHANNEL(N_LOGGING_CHANNELS)
 
