@@ -11,7 +11,6 @@ set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 }
 
 
-#define transform_coord_rect(render_basis, rect) (Rectangle){transform_coord(render_basis, rect.start), transform_coord(render_basis, rect.end)}
 V2
 transform_coord(RenderBasis *render_basis, V2 screen_coord_world)
 {
@@ -22,9 +21,21 @@ transform_coord(RenderBasis *render_basis, V2 screen_coord_world)
   V2 scaled_d_coord_scale_focus_world = render_basis->scale * d_coord_scale_focus_world;
   V2 scaled_d_coord_scale_focus_pixels = scaled_d_coord_scale_focus_world / render_basis->world_per_pixel;
 
-  V2 scaled_screen_coord_world = render_basis->scale_focus + scaled_d_coord_scale_focus_pixels;
+  V2 scaled_screen_coord_pixels = render_basis->scale_focus + scaled_d_coord_scale_focus_pixels;
 
-  return scaled_screen_coord_world;
+  return scaled_screen_coord_pixels;
+}
+
+
+Rectangle
+transform_coord_rect(RenderBasis *render_basis, Rectangle rect)
+{
+  Rectangle result;
+
+  result.start = transform_coord(render_basis, rect.start);
+  result.end = transform_coord(render_basis, rect.end);
+
+  return result;
 }
 
 
