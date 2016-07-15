@@ -184,81 +184,75 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = crop_to(render_region, window_region);
 
-  // TODO: Account for case where both start and end are off screen
-  b32 start_in_region = in_rectangle(start, render_region);
-  b32 end_in_region = in_rectangle(end, render_region);
+  r32 x_gradient = (end.y - start.y) / (end.x - start.x);
+  r32 y_gradient = (end.x - start.x) / (end.y - start.y);
 
-  if (start_in_region || end_in_region)
+  if (!in_rectangle(start, render_region))
   {
-    r32 x_gradient = (end.y - start.y) / (end.x - start.x);
-    r32 y_gradient = (end.x - start.x) / (end.y - start.y);
-    if (!start_in_region)
+    if (start.x < render_region.start.x)
     {
-      if (start.x < render_region.start.x)
-      {
-        start.y += (render_region.start.x - start.x) * x_gradient;
-        start.x = render_region.start.x;
-      }
-      else if (start.x >= render_region.end.x)
-      {
-        start.y += (render_region.end.x - start.x) * x_gradient;
-        start.x = render_region.end.x - 1;
-      }
-      if (start.y < render_region.start.y)
-      {
-        start.x += (render_region.start.y - start.y) * y_gradient;
-        start.y = render_region.start.y;
-      }
-      else if (start.y >= render_region.end.y)
-      {
-        start.x += (render_region.end.y - start.y) * y_gradient;
-        start.y = render_region.end.y - 1;
-      }
+      start.y += (render_region.start.x - start.x) * x_gradient;
+      start.x = render_region.start.x;
     }
-    if (!end_in_region)
+    else if (start.x >= render_region.end.x)
     {
-      if (end.x < render_region.start.x)
-      {
-        end.y += (render_region.start.x - end.x) * x_gradient;
-        end.x = render_region.start.x;
-      }
-      else if (end.x >= render_region.end.x)
-      {
-        end.y += (render_region.end.x - end.x) * x_gradient;
-        end.x = render_region.end.x - 1;
-      }
-      if (end.y < render_region.start.y)
-      {
-        end.x += (render_region.start.y - end.y) * y_gradient;
-        end.y = render_region.start.y;
-      }
-      else if (end.y >= render_region.end.y)
-      {
-        end.x += (render_region.end.y - end.y) * y_gradient;
-        end.y = render_region.end.y - 1;
-      }
+      start.y += (render_region.end.x - start.x) * x_gradient;
+      start.x = render_region.end.x - 1;
     }
-
-    // TODO: IMPORTANT: Sub-pixel rendering!!!
-
-    V2 length_components = {(end.x - start.x),
-                            (end.y - start.y)};
-
-    r32 num_pixels = fmax(abs(length_components.x), abs(length_components.y));
-
-    if(num_pixels)
+    if (start.y < render_region.start.y)
     {
-      V2 step = length_components / num_pixels;
+      start.x += (render_region.start.y - start.y) * y_gradient;
+      start.y = render_region.start.y;
+    }
+    else if (start.y >= render_region.end.y)
+    {
+      start.x += (render_region.end.y - start.y) * y_gradient;
+      start.y = render_region.end.y - 1;
+    }
+  }
+  if (!in_rectangle(end, render_region))
+  {
+    if (end.x < render_region.start.x)
+    {
+      end.y += (render_region.start.x - end.x) * x_gradient;
+      end.x = render_region.start.x;
+    }
+    else if (end.x >= render_region.end.x)
+    {
+      end.y += (render_region.end.x - end.x) * x_gradient;
+      end.x = render_region.end.x - 1;
+    }
+    if (end.y < render_region.start.y)
+    {
+      end.x += (render_region.start.y - end.y) * y_gradient;
+      end.y = render_region.start.y;
+    }
+    else if (end.y >= render_region.end.y)
+    {
+      end.x += (render_region.end.y - end.y) * y_gradient;
+      end.y = render_region.end.y - 1;
+    }
+  }
 
-      V2 pixel_pos_fract = start;
-      for (u32 pixel_n = 0;
-           pixel_n < num_pixels;
-           ++pixel_n)
-      {
-        V2 pixel_pos = round_down(pixel_pos_fract);
-        set_pixel(frame_buffer, pixel_pos.x, pixel_pos.y, color);
-        pixel_pos_fract += step;
-      }
+  // TODO: IMPORTANT: Sub-pixel rendering!!!
+
+  V2 length_components = {(end.x - start.x),
+                          (end.y - start.y)};
+
+  r32 num_pixels = fmax(abs(length_components.x), abs(length_components.y));
+
+  if(num_pixels)
+  {
+    V2 step = length_components / num_pixels;
+
+    V2 pixel_pos_fract = start;
+    for (u32 pixel_n = 0;
+         pixel_n < num_pixels;
+         ++pixel_n)
+    {
+      V2 pixel_pos = round_down(pixel_pos_fract);
+      set_pixel(frame_buffer, pixel_pos.x, pixel_pos.y, color);
+      pixel_pos_fract += step;
     }
   }
 }
