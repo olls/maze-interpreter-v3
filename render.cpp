@@ -173,6 +173,7 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = crop_to(render_region, window_region);
 
+  // TODO: Account for case where both start and end are off screen
   b32 start_in_region = in_rectangle(start, render_region);
   b32 end_in_region = in_rectangle(end, render_region);
 
@@ -190,7 +191,7 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
       else if (start.x >= render_region.end.x)
       {
         start.y += (render_region.end.x - start.x) * x_gradient;
-        start.x = render_region.end.x;
+        start.x = render_region.end.x - 1;
       }
       if (start.y < render_region.start.y)
       {
@@ -200,7 +201,7 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
       else if (start.y >= render_region.end.y)
       {
         start.x += (render_region.end.y - start.y) * y_gradient;
-        start.y = render_region.end.y;
+        start.y = render_region.end.y - 1;
       }
     }
     if (!end_in_region)
@@ -208,22 +209,22 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
       if (end.x < render_region.start.x)
       {
         end.y += (render_region.start.x - end.x) * x_gradient;
-        end.x = render_region.end.x;
+        end.x = render_region.start.x;
       }
       else if (end.x >= render_region.end.x)
       {
         end.y += (render_region.end.x - end.x) * x_gradient;
-        end.x = render_region.end.x;
+        end.x = render_region.end.x - 1;
       }
       if (end.y < render_region.start.y)
       {
         end.x += (render_region.start.y - end.y) * y_gradient;
-        end.y = render_region.end.y;
+        end.y = render_region.start.y;
       }
       else if (end.y >= render_region.end.y)
       {
         end.x += (render_region.end.y - end.y) * y_gradient;
-        end.y = render_region.end.y;
+        end.y = render_region.end.y - 1;
       }
     }
 
