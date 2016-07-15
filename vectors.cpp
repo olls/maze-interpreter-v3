@@ -935,7 +935,7 @@ to_color(V3 vec)
 
 
 V4
-add_color(V4 colour, u32 x)
+add_color(V4 colour, r32 x)
 {
   V4 result = colour + x;
   result.a = colour.a;

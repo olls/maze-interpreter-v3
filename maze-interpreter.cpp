@@ -121,7 +121,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
     {
       selected = true;
-      color = clamp(add_color(color, 0x20), 0xff);
+      color = clamp(add_color(color, .2), 1);
     }
 
     draw_box(frame_buffer, render_basis, cell_bounds, color);
