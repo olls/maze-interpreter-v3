@@ -67,19 +67,6 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 }
 
 
-void
-update_cell(Memory *memory, Cell *cell, Cars *cars, u32 sim_steps)
-{
-  if (sim_steps == 0)
-  {
-    if (cell->type == CELL_START)
-    {
-      add_car(memory, cars, cell->x, cell->y);
-    }
-  }
-}
-
-
 b32
 render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis)
 {
@@ -155,7 +142,13 @@ update_cells(Memory *memory, GameState *game_state, QuadTree *tree)
     {
       Cell *cell = tree->cells + cell_index;
 
-      update_cell(memory, cell, &(game_state->cars), game_state->sim_steps);
+      if (game_state->sim_steps == 0)
+      {
+        if (cell->type == CELL_START)
+        {
+          add_car(memory, &game_state->cars, cell->x, cell->y);
+        }
+      }
     }
 
     update_cells(memory, game_state, tree->top_right);
