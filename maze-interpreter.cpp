@@ -370,15 +370,4 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
   render(memory, game_state, frame_buffer, render_region_pixels, mouse, time_us);
-
-  mouse->scroll -= mouse->scroll / 6.0f;
-  r32 epsilon = 3.0f;
-  if (abs(mouse->scroll.y) < epsilon)
-  {
-    mouse->scroll.y = 0;
-  }
-  if (abs(mouse->scroll.x) < epsilon)
-  {
-    mouse->scroll.x = 0;
-  }
 }

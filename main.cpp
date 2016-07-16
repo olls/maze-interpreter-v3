@@ -22,6 +22,7 @@
 #include "parser.h"
 #include "cars.h"
 #include "input.h"
+
 #include "maze-interpreter.h"
 
 #include "render.cpp"
@@ -182,6 +183,17 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
   while (running)
   {
     u64 last_frame_end = get_us();
+
+    mouse.scroll -= mouse.scroll / 6.0f;
+    r32 epsilon = 1.5f;
+    if (abs(mouse.scroll.y) < epsilon)
+    {
+      mouse.scroll.y = 0;
+    }
+    if (abs(mouse.scroll.x) < epsilon)
+    {
+      mouse.scroll.x = 0;
+    }
 
     set_keys(&keys);
 
