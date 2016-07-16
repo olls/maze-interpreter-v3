@@ -1,11 +1,3 @@
-#include "render.cpp"
-#include "functions.cpp"
-#include "maze.cpp"
-#include "parser.cpp"
-#include "cars.cpp"
-#include "input.cpp"
-
-
 V2
 cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 {

@@ -5,24 +5,31 @@
 
 // Game Independent
 #include "platform.h"
-#include "logging.cpp"
 #include "maths.h"
 #include "vectors.h"
 
 #include "main.h"
 
-// Game Related
-#include "functions.h"
-#include "maze.h"
-#include "cars.h"
-#include "input.h"
-#include "maze-interpreter.h"
-#include "render.h"
-#include "parser.h"
-
+#include "logging.cpp"
 #include "platform.cpp"
 #include "maths.cpp"
 #include "vectors.cpp"
+
+// Game Related
+#include "render.h"
+#include "functions.h"
+#include "maze.h"
+#include "parser.h"
+#include "cars.h"
+#include "input.h"
+#include "maze-interpreter.h"
+
+#include "render.cpp"
+#include "functions.cpp"
+#include "maze.cpp"
+#include "parser.cpp"
+#include "cars.cpp"
+#include "input.cpp"
 
 #include "maze-interpreter.cpp"
 
