@@ -254,6 +254,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
   render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
+  render_particles(&(game_state->particles), frame_buffer, &render_basis);
 }
 
 
@@ -284,11 +285,11 @@ sim_tick(GameState *game_state, u64 time_us)
 
 
 void
-init_game(Memory *memory, GameState *game_state, Keys *keys, u32 argc, char *argv[])
+init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
 {
   game_state->init = true;
 
-  // TODO: Should world coords be r32s now we are using uint32s for
+  // TODO: Should world coords be r32s now we are using u32s for
   //       the cell position?
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
   game_state->zoom = 30;
@@ -311,6 +312,10 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u32 argc, char *arg
   game_state->cars.free_chain = 0;
 
   setup_inputs(keys, game_state->inputs);
+
+  load_bitmap(&game_state->particles.particle_image, "particle.bmp");
+  new_particle_source(&(game_state->particles), (V2){100000, 100000}, PS_CIRCLE, time_us);
+  new_particle_source(&(game_state->particles), (V2){500000, 100000}, PS_GROW, time_us);
 }
 
 
@@ -319,7 +324,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 {
   if (!game_state->init)
   {
-    init_game(memory, game_state, keys, argc, argv);
+    init_game(memory, game_state, keys, time_us, argc, argv);
   }
 
   update_inputs(keys, game_state->inputs, time_us);
@@ -356,6 +361,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   }
 
   annimate_cars(game_state);
+  step_particles(&(game_state->particles), time_us);
 
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};

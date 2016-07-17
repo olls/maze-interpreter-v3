@@ -38,4 +38,5 @@ struct GameState
   Input inputs[N_INPUTS];
   Maze maze;
   Cars cars;
+  Particles particles;
 };

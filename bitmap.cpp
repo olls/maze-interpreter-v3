@@ -49,9 +49,9 @@ load_bitmap(Bitmap *result, const char *filename)
   log(L_Bitmap, "u16 biBitCount (Bits per pixel - 1, 4, 8, 16, 24, or 32)           : `%d`", file->biBitCount);
   log(L_Bitmap, "u32 biCompression (Compression type (0 = uncompressed))            : `%d`", file->biCompression);
   log(L_Bitmap, "u32 biSizeImage (Image Size - may be zero for uncompressed images) : `%d`", file->biSizeImage);
-  log(L_Bitmap, "u32 red_mask    : `%8x", file->red_mask);
-  log(L_Bitmap, "u32 green_mask  : `%8x", file->green_mask);
-  log(L_Bitmap, "u32 blue_mask   : `%8x", file->blue_mask);
+  log(L_Bitmap, "u32 red_mask    : `%8x`", file->red_mask);
+  log(L_Bitmap, "u32 green_mask  : `%8x`", file->green_mask);
+  log(L_Bitmap, "u32 blue_mask   : `%8x`", file->blue_mask);
 
   assert(strcmp((char *)(&file->bfType), "BM"));
 

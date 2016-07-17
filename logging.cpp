@@ -3,6 +3,7 @@
           CHANNEL(L_CarsStorage) \
           CHANNEL(L_CarsSim) \
           CHANNEL(L_Parser) \
+          CHANNEL(L_Particles) \
           CHANNEL(L_Bitmap) \
           CHANNEL(L_Render) \
           CHANNEL(L_GameLoop) \
