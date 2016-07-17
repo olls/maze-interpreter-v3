@@ -95,6 +95,7 @@ step_particles(Particles *particles, u64 time_us)
 
               new_particle->color = get_color(new_particle - particles->particles);
               new_particle->speed = 20000;
+              new_particle->fade_out = true;
               new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
 
               log(L_Particles, "New Grow Particle, %d", (u32)(new_particle - particles->particles));
@@ -119,6 +120,11 @@ step_particles(Particles *particles, u64 time_us)
       }
       else
       {
+        if (particle->fade_out)
+        {
+          particle->color.a = 1.0 - ((r32)(time_us - particle->t0) / (r32)particle->ttl);
+        }
+
         switch (particle->type)
         {
           case PS_CIRCLE:

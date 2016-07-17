@@ -30,6 +30,7 @@ struct Particle
   ParticleType type;
   r32 speed;
   V4 color;
+  b32 fade_out;
   union
   {
     struct
@@ -46,6 +47,8 @@ struct Particle
 
 struct Particles
 {
+  // TODO: Make these arrays stay contiguous with deletes
+
   ParticleSource sources[MAX_PARTICLE_SOURCES];
   u32 next_free_particle_source;
 
