@@ -60,7 +60,7 @@ load_bitmap(Bitmap *result, const char *filename)
     result->red_shift = get_first_bit_pos(file->red_mask);
     result->green_shift = get_first_bit_pos(file->green_mask);
     result->blue_shift = get_first_bit_pos(file->blue_mask);
-    result->alpha_shift = get_first_bit_pos(!(result->red_shift & result->green_shift & result->blue_shift));
+    result->alpha_shift = get_first_bit_pos(file->alpha_mask);
   }
   else
   {
