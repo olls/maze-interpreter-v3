@@ -95,7 +95,7 @@ step_particles(Particles *particles, u64 time_us)
 
               new_particle->color = get_color(new_particle - particles->particles);
               new_particle->fade_out = true;
-              new_particle->speed = 5000;
+              new_particle->speed = 200000;
               new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
 
               log(L_Particles, "New Grow Particle, %d", (u32)(new_particle - particles->particles));
@@ -120,22 +120,25 @@ step_particles(Particles *particles, u64 time_us)
       }
       else
       {
+        u32 age = time_us - particle->t0;
+
         if (particle->fade_out)
         {
-          particle->color.a = 1.0 - ((r32)(time_us - particle->t0) / (r32)particle->ttl);
+          particle->color.a = 1.0 - ((r32)age / (r32)particle->ttl);
         }
 
         switch (particle->type)
         {
           case PS_CIRCLE:
           {
-            particle->offset.x = sin((2.0*M_PI) * (((u32)(time_us - particle->t0)) / particle->speed)) * particle->circle.radius;
-            particle->offset.y = cos((2.0*M_PI) * (((u32)(time_us - particle->t0)) / particle->speed)) * particle->circle.radius;
+            particle->offset.x = sin((2.0*M_PI) * (age / particle->speed)) * particle->circle.radius;
+            particle->offset.y = cos((2.0*M_PI) * (age / particle->speed)) * particle->circle.radius;
           } break;
           case PS_GROW:
           {
-            particle->offset.x += (r32)particle->speed * cos(particle->grow.direction);
-            particle->offset.y += (r32)particle->speed * sin(particle->grow.direction);
+            // NOTE: Speed is in world per second here
+            particle->offset.x = ((r32)age / 1000000) * (r32)particle->speed * cos(particle->grow.direction);
+            particle->offset.y = ((r32)age / 1000000) * (r32)particle->speed * sin(particle->grow.direction);
           } break;
         }
       }
