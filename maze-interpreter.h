@@ -33,11 +33,9 @@ struct GameState
   u64 last_sim_tick;
   r32 sim_ticks_per_s;
 
-  Input inputs[N_INPUTS];
-
-  Maze maze;
-
-  Cars cars;
-
   u32 sim_steps;
+
+  Input inputs[N_INPUTS];
+  Maze maze;
+  Cars cars;
 };
