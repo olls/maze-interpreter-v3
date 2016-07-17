@@ -42,6 +42,8 @@ struct Car
   Direction unpause_direction;
 
   CellType updated_cell_type;
+
+  ParticleSource *particle_source;
 };
 
 

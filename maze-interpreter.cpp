@@ -124,7 +124,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
 
 void
-update_cells(Memory *memory, GameState *game_state, QuadTree *tree)
+update_cells(Memory *memory, GameState *game_state, QuadTree *tree, u64 time_us)
 {
   if (tree)
   {
@@ -138,15 +138,15 @@ update_cells(Memory *memory, GameState *game_state, QuadTree *tree)
       {
         if (cell->type == CELL_START)
         {
-          add_car(memory, &game_state->cars, cell->x, cell->y);
+          add_car(memory, game_state, time_us, &game_state->cars, cell->x, cell->y);
         }
       }
     }
 
-    update_cells(memory, game_state, tree->top_right);
-    update_cells(memory, game_state, tree->top_left);
-    update_cells(memory, game_state, tree->bottom_right);
-    update_cells(memory, game_state, tree->bottom_left);
+    update_cells(memory, game_state, tree->top_right, time_us);
+    update_cells(memory, game_state, tree->top_left, time_us);
+    update_cells(memory, game_state, tree->bottom_right, time_us);
+    update_cells(memory, game_state, tree->bottom_left, time_us);
   }
 }
 
@@ -314,8 +314,6 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   setup_inputs(keys, game_state->inputs);
 
   load_bitmap(&game_state->particles.particle_image, "particle.bmp");
-  new_particle_source(&(game_state->particles), (V2){100000, 100000}, PS_CIRCLE, time_us);
-  new_particle_source(&(game_state->particles), (V2){500000, 100000}, PS_GROW, time_us);
 }
 
 
@@ -354,8 +352,8 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   if (sim_tick(game_state, time_us))
   {
-    update_cells(memory, game_state, &(game_state->maze.tree));
-    update_cars(memory, game_state);
+    update_cells(memory, game_state, &(game_state->maze.tree), time_us);
+    update_cars(memory, game_state, time_us);
 
     ++game_state->sim_steps;
   }

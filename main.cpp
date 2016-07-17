@@ -23,18 +23,18 @@
 #include "functions.h"
 #include "maze.h"
 #include "parser.h"
+#include "particles.h"
 #include "cars.h"
 #include "input.h"
-#include "particles.h"
 
 #include "maze-interpreter.h"
 
 #include "functions.cpp"
 #include "maze.cpp"
 #include "parser.cpp"
+#include "particles.cpp"
 #include "cars.cpp"
 #include "input.cpp"
-#include "particles.cpp"
 
 #include "maze-interpreter.cpp"
 

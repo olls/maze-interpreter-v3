@@ -1,5 +1,5 @@
 Car *
-add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction = DOWN)
+add_car(Memory *memory, GameState *game_state, u64 time_us, Cars *cars, u32 cell_x, u32 cell_y, Direction direction = DOWN)
 {
   CarsBlock *block = cars->first_block;
   while (block && block->next_free_in_block == CARS_PER_BLOCK)
@@ -50,6 +50,9 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
   car->unpause_direction = STATIONARY;
   car->updated_cell_type = CELL_NULL;
 
+  V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
+  car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
+
   return car;
 }
 
@@ -57,10 +60,13 @@ add_car(Memory *memory, Cars *cars, u32 cell_x, u32 cell_y, Direction direction 
 void
 rm_car(CarsBlock *block, u32 index_in_block)
 {
+  Car *car = block->cars + index_in_block;
+  car->particle_source->t0 = 0;
+
   --block->next_free_in_block;
   if (index_in_block != block->next_free_in_block)
   {
-    block->cars[index_in_block] = block->cars[block->next_free_in_block];
+    *car = block->cars[block->next_free_in_block];
   }
 }
 
@@ -185,14 +191,11 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 
       // TODO: Errors if accesses non-existing cell
       Cell *test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
-      if (test_cell)
+      if (test_cell && test_cell->type != CELL_WALL)
       {
-        if (test_cell->type != CELL_WALL)
-        {
-          can_move = true;
-          car->direction = test_direction;
-          break;
-        }
+        can_move = true;
+        car->direction = test_direction;
+        break;
       }
     }
 
@@ -239,7 +242,7 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 
 
 void
-car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
+car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *maze, Cars *cars, Car *car)
 {
   // TODO: Deal with race cars (conditions) ??
 
@@ -277,7 +280,7 @@ car_cell_interactions(Memory *memory, Maze *maze, Cars *cars, Car *car)
     case (CELL_SPLITTER):
     {
       log(L_CarsSim, "Splitter");
-      add_car(memory, cars, car->target_cell_x, car->target_cell_y, RIGHT);
+      add_car(memory, game_state, time_us, cars, car->target_cell_x, car->target_cell_y, RIGHT);
       car->direction = LEFT;
     } break;
 
@@ -368,6 +371,7 @@ update_car_position(GameState *game_state, Car *car)
 {
 #if 1
   // TODO: Why this isn't fast enough?
+  //         We should probably be using time_us to account FPS lag
   r32 speed = (1.0f / FPS) * game_state->sim_ticks_per_s * game_state->cell_spacing;
   V2 direction = -unit_vector(car->offset);
 
@@ -435,7 +439,7 @@ cars_iterator(Cars *cars, CarsIterator *iterator)
 
 
 void
-update_cars(Memory *memory, GameState *game_state)
+update_cars(Memory *memory, GameState *game_state, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
@@ -449,7 +453,7 @@ update_cars(Memory *memory, GameState *game_state)
   {
     if (car->update_next_frame)
     {
-      car_cell_interactions(memory, maze, cars, car);
+      car_cell_interactions(memory, game_state, time_us, maze, cars, car);
     }
   }
 
@@ -492,5 +496,6 @@ annimate_cars(GameState *game_state)
   while ((car = cars_iterator(&game_state->cars, &iter)))
   {
     update_car_position(game_state, car);
+    car->particle_source->pos = (V2){car->target_cell_x, car->target_cell_y} * game_state->cell_spacing + car->offset;
   }
 }

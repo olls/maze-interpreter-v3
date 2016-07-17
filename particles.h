@@ -1,5 +1,5 @@
 const u32 MAX_PARTICLE_SOURCES = 512;
-const u32 MAX_PARTICLES = 512;
+const u32 MAX_PARTICLES = 8192;
 
 
 enum ParticleType

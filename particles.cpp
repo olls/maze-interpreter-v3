@@ -14,13 +14,13 @@ new_particle_source(Particles *particles, V2 pos, ParticleType type, u64 time_us
   {
     case (PS_CIRCLE):
     {
-      result->spawn_rate = 3;
+      result->spawn_rate = 10;
       result->ttl = -1;
       result->particle_ttl = 1000000;
     } break;
     case (PS_GROW):
     {
-      result->spawn_rate = 200;
+      result->spawn_rate = 300;
       result->ttl = -1;
       result->particle_ttl = 200000;
     } break;
@@ -77,7 +77,7 @@ step_particles(Particles *particles, u64 time_us)
 
               new_particle->color = get_color(new_particle - particles->particles);
               new_particle->speed = 1000000 + ((rand() % 500000) - 25000);
-              new_particle->circle.radius = 1000 + ((rand() % 500000) - 2500);
+              new_particle->circle.radius = 30000 + ((rand() % 15000) - 7500);
 
               log(L_Particles, "New Circle Particle, %d", (u32)(new_particle - particles->particles));
             } break;
@@ -94,8 +94,8 @@ step_particles(Particles *particles, u64 time_us)
               new_particle->offset = (V2){0};
 
               new_particle->color = get_color(new_particle - particles->particles);
-              new_particle->speed = 20000;
               new_particle->fade_out = true;
+              new_particle->speed = 5000;
               new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
 
               log(L_Particles, "New Grow Particle, %d", (u32)(new_particle - particles->particles));
@@ -167,7 +167,7 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
         } break;
         case PS_GROW:
         {
-          u32 pixel_size = 10000;
+          u32 pixel_size = 4000;
 
           r32 top_y = pos.y - pixel_size * 1.5;
           r32 bottom_y = pos.y + pixel_size * 1.5;
