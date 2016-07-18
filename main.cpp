@@ -25,6 +25,7 @@
 #include "parser.h"
 #include "particles.h"
 #include "cars.h"
+#include "cars-storage.h"
 #include "input.h"
 
 #include "maze-interpreter.h"
@@ -33,6 +34,7 @@
 #include "maze.cpp"
 #include "parser.cpp"
 #include "particles.cpp"
+#include "cars-storage.cpp"
 #include "cars.cpp"
 #include "input.cpp"
 
