@@ -59,47 +59,49 @@ step_particles(Particles *particles, u64 time_us)
       }
       else
       {
-        if (time_us >= source->last_spawn + (1000000.0 / source->spawn_rate))
+        u32 n_spawn = (time_us - source->last_spawn) * (source->spawn_rate / 1000000.0);
+        if (n_spawn)
         {
-          switch (source->type)
+          source->last_spawn = time_us;
+
+          for (u32 i = 0;
+               i < n_spawn;
+               ++i)
           {
-            case PS_CIRCLE:
+            switch (source->type)
             {
-              // Spawn new particle
-              source->last_spawn = time_us;
+              case PS_CIRCLE:
+              {
+                // Spawn new particle
+                source->last_spawn = time_us;
 
-              Particle *new_particle = create_particle(particles);
-              new_particle->t0 = time_us;
-              new_particle->ttl = source->particle_ttl;
+                Particle *new_particle = create_particle(particles);
+                new_particle->t0 = time_us;
+                new_particle->type = source->type;
+                new_particle->pos = source->pos;
+                new_particle->offset = (V2){0};
 
-              new_particle->pos = source->pos;
-              new_particle->type = source->type;
+                new_particle->color = get_color(new_particle - particles->particles);
+                new_particle->speed = 1000000 + ((rand() % 500000) - 25000);
+                new_particle->circle.radius = 30000 + ((rand() % 15000) - 7500);
+              } break;
+              case PS_GROW:
+              {
+                // Spawn new particle
+                source->last_spawn = time_us;
 
-              new_particle->color = get_color(new_particle - particles->particles);
-              new_particle->speed = 1000000 + ((rand() % 500000) - 25000);
-              new_particle->circle.radius = 30000 + ((rand() % 15000) - 7500);
+                Particle *new_particle = create_particle(particles);
+                new_particle->t0 = time_us;
+                new_particle->type = source->type;
+                new_particle->pos = source->pos;
+                new_particle->offset = (V2){0};
 
-              log(L_Particles, "New Circle Particle, %d", (u32)(new_particle - particles->particles));
-            } break;
-            case PS_GROW:
-            {
-              // Spawn new particle
-              source->last_spawn = time_us;
-
-              Particle *new_particle = create_particle(particles);
-              new_particle->t0 = time_us;
-              new_particle->type = source->type;
-              new_particle->ttl = source->particle_ttl;
-              new_particle->pos = source->pos;
-              new_particle->offset = (V2){0};
-
-              new_particle->color = get_color(new_particle - particles->particles);
-              new_particle->fade_out = true;
-              new_particle->speed = 200000;
-              new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
-
-              log(L_Particles, "New Grow Particle, %d", (u32)(new_particle - particles->particles));
-            } break;
+                new_particle->color = get_color(new_particle - particles->particles);
+                new_particle->fade_out = true;
+                new_particle->speed = 200000;
+                new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
+              } break;
+            }
           }
         }
       }
