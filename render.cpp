@@ -1,6 +1,9 @@
 void
 set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 {
+  assert(pixel_x >= 0 && pixel_x < frame_buffer->width);
+  assert(pixel_y >= 0 && pixel_y < frame_buffer->height);
+
   u32 pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
 
   V3 prev_color = pixel_color_to_V3(frame_buffer->buffer[pixel_pos]);
