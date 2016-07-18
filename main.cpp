@@ -17,6 +17,7 @@
 #include "maths.cpp"
 #include "vectors.cpp"
 #include "render.cpp"
+#include "colors.cpp"
 #include "bitmap.cpp"
 
 // Game Related

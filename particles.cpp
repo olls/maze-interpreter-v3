@@ -6,6 +6,8 @@ new_particle_source(Particles *particles, V2 pos, ParticleType type, u64 time_us
   result = particles->sources + particles->next_free_particle_source++;
   particles->next_free_particle_source %= MAX_PARTICLE_SOURCES;
 
+  *result = (ParticleSource){};
+
   result->pos = pos;
   result->t0 = time_us;
   result->last_spawn = time_us;
@@ -93,7 +95,8 @@ step_particles(Particles *particles, u64 time_us)
               } break;
               case PS_GROW:
               {
-                new_particle->color = get_color(new_particle - particles->particles);
+                new_particle->color = (V4){1, 1, 1, 1};
+                new_particle->hue = rand() % 360;
                 new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
               } break;
             }
@@ -161,12 +164,6 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
       {
         case PS_CIRCLE:
         {
-          V2 screen_pos = transform_coord(render_basis, pos);
-          V2 bitmap_size = {particles->particle_image.file->biWidth, particles->particle_image.file->biHeight};
-          blit_bitmap(frame_buffer, &particles->particle_image, screen_pos - (bitmap_size * .5));
-        } break;
-        case PS_GROW:
-        {
           u32 pixel_size = 4000;
 
           r32 top_y = pos.y - pixel_size * 1.5;
@@ -176,6 +173,12 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
 
           draw_box(frame_buffer, render_basis, (Rectangle){(V2){pos.x - pixel_size*.5, top_y}, (V2){pos.x + pixel_size*.5, bottom_y}}, particle->color);
           draw_box(frame_buffer, render_basis, (Rectangle){(V2){left_x, pos.y - pixel_size*.5}, (V2){right_x, pos.y + pixel_size*.5}}, particle->color);
+        } break;
+        case PS_GROW:
+        {
+          V2 screen_pos = transform_coord(render_basis, pos);
+          V2 bitmap_size = {particles->cross_bitmap.file->biWidth, particles->cross_bitmap.file->biHeight};
+          blit_bitmap(frame_buffer, &particles->cross_bitmap, screen_pos - (bitmap_size * .5), particle->color, particle->hue);
         } break;
       }
     }

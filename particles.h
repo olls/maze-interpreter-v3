@@ -18,6 +18,7 @@ struct Particle
   ParticleType type;
   r32 speed;
   V4 color;
+  r32 hue;
   b32 fade_out;
   union
   {
@@ -56,5 +57,6 @@ struct Particles
   Particle particles[MAX_PARTICLES];
   u32 next_particle_to_use;
 
-  Bitmap particle_image;
+  Bitmap spark_bitmap;
+  Bitmap cross_bitmap;
 };

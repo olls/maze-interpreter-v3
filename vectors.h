@@ -48,6 +48,13 @@ union V4
     r32 g;
     r32 b;
   };
+  struct
+  {
+    r32 _a;
+    r32 h;
+    r32 s;
+    r32 v;
+  };
 };
 
 

@@ -64,6 +64,21 @@ operator*=(V2 &vec, r32 c)
 }
 
 V2
+operator*(V2 a, V2 b)
+{
+  V2 result;
+  result.x = a.x * b.x;
+  result.y = a.y * b.y;
+  return result;
+}
+V2 &
+operator*=(V2 &a, V2 b)
+{
+  a = a * b;
+  return a;
+}
+
+V2
 operator/(r32 c, V2 vec)
 {
   V2 result;
@@ -557,6 +572,22 @@ operator*=(V3 &vec, r32 c)
 }
 
 V3
+operator*(V3 a, V3 b)
+{
+  V3 result;
+  result.x = a.x * b.x;
+  result.y = a.y * b.y;
+  result.z = a.z * b.z;
+  return result;
+}
+V3 &
+operator*=(V3 &a, V3 b)
+{
+  a = a * b;
+  return a;
+}
+
+V3
 operator/(r32 c, V3 vec)
 {
   V3 result;
@@ -736,6 +767,23 @@ operator*=(V4 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
+}
+
+V4
+operator*(V4 a, V4 b)
+{
+  V4 result;
+  result.w = a.w * b.w;
+  result.x = a.x * b.x;
+  result.y = a.y * b.y;
+  result.z = a.z * b.z;
+  return result;
+}
+V4 &
+operator*=(V4 &a, V4 b)
+{
+  a = a * b;
+  return a;
 }
 
 V4

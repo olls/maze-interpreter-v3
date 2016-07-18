@@ -76,7 +76,7 @@ load_bitmap(Bitmap *result, const char *filename)
 
 
 void
-blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos)
+blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0)
 {
   pos = round_down(pos);
 
@@ -103,6 +103,12 @@ blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos)
         if (bitmap->file->biCompression != 3)
         {
           color.a = 1;
+        }
+
+        color *= color_multiplier;
+        if (hue_shift)
+        {
+          color = shift_hue(color, hue_shift);
         }
 
         set_pixel(frame_buffer, pixel_x, pixel_y, color);

@@ -314,7 +314,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   setup_inputs(keys, game_state->inputs);
 
-  load_bitmap(&game_state->particles.particle_image, "particle.bmp");
+  load_bitmap(&game_state->particles.spark_bitmap, "particles/spark.bmp");
+  load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
 }
 
 
