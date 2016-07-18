@@ -71,3 +71,28 @@ log(LoggingChannel channel, const char *text, ...)
     printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, LOGGING_CHANNELS[channel], buf);
   }
 }
+
+
+void
+log(LoggingChannel channel, V4 vec)
+{
+  log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
+}
+
+void
+log(LoggingChannel channel, V2 vec)
+{
+  log(channel, "(%f, %f)", vec.x, vec.y);
+}
+
+void
+log(LoggingChannel channel, V3 vec)
+{
+  log(channel, "(%f, %f, %f)", vec.x, vec.y, vec.z);
+}
+
+void
+log(LoggingChannel channel, Rectangle rect)
+{
+  log(channel, "((%f, %f), (%f, %f))", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
+}

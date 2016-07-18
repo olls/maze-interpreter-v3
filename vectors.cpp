@@ -1020,28 +1020,3 @@ reverse(Direction d)
 
   return result;
 }
-
-
-void
-printV(LoggingChannel channel, V4 vec)
-{
-  log(channel, "(%f, %f, %f, %f)\n", vec.w, vec.x, vec.y, vec.z);
-}
-
-void
-printV(LoggingChannel channel, V2 vec)
-{
-  log(channel, "(%f, %f)\n", vec.x, vec.y);
-}
-
-void
-printV(LoggingChannel channel, V3 vec)
-{
-  log(channel, "(%f, %f, %f)\n", vec.x, vec.y, vec.z);
-}
-
-void
-printR(LoggingChannel channel, Rectangle rect)
-{
-  log(channel, "((%f, %f), (%f, %f))\n", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
-}
