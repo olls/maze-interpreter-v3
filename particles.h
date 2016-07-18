@@ -9,18 +9,6 @@ enum ParticleType
 };
 
 
-struct ParticleSource
-{
-  V2 pos;
-  ParticleType type;
-  r32 spawn_rate;
-  u64 last_spawn;
-  u64 t0;
-  u32 ttl;
-  u32 particle_ttl;
-};
-
-
 struct Particle
 {
   u64 t0;
@@ -42,6 +30,18 @@ struct Particle
       r32 direction;
     } grow;
   };
+};
+
+
+struct ParticleSource
+{
+  V2 pos;
+  r32 spawn_rate;
+  u64 last_spawn;
+  u64 t0;
+  u32 ttl;
+
+  Particle particle_prototype;
 };
 
 
