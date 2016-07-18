@@ -138,7 +138,8 @@ update_cells(Memory *memory, GameState *game_state, QuadTree *tree, u64 time_us)
       {
         if (cell->type == CELL_START)
         {
-          add_car(memory, game_state, time_us, &game_state->cars, cell->x, cell->y);
+          Car *new_car = get_new_car(memory, &game_state->cars);
+          init_car(game_state, time_us, new_car, cell->x, cell->y);
         }
       }
     }

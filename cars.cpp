@@ -1,4 +1,25 @@
 void
+init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V2 direction = DOWN)
+{
+  static u32 cars_id = 0;
+  car->update_next_frame = false;
+  car->dead = false;
+  car->value = 0;
+  car->id = cars_id++;
+  car->target_cell_x = cell_x;
+  car->target_cell_y = cell_y;
+  car->offset = (V2){0, 0};
+  car->direction = direction;
+  car->pause_left = 0;
+  car->unpause_direction = STATIONARY;
+  car->updated_cell_type = CELL_NULL;
+
+  V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
+  car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
+}
+
+
+void
 calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 {
   if (car->direction == STATIONARY)
@@ -93,7 +114,11 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_SPLITTER):
     {
       log(L_CarsSim, "Splitter");
-      add_car(memory, game_state, time_us, cars, car->target_cell_x, car->target_cell_y, RIGHT);
+
+      Car *new_car = get_new_car(memory, cars);
+      init_car(game_state, time_us, new_car, car->target_cell_x, car->target_cell_y, RIGHT);
+
+      new_car->direction = RIGHT;
       car->direction = LEFT;
     } break;
 

@@ -1,5 +1,5 @@
 Car *
-add_car(Memory *memory, GameState *game_state, u64 time_us, Cars *cars, u32 cell_x, u32 cell_y, V2 direction = DOWN)
+get_new_car(Memory *memory, Cars *cars)
 {
   CarsBlock *block = cars->first_block;
   while (block && block->next_free_in_block == CARS_PER_BLOCK)
@@ -35,25 +35,8 @@ add_car(Memory *memory, GameState *game_state, u64 time_us, Cars *cars, u32 cell
     cars->first_block = block;
   }
 
-  static u32 cars_id = 0;
-  Car *car = block->cars + block->next_free_in_block++;
-
-  car->update_next_frame = false;
-  car->dead = false;
-  car->value = 0;
-  car->id = cars_id++;
-  car->target_cell_x = cell_x;
-  car->target_cell_y = cell_y;
-  car->offset = (V2){0, 0};
-  car->direction = direction;
-  car->pause_left = 0;
-  car->unpause_direction = STATIONARY;
-  car->updated_cell_type = CELL_NULL;
-
-  V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
-  car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
-
-  return car;
+  Car *result = block->cars + block->next_free_in_block++;
+  return result;
 }
 
 
