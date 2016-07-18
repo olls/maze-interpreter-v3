@@ -63,12 +63,8 @@ union PixelColor
 };
 
 
-// TODO: Replace use of directions with vectors?
-enum Direction
-{
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-  STATIONARY
-};
+const V2 UP = {0, -1};
+const V2 DOWN = {0, 1};
+const V2 LEFT = {-1, 0};
+const V2 RIGHT = {1, 0};
+const V2 STATIONARY = {0, 0};

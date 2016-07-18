@@ -56,7 +56,7 @@ get_num(char *ptr, char *f_end, u32 *result)
 
 
 char *
-get_direction(char *ptr, enum Direction *result)
+get_direction(char *ptr, V2 *result)
 {
   *result = STATIONARY;
 
@@ -299,7 +299,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
               ptr += 4;
               consume_whitespace(ptr, f_end);
 
-              enum Direction true_direction;
+              V2 true_direction;
               ptr = get_direction(ptr, &true_direction);
               if (true_direction != STATIONARY)
               {
@@ -310,7 +310,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
                   ptr += 4;
                   consume_whitespace(ptr, f_end);
 
-                  enum Direction false_direction;
+                  V2 false_direction;
                   ptr = get_direction(ptr, &false_direction);
                   if (false_direction != STATIONARY)
                   {

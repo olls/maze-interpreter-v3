@@ -36,10 +36,10 @@ struct Car
   // NOTE: Used for sub-cell positioning, in world space.
   V2 offset;
 
-  Direction direction;
+  V2 direction;
 
   u32 pause_left;
-  Direction unpause_direction;
+  V2 unpause_direction;
 
   CellType updated_cell_type;
 

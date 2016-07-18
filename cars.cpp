@@ -1,5 +1,5 @@
 Car *
-add_car(Memory *memory, GameState *game_state, u64 time_us, Cars *cars, u32 cell_x, u32 cell_y, Direction direction = DOWN)
+add_car(Memory *memory, GameState *game_state, u64 time_us, Cars *cars, u32 cell_x, u32 cell_y, V2 direction = DOWN)
 {
   CarsBlock *block = cars->first_block;
   while (block && block->next_free_in_block == CARS_PER_BLOCK)
@@ -145,15 +145,6 @@ update_dead_cars(Cars *cars)
 
 
 void
-change_car_pos(GameState *game_state, Car *car, V2 d)
-{
-  car->offset = -d * game_state->cell_spacing;
-  car->target_cell_x += d.x;
-  car->target_cell_y += d.y;
-}
-
-
-void
 calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 {
   if (car->direction == STATIONARY)
@@ -162,35 +153,35 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
   }
   else
   {
-    Direction directions[4];
+    V2 dir_components[] = {UP, DOWN, LEFT, RIGHT};
+
+    V2 directions[4];
     directions[0] = car->direction;
-    directions[3] = reverse(car->direction);
+    directions[3] = -car->direction;
 
     u32 i = 1;
-    for (u32 direction = 0;
-         direction < 4;
-         direction++)
+    for (u32 direction_index = 0;
+         direction_index < 4;
+         direction_index++)
     {
-      if ((direction != directions[0]) &&
-          (direction != directions[3]))
+      V2 test_direction = dir_components[direction_index];
+
+      if ((test_direction != directions[0]) &&
+          (test_direction != directions[3]))
       {
-        directions[i++] = (Direction)direction;
+        directions[i++] = test_direction;
       }
     }
-
-    V2 dir_components[] = {{ 0, -1}, {0, 1},
-                           {-1,  0}, {1, 0}};
 
     b32 can_move = false;
     for (u32 direction_index = 0;
          direction_index < 4;
          direction_index++)
     {
-      Direction test_direction = directions[direction_index];
-      V2 test_comp = dir_components[test_direction];
+      V2 test_direction = directions[direction_index];
 
       // TODO: Errors if accesses non-existing cell
-      Cell *test_cell = get_cell(maze, (car->target_cell_x + test_comp.x), (car->target_cell_y + test_comp.y));
+      Cell *test_cell = get_cell(maze, (car->target_cell_x + test_direction.x), (car->target_cell_y + test_direction.y));
       if (test_cell && test_cell->type != CELL_WALL)
       {
         can_move = true;
@@ -201,41 +192,9 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 
     if (can_move)
     {
-      V2 d_car_pos = {0};
-
-      switch (car->direction)
-      {
-        case UP:
-        {
-          --d_car_pos.y;
-        } break;
-
-        case DOWN:
-        {
-          ++d_car_pos.y;
-        } break;
-
-        case LEFT:
-        {
-          --d_car_pos.x;
-        } break;
-
-        case RIGHT:
-        {
-          ++d_car_pos.x;
-        } break;
-
-        case STATIONARY:
-        {
-        } break;
-
-        default:
-        {
-          invalid_code_path;
-        }
-      }
-
-      change_car_pos(game_state, car, d_car_pos);
+      car->offset = -car->direction * game_state->cell_spacing;
+      car->target_cell_x += car->direction.x;
+      car->target_cell_y += car->direction.y;
     }
   }
 }
