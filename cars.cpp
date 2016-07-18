@@ -367,12 +367,10 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
 
 void
-update_car_position(GameState *game_state, Car *car)
+update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
 {
 #if 1
-  // TODO: Why this isn't fast enough?
-  //         We should probably be using time_us to account FPS lag
-  r32 speed = (1.0f / FPS) * game_state->sim_ticks_per_s * game_state->cell_spacing;
+  r32 speed = (last_frame_dt / 1000000.0) * game_state->sim_ticks_per_s * game_state->cell_spacing;
   V2 direction = -unit_vector(car->offset);
 
   V2 movement = direction * speed;
@@ -489,13 +487,13 @@ update_cars(Memory *memory, GameState *game_state, u64 time_us)
 
 
 void
-annimate_cars(GameState *game_state)
+annimate_cars(GameState *game_state, u32 last_frame_dt)
 {
   CarsIterator iter = {};
   Car *car;
   while ((car = cars_iterator(&game_state->cars, &iter)))
   {
-    update_car_position(game_state, car);
+    update_car_position(game_state, car, last_frame_dt);
     car->particle_source->pos = (V2){car->target_cell_x, car->target_cell_y} * game_state->cell_spacing + car->offset;
   }
 }

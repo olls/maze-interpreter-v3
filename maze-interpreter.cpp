@@ -318,7 +318,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 argc, char *argv[])
+update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 argc, char *argv[])
 {
   if (!game_state->init)
   {
@@ -358,7 +358,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     ++game_state->sim_steps;
   }
 
-  annimate_cars(game_state);
+  annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
   Rectangle render_region_pixels;
