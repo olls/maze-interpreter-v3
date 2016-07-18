@@ -177,8 +177,11 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
         case PS_GROW:
         {
           V2 screen_pos = transform_coord(render_basis, pos);
-          V2 bitmap_size = {particles->cross_bitmap.file->biWidth, particles->cross_bitmap.file->biHeight};
-          blit_bitmap(frame_buffer, &particles->cross_bitmap, screen_pos - (bitmap_size * .5), particle->color, particle->hue);
+
+          Bitmap *bitmap = &particles->cross_bitmap;
+          V2 bitmap_size = {bitmap->file->biWidth, bitmap->file->biHeight};
+
+          blit_bitmap(frame_buffer, bitmap, screen_pos - (bitmap_size * .5), particle->color, particle->hue);
         } break;
       }
     }
