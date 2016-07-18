@@ -1,3 +1,11 @@
+u32
+calc_car_radius(GameState *game_state)
+{
+  u32 result = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.35f;
+  return result;
+}
+
+
 void
 init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V2 direction = DOWN)
 {
@@ -16,6 +24,7 @@ init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V
 
   V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
   car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
+  car->particle_source->particle_prototype.grow.initial_radius = calc_car_radius(game_state);
 }
 
 

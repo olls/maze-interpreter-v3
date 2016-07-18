@@ -27,6 +27,7 @@ struct Particle
     } circle;
     struct
     {
+      u32 initial_radius;
       r32 direction;
     } grow;
   };

@@ -29,6 +29,7 @@ new_particle_source(Particles *particles, V2 pos, ParticleType type, u64 time_us
       result->particle_prototype.ttl = 200000;
       result->particle_prototype.fade_out = true;
       result->particle_prototype.speed = 200000;
+      result->particle_prototype.grow.initial_radius = 0;
     } break;
   }
 
@@ -133,8 +134,8 @@ step_particles(Particles *particles, u64 time_us)
           case PS_GROW:
           {
             // NOTE: Speed is in world per second here
-            particle->offset.x = ((r32)age / 1000000) * (r32)particle->speed * cos(particle->grow.direction);
-            particle->offset.y = ((r32)age / 1000000) * (r32)particle->speed * sin(particle->grow.direction);
+            particle->offset.x = (particle->grow.initial_radius + ((r32)age / 1000000) * (r32)particle->speed) * cos(particle->grow.direction);
+            particle->offset.y = (particle->grow.initial_radius + ((r32)age / 1000000) * (r32)particle->speed) * sin(particle->grow.direction);
           } break;
         }
       }
