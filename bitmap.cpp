@@ -76,25 +76,31 @@ load_bitmap(Bitmap *result, const char *filename)
 
 
 void
-blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0)
+blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0)
 {
   pos = round_down(pos);
 
-  for (u32 u = 0;
-       u < bitmap->file->biWidth;
-       ++u)
+  r32 width = bitmap->file->biWidth * scale.x;
+  r32 height = bitmap->file->biHeight * scale.y;
+
+  for (u32 dx = 0;
+       dx < width;
+       ++dx)
   {
-    for (u32 v = 0;
-         v < bitmap->file->biHeight;
-         ++v)
+    for (u32 dy = 0;
+         dy < height;
+         ++dy)
     {
-      u32 pixel_x = pos.x + u;
-      u32 pixel_y = (pos.y + bitmap->file->biHeight - 1) - v;
+      r32 u = dx / scale.x;
+      r32 v = dy / scale.y;
+
+      u32 pixel_x = pos.x + dx;
+      u32 pixel_y = (pos.y + height - 1) - dy;
 
       if ((pixel_x < frame_buffer->width) &&
           (pixel_y < frame_buffer->height))
       {
-        u32 *bitmap_color = (u32 *)((u8 *)bitmap->file + bitmap->file->bfOffBits + (u + (v * bitmap->file->biWidth)) * (bitmap->file->biBitCount / 8));
+        u32 *bitmap_color = (u32 *)((u8 *)bitmap->file + bitmap->file->bfOffBits + ((u32)u + ((u32)v * bitmap->file->biWidth)) * (bitmap->file->biBitCount / 8));
         V4 color = {(r32)((*bitmap_color >> bitmap->alpha_shift) & 0xff) / 255.0,
                     (r32)((*bitmap_color >> bitmap->red_shift) & 0xff) / 255.0,
                     (r32)((*bitmap_color >> bitmap->green_shift) & 0xff) / 255.0,
