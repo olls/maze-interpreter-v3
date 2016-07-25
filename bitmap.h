@@ -24,6 +24,8 @@ struct Bitmap
     u32 alpha_mask;
   } __attribute__((packed)) *file;
 
+  u8 *pixels;
+  u32 pixel_size;
   u32 alpha_shift;
   u32 red_shift;
   u32 green_shift;

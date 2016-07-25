@@ -39,9 +39,17 @@ clamp(r32 min, r32 value, r32 max)
 
 
 u32
-lerp(u32 min, u32 max, r32 t)
+lerp(u32 min, r32 t, u32 max)
 {
   u32 result = ((1 - t) * min) + (t * max);
+  return result;
+}
+
+
+r32
+lerp(r32 min, r32 t, r32 max)
+{
+  r32 result = ((1 - t) * min) + (t * max);
   return result;
 }
 

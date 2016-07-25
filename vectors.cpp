@@ -949,6 +949,18 @@ round_down(V4 vec)
 }
 
 
+V4
+lerp(V4 min, r32 t, V4 max)
+{
+  V4 result;
+  result.w = lerp(min.w, t, max.w);
+  result.x = lerp(min.x, t, max.x);
+  result.y = lerp(min.y, t, max.y);
+  result.z = lerp(min.z, t, max.z);
+  return result;
+}
+
+
 V3
 remove_alpha(V4 vec)
 {
