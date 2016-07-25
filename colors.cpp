@@ -5,7 +5,7 @@ rgb_to_hsv(V4 rgb)
   hsv.a = rgb.a;
 
   r32 min = fmin(rgb.r, fmin(rgb.g, rgb.b));
-  r32 max = fmax(rgb.r, fmin(rgb.g, rgb.b));
+  r32 max = fmax(rgb.r, fmax(rgb.g, rgb.b));
   hsv.v = max;
 
   r32 delta = max - min;
