@@ -99,10 +99,10 @@ hsv_to_rgb(V4 hsv)
 
 
 V4
-shift_hue(V4 color, r32 degrees)
+shift_hue(V4 color, u32 degrees)
 {
   V4 hsv = rgb_to_hsv(color);
-  hsv.h += degrees;
+  hsv.h = ((u32)hsv.h + degrees) % 360 + (hsv.h - (u32)hsv.h);
   V4 result = hsv_to_rgb(hsv);
 
   return result;
