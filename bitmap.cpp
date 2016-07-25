@@ -102,12 +102,12 @@ blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 colo
           (pixel_y < frame_buffer->height))
       {
         r32 u = dx / scale.x;
-        r32 v = bitmap->file->biHeight - (dy / scale.y + 1);
+        r32 v = bitmap->file->biHeight - 1 - (dy / scale.y);
 
         u32 bitmap_top_left_pos = (u32)(u)         + ((u32)(v) * bitmap->file->biWidth);
         u32 bitmap_top_right_pos = (u32)(u + 1)    + ((u32)(v) * bitmap->file->biWidth);
-        u32 bitmap_bottom_left_pos = (u32)(u)      + ((u32)(v - 1) * bitmap->file->biWidth);
-        u32 bitmap_bottom_right_pos = (u32)(u + 1) + ((u32)(v - 1) * bitmap->file->biWidth);
+        u32 bitmap_bottom_left_pos = (u32)(u)      + ((u32)(v + 1) * bitmap->file->biWidth);
+        u32 bitmap_bottom_right_pos = (u32)(u + 1) + ((u32)(v + 1) * bitmap->file->biWidth);
 
         u32 *bitmap_top_left = (u32 *)(bitmap->pixels + bitmap->pixel_size * bitmap_top_left_pos);
         u32 *bitmap_top_right = (u32 *)(bitmap->pixels + bitmap->pixel_size * bitmap_top_right_pos);
