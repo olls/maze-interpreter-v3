@@ -25,8 +25,8 @@
 #include "maze.h"
 #include "parser.h"
 #include "particles.h"
-#include "cars.h"
 #include "cars-storage.h"
+#include "cars.h"
 #include "input.h"
 
 #include "maze-interpreter.h"
