@@ -59,4 +59,5 @@ struct Particles
 
   Bitmap spark_bitmap;
   Bitmap cross_bitmap;
+  Bitmap blob_bitmap;
 };

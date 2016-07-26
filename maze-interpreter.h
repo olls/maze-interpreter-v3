@@ -39,4 +39,6 @@ struct GameState
   Maze maze;
   Cars cars;
   Particles particles;
+
+  Bitmap tile;
 };

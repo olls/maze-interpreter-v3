@@ -27,6 +27,7 @@
 #include "particles.h"
 #include "cars-storage.h"
 #include "cars.h"
+#include "draw.h"
 #include "input.h"
 
 #include "maze-interpreter.h"
@@ -37,6 +38,7 @@
 #include "particles.cpp"
 #include "cars-storage.cpp"
 #include "cars.cpp"
+#include "draw.cpp"
 #include "input.cpp"
 
 #include "maze-interpreter.cpp"
