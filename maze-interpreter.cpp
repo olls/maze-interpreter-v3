@@ -20,16 +20,16 @@ draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_b
 
 #else  // NOTE: Displays the id of the car
 
-  u32 car_raduis = game_state->cell_spacing - (game_state->cell_spacing*game_state->cell_margin);
-  V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset - (car_raduis * .5f);
+  u32 cell_size = game_state->cell_spacing - (game_state->cell_spacing*game_state->cell_margin);
+  V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset - (cell_size * .5f);
 
   u32 n = 6;
-  car_raduis *= 1.0f/n;
-  pos += car_raduis * .5f;
+  u32 car_diameter = cell_size / n;
+  pos += car_diameter * .5f;
 
   for (u32 i = 0; i <= car->id; ++i)
   {
-    draw_circle(frame_buffer, render_basis, pos + (V2){((i%n) * car_raduis), ((i/n) * car_raduis)}, car_raduis*.5f, colour);
+    draw_circle(frame_buffer, render_basis, pos + (V2){((i%n) * car_diameter), ((i/n) * car_diameter)}, car_diameter*.5f, colour);
   }
 #endif
 }
