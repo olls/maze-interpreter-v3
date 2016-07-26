@@ -1,31 +1,40 @@
 struct Bitmap
 {
   struct BitmapFile {
-    char bfType[2];       // The characters "BM"
-    u32 bfSize;           // The size of the file in bytes
+    char signature[2];
+    u32 file_size;
     u32 _;
-    u32 bfOffBits;        // Offset to start of Pixel Data
+    u32 pixels_offset;      // Offset to start of Pixel Data
 
-    u32 biSize;           // Header Size - Must be at least 40
-    u32 biWidth;          // Image width in pixels
-    u32 biHeight;         // Image height in pixels
-    u16 biPlanes;         // Must be 1
-    u16 biBitCount;       // Bits per pixel - 1, 4, 8, 16, 24, or 32
-    u32 biCompression;    // Compression type (0 = uncompressed)
-    u32 biSizeImage;      // Image Size - may be zero for uncompressed images
-    u32 biXPelsPerMeter;  // Preferred resolution in pixels per meter
-    u32 biYPelsPerMeter;  // Preferred resolution in pixels per meter
-    u32 biClrUsed;        // Number Color Map entries that are actually used
-    u32 biClrImportant;   // Number of significant colors
+    u32 dib_header_size;    // Must be at least 40
+    u32 width;
+    u32 height;
+    u16 planes;             // Must be 1
+    u16 bits_per_pixel;     // 1, 4, 8, 16, 24, or 32
+    u32 compression;        // 0 = uncompressed
+    u32 image_size;         // May be zero for uncompressed images
+    u32 x_pixels_per_meter; // Preferred resolution
+    u32 y_pixels_per_meter; // Preferred resolution
+    u32 n_colors_table;     // Number of color table entries
+    u32 important_colors;   // Number of significant colors
 
     u32 red_mask;
     u32 green_mask;
     u32 blue_mask;
     u32 alpha_mask;
+
+    u32 color_space_type;
+    u8 color_space_endpoints[36];
+
+    u32 red_gamma;
+    u32 green_gamma;
+    u32 blue_gamma;
+
+    u32 color_table;
+
   } __attribute__((packed)) *file;
 
   u8 *pixels;
-  u32 pixel_size;
   u32 alpha_shift;
   u32 red_shift;
   u32 green_shift;

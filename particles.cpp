@@ -179,7 +179,7 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
           V2 screen_pos = transform_coord(render_basis, pos);
 
           Bitmap *bitmap = &particles->cross_bitmap;
-          V2 bitmap_size = {bitmap->file->biWidth, bitmap->file->biHeight};
+          V2 bitmap_size = {bitmap->file->width, bitmap->file->height};
 
           blit_bitmap(frame_buffer, bitmap, screen_pos - (bitmap_size * .5 * render_basis->scale), (V2){render_basis->scale, render_basis->scale}, particle->color, particle->hue);
         } break;
