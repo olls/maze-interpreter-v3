@@ -181,7 +181,9 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
           Bitmap *bitmap = &particles->blob_bitmap;
           V2 bitmap_size = {bitmap->file->width, bitmap->file->height};
 
-          blit_bitmap(frame_buffer, bitmap, screen_pos - (bitmap_size * .5 * render_basis->scale), (V2){render_basis->scale, render_basis->scale} / 2, particle->color, particle->hue);
+          r32 scale = render_basis->scale * .5f;
+
+          blit_bitmap(frame_buffer, bitmap, screen_pos - (bitmap_size * .5f * scale), (V2){scale, scale}, particle->color, particle->hue, true);
         } break;
       }
     }
