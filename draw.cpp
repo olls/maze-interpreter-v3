@@ -131,16 +131,11 @@ render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *f
   b32 selected = false;
   b32 on_screen = false;
 
-  RenderBasis one_to_one;
-  one_to_one_basis(&one_to_one, frame_buffer);
-
-  Rectangle cell_clip_region = {render_basis->clip_region.start/* + 50000*/, render_basis->clip_region.end/*-50000*/};
-
-  // draw_box_outline(frame_buffer, &one_to_one, cell_clip_region / render_basis->world_per_pixel, (V4){1, 0, 0xff, 0});
+  Rectangle cell_clip_region_pixels = (Rectangle){render_basis->clip_region.start, render_basis->clip_region.end}  / render_basis->world_per_pixel;
 
   if (tree)
   {
-    on_screen = overlaps(cell_clip_region, render_basis->origin + tree->bounds);
+    on_screen = overlaps(cell_clip_region_pixels, transform_coord_rect(render_basis, tree->bounds * game_state->cell_spacing));
 
     for (u32 cell_index = 0;
          cell_index < tree->used;
