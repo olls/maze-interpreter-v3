@@ -109,16 +109,18 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
     Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
-    // TODO: Unproject the mouse coords correctly
-    if (in_rectangle(((V2){mouse->x, mouse->y} * game_state->world_per_pixel), cell_bounds))
+    V4 color_multiplier = {1, 1, 1, 1};
+    if (in_rectangle((V2){mouse->x, mouse->y}, transform_coord_rect(render_basis, cell_bounds)))
     {
       selected = true;
-      color = (color + 20) % 360;
+      color_multiplier.r += 0.5;
+      color_multiplier.g += 0.5;
+      color_multiplier.b += 0.5;
     }
 
     V2 scale = (render_basis->scale * cell_radius * 2 / game_state->world_per_pixel) / (V2){game_state->tile.file->width - 1, game_state->tile.file->height - 1};
 
-    blit_bitmap(frame_buffer, &game_state->tile, transform_coord(render_basis, cell_bounds.start), scale, (V4){1, 1, 1, 1}, color);
+    blit_bitmap(frame_buffer, &game_state->tile, transform_coord(render_basis, cell_bounds.start), scale, color_multiplier, color);
   }
 
   return selected;
@@ -152,11 +154,10 @@ render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *f
 #if 0
     V4 box_color = (V4){0.5f, 0, 0, 0};
     Rectangle world_tree_bounds = (tree->bounds * game_state->cell_spacing);
-    // if (selected)
-    if (on_screen)
+    if (selected)
     {
       box_color.a = 1;
-      box_color.r = 0xFF;
+      box_color.r = 1;
     }
     draw_box_outline(frame_buffer, render_basis, world_tree_bounds, box_color);
 #endif
