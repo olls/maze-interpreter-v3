@@ -77,8 +77,9 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
   render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
 
-  if (abs(game_state->zoom - old_zoom) > 0.005)
+  if (abs(game_state->zoom - old_zoom) != 0)
   {
+    render_basis.scale_focus = game_state->scale_focus;
     game_state->scale_focus = untransform_coord(&render_basis, screen_mouse_pixels);
   }
   render_basis.scale_focus = game_state->scale_focus;
@@ -86,6 +87,14 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
   render_particles(&(game_state->particles), frame_buffer, &render_basis);
+
+#if 0
+  RenderBasis orthographic_basis;
+  get_orthographic_basis(&orthographic_basis, frame_buffer);
+  draw_circle(frame_buffer, &orthographic_basis, game_state->maze_pos, 10, (V4){1, 0, .5, 1});
+
+  draw_circle(frame_buffer, &render_basis, render_basis.scale_focus, 100000, (V4){1, 0, .5, 1});
+#endif
 }
 
 

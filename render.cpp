@@ -47,6 +47,11 @@ untransform_coord(RenderBasis *render_basis, V2 scaled_screen_coord_pixels)
 {
   V2 scaled_screen_coord_world = (scaled_screen_coord_pixels * render_basis->world_per_pixel) - render_basis->origin;
 
+  V2 scaled_d_coord_scale_focus_world = render_basis->scale_focus - scaled_screen_coord_world;
+
+  V2 d_map_coord_scale_focus_world = scaled_d_coord_scale_focus_world / render_basis->scale;
+  V2 map_coord_world = d_map_coord_scale_focus_world + render_basis->scale_focus;
+
   return scaled_screen_coord_world;
 }
 
