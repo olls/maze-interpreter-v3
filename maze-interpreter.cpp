@@ -32,7 +32,6 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 {
   // TODO: Give zoom velocity, to make it smooth
 
-  r32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
 
   if (game_state->inputs[ZOOM_IN].active)
@@ -44,17 +43,18 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
     game_state->d_zoom -= .2;
   }
 
+  r32 old_zoom = game_state->zoom;
   game_state->zoom += game_state->d_zoom;
   game_state->d_zoom *= 0.7f;
 
-  if (mouse->scroll.y > 0 && ((game_state->zoom >= MAX_ZOOM) ||
-                              (game_state->zoom < old_zoom)))
+  if (game_state->d_zoom > 0 && ((game_state->zoom >= MAX_ZOOM) ||
+                                 (game_state->zoom < old_zoom)))
   {
     game_state->d_zoom = 0;
     game_state->zoom = MAX_ZOOM;
   }
-  else if (mouse->scroll.y < 0 && ((game_state->zoom <= MIN_ZOOM) ||
-                                   (game_state->zoom > old_zoom)))
+  else if (game_state->d_zoom < 0 && ((game_state->zoom <= MIN_ZOOM) ||
+                                      (game_state->zoom > old_zoom)))
   {
     game_state->d_zoom = 0;
     game_state->zoom = MIN_ZOOM;
