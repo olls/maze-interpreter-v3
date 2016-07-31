@@ -542,6 +542,15 @@ get_bottom_left(Rectangle rect)
   return result;
 }
 
+Rectangle
+grow(Rectangle rect, r32 by)
+{
+  Rectangle result = rect;
+  result.start -= by;
+  result.end += by;
+  return result;
+}
+
 
 b32
 operator==(V3 a, V3 b)
