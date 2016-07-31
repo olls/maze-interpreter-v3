@@ -19,7 +19,6 @@ struct GameState
   u32 world_per_pixel;
   r32 d_zoom;
   r32 zoom;
-  r32 scale;
   V2 scale_focus;
 
   // NOTE: Things are scaled relatively to cell_spacing.

@@ -142,6 +142,8 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 void
 blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0, b32 interpolation = false)
 {
+  // TODO: Use a RenderBasis!!! (Then check bounds before looping!)
+
   pos = round_down(pos);
 
   r32 width = (bitmap->file->width - 1) * scale.x;

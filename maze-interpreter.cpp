@@ -32,8 +32,9 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 {
   // TODO: Give zoom velocity, to make it smooth
 
-  u32 old_zoom = game_state->zoom;
+  r32 old_zoom = game_state->zoom;
   game_state->d_zoom += mouse->scroll.y;
+
   if (game_state->inputs[ZOOM_IN].active)
   {
     game_state->d_zoom += .2;
@@ -44,7 +45,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   }
 
   game_state->zoom += game_state->d_zoom;
-  game_state->d_zoom *= 0.5f;
+  game_state->d_zoom *= 0.7f;
 
   if (mouse->scroll.y > 0 && ((game_state->zoom >= MAX_ZOOM) ||
                               (game_state->zoom < old_zoom)))
@@ -58,7 +59,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
     game_state->d_zoom = 0;
     game_state->zoom = MIN_ZOOM;
   }
-  game_state->scale = squared(game_state->zoom / 30.0f);
+  r32 scale = squared(game_state->zoom / 30.0f);
 
   V2 screen_mouse_pixels = (V2){mouse->x, mouse->y};
   V2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
@@ -72,20 +73,15 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
   RenderBasis render_basis = {};
   render_basis.world_per_pixel = game_state->world_per_pixel;
+  render_basis.scale = scale;
+  render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
+  render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
 
-  render_basis.scale_focus = game_state->scale_focus;
-  if (game_state->d_zoom > .2f)
+  if (abs(game_state->zoom - old_zoom) > 0.005)
   {
-    game_state->d_zoom = 0;
-    game_state->scale_focus = screen_mouse_pixels;
-    render_basis.scale_focus = screen_mouse_pixels;
+    game_state->scale_focus = untransform_coord(&render_basis, screen_mouse_pixels);
   }
-  render_basis.scale = game_state->scale;
-
-  render_basis.origin = (game_state->maze_pos / render_basis.scale) * game_state->world_per_pixel;
-
-  render_basis.clip_region.start = (V2){0, 0};
-  render_basis.clip_region.end = (V2){frame_buffer->width, frame_buffer->height} * game_state->world_per_pixel;
+  render_basis.scale_focus = game_state->scale_focus;
 
   render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);

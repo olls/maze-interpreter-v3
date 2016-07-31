@@ -94,11 +94,19 @@ operator/(V2 vec, r32 c)
   result.y = vec.y / c;
   return result;
 }
-V2 &
-operator/=(V2 &vec, r32 c)
+V2
+operator/(V2 a, V2 b)
 {
-  vec = vec / c;
-  return vec;
+  V2 result;
+  result.x = a.x / b.x;
+  result.y = a.y / b.y;
+  return result;
+}
+V2 &
+operator/=(V2 &a, r32 b)
+{
+  a = a / b;
+  return a;
 }
 
 V2

@@ -15,18 +15,25 @@ set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 
 
 V2
-transform_coord(RenderBasis *render_basis, V2 screen_coord_world)
+transform_coord(RenderBasis *render_basis, V2 map_coord_world)
 {
-  V2 map_scale_focus_pixels = render_basis->scale_focus - (render_basis->origin / render_basis->world_per_pixel);
-  V2 map_scale_focus_world = map_scale_focus_pixels * render_basis->world_per_pixel;
+  V2 d_map_coord_scale_focus_world = map_coord_world - render_basis->scale_focus;
+  V2 scaled_d_coord_scale_focus_world = render_basis->scale * d_map_coord_scale_focus_world;
 
-  V2 d_coord_scale_focus_world = screen_coord_world - map_scale_focus_world;
-  V2 scaled_d_coord_scale_focus_world = render_basis->scale * d_coord_scale_focus_world;
-  V2 scaled_d_coord_scale_focus_pixels = scaled_d_coord_scale_focus_world / render_basis->world_per_pixel;
+  V2 scaled_screen_coord_world = render_basis->scale_focus + scaled_d_coord_scale_focus_world;
 
-  V2 scaled_screen_coord_pixels = render_basis->scale_focus + scaled_d_coord_scale_focus_pixels;
+  V2 scaled_screen_coord_pixels = (render_basis->origin + scaled_screen_coord_world) / render_basis->world_per_pixel;
 
   return scaled_screen_coord_pixels;
+}
+
+
+V2
+untransform_coord(RenderBasis *render_basis, V2 scaled_screen_coord_pixels)
+{
+  V2 scaled_screen_coord_world = (scaled_screen_coord_pixels * render_basis->world_per_pixel) - render_basis->origin;
+
+  return scaled_screen_coord_world;
 }
 
 
