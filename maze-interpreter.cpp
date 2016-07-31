@@ -199,13 +199,10 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   render_region_pixels.start = (V2){0, 0};
   render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
 
-  RenderBasis clear_basis = {};
-  clear_basis.origin = (V2){0 ,0};
-  clear_basis.world_per_pixel = 1;
-  clear_basis.scale = 1;
-  clear_basis.clip_region = render_region_pixels;
+  RenderBasis orthographic_basis;
+  get_orthographic_basis(&orthographic_basis, frame_buffer);
 
-  fast_draw_box(frame_buffer, &clear_basis, render_region_pixels, (PixelColor){255, 255, 255});
+  fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
   render(memory, game_state, frame_buffer, render_region_pixels, mouse, time_us);
 }
