@@ -242,8 +242,8 @@ V2
 vector_direction(V2 vec)
 {
   V2 result = vec;
-  result.x = div_or_0(result.x, abs(result.x));
-  result.y = div_or_0(result.y, abs(result.y));
+  result.x = div_or_0(result.x, fabs(result.x));
+  result.y = div_or_0(result.y, fabs(result.y));
   return result;
 }
 

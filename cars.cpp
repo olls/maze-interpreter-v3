@@ -272,7 +272,7 @@ update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
 
   V2 movement = direction * speed;
 
-  if (abs(car->offset.x) >= abs(movement.x))
+  if (fabs(car->offset.x) >= fabs(movement.x))
   {
     car->offset.x += movement.x;
   }
@@ -281,7 +281,7 @@ update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
     car->offset.x = 0;
   }
 
-  if (abs(car->offset.y) >= abs(movement.y))
+  if (fabs(car->offset.y) >= fabs(movement.y))
   {
     car->offset.y += movement.y;
   }
