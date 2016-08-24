@@ -55,6 +55,7 @@ load_bitmap(Bitmap *result, const char *filename)
   log(L_Bitmap, "red_mask:                                          `%8x`", file->red_mask);
   log(L_Bitmap, "green_mask:                                        `%8x`", file->green_mask);
   log(L_Bitmap, "blue_mask:                                         `%8x`", file->blue_mask);
+  log(L_Bitmap, "alpha_mask:                                        `%8x`", file->alpha_mask);
 
   if (strncmp(file->signature, "BM", 2) != 0)
   {
@@ -73,7 +74,14 @@ load_bitmap(Bitmap *result, const char *filename)
     result->red_shift = get_first_bit_pos(file->red_mask);
     result->green_shift = get_first_bit_pos(file->green_mask);
     result->blue_shift = get_first_bit_pos(file->blue_mask);
-    result->alpha_shift = get_first_bit_pos(file->alpha_mask);
+    if (file->alpha_mask != 0)
+    {
+      result->alpha_shift = get_first_bit_pos(file->alpha_mask);
+    }
+    else
+    {
+      result->alpha_shift = -1;
+    }
   }
   else
   {
@@ -120,6 +128,11 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
                (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
                (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
                (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
+
+  if (bitmap->file->compression == 3 && bitmap->alpha_shift < 0)
+  {
+    result.a = 1;
+  }
 
   // Basic alpha for 8 bit images
   // TODO: This isn't really a good solution

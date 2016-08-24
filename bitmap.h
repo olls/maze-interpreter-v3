@@ -35,8 +35,8 @@ struct Bitmap
   } __attribute__((packed)) *file;
 
   u8 *pixels;
-  u32 alpha_shift;
-  u32 red_shift;
-  u32 green_shift;
-  u32 blue_shift;
+  s32 alpha_shift;
+  s32 red_shift;
+  s32 green_shift;
+  s32 blue_shift;
 };
