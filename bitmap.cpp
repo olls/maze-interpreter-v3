@@ -146,8 +146,8 @@ blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 colo
 
   pos = round_down(pos);
 
-  r32 width = (bitmap->file->width - 1) * scale.x;
-  r32 height = (bitmap->file->height - 1) * scale.y;
+  r32 width = bitmap->file->width * scale.x;
+  r32 height = bitmap->file->height * scale.y;
 
   for (u32 dx = 0;
        dx < width;
@@ -164,14 +164,13 @@ blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 colo
           (pixel_y < frame_buffer->height))
       {
         r32 u = dx / scale.x;
-        r32 v = bitmap->file->height - 1 - (dy / scale.y);
+        r32 v = (height - dy) / scale.y;
 
         V4 color;
 
-        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-
-        if (interpolation)
+        if (interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
         {
+          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
           V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
           V4 bottom_left_color = get_bitmap_color(bitmap,  u,     v + 1);
           V4 bottom_right_color = get_bitmap_color(bitmap, u + 1, v + 1);
@@ -179,8 +178,24 @@ blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 colo
           color = lerp(lerp(top_left_color,    (u - (u32)u), top_right_color), (v - (u32)v),
                        lerp(bottom_left_color, (u - (u32)u), bottom_right_color));
         }
+        else if (interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
+        {
+          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
+          V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
+
+          color = lerp(top_left_color, (u - (u32)u), top_right_color);
+        }
+        else if (interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
+        {
+          V4 top_left_color = get_bitmap_color(bitmap,  u,     v);
+          V4 bottom_left_color = get_bitmap_color(bitmap, u, v + 1);
+
+          color = lerp(top_left_color, (v - (u32)v), bottom_left_color);
+        }
         else
         {
+          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
+
           color = top_left_color;
         }
 
