@@ -6,6 +6,8 @@ setup_inputs(Keys *keys, Input inputs[])
 
   inputs[RESTART].key_press = &(GET_ALPHA_KEY('r')->on_up);
 
+  inputs[RESET].key_press = &(GET_ALPHA_KEY('n')->on_up);
+
   inputs[STEP].key_press = &(GET_ALPHA_KEY('j')->down);
   inputs[STEP].rate_limit = slow_key_repeat_rate_limit;
 

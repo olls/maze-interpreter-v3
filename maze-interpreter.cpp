@@ -125,10 +125,8 @@ sim_tick(GameState *game_state, u64 time_us)
 
 
 void
-init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
+reset_zoom(GameState *game_state)
 {
-  game_state->init = true;
-
   // TODO: Should world coords be r32s now we are using u32s for
   //       the cell position?
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
@@ -136,6 +134,18 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   game_state->world_per_pixel = 64*64;
   game_state->cell_spacing = 100000;
   game_state->cell_margin = 0.2f;
+  game_state->maze_pos = (V2){};
+  game_state->last_mouse_pos = (V2){};
+}
+
+
+void
+init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
+{
+  game_state->init = true;
+
+  reset_zoom(game_state);
+
   game_state->single_step = false;
   game_state->sim_ticks_per_s = 5;
 
@@ -169,6 +179,11 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   }
 
   update_inputs(keys, game_state->inputs, time_us);
+
+  if (game_state->inputs[RESET].active)
+  {
+    reset_zoom(game_state);
+  }
 
   if (game_state->inputs[RESTART].active)
   {
