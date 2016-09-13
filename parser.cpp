@@ -4,8 +4,24 @@
 
 #define consume_whitespace(ptr, end) while ((*(ptr) == ' ' || *(ptr) == '\t') && (ptr) < end) ++(ptr)
 #define consume_whitespace_nl(ptr, end) while ((*(ptr) == ' ' || *(ptr) == '\t' || isNewline(*(ptr))) && (ptr) < end) ++(ptr)
-#define consume_until_newline(ptr, end) while (!isNewline(*(ptr)) && (ptr) < end) ++(ptr)
 #define consume_while(ptr, func, end) while (func(*(ptr)) && (ptr) < end) ++(ptr)
+#define consume_until(ptr, func, end) while (!func(*(ptr)) && (ptr) < end) ++(ptr)
+#define consume_until_newline(ptr, end) consume_until(ptr, isNewline, end)
+
+
+bool
+str_eq(const char *a, const char *b, u32 n)
+{
+  for (u32 i = 0; i < n; ++i)
+  {
+    if (a[i] != b[i])
+    {
+      return false;;
+    }
+  }
+
+  return true;
+}
 
 
 b32
@@ -96,6 +112,259 @@ get_direction(char *ptr, V2 *result)
 }
 
 
+char *
+parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
+{
+
+  if (str_eq(cell_str, "^^", 2))
+  {
+    cell->type = CELL_START;
+  }
+  else if (str_eq(cell_str, "..", 2))
+  {
+    cell->type = CELL_PATH;
+  }
+  else if (str_eq(cell_str, "##", 2) ||
+           str_eq(cell_str, "  ", 2) ||
+           str_eq(cell_str, "``", 2))
+  {
+    cell->type = CELL_WALL;
+  }
+  else if (str_eq(cell_str, "()", 2))
+  {
+    cell->type = CELL_HOLE;
+  }
+  else if (str_eq(cell_str, "<>", 2))
+  {
+    cell->type = CELL_SPLITTER;
+  }
+  else if (isLetter(cell_str[0]) && (isLetter(cell_str[1]) || isNum(cell_str[1])))
+  {
+    u32 function_index = get_function_index(cell_str);
+    u32 function_parse_bytes_read = 0;
+
+    char *ptr = f_ptr + 2;
+    consume_whitespace(ptr, f_end);
+
+    if (str_eq(ptr, "->", 2))
+    {
+      // Function Definition
+      ptr += 2;
+      Function *function = maze->functions + function_index;
+      function->name[0] = cell_str[0];
+      function->name[1] = cell_str[1];
+
+      consume_whitespace(ptr, f_end);
+
+      if (*ptr == '=')
+      {
+        consume_whitespace(ptr, f_end);
+
+        ptr = get_num(ptr, f_end, &(function->value));
+        function->type = FUNCTION_ASSIGNMENT;
+
+        consume_until_newline(ptr, f_end);
+        f_ptr = ptr;
+
+      }
+      else if (*ptr == '+' ||
+               *ptr == '-' ||
+               *ptr == '*' ||
+               *ptr == '/')
+      {
+        char sign = *ptr++;
+        if (*ptr++ == '=')
+        {
+          switch (sign)
+          {
+            case '+':
+            {
+              function->type = FUNCTION_INCREMENT;
+            } break;
+            case '-':
+            {
+              function->type = FUNCTION_DECREMENT;
+            } break;
+            case '*':
+            {
+              function->type = FUNCTION_MULTIPLY;
+            } break;
+            case '/':
+            {
+              function->type = FUNCTION_DIVIDE;
+            } break;
+          }
+          consume_whitespace(ptr, f_end);
+
+          ptr = get_num(ptr, f_end, &(function->value));
+
+          consume_until_newline(ptr, f_end);
+          f_ptr = ptr;
+        }
+
+      }
+      else if (str_eq(ptr, "IF", 2))
+      {
+        ptr += 2;
+        consume_whitespace(ptr, f_end);
+
+        FunctionType conditional_func_type;
+        b32 valid_condition = true;
+        b32 value_required = true;
+        if (str_eq(ptr, "<=", 2))
+        {
+          ptr += 2;
+          conditional_func_type = FUNCTION_LESS_EQUAL;
+        }
+        if (*ptr == '<')
+        {
+          ptr += 1;
+          conditional_func_type = FUNCTION_LESS;
+        }
+        else if (str_eq(ptr, ">=", 2))
+        {
+          ptr += 2;
+          conditional_func_type = FUNCTION_GREATER_EQUAL;
+        }
+        else if (*ptr == '>')
+        {
+          ptr += 1;
+          conditional_func_type = FUNCTION_GREATER;
+        }
+        else if (str_eq(ptr, "==", 2))
+        {
+          ptr += 2;
+          conditional_func_type = FUNCTION_EQUAL;
+        }
+        else if (str_eq(ptr, "!=", 2))
+        {
+          ptr += 2;
+          conditional_func_type = FUNCTION_NOT_EQUAL;
+        }
+        else if (str_eq(ptr, "**", 2))
+        {
+          ptr += 2;
+          conditional_func_type = FUNCTION_SIGNAL;
+          value_required = false;
+        }
+        else
+        {
+          log(L_Parser, "Conditional");
+          valid_condition = false;
+        }
+
+        u32 condition_value;
+        if (value_required && valid_condition)
+        {
+          consume_whitespace(ptr, f_end);
+
+          char *num_start = ptr;
+          ptr = get_num(ptr, f_end, &(condition_value));
+          if (num_start == ptr)
+          {
+            valid_condition = false;
+          }
+        }
+
+        if (valid_condition)
+        {
+          consume_whitespace(ptr, f_end);
+
+          if (str_eq(ptr, "THEN", 4))
+          {
+            ptr += 4;
+            consume_whitespace(ptr, f_end);
+
+            V2 true_direction;
+            ptr = get_direction(ptr, &true_direction);
+            if (true_direction != STATIONARY)
+            {
+              consume_whitespace(ptr, f_end);
+
+              if (str_eq(ptr, "ELSE", 4))
+              {
+                ptr += 4;
+                consume_whitespace(ptr, f_end);
+
+                V2 false_direction;
+                ptr = get_direction(ptr, &false_direction);
+                if (false_direction != STATIONARY)
+                {
+                  function->type = conditional_func_type;
+                  function->conditional.condition_value = condition_value;
+                  function->conditional.true_direction = true_direction;
+                  function->conditional.false_direction = false_direction;
+
+                  consume_until_newline(ptr, f_end);
+                  f_ptr = ptr;
+                }
+              }
+              else
+              {
+                consume_until_newline(ptr, f_end);
+                f_ptr = ptr;
+              }
+            }
+          }
+        }
+      }
+    }
+    else
+    {
+      // Funciton Call
+      cell->type = CELL_FUNCTION;
+      cell->function_index = function_index;
+    }
+  }
+  else if (str_eq(cell_str, "--", 2))
+  {
+    cell->type = CELL_ONCE;
+  }
+  else if (str_eq(cell_str, "**", 2))
+  {
+    cell->type = CELL_SIGNAL;
+  }
+  else if (str_eq(cell_str, ">>", 2))
+  {
+    cell->type = CELL_INC;
+  }
+  else if (str_eq(cell_str, "<<", 2))
+  {
+    cell->type = CELL_DEC;
+  }
+  else if ((cell_str[0] == '%') && ((cell_str[1] == 'U') ||
+                                    (cell_str[1] == 'u')))
+  {
+    cell->type = CELL_UP;
+  }
+  else if ((cell_str[0] == '%') && ((cell_str[1] == 'D') ||
+                                    (cell_str[1] == 'd')))
+  {
+    cell->type = CELL_DOWN;
+  }
+  else if ((cell_str[0] == '%') && ((cell_str[1] == 'L') ||
+                                    (cell_str[1] == 'l')))
+  {
+    cell->type = CELL_LEFT;
+  }
+  else if ((cell_str[0] == '%') && ((cell_str[1] == 'R') ||
+                                    (cell_str[1] == 'r')))
+  {
+    cell->type = CELL_RIGHT;
+  }
+  else if (isNum(cell_str[0]) && isNum(cell_str[1]))
+  {
+    cell->type = CELL_PAUSE;
+
+    u32 digit0 = cell_str[0] - '0';
+    u32 digit1 = cell_str[1] - '0';
+    cell->pause = (10 * digit0) + digit1;
+  }
+
+  return f_ptr;
+}
+
+
 void
 parse(Maze *maze, Memory *memory, const char *filename)
 {
@@ -128,7 +397,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
     exit(1);
   }
 
-  char cell_str[3] = {};
+  char cell_str[2] = {};
   char *f_ptr = file;
   char *f_end = f_ptr + sb.st_size;
   while (f_ptr < f_end)
@@ -138,252 +407,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
 
     Cell new_cell = {};
     new_cell.type = CELL_NULL;
-
-    if (strncmp(cell_str, "^^", 2) == 0)
-    {
-      new_cell.type = CELL_START;
-    }
-    else if (strncmp(cell_str, "..", 2) == 0)
-    {
-      new_cell.type = CELL_PATH;
-    }
-    else if (strncmp(cell_str, "##", 2) == 0 ||
-             strncmp(cell_str, "  ", 2) == 0 ||
-             strncmp(cell_str, "``", 2) == 0)
-    {
-      new_cell.type = CELL_WALL;
-    }
-    else if (strncmp(cell_str, "()", 2) == 0)
-    {
-      new_cell.type = CELL_HOLE;
-    }
-    else if (strncmp(cell_str, "<>", 2) == 0)
-    {
-      new_cell.type = CELL_SPLITTER;
-    }
-    else if (isLetter(cell_str[0]) && (isLetter(cell_str[1]) || isNum(cell_str[1])))
-    {
-      u32 function_index = get_function_index(cell_str);
-      u32 function_parse_bytes_read = 0;
-
-      char *ptr = f_ptr + 2;
-      consume_whitespace(ptr, f_end);
-
-      if (ptr[0] == '-' &&
-          ptr[1] == '>')
-      {
-        // Function Definition
-        ptr += 2;
-        Function *function = maze->functions + function_index;
-        function->name[0] = cell_str[0];
-        function->name[1] = cell_str[1];
-
-        consume_whitespace(ptr, f_end);
-
-        if (*ptr == '=')
-        {
-          consume_whitespace(ptr, f_end);
-
-          ptr = get_num(ptr, f_end, &(function->value));
-          function->type = FUNCTION_ASSIGNMENT;
-
-          consume_until_newline(ptr, f_end);
-          f_ptr = ptr;
-
-        }
-        else if (*ptr == '+' ||
-                 *ptr == '-' ||
-                 *ptr == '*' ||
-                 *ptr == '/')
-        {
-          char sign = *ptr++;
-          if (*ptr++ == '=')
-          {
-            switch (sign)
-            {
-              case '+':
-              {
-                function->type = FUNCTION_INCREMENT;
-              } break;
-              case '-':
-              {
-                function->type = FUNCTION_DECREMENT;
-              } break;
-              case '*':
-              {
-                function->type = FUNCTION_MULTIPLY;
-              } break;
-              case '/':
-              {
-                function->type = FUNCTION_DIVIDE;
-              } break;
-            }
-            consume_whitespace(ptr, f_end);
-
-            ptr = get_num(ptr, f_end, &(function->value));
-
-            consume_until_newline(ptr, f_end);
-            f_ptr = ptr;
-          }
-
-        }
-        else if (strncmp(ptr, "IF", 2) == 0)
-        {
-          ptr += 2;
-          consume_whitespace(ptr, f_end);
-
-          FunctionType conditional_func_type;
-          b32 valid_condition = true;
-          b32 value_required = true;
-          if (strncmp(ptr, "<=", 2) == 0)
-          {
-            ptr += 2;
-            conditional_func_type = FUNCTION_LESS_EQUAL;
-          }
-          if (*ptr == '<')
-          {
-            ptr += 1;
-            conditional_func_type = FUNCTION_LESS;
-          }
-          else if (strncmp(ptr, ">=", 2) == 0)
-          {
-            ptr += 2;
-            conditional_func_type = FUNCTION_GREATER_EQUAL;
-          }
-          else if (*ptr == '>')
-          {
-            ptr += 1;
-            conditional_func_type = FUNCTION_GREATER;
-          }
-          else if (strncmp(ptr, "==", 2) == 0)
-          {
-            ptr += 2;
-            conditional_func_type = FUNCTION_EQUAL;
-          }
-          else if (strncmp(ptr, "!=", 2) == 0)
-          {
-            ptr += 2;
-            conditional_func_type = FUNCTION_NOT_EQUAL;
-          }
-          else if (strncmp(ptr, "**", 2) == 0)
-          {
-            ptr += 2;
-            conditional_func_type = FUNCTION_SIGNAL;
-            value_required = false;
-          }
-          else
-          {
-            log(L_Parser, "Conditional");
-            valid_condition = false;
-          }
-
-          u32 condition_value;
-          if (value_required && valid_condition)
-          {
-            consume_whitespace(ptr, f_end);
-
-            char *num_start = ptr;
-            ptr = get_num(ptr, f_end, &(condition_value));
-            if (num_start == ptr)
-            {
-              valid_condition = false;
-            }
-          }
-
-          if (valid_condition)
-          {
-            consume_whitespace(ptr, f_end);
-
-            if (strncmp(ptr, "THEN", 4) == 0)
-            {
-              ptr += 4;
-              consume_whitespace(ptr, f_end);
-
-              V2 true_direction;
-              ptr = get_direction(ptr, &true_direction);
-              if (true_direction != STATIONARY)
-              {
-                consume_whitespace(ptr, f_end);
-
-                if (strncmp(ptr, "ELSE", 4) == 0)
-                {
-                  ptr += 4;
-                  consume_whitespace(ptr, f_end);
-
-                  V2 false_direction;
-                  ptr = get_direction(ptr, &false_direction);
-                  if (false_direction != STATIONARY)
-                  {
-                    function->type = conditional_func_type;
-                    function->conditional.condition_value = condition_value;
-                    function->conditional.true_direction = true_direction;
-                    function->conditional.false_direction = false_direction;
-
-                    consume_until_newline(ptr, f_end);
-                    f_ptr = ptr;
-                  }
-                }
-                else
-                {
-                  consume_until_newline(ptr, f_end);
-                  f_ptr = ptr;
-                }
-              }
-            }
-          }
-        }
-      }
-      else
-      {
-        // Funciton Call
-        new_cell.type = CELL_FUNCTION;
-        new_cell.function_index = function_index;
-      }
-    }
-    else if (strncmp(cell_str, "--", 2) == 0)
-    {
-      new_cell.type = CELL_ONCE;
-    }
-    else if (strncmp(cell_str, "**", 2) == 0)
-    {
-      new_cell.type = CELL_SIGNAL;
-    }
-    else if (strncmp(cell_str, ">>", 2) == 0)
-    {
-      new_cell.type = CELL_INC;
-    }
-    else if (strncmp(cell_str, "<<", 2) == 0)
-    {
-      new_cell.type = CELL_DEC;
-    }
-    else if ((cell_str[0] == '%') && ((cell_str[1] == 'U') ||
-                                      (cell_str[1] == 'u')))
-    {
-      new_cell.type = CELL_UP;
-    }
-    else if ((cell_str[0] == '%') && ((cell_str[1] == 'D') ||
-                                      (cell_str[1] == 'd')))
-    {
-      new_cell.type = CELL_DOWN;
-    }
-    else if ((cell_str[0] == '%') && ((cell_str[1] == 'L') ||
-                                      (cell_str[1] == 'l')))
-    {
-      new_cell.type = CELL_LEFT;
-    }
-    else if ((cell_str[0] == '%') && ((cell_str[1] == 'R') ||
-                                      (cell_str[1] == 'r')))
-    {
-      new_cell.type = CELL_RIGHT;
-    }
-    else if (isNum(cell_str[0]) && isNum(cell_str[1]))
-    {
-      new_cell.type = CELL_PAUSE;
-
-      u32 digit0 = cell_str[0] - '0';
-      u32 digit1 = cell_str[1] - '0';
-      new_cell.pause = (10 * digit0) + digit1;
-    }
+    f_ptr = parse_cell(maze, cell_str, f_ptr, f_end, &new_cell);
 
     if (new_cell.type != CELL_NULL)
     {
@@ -392,7 +416,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
       cell->pause = new_cell.pause;
       cell->function_index = new_cell.function_index;
 
-      log_s(L_Parser, "%s ", cell_str);
+      log_s(L_Parser, "%.2s ", cell_str);
 
       f_ptr += 2;
       ++x;
