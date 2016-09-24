@@ -241,12 +241,6 @@ parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
           ptr += 2;
           conditional_func_type = FUNCTION_NOT_EQUAL;
         }
-        else if (str_eq(ptr, "**", 2))
-        {
-          ptr += 2;
-          conditional_func_type = FUNCTION_SIGNAL;
-          value_required = false;
-        }
         else
         {
           log(L_Parser, "Conditional");
@@ -320,9 +314,25 @@ parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
   {
     cell->type = CELL_ONCE;
   }
-  else if (str_eq(cell_str, "**", 2))
+  else if ((cell_str[0] == '*') && ((cell_str[1] == 'U') ||
+                                    (cell_str[1] == 'u')))
   {
-    cell->type = CELL_SIGNAL;
+    cell->type = CELL_UP_UNLESS_DETECT;
+  }
+  else if ((cell_str[0] == '*') && ((cell_str[1] == 'D') ||
+                                    (cell_str[1] == 'd')))
+  {
+    cell->type = CELL_DOWN_UNLESS_DETECT;
+  }
+  else if ((cell_str[0] == '*') && ((cell_str[1] == 'L') ||
+                                    (cell_str[1] == 'l')))
+  {
+    cell->type = CELL_LEFT_UNLESS_DETECT;
+  }
+  else if ((cell_str[0] == '*') && ((cell_str[1] == 'R') ||
+                                    (cell_str[1] == 'r')))
+  {
+    cell->type = CELL_RIGHT_UNLESS_DETECT;
   }
   else if (str_eq(cell_str, ">>", 2))
   {

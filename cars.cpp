@@ -84,6 +84,29 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
 }
 
 
+u32
+cars_in_direct_neighbourhood(Maze *maze, Cars *cars, Cell *cell)
+{
+  u32 result = 0;
+
+  Car *test_car;
+  CarsIterator iter;
+  while ((test_car = cars_iterator(cars, &iter)))
+  {
+    u32 test_x = test_car->target_cell_x;
+    u32 test_y = test_car->target_cell_y;
+
+    if (((test_x == cell->x - 1 || test_x == cell->x + 1) && test_y == cell->y) ||
+        ((test_y == cell->y - 1 || test_y == cell->y + 1) && test_x == cell->x))
+    {
+      ++result;
+    }
+  }
+
+  return result;
+}
+
+
 void
 car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *maze, Cars *cars, Car *car)
 {
@@ -143,9 +166,32 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       car->updated_cell_type = CELL_WALL;
     } break;
 
-    case (CELL_SIGNAL):
+    case (CELL_UP_UNLESS_DETECT):
+    case (CELL_DOWN_UNLESS_DETECT):
+    case (CELL_LEFT_UNLESS_DETECT):
+    case (CELL_RIGHT_UNLESS_DETECT):
     {
-      log(L_CarsSim, "Signal");
+      log(L_CarsSim, "Unless Detect");
+      if (cars_in_direct_neighbourhood(maze, cars, current_cell) == 0)
+      {
+        switch (current_cell->type)
+        {
+          case (CELL_UP_UNLESS_DETECT):
+            car->direction = UP;
+            break;
+          case (CELL_DOWN_UNLESS_DETECT):
+            car->direction = DOWN;
+            break;
+          case (CELL_LEFT_UNLESS_DETECT):
+            car->direction = LEFT;
+            break;
+          case (CELL_RIGHT_UNLESS_DETECT):
+            car->direction = RIGHT;
+            break;
+          default:
+            break;
+        }
+      }
     } break;
 
     case (CELL_INC):

@@ -80,7 +80,13 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
         break;
       case CELL_ONCE:     color = 740;
         break;
-      case CELL_SIGNAL:   color = 013;
+      case CELL_UP_UNLESS_DETECT:     color = 013;
+        break;
+      case CELL_DOWN_UNLESS_DETECT:   color = 013;
+        break;
+      case CELL_LEFT_UNLESS_DETECT:   color = 013;
+        break;
+      case CELL_RIGHT_UNLESS_DETECT:  color = 013;
         break;
       case CELL_INC:      color = 013;
         break;
