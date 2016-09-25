@@ -157,7 +157,15 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_FUNCTION):
     {
       Function *function = maze->functions + current_cell->function_index;
-      log(L_CarsSim, "Function: %s, %d", function->name, (u32)function->type);
+
+      if (function->type == FUNCTION_NULL)
+      {
+        log(L_CarsSim, "Function '%.2s' not defined, skipping.", current_cell->name);
+      }
+      else
+      {
+        log(L_CarsSim, "Function: %s, {type=%d, value=%d}", function->name, (u32)function->type, function->value);
+      }
     } break;
 
     case (CELL_ONCE):

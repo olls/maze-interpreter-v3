@@ -26,6 +26,8 @@ struct Cell
   u32 x;
   u32 y;
   enum CellType type;
+  char name[2];
+
   union {
     u32 pause;
     u32 function_index;
