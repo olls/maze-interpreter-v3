@@ -126,206 +126,213 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
     f_ptr += 2;
 
     Function *function = functions + function_index;
-    function->type = FUNCTION_NULL;
-    function->name[0] = cell_str[0];
-    function->name[1] = cell_str[1];
 
-    consume_whitespace(f_ptr, f_end);
-
-    if (*f_ptr == '=')
+    if (function->type != FUNCTION_NULL)
     {
-      log(L_Parser, "  Type: Assignment,");
-
-      ++f_ptr;
-      consume_whitespace(f_ptr, f_end);
-
-      u32 assignment_value;
-      char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
-
-      if (end_num_f_ptr == f_ptr)
-      {
-        log(L_Parser, "  Function invalid: Assignment value missing.");
-      }
-      else
-      {
-        log(L_Parser, "  Value: %d", assignment_value);
-        f_ptr = end_num_f_ptr;
-
-        function->value = assignment_value;
-        function->type = FUNCTION_ASSIGNMENT;
-      }
+      log(L_Parser, "Function already defined, ignore this definition.");
     }
-    else if ((f_ptr[0] == '+' ||
-              f_ptr[0] == '-' ||
-              f_ptr[0] == '*' ||
-              f_ptr[0] == '/') && f_ptr[1] == '=')
+    else
     {
-      log(L_Parser, "  Type: Operator,");
+      function->name[0] = cell_str[0];
+      function->name[1] = cell_str[1];
 
-      char sign = f_ptr[0];
-
-      f_ptr += 2;
       consume_whitespace(f_ptr, f_end);
 
-      u32 assignment_value;
-      char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
-      if (end_num_f_ptr == f_ptr)
+      if (*f_ptr == '=')
       {
-        log(L_Parser, "  Function invalid: Operator value missing.");
-      }
-      else
-      {
-        log(L_Parser, "  Value: %d", assignment_value);
-        f_ptr = end_num_f_ptr;
+        log(L_Parser, "  Type: Assignment,");
 
-        function->value = assignment_value;
-
-        switch (sign)
-        {
-          case '+':
-          {
-            function->type = FUNCTION_INCREMENT;
-          } break;
-          case '-':
-          {
-            function->type = FUNCTION_DECREMENT;
-          } break;
-          case '*':
-          {
-            function->type = FUNCTION_MULTIPLY;
-          } break;
-          case '/':
-          {
-            function->type = FUNCTION_DIVIDE;
-          } break;
-        }
-      }
-    }
-    else if (str_eq(f_ptr, "IF", 2) || str_eq(f_ptr, "if", 2))
-    {
-      log(L_Parser, "  Type: Conditional,");
-
-      f_ptr += 2;
-      consume_whitespace(f_ptr, f_end);
-
-      FunctionType conditional_func_type;
-      b32 valid_condition = true;
-
-      if (str_eq(f_ptr, "<=", 2))
-      {
-        f_ptr += 2;
-        conditional_func_type = FUNCTION_LESS_EQUAL;
-      }
-      if (*f_ptr == '<')
-      {
-        f_ptr += 1;
-        conditional_func_type = FUNCTION_LESS;
-      }
-      else if (str_eq(f_ptr, ">=", 2))
-      {
-        f_ptr += 2;
-        conditional_func_type = FUNCTION_GREATER_EQUAL;
-      }
-      else if (*f_ptr == '>')
-      {
-        f_ptr += 1;
-        conditional_func_type = FUNCTION_GREATER;
-      }
-      else if (str_eq(f_ptr, "==", 2))
-      {
-        f_ptr += 2;
-        conditional_func_type = FUNCTION_EQUAL;
-      }
-      else if (str_eq(f_ptr, "!=", 2))
-      {
-        f_ptr += 2;
-        conditional_func_type = FUNCTION_NOT_EQUAL;
-      }
-      else
-      {
-        log(L_Parser, "  Invalid function: Conditional operator missing.");
-        valid_condition = false;
-      }
-
-      if (valid_condition)
-      {
+        ++f_ptr;
         consume_whitespace(f_ptr, f_end);
 
-        u32 condition_value;
-        char *end_num_f_ptr = get_num(f_ptr, f_end, &condition_value);
+        u32 assignment_value;
+        char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
+
         if (end_num_f_ptr == f_ptr)
         {
-          log(L_Parser, "  Invalid function: Missing condition value.");
+          log(L_Parser, "  Function invalid: Assignment value missing.");
         }
         else
         {
-          log(L_Parser, "  Condition value: %d", condition_value);
+          log(L_Parser, "  Value: %d", assignment_value);
           f_ptr = end_num_f_ptr;
 
+          function->value = assignment_value;
+          function->type = FUNCTION_ASSIGNMENT;
+        }
+      }
+      else if ((f_ptr[0] == '+' ||
+                f_ptr[0] == '-' ||
+                f_ptr[0] == '*' ||
+                f_ptr[0] == '/') && f_ptr[1] == '=')
+      {
+        log(L_Parser, "  Type: Operator,");
+
+        char sign = f_ptr[0];
+
+        f_ptr += 2;
+        consume_whitespace(f_ptr, f_end);
+
+        u32 assignment_value;
+        char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
+        if (end_num_f_ptr == f_ptr)
+        {
+          log(L_Parser, "  Function invalid: Operator value missing.");
+        }
+        else
+        {
+          log(L_Parser, "  Value: %d", assignment_value);
+          f_ptr = end_num_f_ptr;
+
+          function->value = assignment_value;
+
+          switch (sign)
+          {
+            case '+':
+            {
+              function->type = FUNCTION_INCREMENT;
+            } break;
+            case '-':
+            {
+              function->type = FUNCTION_DECREMENT;
+            } break;
+            case '*':
+            {
+              function->type = FUNCTION_MULTIPLY;
+            } break;
+            case '/':
+            {
+              function->type = FUNCTION_DIVIDE;
+            } break;
+          }
+        }
+      }
+      else if (str_eq(f_ptr, "IF", 2) || str_eq(f_ptr, "if", 2))
+      {
+        log(L_Parser, "  Type: Conditional,");
+
+        f_ptr += 2;
+        consume_whitespace(f_ptr, f_end);
+
+        FunctionType conditional_func_type;
+        b32 valid_condition = true;
+
+        if (str_eq(f_ptr, "<=", 2))
+        {
+          f_ptr += 2;
+          conditional_func_type = FUNCTION_LESS_EQUAL;
+        }
+        if (*f_ptr == '<')
+        {
+          f_ptr += 1;
+          conditional_func_type = FUNCTION_LESS;
+        }
+        else if (str_eq(f_ptr, ">=", 2))
+        {
+          f_ptr += 2;
+          conditional_func_type = FUNCTION_GREATER_EQUAL;
+        }
+        else if (*f_ptr == '>')
+        {
+          f_ptr += 1;
+          conditional_func_type = FUNCTION_GREATER;
+        }
+        else if (str_eq(f_ptr, "==", 2))
+        {
+          f_ptr += 2;
+          conditional_func_type = FUNCTION_EQUAL;
+        }
+        else if (str_eq(f_ptr, "!=", 2))
+        {
+          f_ptr += 2;
+          conditional_func_type = FUNCTION_NOT_EQUAL;
+        }
+        else
+        {
+          log(L_Parser, "  Invalid function: Conditional operator missing.");
+          valid_condition = false;
+        }
+
+        if (valid_condition)
+        {
           consume_whitespace(f_ptr, f_end);
 
-          if (!(str_eq(f_ptr, "THEN", 4) || str_eq(f_ptr, "then", 4)))
+          u32 condition_value;
+          char *end_num_f_ptr = get_num(f_ptr, f_end, &condition_value);
+          if (end_num_f_ptr == f_ptr)
           {
-            log(L_Parser, "  Invalid function: Missing 'THEN' keyword.");
+            log(L_Parser, "  Invalid function: Missing condition value.");
           }
           else
           {
-            f_ptr += 4;
+            log(L_Parser, "  Condition value: %d", condition_value);
+            f_ptr = end_num_f_ptr;
+
             consume_whitespace(f_ptr, f_end);
 
-            V2 true_direction;
-            char *end_true_direction_f_ptr = get_direction(f_ptr, &true_direction);
-            if (end_true_direction_f_ptr == f_ptr)
+            if (!(str_eq(f_ptr, "THEN", 4) || str_eq(f_ptr, "then", 4)))
             {
-              log(L_Parser, "  Invalid function: Missing 'THEN' direction.");
+              log(L_Parser, "  Invalid function: Missing 'THEN' keyword.");
             }
             else
             {
-              log(L_Parser, "  THEN direction: (%f, %f)", true_direction.x, true_direction.y);
-              f_ptr = end_true_direction_f_ptr;
-
+              f_ptr += 4;
               consume_whitespace(f_ptr, f_end);
 
-              b32 valid_conditional_function = true;
-              b32 else_exists = false;
-              V2 false_direction;
-
-              // ELSE is optional
-              if (str_eq(f_ptr, "ELSE", 4) || str_eq(f_ptr, "else", 4))
+              V2 true_direction;
+              char *end_true_direction_f_ptr = get_direction(f_ptr, &true_direction);
+              if (end_true_direction_f_ptr == f_ptr)
               {
-                else_exists = true;
+                log(L_Parser, "  Invalid function: Missing 'THEN' direction.");
+              }
+              else
+              {
+                log(L_Parser, "  THEN direction: (%f, %f)", true_direction.x, true_direction.y);
+                f_ptr = end_true_direction_f_ptr;
 
-                f_ptr += 4;
                 consume_whitespace(f_ptr, f_end);
 
-                char *end_false_direction_f_ptr = get_direction(f_ptr, &false_direction);
-                if (end_false_direction_f_ptr == f_ptr)
-                {
-                  log(L_Parser, "Invalid function: Missing 'ELSE' direction.");
-                  valid_conditional_function = false;
-                }
-                else
-                {
-                  log(L_Parser, "  ELSE direction: (%f, %f)", false_direction.x, false_direction.y);
-                  f_ptr = end_false_direction_f_ptr;
+                b32 valid_conditional_function = true;
+                b32 else_exists = false;
+                V2 false_direction;
 
-                  valid_conditional_function = true;
+                // ELSE is optional
+                if (str_eq(f_ptr, "ELSE", 4) || str_eq(f_ptr, "else", 4))
+                {
+                  else_exists = true;
+
+                  f_ptr += 4;
+                  consume_whitespace(f_ptr, f_end);
+
+                  char *end_false_direction_f_ptr = get_direction(f_ptr, &false_direction);
+                  if (end_false_direction_f_ptr == f_ptr)
+                  {
+                    log(L_Parser, "Invalid function: Missing 'ELSE' direction.");
+                    valid_conditional_function = false;
+                  }
+                  else
+                  {
+                    log(L_Parser, "  ELSE direction: (%f, %f)", false_direction.x, false_direction.y);
+                    f_ptr = end_false_direction_f_ptr;
+
+                    valid_conditional_function = true;
+                  }
                 }
+
+                if (valid_conditional_function)
+                {
+                  function->type = conditional_func_type;
+                  function->conditional.value = condition_value;
+                  function->conditional.true_direction = true_direction;
+
+                  function->conditional.else_exists = else_exists;
+                  if (else_exists)
+                  {
+                    function->conditional.false_direction = false_direction;
+                  }
+                }
+
               }
-
-              if (valid_conditional_function)
-              {
-                function->type = conditional_func_type;
-                function->conditional.value = condition_value;
-                function->conditional.true_direction = true_direction;
-
-                function->conditional.else_exists = else_exists;
-                if (else_exists)
-                {
-                  function->conditional.false_direction = false_direction;
-                }
-              }
-
             }
           }
         }
