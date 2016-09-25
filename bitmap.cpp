@@ -19,7 +19,7 @@ get_first_bit_pos(u32 x)
 void
 load_bitmap(Bitmap *result, const char *filename)
 {
-  printf("Loading bitmap: \"%s\"\n", filename);
+  log(L_Bitmap, "Loading bitmap: \"%s\"", filename);
 
   u32 fd = open(filename, O_RDONLY);
   if (fd == -1)
