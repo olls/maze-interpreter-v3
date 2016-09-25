@@ -165,6 +165,78 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       else
       {
         log(L_CarsSim, "Function: %s, {type=%d, value=%d}", function->name, (u32)function->type, function->value);
+        log(L_CarsSim, "Old car value: %d", car->value);
+
+        switch (function->type)
+        {
+          case (FUNCTION_ASSIGNMENT):
+          {
+            car->value = function->value;
+          } break;
+          case (FUNCTION_INCREMENT):
+          {
+            car->value += function->value;
+          } break;
+          case (FUNCTION_DECREMENT):
+          {
+            car->value -= function->value;
+          } break;
+          case (FUNCTION_MULTIPLY):
+          {
+            car->value *= function->value;
+          } break;
+          case (FUNCTION_DIVIDE):
+          {
+            car->value /= function->value;
+          } break;
+
+          case (FUNCTION_LESS):
+          case (FUNCTION_LESS_EQUAL):
+          case (FUNCTION_EQUAL):
+          case (FUNCTION_NOT_EQUAL):
+          case (FUNCTION_GREATER_EQUAL):
+          case (FUNCTION_GREATER):
+          {
+            bool condition;
+            switch (function->type)
+            {
+              case (FUNCTION_LESS):
+                condition = car->value < function->conditional.value;
+                break;
+              case (FUNCTION_LESS_EQUAL):
+                condition = car->value <= function->conditional.value;
+                break;
+              case (FUNCTION_EQUAL):
+                condition = car->value == function->conditional.value;
+                break;
+              case (FUNCTION_NOT_EQUAL):
+                condition = car->value != function->conditional.value;
+                break;
+              case (FUNCTION_GREATER_EQUAL):
+                condition = car->value >= function->conditional.value;
+                break;
+              case (FUNCTION_GREATER):
+                condition = car->value > function->conditional.value;
+                break;
+              default: break;
+            }
+
+            if (condition)
+            {
+              car->direction = function->conditional.true_direction;
+            }
+            else
+            {
+              if (function->conditional.else_exists)
+              {
+                car->direction = function->conditional.false_direction;
+              }
+            }
+          } break;
+          default: break;
+        }
+
+        log(L_CarsSim, "New car value: %d", car->value);
       }
     } break;
 

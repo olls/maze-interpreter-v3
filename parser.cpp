@@ -316,9 +316,10 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
               if (valid_conditional_function)
               {
                 function->type = conditional_func_type;
-                function->conditional.condition_value = condition_value;
+                function->conditional.value = condition_value;
                 function->conditional.true_direction = true_direction;
 
+                function->conditional.else_exists = else_exists;
                 if (else_exists)
                 {
                   function->conditional.false_direction = false_direction;

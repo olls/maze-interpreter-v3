@@ -25,8 +25,9 @@ struct Function
     u32 value;
     struct
     {
-      u32 condition_value;
+      u32 value;
       V2 true_direction;
+      b32 else_exists;
       V2 false_direction;
     } conditional;
   };
