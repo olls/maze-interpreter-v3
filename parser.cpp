@@ -116,6 +116,8 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
 {
   u32 function_index = get_function_index(cell_str);
 
+  char *start_f_ptr = f_ptr;
+
   consume_whitespace(f_ptr, f_end);
 
   if (str_eq(f_ptr, "->", 2))
@@ -340,6 +342,10 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
     }
 
     consume_until_newline(f_ptr, f_end);
+  }
+  else
+  {
+    f_ptr = start_f_ptr;
   }
 
   return f_ptr;
