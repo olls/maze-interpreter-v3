@@ -6,3 +6,8 @@ A C++ version of my [Python Maze Interpreter](http://github.com/olls/maze-interp
 # Planned Specs
 
 I am aiming to be able deal with mazes 10000 x 10000 cell; at 128 bits per cell, equals 1.6GB in memory.
+
+
+# Current Demo
+
+![Demo](https://zippy.gfycat.com/WiltedMildFlea.gif)
