@@ -165,7 +165,6 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       else
       {
         log(L_CarsSim, "Function: %s, {type=%d, value=%d}", function->name, (u32)function->type, function->value);
-        log(L_CarsSim, "Old car value: %d", car->value);
 
         switch (function->type)
         {

@@ -86,7 +86,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
 
   render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
   render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
-  render_particles(&(game_state->particles), frame_buffer, &render_basis);
+  // render_particles(&(game_state->particles), frame_buffer, &render_basis);
 
 #if 0
   RenderBasis orthographic_basis;

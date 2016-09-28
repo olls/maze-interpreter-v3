@@ -61,46 +61,46 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
   if (cell->type != CELL_WALL)
   {
 
-    u32 color = 0;
+    V4 color;
     switch (cell->type)
     {
-      case CELL_NULL:     color = 000;
+      case CELL_NULL:     color = (V4){1, 0.0, 0.0, 0.0};
         break;
-      case CELL_START:    color = 733;
+      case CELL_START:    color = (V4){1, 0.7, 0.3, 0.3};
         break;
-      case CELL_PATH:     color = 313;
+      case CELL_PATH:     color = (V4){1, 0.8, 0.8, 0.9};
         break;
-      case CELL_WALL:     color = 020;
+      case CELL_WALL:     color = (V4){1, 0.0, 0.2, 0.0};
         break;
-      case CELL_HOLE:     color = 027;
+      case CELL_HOLE:     color = (V4){1, 0.0, 0.2, 0.7};
         break;
-      case CELL_SPLITTER: color = 760;
+      case CELL_SPLITTER: color = (V4){1, 0.7, 0.6, 0.0};
         break;
-      case CELL_FUNCTION: color = 753;
+      case CELL_FUNCTION: color = (V4){1, 0.7, 0.5, 0.3};
         break;
-      case CELL_ONCE:     color = 740;
+      case CELL_ONCE:     color = (V4){1, 0.7, 0.4, 0.0};
         break;
-      case CELL_UP_UNLESS_DETECT:     color = 013;
+      case CELL_UP_UNLESS_DETECT:     color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_DOWN_UNLESS_DETECT:   color = 013;
+      case CELL_DOWN_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_LEFT_UNLESS_DETECT:   color = 013;
+      case CELL_LEFT_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_RIGHT_UNLESS_DETECT:  color = 013;
+      case CELL_RIGHT_UNLESS_DETECT:  color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_INC:      color = 013;
+      case CELL_INC:      color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_DEC:      color = 013;
+      case CELL_DEC:      color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_UP:       color = 000;
+      case CELL_UP:       color = (V4){1, 0.0, 0.0, 0.0};
         break;
-      case CELL_DOWN:     color = 300;
+      case CELL_DOWN:     color = (V4){1, 0.3, 0.0, 0.0};
         break;
-      case CELL_LEFT:     color = 013;
+      case CELL_LEFT:     color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_RIGHT:    color = 313;
+      case CELL_RIGHT:    color = (V4){1, 0.3, 0.1, 0.3};
         break;
-      case CELL_PAUSE:    color = 307;
+      case CELL_PAUSE:    color = (V4){1, 0.3, 0.0, 0.7};
         break;
     }
 
@@ -121,7 +121,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
     V2 scale = (render_basis->scale * cell_radius * 2 / game_state->world_per_pixel) / (V2){game_state->tile.file->width - 1, game_state->tile.file->height - 1};
 
-    blit_bitmap(frame_buffer, &game_state->tile, transform_coord(render_basis, cell_bounds.start), scale, color_multiplier, color);
+    draw_box(frame_buffer, render_basis, cell_bounds, color);
   }
 
   return selected;
