@@ -273,16 +273,16 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       }
     } break;
 
-    case (CELL_INC):
+    case (CELL_OUT):
     {
-      log(L_CarsSim, "Increment");
-      ++car->value;
+      log(L_CarsSim, "Output");
+      printf("%d\n", car->value);
     } break;
 
-    case (CELL_DEC):
+    case (CELL_INP):
     {
-      log(L_CarsSim, "Decrement");
-      --car->value;
+      log(L_CarsSim, "Input");
+      log(L_CarsSim, "Not Implemented!");
     } break;
 
     case (CELL_UP):

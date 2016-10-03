@@ -419,11 +419,11 @@ parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
   }
   else if (str_eq(cell_str, ">>", 2))
   {
-    cell->type = CELL_INC;
+    cell->type = CELL_OUT;
   }
   else if (str_eq(cell_str, "<<", 2))
   {
-    cell->type = CELL_DEC;
+    cell->type = CELL_INP;
   }
   else if ((cell_str[0] == '%') && ((cell_str[1] == 'U') ||
                                     (cell_str[1] == 'u')))

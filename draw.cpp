@@ -88,9 +88,9 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
         break;
       case CELL_RIGHT_UNLESS_DETECT:  color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_INC:      color = (V4){1, 0.0, 0.1, 0.3};
+      case CELL_OUT:      color = (V4){1, 0.0, 0.1, 0.3};
         break;
-      case CELL_DEC:      color = (V4){1, 0.0, 0.1, 0.3};
+      case CELL_INP:      color = (V4){1, 0.0, 0.1, 0.3};
         break;
       case CELL_UP:       color = (V4){1, 0.0, 0.0, 0.0};
         break;
