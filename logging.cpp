@@ -1,3 +1,6 @@
+#include <stdarg.h>
+#include <stdio.h>
+
 #define ALL_LOGGING_CHANNELS(CHANNEL) \
           CHANNEL(L_Main) \
           CHANNEL(L_CarsStorage) \
