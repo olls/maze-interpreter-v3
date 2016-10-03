@@ -2,7 +2,7 @@ b32
 operator==(V2 a, V2 b)
 {
   b32 result = ((a.x == b.x) &&
-                 (a.y == b.y));
+                (a.y == b.y));
   return result;
 }
 b32
@@ -23,7 +23,7 @@ b32
 operator<(V2 a, V2 b)
 {
   b32 result = ((a.x < b.x) &&
-                 (a.y < b.y));
+                (a.y < b.y));
   return result;
 }
 
@@ -31,14 +31,14 @@ b32
 operator>=(V2 a, V2 b)
 {
   b32 result = ((a.x >= b.x) &&
-                 (a.y >= b.y));
+                (a.y >= b.y));
   return result;
 }
 b32
 operator<=(V2 a, V2 b)
 {
   b32 result = ((a.x <= b.x) &&
-                 (a.y <= b.y));
+                (a.y <= b.y));
   return result;
 }
 
@@ -196,8 +196,8 @@ V2
 min_V2(V2 a, V2 b)
 {
   V2 result;
-  result.x = fmin(a.x, b.x);
-  result.y = fmin(a.y, b.y);
+  result.x = min(a.x, b.x);
+  result.y = min(a.y, b.y);
   return result;
 }
 
@@ -205,8 +205,8 @@ V2
 max_V2(V2 a, V2 b)
 {
   V2 result;
-  result.x = fmax(a.x, b.x);
-  result.y = fmax(a.y, b.y);
+  result.x = max(a.x, b.x);
+  result.y = max(a.y, b.y);
   return result;
 }
 
@@ -242,8 +242,8 @@ V2
 vector_direction(V2 vec)
 {
   V2 result = vec;
-  result.x = div_or_0(result.x, fabs(result.x));
-  result.y = div_or_0(result.y, fabs(result.y));
+  result.x = div_or_0(result.x, abs(result.x));
+  result.y = div_or_0(result.y, abs(result.y));
   return result;
 }
 
@@ -252,7 +252,7 @@ b32
 operator==(Rectangle a, Rectangle b)
 {
   b32 result = ((a.start == b.start) &&
-                 (a.end == b.end));
+                (a.end == b.end));
   return result;
 }
 b32
@@ -463,9 +463,9 @@ b32
 in_rectangle(V2 test, Rectangle rect)
 {
   b32 result = ((test.x >= rect.start.x) &&
-                 (test.x < rect.end.x) &&
-                 (test.y >= rect.start.y) &&
-                 (test.y < rect.end.y));
+                (test.x < rect.end.x) &&
+                (test.y >= rect.start.y) &&
+                (test.y < rect.end.y));
   return result;
 }
 
@@ -473,9 +473,9 @@ b32
 overlaps(Rectangle a, Rectangle b)
 {
   b32 result = !((b.end.x < a.start.x) ||
-                  (b.start.x > a.end.x) ||
-                  (b.end.y < a.start.y) ||
-                  (b.start.y > a.end.y));
+                 (b.start.x > a.end.x) ||
+                 (b.end.y < a.start.y) ||
+                 (b.start.y > a.end.y));
   return result;
 }
 
@@ -722,9 +722,9 @@ V3
 min_V3(V3 a, V3 b)
 {
   V3 result;
-  result.x = fmin(a.x, b.x);
-  result.y = fmin(a.y, b.y);
-  result.z = fmin(a.z, b.z);
+  result.x = min(a.x, b.x);
+  result.y = min(a.y, b.y);
+  result.z = min(a.z, b.z);
   return result;
 }
 
@@ -732,9 +732,9 @@ V3
 max_V3(V3 a, V3 b)
 {
   V3 result;
-  result.x = fmax(a.x, b.x);
-  result.y = fmax(a.y, b.y);
-  result.z = fmax(a.z, b.z);
+  result.x = max(a.x, b.x);
+  result.y = max(a.y, b.y);
+  result.z = max(a.z, b.z);
   return result;
 }
 
@@ -929,10 +929,10 @@ V4
 min_V4(V4 a, V4 b)
 {
   V4 result;
-  result.w = fmin(a.w, b.w);
-  result.x = fmin(a.x, b.x);
-  result.y = fmin(a.y, b.y);
-  result.z = fmin(a.z, b.z);
+  result.w = min(a.w, b.w);
+  result.x = min(a.x, b.x);
+  result.y = min(a.y, b.y);
+  result.z = min(a.z, b.z);
   return result;
 }
 
@@ -940,10 +940,10 @@ V4
 max_V4(V4 a, V4 b)
 {
   V4 result;
-  result.w = fmax(a.w, b.w);
-  result.x = fmax(a.x, b.x);
-  result.y = fmax(a.y, b.y);
-  result.z = fmax(a.z, b.z);
+  result.w = max(a.w, b.w);
+  result.x = max(a.x, b.x);
+  result.y = max(a.y, b.y);
+  result.z = max(a.z, b.z);
   return result;
 }
 

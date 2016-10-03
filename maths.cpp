@@ -1,3 +1,38 @@
+s32
+min(s32 a, s32 b)
+{
+  s32 result = a;
+  if (b < a)
+  {
+    result = b;
+  }
+  return result;
+}
+
+s32
+max(s32 a, s32 b)
+{
+  s32 result = a;
+  if (b > a)
+  {
+    result = b;
+  }
+  return result;
+}
+
+
+s32
+abs(s32 x)
+{
+  s32 result = x;
+  if (x < 0)
+  {
+    result = -x;
+  }
+  return result;
+}
+
+
 r32
 squared(r32 base)
 {
