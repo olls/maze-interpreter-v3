@@ -1,5 +1,5 @@
 Cell *
-get_cell(QuadTree * tree, u32 x, u32 y)
+get_cell(QuadTree *tree, u32 x, u32 y)
 {
   Cell *cell = 0;
   for (u32 cell_index = 0;

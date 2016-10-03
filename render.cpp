@@ -268,7 +268,7 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
   V2 length_components = {(end.x - start.x),
                           (end.y - start.y)};
 
-  r32 num_pixels = max(fabs(length_components.x), fabs(length_components.y));
+  r32 num_pixels = max(abs(length_components.x), abs(length_components.y));
 
   if(num_pixels)
   {

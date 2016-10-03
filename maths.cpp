@@ -8,11 +8,51 @@ min(s32 a, s32 b)
   }
   return result;
 }
+u32
+min(u32 a, u32 b)
+{
+  u32 result = a;
+  if (b < a)
+  {
+    result = b;
+  }
+  return result;
+}
+r32
+min(r32 a, r32 b)
+{
+  r32 result = a;
+  if (b < a)
+  {
+    result = b;
+  }
+  return result;
+}
 
 s32
 max(s32 a, s32 b)
 {
   s32 result = a;
+  if (b > a)
+  {
+    result = b;
+  }
+  return result;
+}
+u32
+max(u32 a, u32 b)
+{
+  s32 result = a;
+  if (b > a)
+  {
+    result = b;
+  }
+  return result;
+}
+r32
+max(r32 a, r32 b)
+{
+  r32 result = a;
   if (b > a)
   {
     result = b;
@@ -25,6 +65,16 @@ s32
 abs(s32 x)
 {
   s32 result = x;
+  if (x < 0)
+  {
+    result = -x;
+  }
+  return result;
+}
+r32
+abs(r32 x)
+{
+  r32 result = x;
   if (x < 0)
   {
     result = -x;

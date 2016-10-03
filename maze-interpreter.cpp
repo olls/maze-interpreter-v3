@@ -77,7 +77,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
   render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
 
-  if (fabs(game_state->zoom - old_zoom) > 0.1)
+  if (abs(game_state->zoom - old_zoom) > 0.1)
   {
     render_basis.scale_focus = game_state->scale_focus;
     game_state->scale_focus = untransform_coord(&render_basis, screen_mouse_pixels);
