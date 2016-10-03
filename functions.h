@@ -22,10 +22,10 @@ struct Function
   FunctionType type;
   union
   {
-    u32 value;
+    s32 value;
     struct
     {
-      u32 value;
+      s32 value;
       V2 true_direction;
       b32 else_exists;
       V2 false_direction;
