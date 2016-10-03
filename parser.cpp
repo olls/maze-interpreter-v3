@@ -224,7 +224,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
           f_ptr += 2;
           conditional_func_type = FUNCTION_LESS_EQUAL;
         }
-        if (*f_ptr == '<')
+        else if (*f_ptr == '<')
         {
           f_ptr += 1;
           conditional_func_type = FUNCTION_LESS;
