@@ -196,11 +196,11 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
 
     mouse.scroll -= mouse.scroll / 6.0f;
     r32 epsilon = 1.5f;
-    if (fabs(mouse.scroll.y) < epsilon)
+    if (abs(mouse.scroll.y) < epsilon)
     {
       mouse.scroll.y = 0;
     }
-    if (fabs(mouse.scroll.x) < epsilon)
+    if (abs(mouse.scroll.x) < epsilon)
     {
       mouse.scroll.x = 0;
     }
