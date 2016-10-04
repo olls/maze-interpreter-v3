@@ -90,7 +90,7 @@ cars_in_direct_neighbourhood(Maze *maze, Cars *cars, Cell *cell)
   u32 result = 0;
 
   Car *test_car;
-  CarsIterator iter;
+  CarsIterator iter = {};
   while ((test_car = cars_iterator(cars, &iter)))
   {
     u32 test_x = test_car->target_cell_x;
@@ -251,6 +251,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_RIGHT_UNLESS_DETECT):
     {
       log(L_CarsSim, "Unless Detect");
+      // TODO: This might need optimising for large numbers of cars (We're looping through cars^2)
       if (cars_in_direct_neighbourhood(maze, cars, current_cell) == 0)
       {
         switch (current_cell->type)
