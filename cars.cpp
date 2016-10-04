@@ -149,7 +149,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
       Car *new_car = get_new_car(memory, cars);
       init_car(game_state, time_us, new_car, car->target_cell_x, car->target_cell_y, RIGHT);
-
+      new_car->value = car->value;
       new_car->direction = RIGHT;
       car->direction = LEFT;
     } break;
