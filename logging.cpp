@@ -77,6 +77,39 @@ log(LoggingChannel channel, const char *text, ...)
 
 
 void
+log_d(LoggingChannel channel, V2 direction)
+{
+  char s[16] = {};
+
+  if (direction.x == 0 && direction.y == -1)
+  {
+    strcpy(s, "UP");
+  }
+  else if (direction.x == 0 && direction.y == 1)
+  {
+    strcpy(s, "DOWN");
+  }
+  else if (direction.x == -1 && direction.y == 0)
+  {
+    strcpy(s, "LEFT");
+  }
+  else if (direction.x == 1 && direction.y == 0)
+  {
+    strcpy(s, "RIGHT");
+  }
+  else if (direction.x == 0 && direction.y == 0)
+  {
+    strcpy(s, "STATIONARY");
+  }
+
+  if (s[0])
+  {
+    log_s(channel, s);
+  }
+}
+
+
+void
 log(LoggingChannel channel, V4 vec)
 {
   log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
