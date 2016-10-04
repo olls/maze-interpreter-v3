@@ -4,21 +4,21 @@ rgb_to_hsv(V4 rgb)
   V4 hsv;
   hsv.a = rgb.a;
 
-  r32 min = fmin(rgb.r, fmin(rgb.g, rgb.b));
-  r32 max = fmax(rgb.r, fmax(rgb.g, rgb.b));
-  hsv.v = max;
+  r32 min_c = min(rgb.r, min(rgb.g, rgb.b));
+  r32 max_c = max(rgb.r, max(rgb.g, rgb.b));
+  hsv.v = max_c;
 
-  r32 delta = max - min;
+  r32 delta = max_c - min_c;
 
-  if (max != 0)
+  if (max_c != 0)
   {
-    hsv.s = delta / max;
+    hsv.s = delta / max_c;
 
     if (delta == 0)
       hsv.h = 0;
-    else if (rgb.r == max)
+    else if (rgb.r == max_c)
       hsv.h = (rgb.g - rgb.b) / delta;      // between yellow & magenta
-    else if (rgb.g == max)
+    else if (rgb.g == max_c)
       hsv.h = 2 + (rgb.b - rgb.r) / delta;  // between cyan & yellow
     else
       hsv.h = 4 + (rgb.r - rgb.g) / delta;  // between magenta & cyan
