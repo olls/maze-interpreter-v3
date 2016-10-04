@@ -1,3 +1,9 @@
+V2
+v2(r32 x)
+{
+  return (V2){x, x};
+}
+
 b32
 operator==(V2 a, V2 b)
 {
