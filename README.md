@@ -42,5 +42,5 @@ The 'detect unless' cells are written as `*U`, `*D`, `*L`, `*R`, for up, down, l
 These changes do not change the functionality of the Maze language, and are backwards compatible with the wiki version of Maze.  (i.e. you can use the syntax on the wiki too)
 
  - Commas are not needed to separate cells from one another, they will be ignored if used.
- - Walls can be written as `\`\`` and `  ` as well as `##`.
+ - Walls can be written as ``` `` ``` and `  ` as well as `##`.
  - Any unrecognised syntax will be skipped.
