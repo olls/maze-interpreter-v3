@@ -31,8 +31,15 @@ channel_enabled(LoggingChannel channel)
 {
   switch(channel)
   {
-    case L_CarsSim:
+    case L_Main:
     case L_CarsStorage:
+    case L_CarsSim:
+    case L_Maze:
+    case L_Parser:
+    case L_Particles:
+    case L_Bitmap:
+    case L_Render:
+    case L_GameLoop:
     {
       return false;
     } break;
