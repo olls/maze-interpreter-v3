@@ -103,9 +103,8 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
       else
       {
         // NOTE: If it gets here: it is in old-tree but not any of it's
-        //       subdivisions
-        // TODO: Shouldn't we be returning NULL instead of asserting?
-        invalid_code_path;
+        //       subdivisions, therefore: doesn't exist.
+        break;
       }
     }
 

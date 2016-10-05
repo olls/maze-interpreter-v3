@@ -64,9 +64,10 @@ calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
     {
       V2 test_direction = directions[direction_index];
 
-      // TODO: Errors if accesses non-existing cell
       Cell *test_cell = get_cell(maze, (car->target_cell_x + test_direction.x), (car->target_cell_y + test_direction.y));
-      if (test_cell && test_cell->type != CELL_WALL)
+      if (test_cell &&
+          test_cell->type != CELL_WALL &&
+          test_cell->type != CELL_NULL)
       {
         can_move = true;
         car->direction = test_direction;
