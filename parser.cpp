@@ -542,4 +542,14 @@ parse(Maze *maze, Memory *memory, const char *filename)
 
   log_s(L_Parser, "\n");
   log(L_Parser, "(%d, %d)", maze->width, maze->height);
+
+  if (munmap((void *)file, sb.st_size) != 0)
+  {
+    printf("Error unmapping file.");
+  }
+
+  if (close(fd) != 0)
+  {
+    printf("Error while closing file descriptor.");
+  }
 }
