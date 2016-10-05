@@ -100,7 +100,6 @@ load_bitmap(Bitmap *result, const char *filename)
 V4
 get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 {
-  // TODO: Store the bitmap in memory, to avoid doing this bit swizzling every frame!
   u32 bytes_per_pixel = bitmap->file->bits_per_pixel / 8;
   u32 bytes_per_width = bitmap->file->width * bytes_per_pixel;
 
