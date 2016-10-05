@@ -32,8 +32,8 @@
 
 
 const b32 FULLSCREEN = false;
-const u32 WINDOW_WIDTH = 1920;
-const u32 WINDOW_HEIGHT = 1080;
+const u32 WINDOW_WIDTH = 1280.0/1.2;
+const u32 WINDOW_HEIGHT = 720.0/1.2;
 
 const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(50);
