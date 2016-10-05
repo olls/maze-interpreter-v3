@@ -119,3 +119,26 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
 
   return cell;
 }
+
+
+void
+clear_cells_from_quadtree(QuadTree *tree)
+{
+  if (tree)
+  {
+    tree->used = 0;
+
+    clear_cells_from_quadtree(tree->top_right);
+    clear_cells_from_quadtree(tree->top_left);
+    clear_cells_from_quadtree(tree->bottom_right);
+    clear_cells_from_quadtree(tree->bottom_left);
+  }
+}
+
+
+void
+clear_maze(Maze *maze)
+{
+  clear_cells_from_quadtree(&maze->tree);
+  memset(&maze->cache_hash, 0, CELL_CACHE_SIZE * sizeof(Cell*));
+}

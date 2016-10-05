@@ -15,6 +15,7 @@ enum Inputs
 {
   RESTART,
   RESET,
+  RELOAD,
   STEP,
   STEP_MODE_TOGGLE,
   ZOOM_IN,

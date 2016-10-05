@@ -144,13 +144,8 @@ reset_zoom(GameState *game_state, FrameBuffer *frame_buffer)
 
 
 void
-init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
+load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
-  game_state->init = true;
-
-  game_state->single_step = false;
-  game_state->sim_ticks_per_s = 5;
-
   if (argc > 1)
   {
     parse(&(game_state->maze), memory, argv[1]);
@@ -160,8 +155,22 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
     parse(&(game_state->maze), memory, MAZE_FILENAME);
   }
 
+  delete_all_cars(&(game_state->cars));
+
+  game_state->last_sim_tick = 0;
+  game_state->sim_steps = 0;
   game_state->cars.first_block = 0;
   game_state->cars.free_chain = 0;
+}
+
+
+void
+init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
+{
+  game_state->init = true;
+
+  game_state->single_step = false;
+  game_state->sim_ticks_per_s = 5;
 
   setup_inputs(keys, game_state->inputs);
 
@@ -178,10 +187,16 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (!game_state->init)
   {
     init_game(memory, game_state, keys, time_us, argc, argv);
+    load_maze(memory, game_state, argc, argv);
     reset_zoom(game_state, frame_buffer);
   }
 
   update_inputs(keys, game_state->inputs, time_us);
+
+  if (game_state->inputs[RELOAD].active)
+  {
+    load_maze(memory, game_state, argc, argv);
+  }
 
   if (game_state->inputs[RESET].active)
   {
