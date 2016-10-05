@@ -5,6 +5,7 @@
           CHANNEL(L_Main) \
           CHANNEL(L_CarsStorage) \
           CHANNEL(L_CarsSim) \
+          CHANNEL(L_Maze) \
           CHANNEL(L_Parser) \
           CHANNEL(L_Particles) \
           CHANNEL(L_Bitmap) \

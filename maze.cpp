@@ -16,6 +16,7 @@ get_cell(QuadTree *tree, u32 x, u32 y)
   }
   if (!cell && tree->used != QUAD_STORE_N)
   {
+    // TODO: This will return a newly created Null type cell if there is space in the tree, this can be unexpected, if you call get_cell below without passing memory...
     cell = tree->cells + tree->used++;
     cell->x = x;
     cell->y = y;
@@ -57,6 +58,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
 
   if (hash_cell && hash_cell->x == x && hash_cell->y == y)
   {
+    log(L_Maze, "Got cell from hash");
     cell = hash_cell;
   }
   else
@@ -104,13 +106,16 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
       {
         // NOTE: If it gets here: it is in old-tree but not any of it's
         //       subdivisions, therefore: doesn't exist.
+        log(L_Maze, "Halp!");
         break;
       }
     }
+    log(L_Maze, "Got cell from quadtree");
 
     // Add to hash cache
     if (cell)
     {
+      log(L_Maze, "Putting cell in hash");
       Cell **hash_slot = get_cell_from_hash(maze, x, y);
       *hash_slot = cell;
     }
