@@ -21,6 +21,8 @@ struct GameState
   r32 zoom;
   V2 scale_focus;
 
+  RenderBasis last_frame_render_basis;
+
   // NOTE: Things are scaled relatively to cell_spacing.
   u32 cell_spacing;
   r32 cell_margin;

@@ -110,13 +110,14 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
     Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
-    V4 color_multiplier = {1, 1, 1, 1};
-    if (in_rectangle((V2){mouse->x, mouse->y}, transform_coord_rect(render_basis, cell_bounds)))
+    if (cell->hovered)
     {
+      cell->hovered = false;
       selected = true;
-      color_multiplier.r += 0.5;
-      color_multiplier.g += 0.5;
-      color_multiplier.b += 0.5;
+
+      color.r = min(color.r + 0.15, 1.0f);
+      color.g = min(color.g + 0.15, 1.0f);
+      color.b = min(color.b + 0.15, 1.0f);
     }
 
     V2 scale = (render_basis->scale * cell_radius * 2 / game_state->world_per_pixel) / (V2){game_state->tile.file->width - 1, game_state->tile.file->height - 1};

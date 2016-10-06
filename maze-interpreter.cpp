@@ -1,28 +1,42 @@
 void
-update_cells(Memory *memory, GameState *game_state, QuadTree *tree, u64 time_us)
+update_cells_state_from_user_interactions(GameState *game_state, Mouse *mouse)
 {
-  if (tree)
-  {
-    for (u32 cell_index = 0;
-         cell_index < tree->used;
-         ++cell_index)
-    {
-      Cell *cell = tree->cells + cell_index;
+  V2 mouse_maze_pos = untransform_coord(&game_state->last_frame_render_basis, (V2){mouse->x, mouse->y});
+  V2 mouse_cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
 
-      if (game_state->sim_steps == 0)
+  Cell *cell_hovered_over = get_cell(&game_state->maze, mouse_cell_pos.x, mouse_cell_pos.y);
+  if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
+  {
+    cell_hovered_over->hovered = true;
+  }
+}
+
+
+void
+update_all_cells(Memory *memory, GameState *game_state, QuadTree *tree, u64 time_us)
+{
+  if (game_state->sim_steps == 0)
+  {
+    if (tree)
+    {
+      for (u32 cell_index = 0;
+           cell_index < tree->used;
+           ++cell_index)
       {
+        Cell *cell = tree->cells + cell_index;
+
         if (cell->type == CELL_START)
         {
           Car *new_car = get_new_car(memory, &game_state->cars);
           init_car(game_state, time_us, new_car, cell->x, cell->y);
         }
       }
-    }
 
-    update_cells(memory, game_state, tree->top_right, time_us);
-    update_cells(memory, game_state, tree->top_left, time_us);
-    update_cells(memory, game_state, tree->bottom_right, time_us);
-    update_cells(memory, game_state, tree->bottom_left, time_us);
+      update_all_cells(memory, game_state, tree->top_right, time_us);
+      update_all_cells(memory, game_state, tree->top_left, time_us);
+      update_all_cells(memory, game_state, tree->bottom_right, time_us);
+      update_all_cells(memory, game_state, tree->bottom_left, time_us);
+    }
   }
 }
 
@@ -71,29 +85,29 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
     game_state->maze_pos += d_screen_mouse_pixels;
   }
 
-  RenderBasis render_basis = {};
-  render_basis.world_per_pixel = game_state->world_per_pixel;
-  render_basis.scale = scale;
-  render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
-  render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
+  RenderBasis *render_basis = &game_state->last_frame_render_basis;
+  render_basis->world_per_pixel = game_state->world_per_pixel;
+  render_basis->scale = scale;
+  render_basis->origin = game_state->maze_pos * game_state->world_per_pixel;
+  render_basis->clip_region = render_region_pixels * game_state->world_per_pixel;
 
   if (abs(game_state->zoom - old_zoom) > 0.1)
   {
-    render_basis.scale_focus = game_state->scale_focus;
-    game_state->scale_focus = untransform_coord(&render_basis, screen_mouse_pixels);
+    render_basis->scale_focus = game_state->scale_focus;
+    game_state->scale_focus = untransform_coord(render_basis, screen_mouse_pixels);
   }
-  render_basis.scale_focus = game_state->scale_focus;
+  render_basis->scale_focus = game_state->scale_focus;
 
-  render_cells(memory, game_state, mouse, frame_buffer, &render_basis, &(game_state->maze.tree));
-  render_cars(game_state, frame_buffer, &render_basis, &(game_state->cars), time_us);
-  // render_particles(&(game_state->particles), frame_buffer, &render_basis);
+  render_cells(memory, game_state, mouse, frame_buffer, render_basis, &(game_state->maze.tree));
+  render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
+  // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
 #if 0
   RenderBasis orthographic_basis;
   get_orthographic_basis(&orthographic_basis, frame_buffer);
   draw_circle(frame_buffer, &orthographic_basis, game_state->maze_pos, 10, (V4){1, 0, .5, 1});
 
-  draw_circle(frame_buffer, &render_basis, render_basis.scale_focus, 100000, (V4){1, 0, .5, 1});
+  draw_circle(frame_buffer, render_basis, render_basis->scale_focus, 100000, (V4){1, 0, .5, 1});
 #endif
 }
 
@@ -226,10 +240,12 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   }
   game_state->sim_ticks_per_s = clamp(.5, game_state->sim_ticks_per_s, 20);
 
+  update_cells_state_from_user_interactions(game_state, mouse);
+
   if (sim_tick(game_state, time_us))
   {
-    update_cells(memory, game_state, &(game_state->maze.tree), time_us);
-    update_cars(memory, game_state, time_us);
+    update_all_cells(memory, game_state, &(game_state->maze.tree), time_us);
+    perform_cars_sim_tick(memory, game_state, time_us);
 
     ++game_state->sim_steps;
   }

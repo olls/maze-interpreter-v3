@@ -220,8 +220,8 @@ V2
 round_down(V2 vec)
 {
   V2 result;
-  result.x = (s32)vec.x;
-  result.y = (s32)vec.y;
+  result.x = round_down(vec.x);
+  result.y = round_down(vec.y);
   return result;
 }
 

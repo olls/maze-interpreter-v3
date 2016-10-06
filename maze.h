@@ -27,6 +27,7 @@ struct Cell
   u32 y;
   enum CellType type;
   char name[2];
+  b32 hovered;
 
   union {
     u32 pause;

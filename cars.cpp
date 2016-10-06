@@ -341,7 +341,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
 
 void
-update_cars(Memory *memory, GameState *game_state, u64 time_us)
+perform_cars_sim_tick(Memory *memory, GameState *game_state, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);

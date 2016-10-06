@@ -31,6 +31,8 @@ get_orthographic_basis(RenderBasis *result, FrameBuffer *frame_buffer)
 V2
 transform_coord(RenderBasis *render_basis, V2 map_coord_world)
 {
+  // This is having problems with zooming...
+
   V2 d_map_coord_scale_focus_world = map_coord_world - render_basis->scale_focus;
   V2 scaled_d_coord_scale_focus_world = render_basis->scale * d_map_coord_scale_focus_world;
 
@@ -45,6 +47,8 @@ transform_coord(RenderBasis *render_basis, V2 map_coord_world)
 V2
 untransform_coord(RenderBasis *render_basis, V2 scaled_screen_coord_pixels)
 {
+  // This is not really working...
+
   V2 scaled_screen_coord_world = (scaled_screen_coord_pixels * render_basis->world_per_pixel) - render_basis->origin;
 
   V2 scaled_d_coord_scale_focus_world = render_basis->scale_focus - scaled_screen_coord_world;

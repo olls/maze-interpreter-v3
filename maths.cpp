@@ -83,6 +83,20 @@ abs(r32 x)
 }
 
 
+s32
+round_down(r32 x)
+{
+  s32 result;
+  if (x < 0)
+  {
+    x -= 1.0;
+  }
+  result = (s32)x;
+
+  return result;
+}
+
+
 r32
 squared(r32 base)
 {
