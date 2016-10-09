@@ -1,5 +1,5 @@
 Cell *
-get_cell(QuadTree *tree, u32 x, u32 y)
+get_cell_from_quad(QuadTree *tree, u32 x, u32 y, b32 create_new = false)
 {
   Cell *cell = 0;
   for (u32 cell_index = 0;
@@ -14,10 +14,10 @@ get_cell(QuadTree *tree, u32 x, u32 y)
       break;
     }
   }
-  if (!cell && tree->used != QUAD_STORE_N)
+  if (create_new && !cell && tree->used != QUAD_STORE_N)
   {
-    // TODO: This will return a newly created Null type cell if there is space in the tree, this can be unexpected, if you call get_cell below without passing memory...
     cell = tree->cells + tree->used++;
+    cell->type = CELL_NULL;
     cell->x = x;
     cell->y = y;
   }
@@ -63,7 +63,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
   }
   else
   {
-    while (tree && !(cell = get_cell(tree, x, y)))
+    while (tree && !(cell = get_cell_from_quad(tree, x, y, memory != 0)))
     {
       Rectangle top_right_bounds    = get_top_right(tree->bounds);
       Rectangle top_left_bounds     = get_top_left(tree->bounds);
