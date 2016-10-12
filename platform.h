@@ -20,4 +20,3 @@ struct Memory
   size_t used;
   size_t total;
 };
-

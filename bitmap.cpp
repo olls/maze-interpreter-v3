@@ -152,73 +152,91 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 
 
 void
-blit_bitmap(FrameBuffer *frame_buffer, Bitmap *bitmap, V2 pos, V2 scale, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0, b32 interpolation = false)
+blit_bitmap(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *bitmap, V2 pos, Rectangle crop = (Rectangle){-1}, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0, b32 interpolation = false)
 {
-  // TODO: Use a RenderBasis!!! (Then check bounds before looping!)
+  if (crop.start.x == -1)
+  {
+    crop.start = (V2){0, 0};
+    crop.end = (V2){bitmap->file->width, bitmap->file->height};
+  }
+
+  V2 crop_size = crop.end - crop.start;
+  V2 fract_pixel_space_size = crop_size*render_basis->scale;
+
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
+  render_region = get_overlap(render_region, window_region);
+
+  Rectangle fract_pixel_space;
+  fract_pixel_space.start = transform_coord(render_basis, pos);
+  fract_pixel_space.end = fract_pixel_space.start + fract_pixel_space_size;
+
+  Rectangle pixel_space = round_down(fract_pixel_space);
+  pixel_space = (Rectangle){pixel_space.start, pixel_space.end};
+
+  pixel_space = crop_to(pixel_space, render_region);
 
   pos = round_down(pos);
 
-  r32 width = bitmap->file->width * scale.x;
-  r32 height = bitmap->file->height * scale.y;
+  r32 width = bitmap->file->width * render_basis->scale;
+  r32 height = bitmap->file->height * render_basis->scale;
 
-  for (u32 dx = 0;
-       dx < width;
-       ++dx)
+  for (u32 pixel_y = pixel_space.start.y;
+       pixel_y < pixel_space.end.y;
+       pixel_y++)
   {
-    for (u32 dy = 0;
-         dy < height;
-         ++dy)
+    for (u32 pixel_x = pixel_space.start.x;
+         pixel_x < pixel_space.end.x;
+         pixel_x++)
     {
-      u32 pixel_x = pos.x + dx;
-      u32 pixel_y = pos.y + dy;
+      u32 dx = pixel_x - pixel_space.start.x;
+      u32 dy = pixel_y - pixel_space.start.y;
 
-      if ((pixel_x < frame_buffer->width) &&
-          (pixel_y < frame_buffer->height))
+      r32 u = crop.start.x + (dx / render_basis->scale);
+      r32 v = crop.start.y + ((fract_pixel_space_size.y - dy) / render_basis->scale - 1);
+
+      V4 color;
+
+      if (interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
       {
-        r32 u = dx / scale.x;
-        r32 v = (height - dy) / scale.y;
+        V4 top_left_color     = get_bitmap_color(bitmap, u,     v);
+        V4 top_right_color    = get_bitmap_color(bitmap, u + 1, v);
+        V4 bottom_left_color  = get_bitmap_color(bitmap, u,     v + 1);
+        V4 bottom_right_color = get_bitmap_color(bitmap, u + 1, v + 1);
 
-        V4 color;
-
-        if (interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
-        {
-          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-          V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
-          V4 bottom_left_color = get_bitmap_color(bitmap,  u,     v + 1);
-          V4 bottom_right_color = get_bitmap_color(bitmap, u + 1, v + 1);
-
-          color = lerp(lerp(top_left_color,    (u - (u32)u), top_right_color), (v - (u32)v),
-                       lerp(bottom_left_color, (u - (u32)u), bottom_right_color));
-        }
-        else if (interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
-        {
-          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-          V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
-
-          color = lerp(top_left_color, (u - (u32)u), top_right_color);
-        }
-        else if (interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
-        {
-          V4 top_left_color = get_bitmap_color(bitmap,  u,     v);
-          V4 bottom_left_color = get_bitmap_color(bitmap, u, v + 1);
-
-          color = lerp(top_left_color, (v - (u32)v), bottom_left_color);
-        }
-        else
-        {
-          V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-
-          color = top_left_color;
-        }
-
-        color *= color_multiplier;
-        if (hue_shift)
-        {
-          color = shift_hue(color, hue_shift);
-        }
-
-        set_pixel(frame_buffer, pixel_x, pixel_y, color);
+        color = lerp(lerp(top_left_color,    (u - (u32)u), top_right_color), (v - (u32)v),
+                     lerp(bottom_left_color, (u - (u32)u), bottom_right_color));
       }
+      else if (interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
+      {
+        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
+        V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
+
+        color = lerp(top_left_color, (u - (u32)u), top_right_color);
+      }
+      else if (interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
+      {
+        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
+        V4 bottom_left_color = get_bitmap_color(bitmap,  u, v + 1);
+
+        color = lerp(top_left_color, (v - (u32)v), bottom_left_color);
+      }
+      else
+      {
+        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
+
+        // top_left_color = (V4){1,1,1,1};
+
+        color = top_left_color;
+      }
+
+      color *= color_multiplier;
+      if (hue_shift)
+      {
+        color = shift_hue(color, hue_shift);
+      }
+
+      set_pixel(frame_buffer, pixel_x, pixel_y, color);
     }
   }
 }
