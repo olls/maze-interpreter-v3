@@ -80,6 +80,16 @@ set_keys(Keys *keys)
 }
 
 
+void
+set_mouse(Mouse *mouse)
+{
+  mouse->l_on_down = false;
+  mouse->r_on_down = false;
+  mouse->l_on_up = false;
+  mouse->r_on_up = false;
+}
+
+
 b32
 process_keys(Keys *keys, SDL_Event event)
 {
@@ -160,10 +170,14 @@ process_mouse(Mouse *mouse, SDL_Event event)
       if (event.button.button == SDL_BUTTON_LEFT)
       {
         mouse->l_down = down;
+        mouse->l_on_down = down;
+        mouse->l_on_up = !down;
       }
       else if (event.button.button == SDL_BUTTON_RIGHT)
       {
         mouse->r_down = down;
+        mouse->l_on_down = down;
+        mouse->l_on_up = !down;
       }
     } break;
 
@@ -206,6 +220,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
     }
 
     set_keys(&keys);
+    set_mouse(&mouse);
 
     SDL_Event event;
     while(SDL_PollEvent(&event))
