@@ -59,6 +59,8 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
+  draw_string(frame_buffer, render_basis, &game_state->font, (V2){(game_state->maze.width) * game_state->cell_spacing}, game_state->persistent_str);
+
 #if 0
   RenderBasis orthographic_basis;
   get_orthographic_basis(&orthographic_basis, frame_buffer);
@@ -150,6 +152,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->particles.blob_bitmap, "particles/blob.bmp");
   load_bitmap(&game_state->tile, "tile.bmp");
   load_bitmap(&game_state->font, "font.bmp");
+
+  strcpy(game_state->persistent_str, "Init!");
 }
 
 
@@ -167,16 +171,19 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   if (game_state->inputs[RELOAD].active)
   {
+    strcpy(game_state->persistent_str, "Reload!");
     load_maze(memory, game_state, argc, argv);
   }
 
   if (game_state->inputs[RESET].active)
   {
+    strcpy(game_state->persistent_str, "Reset!");
     reset_zoom(game_state, frame_buffer);
   }
 
   if (game_state->inputs[RESTART].active)
   {
+    strcpy(game_state->persistent_str, "Restart!");
     delete_all_cars(&(game_state->cars));
     game_state->last_sim_tick = 0;
     game_state->sim_steps = 0;

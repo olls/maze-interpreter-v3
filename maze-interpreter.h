@@ -43,4 +43,6 @@ struct GameState
 
   Bitmap tile;
   Bitmap font;
+
+  char persistent_str[256];
 };

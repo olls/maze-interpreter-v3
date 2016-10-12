@@ -279,6 +279,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     {
       log(L_CarsSim, "Output");
       printf("%d\n", car->value);
+      snprintf(game_state->persistent_str, 256, "%d", car->value);
     } break;
 
     case (CELL_INP):
