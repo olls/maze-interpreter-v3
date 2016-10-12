@@ -58,7 +58,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
 
   if (hash_cell && hash_cell->x == x && hash_cell->y == y)
   {
-    log(L_Maze, "Got cell from hash");
+    log(L_CellsStorage, "Got cell from hash");
     cell = hash_cell;
   }
   else
@@ -109,12 +109,12 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
         break;
       }
     }
-    log(L_Maze, "Got cell from quadtree");
+    log(L_CellsStorage, "Got cell from quadtree");
 
     // Add to hash cache
     if (cell)
     {
-      log(L_Maze, "Putting cell in hash");
+      log(L_CellsStorage, "Putting cell in hash");
       Cell **hash_slot = get_cell_from_hash(maze, x, y);
       *hash_slot = cell;
     }

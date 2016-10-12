@@ -27,7 +27,11 @@ struct Cell
   u32 y;
   enum CellType type;
   char name[2];
+
   b32 hovered;
+
+  b32 edit_mode;
+  u64 edit_mode_last_change;
 
   union {
     u32 pause;

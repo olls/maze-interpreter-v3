@@ -22,22 +22,24 @@
 
 // Game Related
 #include "functions.h"
-#include "maze.h"
-#include "parser.h"
 #include "particles.h"
+#include "cells-storage.h"
 #include "cars-storage.h"
 #include "cars.h"
+#include "cells.h"
+#include "parser.h"
 #include "draw.h"
 #include "input.h"
 
 #include "maze-interpreter.h"
 
 #include "functions.cpp"
-#include "maze.cpp"
-#include "parser.cpp"
 #include "particles.cpp"
+#include "cells-storage.cpp"
 #include "cars-storage.cpp"
 #include "cars.cpp"
+#include "cells.cpp"
+#include "parser.cpp"
 #include "draw.cpp"
 #include "input.cpp"
 

@@ -1,47 +1,4 @@
 void
-update_cells_state_from_user_interactions(GameState *game_state, Mouse *mouse)
-{
-  V2 mouse_maze_pos = untransform_coord(&game_state->last_frame_render_basis, (V2){mouse->x, mouse->y});
-  V2 mouse_cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
-
-  Cell *cell_hovered_over = get_cell(&game_state->maze, mouse_cell_pos.x, mouse_cell_pos.y);
-  if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
-  {
-    cell_hovered_over->hovered = true;
-  }
-}
-
-
-void
-update_all_cells(Memory *memory, GameState *game_state, QuadTree *tree, u64 time_us)
-{
-  if (game_state->sim_steps == 0)
-  {
-    if (tree)
-    {
-      for (u32 cell_index = 0;
-           cell_index < tree->used;
-           ++cell_index)
-      {
-        Cell *cell = tree->cells + cell_index;
-
-        if (cell->type == CELL_START)
-        {
-          Car *new_car = get_new_car(memory, &game_state->cars);
-          init_car(game_state, time_us, new_car, cell->x, cell->y);
-        }
-      }
-
-      update_all_cells(memory, game_state, tree->top_right, time_us);
-      update_all_cells(memory, game_state, tree->top_left, time_us);
-      update_all_cells(memory, game_state, tree->bottom_right, time_us);
-      update_all_cells(memory, game_state, tree->bottom_left, time_us);
-    }
-  }
-}
-
-
-void
 render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse, u64 time_us)
 {
   // TODO: Give zoom velocity, to make it smooth
@@ -240,11 +197,11 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   }
   game_state->sim_ticks_per_s = clamp(.5, game_state->sim_ticks_per_s, 20);
 
-  update_cells_state_from_user_interactions(game_state, mouse);
+  update_cells_ui_state(game_state, mouse, time_us);
 
   if (sim_tick(game_state, time_us))
   {
-    update_all_cells(memory, game_state, &(game_state->maze.tree), time_us);
+    perform_cells_sim_tick(memory, game_state, &(game_state->maze.tree), time_us);
     perform_cars_sim_tick(memory, game_state, time_us);
 
     ++game_state->sim_steps;

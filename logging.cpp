@@ -5,8 +5,8 @@
           CHANNEL(L_Main) \
           CHANNEL(L_CarsStorage) \
           CHANNEL(L_CarsSim) \
+          CHANNEL(L_CellsStorage) \
           CHANNEL(L_Cells) \
-          CHANNEL(L_Maze) \
           CHANNEL(L_Parser) \
           CHANNEL(L_Particles) \
           CHANNEL(L_Bitmap) \
@@ -35,7 +35,8 @@ channel_enabled(LoggingChannel channel)
     case L_Main:
     case L_CarsStorage:
     case L_CarsSim:
-    case L_Maze:
+    case L_CellsStorage:
+    case L_Cells:
     case L_Parser:
     case L_Particles:
     case L_Bitmap:
