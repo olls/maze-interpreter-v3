@@ -469,7 +469,7 @@ void
 parse(Maze *maze, Memory *memory, const char *filename)
 {
   clear_maze(maze);
-  memset(maze->functions, 0, MAX_FUNCTIONS * sizeof(Function));
+  zero_n(maze->functions, Function, MAX_FUNCTIONS);
 
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
   maze->width = 0;

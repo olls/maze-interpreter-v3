@@ -15,3 +15,12 @@ push_mem(Memory *memory, size_t bytes)
 
   return result;
 }
+
+
+#define zero(mem, type) _zero((void *)(mem), sizeof(type))
+#define zero_n(mem, type, n) _zero((void *)(mem), sizeof(type) * (n))
+void
+_zero(void *mem, u32 size)
+{
+  memset(mem, 0, size);
+}

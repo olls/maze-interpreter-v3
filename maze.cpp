@@ -17,7 +17,7 @@ get_cell_from_quad(QuadTree *tree, u32 x, u32 y, b32 create_new = false)
   if (create_new && !cell && tree->used != QUAD_STORE_N)
   {
     cell = tree->cells + tree->used++;
-    cell->type = CELL_NULL;
+    zero(cell, Cell);
     cell->x = x;
     cell->y = y;
   }
@@ -106,7 +106,6 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
       {
         // NOTE: If it gets here: it is in old-tree but not any of it's
         //       subdivisions, therefore: doesn't exist.
-        log(L_Maze, "Halp!");
         break;
       }
     }
@@ -144,5 +143,5 @@ void
 clear_maze(Maze *maze)
 {
   clear_cells_from_quadtree(&maze->tree);
-  memset(&maze->cache_hash, 0, CELL_CACHE_SIZE * sizeof(Cell*));
+  zero_n(&maze->cache_hash, Cell*, CELL_CACHE_SIZE);
 }
