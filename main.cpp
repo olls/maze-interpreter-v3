@@ -9,6 +9,7 @@
 #include "vectors.h"
 #include "render.h"
 #include "bitmap.h"
+#include "font.h"
 
 #include "main.h"
 
@@ -19,6 +20,7 @@
 #include "render.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
+#include "font.cpp"
 
 // Game Related
 #include "functions.h"

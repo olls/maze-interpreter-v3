@@ -149,6 +149,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
   load_bitmap(&game_state->particles.blob_bitmap, "particles/blob.bmp");
   load_bitmap(&game_state->tile, "tile.bmp");
+  load_bitmap(&game_state->font, "font.bmp");
 }
 
 

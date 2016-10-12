@@ -42,4 +42,5 @@ struct GameState
   Particles particles;
 
   Bitmap tile;
+  Bitmap font;
 };
