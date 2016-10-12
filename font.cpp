@@ -30,3 +30,16 @@ draw_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, 
     ++i;
   }
 }
+
+
+void
+draw_formatted_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, const char *text, ...)
+{
+  char buf[256];
+  va_list aptr;
+  va_start(aptr, text);
+  vsnprintf(buf, 256, text, aptr);
+  va_end(aptr);
+
+  draw_string(frame_buffer, render_basis, font, world_pos, buf);
+}

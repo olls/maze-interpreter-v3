@@ -59,7 +59,7 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
-  draw_string(frame_buffer, render_basis, &game_state->font, (V2){(game_state->maze.width) * game_state->cell_spacing}, game_state->persistent_str);
+  draw_formatted_string(frame_buffer, render_basis, &game_state->font, (V2){(game_state->maze.width) * game_state->cell_spacing}, ">: '%s'", game_state->persistent_str);
 
 #if 0
   RenderBasis orthographic_basis;
