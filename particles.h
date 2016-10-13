@@ -15,11 +15,12 @@ struct Particle
   u32 ttl;
   V2 pos;
   V2 offset;
-  ParticleType type;
   r32 speed;
   V4 color;
   r32 hue;
   b32 fade_out;
+  Bitmap *bitmap;
+  ParticleType type;
   union
   {
     struct
@@ -60,4 +61,5 @@ struct Particles
   Bitmap spark_bitmap;
   Bitmap cross_bitmap;
   Bitmap blob_bitmap;
+  Bitmap smoke_bitmap;
 };

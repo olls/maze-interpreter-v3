@@ -25,6 +25,7 @@ init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V
   V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
   car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
   car->particle_source->particle_prototype.grow.initial_radius = calc_car_radius(game_state);
+  car->particle_source->particle_prototype.bitmap = &(game_state->particles.smoke_bitmap);
 }
 
 

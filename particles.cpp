@@ -25,12 +25,12 @@ new_particle_source(Particles *particles, V2 pos, ParticleType type, u64 time_us
     } break;
     case (PS_GROW):
     {
-      result->spawn_rate = 100;
+      result->spawn_rate = 10;
       result->ttl = -1;
 
-      result->particle_prototype.ttl = 200000;
+      result->particle_prototype.ttl = 2000000;
       result->particle_prototype.fade_out = true;
-      result->particle_prototype.speed = 200000;
+      result->particle_prototype.speed = 40000;
       result->particle_prototype.grow.initial_radius = 0;
     } break;
   }
@@ -176,10 +176,10 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
         } break;
         case PS_GROW:
         {
-          Bitmap *bitmap = &particles->blob_bitmap;
-          V2 bitmap_size = {bitmap->file->width, bitmap->file->height};
+          V2 bitmap_size = {particle->bitmap->file->width,
+                            particle->bitmap->file->height};
 
-          blit_bitmap(frame_buffer, render_basis, bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), (Rectangle){-1}, particle->color, particle->hue, true);
+          blit_bitmap(frame_buffer, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), (Rectangle){-1}, particle->color, particle->hue, true);
         } break;
       }
     }
