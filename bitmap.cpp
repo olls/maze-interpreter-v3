@@ -156,6 +156,7 @@ BlitBitmapOptions
 {
   Rectangle crop;
   V4 color_multiplier;
+  b32 invert;
   r32 hue_shift;
   b32 interpolation;
   r32 scale;
@@ -166,6 +167,7 @@ get_default_blit_bitmap_options(BlitBitmapOptions *opts)
 {
   opts->crop = (Rectangle){-1};
   opts->color_multiplier = (V4){1, 1, 1, 1};
+  opts->invert = false;
   opts->hue_shift = 0;
   opts->interpolation = false;
   opts->scale = 1;
@@ -255,6 +257,13 @@ blit_bitmap(FrameBuffer *frame_buffer,
         V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
 
         color = top_left_color;
+      }
+
+      if (opts->invert)
+      {
+        color.r = 1 - color.r;
+        color.g = 1 - color.g;
+        color.b = 1 - color.b;
       }
 
       color *= opts->color_multiplier;

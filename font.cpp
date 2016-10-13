@@ -1,8 +1,8 @@
-V2 CHAR_SIZE = {60, 111};
+V2 CHAR_SIZE = {66, 116};
 
 
 void
-draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, char x, r32 scale = 1)
+draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1})
 {
   u32 char_index = x - 32;
   V2 bitmap_pos = {
@@ -20,17 +20,21 @@ draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2
   blit_opts.crop = char_box;
   blit_opts.interpolation = true;
   blit_opts.scale = scale;
+  if (color.a != -1)
+  {
+    blit_opts.color_multiplier = color;
+  }
   blit_bitmap(frame_buffer, render_basis, font, world_pos, &blit_opts);
 }
 
 
 void
-draw_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, const char str[], r32 scale = 1)
+draw_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, const char str[], r32 scale = 1, V4 color = (V4){-1})
 {
   u32 i = 0;
   while (str[i])
   {
-    draw_char(frame_buffer, render_basis, font, world_pos, str[i], scale);
+    draw_char(frame_buffer, render_basis, font, world_pos, str[i], scale, color);
 
     world_pos.x += CHAR_SIZE.x * render_basis->world_per_pixel * scale;
     ++i;
