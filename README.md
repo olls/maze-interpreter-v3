@@ -4,9 +4,9 @@ This is a interpreter for the programming language [Maze](http://esolangs.org/wi
 
 Maze is a language based on an ASCII art 'maze' for 'cars' (variables) to move around.  The shape of your maze describes the program flow and the branches the variables take.  It makes a lot more sense if you look at an example, here is a recording of a multiplication program running:
 
-[![Demo](https://fat.gfycat.com/KeyFlickeringGalapagosdove.gif)](https://gfycat.com/KeyFlickeringGalapagosdove)
+[![Demo](https://fat.gfycat.com/ActiveGrimyConey.gif)](https://gfycat.com/ActiveGrimyConey)
 
-Multiplying `3 * 3`, the results are not currently displayed, but are correct!
+Multiplying `2 * 3`!
 
 
 ## WIP
