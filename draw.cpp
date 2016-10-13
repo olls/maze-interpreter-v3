@@ -12,26 +12,14 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 void
 draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
-#if 1
   u32 car_raduis = calc_car_radius(game_state);
   V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset;
 
   draw_circle(frame_buffer, render_basis, pos, car_raduis, colour);
 
-#else  // NOTE: Displays the id of the car
-
-  u32 cell_size = game_state->cell_spacing - (game_state->cell_spacing*game_state->cell_margin);
-  V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset - (cell_size * .5f);
-
-  u32 n = 6;
-  u32 car_diameter = cell_size / n;
-  pos += car_diameter * .5f;
-
-  for (u32 i = 0; i <= car->id; ++i)
-  {
-    draw_circle(frame_buffer, render_basis, pos + (V2){((i%n) * car_diameter), ((i/n) * car_diameter)}, car_diameter*.5f, colour);
-  }
-#endif
+  char str[256];
+  fmted_str(str, "%d", car->value);
+  draw_string(frame_buffer, render_basis, &game_state->font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
 }
 
 

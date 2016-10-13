@@ -1,3 +1,6 @@
+V2 CHAR_SIZE = {60, 111};
+
+
 void
 draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, char x, r32 scale = 1)
 {
@@ -7,11 +10,9 @@ draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2
     .y = 5 - (char_index / 16)
   };
 
-  V2 char_size = {60, 111};
-
   Rectangle char_box = {
-    .start = bitmap_pos * char_size,
-    .end = bitmap_pos * char_size + char_size
+    .start = bitmap_pos * CHAR_SIZE,
+    .end = bitmap_pos * CHAR_SIZE + CHAR_SIZE
   };
 
   BlitBitmapOptions blit_opts;
@@ -31,20 +32,17 @@ draw_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, 
   {
     draw_char(frame_buffer, render_basis, font, world_pos, str[i], scale);
 
-    world_pos.x += 60 * render_basis->world_per_pixel * scale;
+    world_pos.x += CHAR_SIZE.x * render_basis->world_per_pixel * scale;
     ++i;
   }
 }
 
 
 void
-draw_formatted_string(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2 world_pos, const char *text, ...)
+fmted_str(char out[256], const char *pattern,  ...)
 {
-  char buf[256];
   va_list aptr;
-  va_start(aptr, text);
-  vsnprintf(buf, 256, text, aptr);
+  va_start(aptr, pattern);
+  vsnprintf(out, 256, pattern, aptr);
   va_end(aptr);
-
-  draw_string(frame_buffer, render_basis, font, world_pos, buf);
 }
