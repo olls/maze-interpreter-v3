@@ -6,7 +6,7 @@ Maze is a language based on an ASCII art 'maze' for 'cars' (variables) to move a
 
 [![Demo](https://fat.gfycat.com/ActiveGrimyConey.gif)](https://gfycat.com/ActiveGrimyConey)
 
-Multiplying `3 * 3`, the results are not currently displayed, but are correct!
+Multiplying `2 * 3`!
 
 
 ## WIP
