@@ -179,7 +179,13 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
           V2 bitmap_size = {particle->bitmap->file->width,
                             particle->bitmap->file->height};
 
-          blit_bitmap(frame_buffer, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), (Rectangle){-1}, particle->color, particle->hue, true);
+          BlitBitmapOptions blit_opts;
+          get_default_blit_bitmap_options(&blit_opts);
+
+          blit_opts.color_multiplier = particle->color;
+          blit_opts.hue_shift = particle->hue;
+          blit_opts.interpolation = true;
+          blit_bitmap(frame_buffer, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), &blit_opts);
         } break;
       }
     }

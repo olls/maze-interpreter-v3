@@ -151,16 +151,43 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 }
 
 
-void
-blit_bitmap(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *bitmap, V2 pos, Rectangle crop = (Rectangle){-1}, V4 color_multiplier = (V4){1, 1, 1, 1}, r32 hue_shift = 0, b32 interpolation = false)
+struct
+BlitBitmapOptions
 {
-  if (crop.start.x == -1)
+  Rectangle crop;
+  V4 color_multiplier;
+  r32 hue_shift;
+  b32 interpolation;
+};
+
+void
+get_default_blit_bitmap_options(BlitBitmapOptions *opts)
+{
+  opts->crop = (Rectangle){-1};
+  opts->color_multiplier = (V4){1, 1, 1, 1};
+  opts->hue_shift = 0;
+  opts->interpolation = false;
+}
+
+void
+blit_bitmap(FrameBuffer *frame_buffer,
+            RenderBasis *render_basis,
+            Bitmap *bitmap,
+            V2 pos,
+            BlitBitmapOptions *opts = 0)
+{
+  if (opts == 0)
   {
-    crop.start = (V2){0, 0};
-    crop.end = (V2){bitmap->file->width, bitmap->file->height};
+    get_default_blit_bitmap_options(opts);
   }
 
-  V2 crop_size = crop.end - crop.start;
+  if (opts->crop.start.x == -1)
+  {
+    opts->crop.start = (V2){0, 0};
+    opts->crop.end = (V2){bitmap->file->width, bitmap->file->height};
+  }
+
+  V2 crop_size = opts->crop.end - opts->crop.start;
   V2 fract_pixel_space_size = crop_size*render_basis->scale;
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
@@ -192,12 +219,12 @@ blit_bitmap(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *bitmap
       u32 dx = pixel_x - pixel_space.start.x;
       u32 dy = pixel_y - pixel_space.start.y;
 
-      r32 u = crop.start.x + (dx / render_basis->scale);
-      r32 v = crop.start.y + ((fract_pixel_space_size.y - dy) / render_basis->scale - 1);
+      r32 u = opts->crop.start.x + (dx / render_basis->scale);
+      r32 v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / render_basis->scale - 1);
 
       V4 color;
 
-      if (interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
+      if (opts->interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
       {
         V4 top_left_color     = get_bitmap_color(bitmap, u,     v);
         V4 top_right_color    = get_bitmap_color(bitmap, u + 1, v);
@@ -207,14 +234,14 @@ blit_bitmap(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *bitmap
         color = lerp(lerp(top_left_color,    (u - (u32)u), top_right_color), (v - (u32)v),
                      lerp(bottom_left_color, (u - (u32)u), bottom_right_color));
       }
-      else if (interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
+      else if (opts->interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
       {
         V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
         V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
 
         color = lerp(top_left_color, (u - (u32)u), top_right_color);
       }
-      else if (interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
+      else if (opts->interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
       {
         V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
         V4 bottom_left_color = get_bitmap_color(bitmap,  u, v + 1);
@@ -230,10 +257,10 @@ blit_bitmap(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *bitmap
         color = top_left_color;
       }
 
-      color *= color_multiplier;
-      if (hue_shift)
+      color *= opts->color_multiplier;
+      if (opts->hue_shift)
       {
-        color = shift_hue(color, hue_shift);
+        color = shift_hue(color, opts->hue_shift);
       }
 
       set_pixel(frame_buffer, pixel_x, pixel_y, color);

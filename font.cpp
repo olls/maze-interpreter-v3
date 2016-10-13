@@ -14,7 +14,11 @@ draw_char(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmap *font, V2
     .end = bitmap_pos * char_size + char_size
   };
 
-  blit_bitmap(frame_buffer, render_basis, font, world_pos, char_box, (V4){1, 1, 1, 1}, 0, true);
+  BlitBitmapOptions blit_opts;
+  get_default_blit_bitmap_options(&blit_opts);
+  blit_opts.crop = char_box;
+  blit_opts.interpolation = true;
+  blit_bitmap(frame_buffer, render_basis, font, world_pos, &blit_opts);
 }
 
 
