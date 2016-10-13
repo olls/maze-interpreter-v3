@@ -158,6 +158,7 @@ BlitBitmapOptions
   V4 color_multiplier;
   r32 hue_shift;
   b32 interpolation;
+  r32 scale;
 };
 
 void
@@ -167,6 +168,7 @@ get_default_blit_bitmap_options(BlitBitmapOptions *opts)
   opts->color_multiplier = (V4){1, 1, 1, 1};
   opts->hue_shift = 0;
   opts->interpolation = false;
+  opts->scale = 1;
 }
 
 void
@@ -188,7 +190,7 @@ blit_bitmap(FrameBuffer *frame_buffer,
   }
 
   V2 crop_size = opts->crop.end - opts->crop.start;
-  V2 fract_pixel_space_size = crop_size*render_basis->scale;
+  V2 fract_pixel_space_size = crop_size * render_basis->scale * opts->scale;
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -205,8 +207,8 @@ blit_bitmap(FrameBuffer *frame_buffer,
 
   pos = round_down(pos);
 
-  r32 width = bitmap->file->width * render_basis->scale;
-  r32 height = bitmap->file->height * render_basis->scale;
+  r32 width = bitmap->file->width * render_basis->scale * opts->scale;
+  r32 height = bitmap->file->height * render_basis->scale * opts->scale;
 
   for (u32 pixel_y = pixel_space.start.y;
        pixel_y < pixel_space.end.y;
@@ -219,8 +221,8 @@ blit_bitmap(FrameBuffer *frame_buffer,
       u32 dx = pixel_x - pixel_space.start.x;
       u32 dy = pixel_y - pixel_space.start.y;
 
-      r32 u = opts->crop.start.x + (dx / render_basis->scale);
-      r32 v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / render_basis->scale - 1);
+      r32 u = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
+      r32 v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
 
       V4 color;
 
@@ -251,8 +253,6 @@ blit_bitmap(FrameBuffer *frame_buffer,
       else
       {
         V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-
-        // top_left_color = (V4){1,1,1,1};
 
         color = top_left_color;
       }
