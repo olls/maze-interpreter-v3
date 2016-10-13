@@ -132,8 +132,6 @@ load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 
   game_state->last_sim_tick = 0;
   game_state->sim_steps = 0;
-  game_state->cars.first_block = 0;
-  game_state->cars.free_chain = 0;
 }
 
 

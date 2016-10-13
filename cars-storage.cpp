@@ -45,10 +45,33 @@ void delete_all_cars(Cars *cars)
   CarsBlock *block = cars->first_block;
   if (block)
   {
-    while (block->next_block)
+    while (true)
     {
-      block = block->next_block;
+      // Clear partical sources
+      Car *car;
+      for (u32 car_index = 0;
+           car_index < block->next_free_in_block;
+           ++car_index)
+      {
+        car = block->cars + car_index;
+        if (car->particle_source)
+        {
+          car->particle_source->t0 = 0;
+        }
+      }
+
+      if (block->next_block)
+      {
+        block = block->next_block;
+      }
+      else
+      {
+        break;
+      }
     }
+
+    // Put free chain on end of current block chain,
+    //   then put block chain on free chain
     block->next_block = cars->free_chain;
     cars->free_chain = cars->first_block;
     cars->first_block = 0;

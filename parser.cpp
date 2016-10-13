@@ -355,7 +355,6 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
 char *
 parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
 {
-
   if (str_eq(cell_str, "^^", 2))
   {
     cell->type = CELL_START;
