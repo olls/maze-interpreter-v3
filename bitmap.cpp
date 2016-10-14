@@ -228,6 +228,8 @@ blit_bitmap(FrameBuffer *frame_buffer,
 
       V4 color;
 
+      // TODO: Fix interpolation on edges of crop
+
       if (opts->interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
       {
         V4 top_left_color     = get_bitmap_color(bitmap, u,     v);

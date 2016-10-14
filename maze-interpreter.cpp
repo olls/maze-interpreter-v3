@@ -51,7 +51,7 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
 
 
 void
-render(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse, u64 time_us)
+render(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, u64 time_us)
 {
   RenderBasis *render_basis = &game_state->current_render_basis;
   render_basis->world_per_pixel = game_state->world_per_pixel;
@@ -60,19 +60,11 @@ render(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region
   render_basis->origin = game_state->maze_pos * game_state->world_per_pixel;
   render_basis->clip_region = render_region_pixels * game_state->world_per_pixel;
 
-  render_cells(game_state, mouse, frame_buffer, render_basis, &(game_state->maze.tree), time_us);
+  render_cells(game_state, frame_buffer, render_basis, &(game_state->maze.tree), time_us);
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
   draw_string(frame_buffer, render_basis, &game_state->font, (V2){0, game_state->maze.height-2} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
-
-#if 0
-  RenderBasis orthographic_basis;
-  get_orthographic_basis(&orthographic_basis, frame_buffer);
-  draw_circle(frame_buffer, &orthographic_basis, game_state->maze_pos, 10, (V4){1, 0, .5, 1});
-
-  draw_circle(frame_buffer, render_basis, render_basis->scale_focus, 100000, (V4){1, 0, .5, 1});
-#endif
 }
 
 
@@ -234,5 +226,5 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
   update_pan_and_zoom(game_state, mouse);
-  render(game_state, frame_buffer, world_box, mouse, time_us);
+  render(game_state, frame_buffer, world_box, time_us);
 }

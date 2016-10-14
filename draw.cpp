@@ -43,7 +43,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 
 
 b32
-render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, u64 time_us)
+render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, u64 time_us)
 {
   b32 selected = false;
   if (cell->type != CELL_WALL)
@@ -117,7 +117,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
 
 void
-render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
+render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
 {
   b32 selected = false;
   b32 on_screen = false;
@@ -136,7 +136,7 @@ render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Ren
 
       if (on_screen)
       {
-        selected |= render_cell(cell, game_state, mouse, frame_buffer, render_basis, time_us);
+        selected |= render_cell(cell, game_state, frame_buffer, render_basis, time_us);
       }
     }
 
@@ -151,10 +151,10 @@ render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, Ren
     draw_box_outline(frame_buffer, render_basis, world_tree_bounds, box_color);
 #endif
 
-    render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_right, time_us);
-    render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_left, time_us);
-    render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_right, time_us);
-    render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_left, time_us);
+    render_cells(game_state, frame_buffer, render_basis, tree->top_right, time_us);
+    render_cells(game_state, frame_buffer, render_basis, tree->top_left, time_us);
+    render_cells(game_state, frame_buffer, render_basis, tree->bottom_right, time_us);
+    render_cells(game_state, frame_buffer, render_basis, tree->bottom_left, time_us);
   }
 }
 
