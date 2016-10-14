@@ -1,10 +1,10 @@
 V2
-cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
+cell_coord_to_world(u32 cell_spacing, u32 cell_x, u32 cell_y)
 {
   // TODO: Is there any point in world space any more???
   //       Cars have cell_x/y and offset, is that all we need? (Help
   //       with precision?)
-  V2 result = ((V2){cell_x, cell_y} * game_state->cell_spacing);
+  V2 result = ((V2){cell_x, cell_y} * cell_spacing);
   return result;
 }
 
@@ -12,8 +12,8 @@ cell_coord_to_world(GameState *game_state, u32 cell_x, u32 cell_y)
 void
 draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
-  u32 car_raduis = calc_car_radius(game_state);
-  V2 pos = cell_coord_to_world(game_state, car->target_cell_x, car->target_cell_y) + car->offset;
+  u32 car_raduis = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
+  V2 pos = cell_coord_to_world(game_state->cell_spacing, car->target_cell_x, car->target_cell_y) + car->offset;
 
   draw_circle(frame_buffer, render_basis, pos, car_raduis, colour);
 
@@ -95,7 +95,7 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
     u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
 
     // NOTE: Tile centred on coord
-    V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
+    V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
     Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
     if (cell->hovered_at_time == time_us)
@@ -107,7 +107,6 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
       color.b = min(color.b + 0.15, 1.0f);
     }
 
-    V2 scale = (render_basis->scale * cell_radius * 2 / game_state->world_per_pixel) / (V2){game_state->tile.file->width - 1, game_state->tile.file->height - 1};
 
     draw_box(frame_buffer, render_basis, cell_bounds, color);
   }
@@ -128,14 +127,14 @@ render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rend
   {
     on_screen = overlaps(cell_clip_region_pixels, transform_coord_rect(render_basis, grow(tree->bounds, .5) * game_state->cell_spacing));
 
-    for (u32 cell_index = 0;
-         cell_index < tree->used;
-         ++cell_index)
+    if (on_screen)
     {
-      Cell *cell = tree->cells + cell_index;
-
-      if (on_screen)
+      for (u32 cell_index = 0;
+           cell_index < tree->used;
+           ++cell_index)
       {
+        Cell *cell = tree->cells + cell_index;
+
         selected |= render_cell(cell, game_state, frame_buffer, render_basis, time_us);
       }
     }
