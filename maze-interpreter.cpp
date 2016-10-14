@@ -162,6 +162,18 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   Rectangle world_box = grow(render_region_pixels, -10);
 
+  V2 ns = {1, 1};
+  Rectangle segments[(u32)ns.x*(u32)ns.y];
+
+  V2 s;
+  for (s.y = 0; s.y < ns.y; ++s.y)
+  {
+    for (s.x = 0; s.x < ns.x; ++s.x)
+    {
+      segments[(u32)s.y + (u32)ns.y*(u32)s.x] = get_segment(render_region_pixels, s, ns);
+    }
+  }
+
   if (!game_state->init)
   {
     init_game(memory, game_state, keys, time_us, argc, argv);
@@ -221,10 +233,17 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   step_particles(&(game_state->particles), time_us);
 
   RenderBasis orthographic_basis;
-  get_orthographic_basis(&orthographic_basis, frame_buffer);
+  get_orthographic_basis(&orthographic_basis, render_region_pixels);
 
   fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
   update_pan_and_zoom(game_state, mouse);
-  render(game_state, frame_buffer, world_box, time_us);
+
+  for (s.y = 0; s.y < ns.y; ++s.y)
+  {
+    for (s.x = 0; s.x < ns.x; ++s.x)
+    {
+      render(game_state, frame_buffer, segments[(u32)s.y + (u32)ns.y*(u32)s.x], time_us);
+    }
+  }
 }

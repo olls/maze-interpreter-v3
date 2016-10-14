@@ -11,6 +11,7 @@
           CHANNEL(L_Particles) \
           CHANNEL(L_Bitmap) \
           CHANNEL(L_Font) \
+          CHANNEL(L_Vector) \
           CHANNEL(L_Render) \
           CHANNEL(L_GameLoop) \
           CHANNEL(N_LOGGING_CHANNELS)
@@ -42,6 +43,7 @@ channel_enabled(LoggingChannel channel)
     case L_Particles:
     case L_Bitmap:
     case L_Font:
+    case L_Vector:
     case L_Render:
     case L_GameLoop:
     {

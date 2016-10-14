@@ -573,6 +573,18 @@ get_bottom_left(Rectangle rect)
 }
 
 Rectangle
+get_segment(Rectangle rect, V2 pos, V2 segments)
+{
+  V2 seg_size = size(rect) / segments;
+
+  Rectangle result;
+  result.start = rect.start + seg_size*pos;
+  result.end = result.start + seg_size;
+
+  return result;
+}
+
+Rectangle
 grow(Rectangle rect, r32 by)
 {
   Rectangle result = rect;
