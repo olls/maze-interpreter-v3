@@ -164,6 +164,19 @@ div_or_0(r32 n, r32 d)
   return result;
 }
 
+s32
+sign(s32 a)
+{
+  s32 result = a >= 0 ? 1 : -1;
+  return result;
+}
+r32
+sign(r32 a)
+{
+  r32 result = a >= 0 ? 1 : -1;
+  return result;
+}
+
 
 void
 printF(LoggingChannel channel, r32 f)

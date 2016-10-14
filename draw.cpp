@@ -43,7 +43,7 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
 
 
 b32
-render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis)
+render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, u64 time_us)
 {
   b32 selected = false;
   if (cell->type != CELL_WALL)
@@ -98,9 +98,8 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
     V2 world_pos = cell_coord_to_world(game_state, cell->x, cell->y);
     Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
-    if (cell->hovered)
+    if (cell->hovered_at_time == time_us)
     {
-      cell->hovered = false;
       selected = true;
 
       color.r = min(color.r + 0.15, 1.0f);
@@ -118,7 +117,7 @@ render_cell(Cell *cell, GameState *game_state, Mouse *mouse, FrameBuffer *frame_
 
 
 void
-render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree)
+render_cells(GameState *game_state, Mouse *mouse, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
 {
   b32 selected = false;
   b32 on_screen = false;
@@ -137,7 +136,7 @@ render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *f
 
       if (on_screen)
       {
-        selected |= render_cell(cell, game_state, mouse, frame_buffer, render_basis);
+        selected |= render_cell(cell, game_state, mouse, frame_buffer, render_basis, time_us);
       }
     }
 
@@ -152,10 +151,10 @@ render_cells(Memory *memory, GameState *game_state, Mouse *mouse, FrameBuffer *f
     draw_box_outline(frame_buffer, render_basis, world_tree_bounds, box_color);
 #endif
 
-    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_right);
-    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->top_left);
-    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_right);
-    render_cells(memory, game_state, mouse, frame_buffer, render_basis, tree->bottom_left);
+    render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_right, time_us);
+    render_cells(game_state, mouse, frame_buffer, render_basis, tree->top_left, time_us);
+    render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_right, time_us);
+    render_cells(game_state, mouse, frame_buffer, render_basis, tree->bottom_left, time_us);
   }
 }
 

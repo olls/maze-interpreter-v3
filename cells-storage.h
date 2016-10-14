@@ -28,7 +28,7 @@ struct Cell
   enum CellType type;
   char name[2];
 
-  b32 hovered;
+  u64 hovered_at_time;
 
   b32 edit_mode;
   u64 edit_mode_last_change;

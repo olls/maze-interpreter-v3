@@ -1,13 +1,13 @@
 void
 update_cells_ui_state(GameState *game_state, Mouse *mouse, u64 time_us)
 {
-  V2 mouse_maze_pos = untransform_coord(&game_state->last_frame_render_basis, (V2){mouse->x, mouse->y});
+  V2 mouse_maze_pos = untransform_coord(&game_state->current_render_basis, (V2){mouse->x, mouse->y});
   V2 mouse_cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
 
   Cell *cell_hovered_over = get_cell(&game_state->maze, mouse_cell_pos.x, mouse_cell_pos.y);
   if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
   {
-    cell_hovered_over->hovered = true;
+    cell_hovered_over->hovered_at_time = time_us;
   }
 }
 

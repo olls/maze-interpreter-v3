@@ -1,5 +1,5 @@
 void
-render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse, u64 time_us)
+update_pan_and_zoom(GameState *game_state, Mouse *mouse)
 {
   // TODO: Give zoom velocity, to make it smooth
 
@@ -30,7 +30,6 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
     game_state->d_zoom = 0;
     game_state->zoom = MIN_ZOOM;
   }
-  r32 scale = squared(game_state->zoom / 30.0f);
 
   V2 screen_mouse_pixels = (V2){mouse->x, mouse->y};
   V2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
@@ -42,20 +41,26 @@ render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Rectang
     game_state->maze_pos += d_screen_mouse_pixels;
   }
 
-  RenderBasis *render_basis = &game_state->last_frame_render_basis;
+  V2 scale_focus;
+  if (abs(game_state->zoom - old_zoom) > 0.1)
+  {
+    scale_focus = game_state->scale_focus;
+    game_state->scale_focus = untransform_coord(&game_state->current_render_basis, screen_mouse_pixels);
+  }
+}
+
+
+void
+render(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, Mouse *mouse, u64 time_us)
+{
+  RenderBasis *render_basis = &game_state->current_render_basis;
   render_basis->world_per_pixel = game_state->world_per_pixel;
-  render_basis->scale = scale;
+  render_basis->scale = squared(game_state->zoom / 30.0f);
+  render_basis->scale_focus = game_state->scale_focus;
   render_basis->origin = game_state->maze_pos * game_state->world_per_pixel;
   render_basis->clip_region = render_region_pixels * game_state->world_per_pixel;
 
-  if (abs(game_state->zoom - old_zoom) > 0.1)
-  {
-    render_basis->scale_focus = game_state->scale_focus;
-    game_state->scale_focus = untransform_coord(render_basis, screen_mouse_pixels);
-  }
-  render_basis->scale_focus = game_state->scale_focus;
-
-  render_cells(memory, game_state, mouse, frame_buffer, render_basis, &(game_state->maze.tree));
+  render_cells(game_state, mouse, frame_buffer, render_basis, &(game_state->maze.tree), time_us);
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
@@ -98,7 +103,7 @@ sim_tick(GameState *game_state, u64 time_us)
 
 
 void
-reset_zoom(GameState *game_state, FrameBuffer *frame_buffer)
+reset_zoom(GameState *game_state, Rectangle world_box)
 {
   // TODO: Should world coords be r32s now we are using u32s for
   //       the cell position?
@@ -110,9 +115,8 @@ reset_zoom(GameState *game_state, FrameBuffer *frame_buffer)
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
   game_state->zoom = 30;
 
-  V2 screen_size = (V2){frame_buffer->width, frame_buffer->height};
   V2 maze_size_in_pixels = (V2){game_state->maze.width, game_state->maze.height} * game_state->cell_spacing / game_state->world_per_pixel;
-  game_state->maze_pos = (0.5f * screen_size) - (0.5f * maze_size_in_pixels);
+  game_state->maze_pos = (0.5f * size(world_box)) - (0.5f * maze_size_in_pixels);
 }
 
 
@@ -159,11 +163,18 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 void
 update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 argc, char *argv[])
 {
+  Rectangle render_region_pixels;
+  render_region_pixels.start = (V2){0, 0};
+  render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
+  render_region_pixels = grow(render_region_pixels, -20);
+
+  Rectangle world_box = grow(render_region_pixels, -10);
+
   if (!game_state->init)
   {
     init_game(memory, game_state, keys, time_us, argc, argv);
     load_maze(memory, game_state, argc, argv);
-    reset_zoom(game_state, frame_buffer);
+    reset_zoom(game_state, world_box);
   }
 
   update_inputs(keys, game_state->inputs, time_us);
@@ -177,7 +188,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (game_state->inputs[RESET].active)
   {
     strcpy(game_state->persistent_str, "Reset!");
-    reset_zoom(game_state, frame_buffer);
+    reset_zoom(game_state, world_box);
   }
 
   if (game_state->inputs[RESTART].active)
@@ -217,14 +228,11 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  Rectangle render_region_pixels;
-  render_region_pixels.start = (V2){0, 0};
-  render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
-
   RenderBasis orthographic_basis;
   get_orthographic_basis(&orthographic_basis, frame_buffer);
 
   fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
 
-  render(memory, game_state, frame_buffer, render_region_pixels, mouse, time_us);
+  update_pan_and_zoom(game_state, mouse);
+  render(game_state, frame_buffer, world_box, mouse, time_us);
 }

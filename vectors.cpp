@@ -281,6 +281,14 @@ operator*(Rectangle rect, r32 c)
   Rectangle result = c * rect;
   return result;
 }
+Rectangle
+operator*(Rectangle rect, V2 vec)
+{
+  Rectangle result;
+  result.start = rect.start * vec;
+  result.end = rect.end * vec;
+  return result;
+}
 Rectangle &
 operator*=(Rectangle &rect, r32 c)
 {
@@ -302,6 +310,14 @@ operator/(Rectangle rect, r32 c)
   Rectangle result;
   result.start = rect.start / c;
   result.end = rect.end / c;
+  return result;
+}
+Rectangle
+operator/(Rectangle rect, V2 vec)
+{
+  Rectangle result;
+  result.start = rect.start / vec;
+  result.end = rect.end / vec;
   return result;
 }
 Rectangle &
@@ -502,9 +518,17 @@ get_overlap(Rectangle a, Rectangle b)
 }
 
 V2
+size(Rectangle rect)
+{
+  V2 result;
+  result = rect.end - rect.start;
+  return result;
+}
+
+V2
 get_center(Rectangle rect)
 {
-  V2 result = rect.start + ((rect.end - rect.start) / 2);
+  V2 result = rect.start + size(rect)*0.5;
   return result;
 }
 
@@ -554,6 +578,44 @@ grow(Rectangle rect, r32 by)
   Rectangle result = rect;
   result.start -= by;
   result.end += by;
+  return result;
+}
+
+Rectangle
+get_horizontal_fraction(Rectangle rect, r32 frac)
+{
+  Rectangle result;
+  result.start = rect.start;
+  result.end = (V2){
+    result.start.x + (rect.end.x-rect.start.x)*frac,
+    rect.end.y
+  };
+  return result;
+}
+Rectangle
+get_nth_horizontal_fraction(Rectangle rect, r32 frac, u32 n)
+{
+  Rectangle result = get_horizontal_fraction(rect, frac);
+  result += (V2){(rect.end.x-rect.start.x)*frac*n, 0};
+  return result;
+}
+
+Rectangle
+get_vertical_fraction(Rectangle rect, r32 frac)
+{
+  Rectangle result;
+  result.start = rect.start;
+  result.end = (V2){
+    rect.end.x,
+    result.start.y + (rect.end.y-rect.start.y)*frac
+  };
+  return result;
+}
+Rectangle
+get_nth_vertical_fraction(Rectangle rect, r32 frac, u32 n)
+{
+  Rectangle result = get_vertical_fraction(rect, frac);
+  result += (V2){0, (rect.end.y-rect.start.y)*frac*n};
   return result;
 }
 
