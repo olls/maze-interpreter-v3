@@ -46,78 +46,75 @@ b32
 render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, u64 time_us)
 {
   b32 selected = false;
-  if (cell->type != CELL_WALL)
+
+  V4 color;
+  switch (cell->type)
   {
+    case CELL_NULL:     color = (V4){1, 0.0, 0.0, 0.0};
+      break;
+    case CELL_START:    color = (V4){1, 0.7, 0.3, 0.3};
+      break;
+    case CELL_PATH:     color = (V4){1, 0.8, 0.8, 0.9};
+      break;
+    case CELL_WALL:     color = (V4){1, 0.9, 0.8, 0.9};
+      break;
+    case CELL_HOLE:     color = (V4){1, 0.0, 0.2, 0.7};
+      break;
+    case CELL_SPLITTER: color = (V4){1, 0.7, 0.6, 0.0};
+      break;
+    case CELL_FUNCTION: color = (V4){1, 0.7, 0.5, 0.3};
+      break;
+    case CELL_ONCE:     color = (V4){1, 0.7, 0.4, 0.0};
+      break;
+    case CELL_UP_UNLESS_DETECT:     color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_DOWN_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_LEFT_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_RIGHT_UNLESS_DETECT:  color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_OUT:      color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_INP:      color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_UP:       color = (V4){1, 0.0, 0.0, 0.0};
+      break;
+    case CELL_DOWN:     color = (V4){1, 0.3, 0.0, 0.0};
+      break;
+    case CELL_LEFT:     color = (V4){1, 0.0, 0.1, 0.3};
+      break;
+    case CELL_RIGHT:    color = (V4){1, 0.3, 0.1, 0.3};
+      break;
+    case CELL_PAUSE:    color = (V4){1, 0.3, 0.0, 0.7};
+      break;
 
-    V4 color;
-    switch (cell->type)
-    {
-      case CELL_NULL:     color = (V4){1, 0.0, 0.0, 0.0};
-        break;
-      case CELL_START:    color = (V4){1, 0.7, 0.3, 0.3};
-        break;
-      case CELL_PATH:     color = (V4){1, 0.8, 0.8, 0.9};
-        break;
-      case CELL_WALL:     color = (V4){1, 0.0, 0.2, 0.0};
-        break;
-      case CELL_HOLE:     color = (V4){1, 0.0, 0.2, 0.7};
-        break;
-      case CELL_SPLITTER: color = (V4){1, 0.7, 0.6, 0.0};
-        break;
-      case CELL_FUNCTION: color = (V4){1, 0.7, 0.5, 0.3};
-        break;
-      case CELL_ONCE:     color = (V4){1, 0.7, 0.4, 0.0};
-        break;
-      case CELL_UP_UNLESS_DETECT:     color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_DOWN_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_LEFT_UNLESS_DETECT:   color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_RIGHT_UNLESS_DETECT:  color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_OUT:      color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_INP:      color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_UP:       color = (V4){1, 0.0, 0.0, 0.0};
-        break;
-      case CELL_DOWN:     color = (V4){1, 0.3, 0.0, 0.0};
-        break;
-      case CELL_LEFT:     color = (V4){1, 0.0, 0.1, 0.3};
-        break;
-      case CELL_RIGHT:    color = (V4){1, 0.3, 0.1, 0.3};
-        break;
-      case CELL_PAUSE:    color = (V4){1, 0.3, 0.0, 0.7};
-        break;
-
-      default:
-        invalid_code_path;
-        break;
-    }
-
-    u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
-
-    // NOTE: Tile centred on coord
-    V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
-    Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
-
-    if (cell->hovered_at_time == time_us)
-    {
-      selected = true;
-
-      color.r = min(color.r + 0.15, 1.0f);
-      color.g = min(color.g + 0.15, 1.0f);
-      color.b = min(color.b + 0.15, 1.0f);
-    }
-
-    if (cell == game_state->ui.cell_currently_being_edited)
-    {
-      color.r = 1;
-    }
-
-    draw_box(frame_buffer, render_basis, cell_bounds, color);
+    default:
+      invalid_code_path;
+      break;
   }
+
+  u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
+
+  // NOTE: Tile centred on coord
+  V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
+  Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
+
+  if (cell->hovered_at_time == time_us)
+  {
+    selected = true;
+
+    color.r = min(color.r + 0.15, 1.0f);
+    color.g = min(color.g + 0.15, 1.0f);
+    color.b = min(color.b + 0.15, 1.0f);
+  }
+
+  if (cell == game_state->ui.cell_currently_being_edited)
+  {
+    color.r = 1;
+  }
+
+  draw_box(frame_buffer, render_basis, cell_bounds, color);
 
   return selected;
 }
