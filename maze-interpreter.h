@@ -12,6 +12,13 @@ const r32 MAX_ZOOM = 200;
 const char MAZE_FILENAME[] = "test.mz";
 
 
+struct Bitmaps
+{
+  Bitmap tile;
+  Bitmap font;
+};
+
+
 struct GameState
 {
   b32 init;
@@ -21,7 +28,7 @@ struct GameState
   r32 zoom;
   V2 scale_focus;
 
-  RenderBasis current_render_basis;
+  RenderBasis last_render_basis;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   u32 cell_spacing;

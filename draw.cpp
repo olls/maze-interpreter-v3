@@ -19,7 +19,7 @@ draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_b
 
   char str[256];
   fmted_str(str, "%d", car->value);
-  draw_string(frame_buffer, render_basis, &game_state->font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
+  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
 }
 
 

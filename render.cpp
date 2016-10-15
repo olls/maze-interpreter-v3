@@ -17,7 +17,8 @@ set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
 void
 get_orthographic_basis(RenderBasis *result, Rectangle render_region_pixels)
 {
-  result->origin = (V2){0 ,0};
+  zero(result, RenderBasis);
+  result->origin = render_region_pixels.start;
   result->world_per_pixel = 1;
   result->scale = 1;
   result->clip_region = render_region_pixels;

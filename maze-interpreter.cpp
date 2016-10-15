@@ -36,6 +36,7 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
 
   game_state->last_mouse_pos = screen_mouse_pixels;
 
+  // TODO: Need a layer to filter whether the mouse is focused on the world
   if (mouse->l_down)
   {
     game_state->maze_pos += d_screen_mouse_pixels;
@@ -50,30 +51,21 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
     game_state->currently_panning = false;
   }
 
-  V2 scale_focus;
   if (abs(game_state->zoom - old_zoom) > 0.1)
   {
-    scale_focus = game_state->scale_focus;
-    game_state->scale_focus = untransform_coord(&game_state->current_render_basis, screen_mouse_pixels);
+    game_state->scale_focus = untransform_coord(&game_state->last_render_basis, screen_mouse_pixels);
   }
 }
 
 
 void
-render(GameState *game_state, FrameBuffer *frame_buffer, Rectangle render_region_pixels, u64 time_us)
+render(GameState *game_state, RenderBasis *render_basis, FrameBuffer *frame_buffer, u64 time_us)
 {
-  RenderBasis *render_basis = &game_state->current_render_basis;
-  render_basis->world_per_pixel = game_state->world_per_pixel;
-  render_basis->scale = squared(game_state->zoom / 30.0f);
-  render_basis->scale_focus = game_state->scale_focus;
-  render_basis->origin = game_state->maze_pos * game_state->world_per_pixel;
-  render_basis->clip_region = render_region_pixels * game_state->world_per_pixel;
-
   render_cells(game_state, frame_buffer, render_basis, &(game_state->maze.tree), time_us);
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
-  draw_string(frame_buffer, render_basis, &game_state->font, (V2){0, game_state->maze.height-2} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
+  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height-2} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
 }
 
 
@@ -154,8 +146,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
   load_bitmap(&game_state->particles.blob_bitmap, "particles/blob.bmp");
   load_bitmap(&game_state->particles.smoke_bitmap, "particles/smoke.bmp");
-  load_bitmap(&game_state->tile, "tile.bmp");
-  load_bitmap(&game_state->font, "font.bmp");
+  load_bitmap(&game_state->bitmaps.tile, "tile.bmp");
+  load_bitmap(&game_state->bitmaps.font, "font.bmp");
 
   strcpy(game_state->persistent_str, "Init!");
 }
@@ -218,6 +210,26 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     log(L_GameLoop, "Changing stepping mode");
   }
 
+  //
+  // UPDATE VIEW
+  //
+
+  update_pan_and_zoom(game_state, mouse);
+
+  RenderBasis render_basis;
+  render_basis.world_per_pixel = game_state->world_per_pixel;
+  render_basis.scale = squared(game_state->zoom / 30.0f);
+  render_basis.scale_focus = game_state->scale_focus;
+  render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
+  render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
+
+  RenderBasis orthographic_basis;
+  get_orthographic_basis(&orthographic_basis, render_region_pixels);
+
+  //
+  // UPDATE WORLD
+  //
+
   if (game_state->inputs[SIM_TICKS_INC].active)
   {
     game_state->sim_ticks_per_s += .5f;
@@ -228,7 +240,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   }
   game_state->sim_ticks_per_s = clamp(.5, game_state->sim_ticks_per_s, 20);
 
-  update_cells_ui_state(game_state, mouse, time_us);
+  update_cells_ui_state(game_state, &render_basis, mouse, time_us);
 
   if (sim_tick(game_state, time_us))
   {
@@ -241,27 +253,30 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  update_ui(&game_state->ui, mouse);
-
-  update_pan_and_zoom(game_state, mouse);
+  update_ui(&orthographic_basis, &game_state->ui, mouse, time_us);
 
   //
   // RENDER
   //
 
-  RenderBasis orthographic_basis;
-  get_orthographic_basis(&orthographic_basis, render_region_pixels);
-
-  fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
+  fast_draw_box(frame_buffer, &orthographic_basis, (Rectangle){(V2){0,0},size(render_region_pixels)}, (PixelColor){255, 255, 255});
 
   for (s.y = 0; s.y < ns.y; ++s.y)
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
-      render(game_state, frame_buffer, segments[(u32)s.y + (u32)ns.y*(u32)s.x], time_us);
+      Rectangle segment_rect = segments[(u32)s.y + (u32)ns.y*(u32)s.x];
+
+      RenderBasis segment_render_basis = render_basis;
+      segment_render_basis.clip_region = segment_rect * game_state->world_per_pixel;
+
+      render(game_state, &segment_render_basis, frame_buffer, time_us);
     }
   }
 
   // TODO: Should go in render?
-  draw_ui(frame_buffer, &orthographic_basis, &game_state->ui);
+  draw_ui(frame_buffer, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
+
+  // TODO: Get rid of this
+  game_state->last_render_basis = render_basis;
 }
