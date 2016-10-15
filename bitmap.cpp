@@ -203,14 +203,7 @@ blit_bitmap(FrameBuffer *frame_buffer,
   fract_pixel_space.end = fract_pixel_space.start + fract_pixel_space_size;
 
   Rectangle pixel_space = round_down(fract_pixel_space);
-  pixel_space = (Rectangle){pixel_space.start, pixel_space.end};
-
   pixel_space = crop_to(pixel_space, render_region);
-
-  pos = round_down(pos);
-
-  r32 width = bitmap->file->width * render_basis->scale * opts->scale;
-  r32 height = bitmap->file->height * render_basis->scale * opts->scale;
 
   for (u32 pixel_y = pixel_space.start.y;
        pixel_y < pixel_space.end.y;
@@ -220,8 +213,8 @@ blit_bitmap(FrameBuffer *frame_buffer,
          pixel_x < pixel_space.end.x;
          pixel_x++)
     {
-      u32 dx = pixel_x - pixel_space.start.x;
-      u32 dy = pixel_y - pixel_space.start.y;
+      r32 dx = pixel_x - fract_pixel_space.start.x;
+      r32 dy = pixel_y - fract_pixel_space.start.y;
 
       r32 u = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
       r32 v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
