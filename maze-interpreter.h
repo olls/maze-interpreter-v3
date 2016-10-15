@@ -29,6 +29,7 @@ struct GameState
 
   V2 maze_pos;
   V2 last_mouse_pos;
+  b32 currently_panning;
 
   b32 single_step;
   u64 last_sim_tick;
@@ -45,4 +46,7 @@ struct GameState
   Bitmap font;
 
   char persistent_str[256];
+
+  Cell *cell_currently_being_edited;
+  UI ui;
 };

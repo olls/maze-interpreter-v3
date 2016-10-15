@@ -90,6 +90,10 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
         break;
       case CELL_PAUSE:    color = (V4){1, 0.3, 0.0, 0.7};
         break;
+
+      default:
+        invalid_code_path;
+        break;
     }
 
     u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
@@ -107,6 +111,10 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
       color.b = min(color.b + 0.15, 1.0f);
     }
 
+    if (cell->edit_mode)
+    {
+      color.r = 1;
+    }
 
     draw_box(frame_buffer, render_basis, cell_bounds, color);
   }
@@ -142,12 +150,15 @@ render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rend
 #if 0
     V4 box_color = (V4){0.5f, 0, 0, 0};
     Rectangle world_tree_bounds = (tree->bounds * game_state->cell_spacing);
-    if (selected)
+    if (on_screen)
     {
       box_color.a = 1;
       box_color.r = 1;
     }
-    draw_box_outline(frame_buffer, render_basis, world_tree_bounds, box_color);
+    RenderBasis tmp_basis = *render_basis;
+    tmp_basis.clip_region = grow(tmp_basis.clip_region, 0);
+
+    draw_box_outline(frame_buffer, &tmp_basis, world_tree_bounds, box_color);
 #endif
 
     render_cells(game_state, frame_buffer, render_basis, tree->top_right, time_us);

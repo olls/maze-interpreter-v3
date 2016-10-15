@@ -8,6 +8,22 @@ update_cells_ui_state(GameState *game_state, Mouse *mouse, u64 time_us)
   if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
   {
     cell_hovered_over->hovered_at_time = time_us;
+
+    if (mouse->l_on_up && !game_state->currently_panning && game_state && (time_us >= cell_hovered_over->edit_mode_last_change + (u32)(seconds_in_u(1) / 1)))
+    {
+      cell_hovered_over->edit_mode_last_change = time_us;
+
+      if (cell_hovered_over->edit_mode)
+      {
+        game_state->cell_currently_being_edited = 0;
+        cell_hovered_over->edit_mode = false;
+      }
+      else
+      {
+        game_state->cell_currently_being_edited = cell_hovered_over;
+        cell_hovered_over->edit_mode = true;
+      }
+    }
   }
 }
 

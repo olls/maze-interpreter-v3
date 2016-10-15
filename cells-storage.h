@@ -18,7 +18,9 @@ enum CellType
   CELL_DOWN,
   CELL_LEFT,
   CELL_RIGHT,
-  CELL_PAUSE
+  CELL_PAUSE,
+
+  N_CELL_TYPES
 };
 
 struct Cell

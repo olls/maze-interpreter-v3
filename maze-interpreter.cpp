@@ -39,6 +39,15 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
   if (mouse->l_down)
   {
     game_state->maze_pos += d_screen_mouse_pixels;
+
+    if (game_state->currently_panning || d_screen_mouse_pixels != (V2){0,0})
+    {
+      game_state->currently_panning = true;
+    }
+  }
+  else
+  {
+    game_state->currently_panning = false;
   }
 
   V2 scale_focus;
@@ -170,7 +179,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
-      segments[(u32)s.y + (u32)ns.y*(u32)s.x] = get_segment(render_region_pixels, s, ns);
+      segments[(u32)s.y + (u32)ns.y*(u32)s.x] = get_segment(world_box, s, ns);
     }
   }
 
@@ -232,12 +241,18 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
+  update_ui(&game_state->ui, mouse);
+
+  update_pan_and_zoom(game_state, mouse);
+
+  //
+  // RENDER
+  //
+
   RenderBasis orthographic_basis;
   get_orthographic_basis(&orthographic_basis, render_region_pixels);
 
   fast_draw_box(frame_buffer, &orthographic_basis, render_region_pixels, (PixelColor){255, 255, 255});
-
-  update_pan_and_zoom(game_state, mouse);
 
   for (s.y = 0; s.y < ns.y; ++s.y)
   {
@@ -246,4 +261,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
       render(game_state, frame_buffer, segments[(u32)s.y + (u32)ns.y*(u32)s.x], time_us);
     }
   }
+
+  // TODO: Should go in render?
+  draw_ui(frame_buffer, &orthographic_basis, &game_state->ui);
 }

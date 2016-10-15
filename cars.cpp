@@ -338,6 +338,11 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       }
       log(L_CarsSim, "Pause: %d/%d", car->pause_left, current_cell->pause);
     } break;
+
+    default:
+    {
+      invalid_code_path;
+    } break;
   }
 }
 

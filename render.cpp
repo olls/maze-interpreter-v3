@@ -202,9 +202,7 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
 
   if (start.x > end.x)
   {
-    V2 temp = start;
-    start = end;
-    end = temp;
+    start = end, end = start;
   }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
@@ -292,4 +290,14 @@ draw_box_outline(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle
   draw_line(frame_buffer, render_basis, box.start, (V2){box.end.x, box.start.y}, color);
   draw_line(frame_buffer, render_basis, (V2){box.start.x, box.end.y}, box.end, color);
   draw_line(frame_buffer, render_basis, (V2){box.end.x, box.start.y}, box.end, color);
+}
+
+
+void
+draw_thick_box_outline(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color, s32 n)
+{
+  for (s32 i = 0; i < abs(n); ++i)
+  {
+    draw_box_outline(frame_buffer, render_basis, grow(box, -i*sign(n)), color);
+  }
 }

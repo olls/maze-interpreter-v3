@@ -31,6 +31,7 @@
 #include "cells.h"
 #include "parser.h"
 #include "draw.h"
+#include "ui.h"
 #include "input.h"
 
 #include "maze-interpreter.h"
@@ -43,6 +44,7 @@
 #include "cells.cpp"
 #include "parser.cpp"
 #include "draw.cpp"
+#include "ui.cpp"
 #include "input.cpp"
 
 #include "maze-interpreter.cpp"
