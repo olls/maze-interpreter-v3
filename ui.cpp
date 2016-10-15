@@ -1,5 +1,6 @@
 const V4 FRAME_COLOR = {1, 0.15, 0.3, 75};
-V2 MENU_ITEM_SIZE = {70, 20};
+const r32 FONT_SIZE = 0.2;
+V2 MENU_ITEM_SIZE = {250, 20};
 
 
 Rectangle
@@ -40,7 +41,7 @@ draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitm
       draw_box(frame_buffer, render_basis, rect, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
     }
 
-    draw_string(frame_buffer, render_basis, &bitmaps->font, rect.start, item->name, 0.2, (V4){1, 0, 0, 0});
+    draw_string(frame_buffer, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
   }
 }
 
@@ -48,6 +49,8 @@ draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitm
 void
 init_ui(UI *ui)
 {
+  u32 longest_menu_item = 0;
+
   ui->cell_type_menu.length = N_CELL_TYPES;
   for (u32 item_index = 0;
        item_index < N_CELL_TYPES;
@@ -56,8 +59,17 @@ init_ui(UI *ui)
     MenuItem *item = ui->cell_type_menu.items + item_index;
     strncpy(item->name, CELL_TYPE_NAMES[item_index], MAX_MENU_ITEM_NAME_LEN);
     item->cell_type = (CellType)item_index;
+
+    u32 len;
+    for (len = 0; item->name[len]; ++len);
+    if (len > longest_menu_item)
+    {
+      longest_menu_item = len;
+    }
   }
   ui->cell_type_menu.pos = (V2){10, 10};
+
+  MENU_ITEM_SIZE.x = longest_menu_item * CHAR_SIZE.x * FONT_SIZE;
 }
 
 
