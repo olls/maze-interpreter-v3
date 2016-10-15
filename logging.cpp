@@ -9,6 +9,7 @@
           CHANNEL(L_Cells) \
           CHANNEL(L_Parser) \
           CHANNEL(L_Particles) \
+          CHANNEL(L_UI) \
           CHANNEL(L_Bitmap) \
           CHANNEL(L_Font) \
           CHANNEL(L_Vector) \
@@ -41,6 +42,7 @@ channel_enabled(LoggingChannel channel)
     case L_Cells:
     case L_Parser:
     case L_Particles:
+    case L_UI:
     case L_Bitmap:
     case L_Font:
     case L_Vector:

@@ -150,6 +150,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->bitmaps.font, "font.bmp");
 
   strcpy(game_state->persistent_str, "Init!");
+
+  init_ui(&game_state->ui);
 }
 
 
@@ -253,7 +255,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  update_ui(&orthographic_basis, &game_state->ui, mouse, time_us);
+  update_ui(&orthographic_basis, game_state, &game_state->ui, mouse, time_us);
 
   //
   // RENDER

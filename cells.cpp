@@ -10,20 +10,27 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
     cell_hovered_over->hovered_at_time = time_us;
   }
 
-    if (mouse->l_on_up && !game_state->currently_panning && game_state && (time_us >= cell_hovered_over->edit_mode_last_change + (u32)(seconds_in_u(1) / 1)))
+  if (mouse->l_on_up && !game_state->currently_panning)
+  {
+    if (cell_hovered_over)
     {
-      cell_hovered_over->edit_mode_last_change = time_us;
+      if (time_us >= cell_hovered_over->edit_mode_last_change + seconds_in_u(0.01))
+      {
+        cell_hovered_over->edit_mode_last_change = time_us;
 
-      if (cell_hovered_over->edit_mode)
-      {
-        game_state->cell_currently_being_edited = 0;
-        cell_hovered_over->edit_mode = false;
+        if (cell_hovered_over == game_state->ui.cell_currently_being_edited)
+        {
+          game_state->ui.cell_currently_being_edited = 0;
+        }
+        else
+        {
+          game_state->ui.cell_currently_being_edited = cell_hovered_over;
+        }
       }
-      else
-      {
-        game_state->cell_currently_being_edited = cell_hovered_over;
-        cell_hovered_over->edit_mode = true;
-      }
+    }
+    else
+    {
+      game_state->ui.cell_currently_being_edited = 0;
     }
   }
 }

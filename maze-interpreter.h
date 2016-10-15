@@ -49,11 +49,9 @@ struct GameState
   Cars cars;
   Particles particles;
 
-  Bitmap tile;
-  Bitmap font;
+  Bitmaps bitmaps;
 
   char persistent_str[256];
 
-  Cell *cell_currently_being_edited;
   UI ui;
 };

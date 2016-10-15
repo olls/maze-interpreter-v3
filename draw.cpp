@@ -111,7 +111,7 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
       color.b = min(color.b + 0.15, 1.0f);
     }
 
-    if (cell->edit_mode)
+    if (cell == game_state->ui.cell_currently_being_edited)
     {
       color.r = 1;
     }

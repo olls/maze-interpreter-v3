@@ -1,47 +1,90 @@
-void
-draw_ui_frame(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle frame)
+const V4 FRAME_COLOR = {1, 0.15, 0.3, 75};
+V2 MENU_ITEM_SIZE = {70, 20};
+
+
+Rectangle
+get_memu_item_rect(Menu *menu, u32 n)
 {
-  V4 frame_color = {1, 0.15, 0.3, 75};
-  draw_thick_box_outline(frame_buffer, render_basis, frame, frame_color, 4);
+  Rectangle result;
+  result.start = menu->pos + (V2){0, n}*MENU_ITEM_SIZE;
+  result.end = result.start + MENU_ITEM_SIZE;
+  return result;
 }
 
 
 void
-draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Menu *menu)
+draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, u64 time_us)
 {
   Rectangle rect;
-  rect.start = render_basis->origin + menu->pos;
-  rect.end = rect.start + (V2){70, 20 * menu->length};
-  draw_ui_frame(frame_buffer, render_basis, rect);
+  rect.start = menu->pos;
+  rect.end = rect.start + MENU_ITEM_SIZE * (V2){1, menu->length};
+  rect = grow(rect, 2);
+
+  draw_thick_box_outline(frame_buffer, render_basis, rect, FRAME_COLOR, 1);
+
+  for (u32 item_index = 0;
+       item_index < menu->length;
+       ++item_index)
+  {
+    MenuItem *item = menu->items + item_index;
+
+    rect = get_memu_item_rect(menu, item_index);
+    draw_thick_box_outline(frame_buffer, render_basis, rect, FRAME_COLOR, 1);
+
+    if (item->hovered_at_time == time_us)
+    {
+      draw_box(frame_buffer, render_basis, rect, clamp(FRAME_COLOR + 0.5, 1));
+    }
+
+    draw_string(frame_buffer, render_basis, &bitmaps->font, rect.start, item->name, 0.2, (V4){1, 0, 0, 0});
+  }
 }
 
 
 void
-draw_ui(FrameBuffer *frame_buffer, RenderBasis *render_basis, UI *ui)
+init_ui(UI *ui)
 {
-  for (u32 menu_index = 0;
-       menu_index < MAX_MENUS;
-       ++menu_index)
+  ui->cell_type_menu.length = N_CELL_TYPES;
+  for (u32 item_index = 0;
+       item_index < N_CELL_TYPES;
+       ++item_index)
   {
-    Menu *menu = ui->menu_items + menu_index;
-    if (menu->length)
+    MenuItem *item = ui->cell_type_menu.items + item_index;
+    strncpy(item->name, CELL_TYPE_NAMES[item_index], MAX_MENU_ITEM_NAME_LEN);
+    item->cell_type = (CellType)item_index;
+  }
+  ui->cell_type_menu.pos = (V2){10, 10};
+}
+
+
+void
+update_ui(RenderBasis *render_basis, GameState *game_state, UI *ui, Mouse *mouse, u64 time_us)
+{
+  for (u32 item_index = 0;
+       item_index < ui->cell_type_menu.length;
+       ++item_index)
+  {
+    MenuItem *item = ui->cell_type_menu.items + item_index;
+
+    Rectangle rect = get_memu_item_rect(&ui->cell_type_menu, item_index);
+    if (in_rectangle(untransform_coord(render_basis, (V2){mouse->x, mouse->y}), rect))
     {
-      draw_ui_menu(frame_buffer, render_basis, menu);
+      item->hovered_at_time = time_us;
+
+      if (mouse->l_down && !game_state->currently_panning && ui->cell_currently_being_edited)
+      {
+        ui->cell_currently_being_edited->type = item->cell_type;
+      }
     }
   }
 }
 
 
 void
-update_ui(UI *ui, Mouse *mouse)
+draw_ui(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitmaps, UI *ui, u64 time_us)
 {
-  if (mouse->l_down)
+  if (ui->cell_currently_being_edited)
   {
-    ui->menu_items[0].length = N_CELL_TYPES;
-    ui->menu_items[0].pos = (V2){0, 0};
-  }
-  else
-  {
-    ui->menu_items[0].length = 0;
+    draw_ui_menu(frame_buffer, render_basis, bitmaps, &ui->cell_type_menu, time_us);
   }
 }
