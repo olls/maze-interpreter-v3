@@ -156,7 +156,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 argc, char *argv[])
+update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps, u32 argc, char *argv[])
 {
   Rectangle render_region_pixels;
   render_region_pixels.start = (V2){0, 0};
@@ -278,6 +278,10 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   // TODO: Should go in render?
   draw_ui(frame_buffer, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
+
+  char str[256];
+  fmted_str(str, "%d", fps);
+  draw_string(frame_buffer, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
 
   // TODO: Get rid of this
   game_state->last_render_basis = render_basis;

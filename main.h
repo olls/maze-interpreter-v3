@@ -76,3 +76,11 @@ struct Mouse
 
   V2 scroll;
 };
+
+
+struct FPSCounter
+{
+  u32 frame_count;
+  u64 last_update;
+  u32 current_avg;
+};
