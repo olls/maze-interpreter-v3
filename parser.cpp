@@ -471,8 +471,6 @@ parse(Maze *maze, Memory *memory, const char *filename)
   zero_n(maze->functions, Function, MAX_FUNCTIONS);
 
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
-  maze->width = 0;
-  maze->height = 0;
 
   u32 x = 0;
   u32 y = 0;
@@ -528,10 +526,6 @@ parse(Maze *maze, Memory *memory, const char *filename)
     {
       if (cell_str[0] == '\n')
       {
-        if (x > maze->width)
-        {
-          maze->width = x;
-        }
         x = 0;
         ++y;
         log_s(L_Parser, "\n");
@@ -539,10 +533,8 @@ parse(Maze *maze, Memory *memory, const char *filename)
       f_ptr += 1;
     }
   }
-  maze->height = y;
 
   log_s(L_Parser, "\n");
-  log(L_Parser, "(%d, %d)", maze->width, maze->height);
 
   if (munmap((void *)file, sb.st_size) != 0)
   {

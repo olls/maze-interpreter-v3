@@ -29,6 +29,7 @@ struct RenderSegments
 struct GameState
 {
   b32 init;
+  const char *filename;
 
   u32 world_per_pixel;
   r32 d_zoom;

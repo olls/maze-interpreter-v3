@@ -65,7 +65,7 @@ render(GameState *game_state, RenderBasis *render_basis, FrameBuffer *frame_buff
   render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), frame_buffer, render_basis);
 
-  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height-2} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
+  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
 }
 
 
@@ -116,14 +116,11 @@ reset_zoom(GameState *game_state)
 void
 load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
-  if (argc > 1)
-  {
-    parse(&(game_state->maze), memory, argv[1]);
-  }
-  else
-  {
-    parse(&(game_state->maze), memory, MAZE_FILENAME);
-  }
+  parse(&game_state->maze, memory, game_state->filename);
+
+  V2 size = get_maze_size(&game_state->maze);
+  game_state->maze.width = size.x;
+  game_state->maze.height = size.y;
 
   delete_all_cars(&(game_state->cars));
 
@@ -139,6 +136,16 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   game_state->single_step = false;
   game_state->sim_ticks_per_s = 5;
+
+  if (argc > 1)
+  {
+    game_state->filename = argv[1];
+  }
+  else
+  {
+    printf("Error: No Maze filename supplied.\n");
+    exit(1);
+  }
 
   setup_inputs(keys, game_state->inputs);
 
@@ -176,7 +183,7 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
 
   game_state->world_render_region = grow(game_state->screen_render_region, -10);
 
-  V2 ns = {8, 8};
+  V2 ns = {1, 1};
   game_state->render_segs.segments = push_structs(memory, Rectangle, ns.x * ns.y);
   game_state->render_segs.n_segments = ns;
 

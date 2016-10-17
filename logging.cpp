@@ -8,6 +8,7 @@
           CHANNEL(L_CellsStorage) \
           CHANNEL(L_Cells) \
           CHANNEL(L_Parser) \
+          CHANNEL(L_Serializer) \
           CHANNEL(L_Particles) \
           CHANNEL(L_UI) \
           CHANNEL(L_Bitmap) \
@@ -41,6 +42,7 @@ channel_enabled(LoggingChannel channel)
     case L_CellsStorage:
     case L_Cells:
     case L_Parser:
+    case L_Serializer:
     case L_Particles:
     case L_UI:
     case L_Bitmap:
