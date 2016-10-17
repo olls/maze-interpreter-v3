@@ -74,7 +74,7 @@ init_ui(UI *ui)
 
 
 void
-update_ui(RenderBasis *render_basis, GameState *game_state, UI *ui, Mouse *mouse, u64 time_us)
+update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, u64 time_us)
 {
   for (u32 item_index = 0;
        item_index < ui->cell_type_menu.length;

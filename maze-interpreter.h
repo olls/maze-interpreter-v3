@@ -19,6 +19,13 @@ struct Bitmaps
 };
 
 
+struct RenderSegments
+{
+  V2 n_segments;
+  Rectangle *segments;
+};
+
+
 struct GameState
 {
   b32 init;
@@ -29,6 +36,11 @@ struct GameState
   V2 scale_focus;
 
   RenderBasis last_render_basis;
+
+  Rectangle screen_render_region;
+  Rectangle world_render_region;
+
+  RenderSegments render_segs;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   u32 cell_spacing;

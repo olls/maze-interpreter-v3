@@ -96,7 +96,7 @@ sim_tick(GameState *game_state, u64 time_us)
 
 
 void
-reset_zoom(GameState *game_state, Rectangle world_box)
+reset_zoom(GameState *game_state)
 {
   // TODO: Should world coords be r32s now we are using u32s for
   //       the cell position?
@@ -109,7 +109,7 @@ reset_zoom(GameState *game_state, Rectangle world_box)
   game_state->zoom = 30;
 
   V2 maze_size_in_pixels = (V2){game_state->maze.width, game_state->maze.height} * game_state->cell_spacing / game_state->world_per_pixel;
-  game_state->maze_pos = (0.5f * size(world_box)) - (0.5f * maze_size_in_pixels);
+  game_state->maze_pos = (0.5f * size(game_state->world_render_region)) - (0.5f * maze_size_in_pixels);
 }
 
 
@@ -152,36 +152,56 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   strcpy(game_state->persistent_str, "Init!");
 
   init_ui(&game_state->ui);
+
+  // u32 n_threads = 4;
+  // pthread_t threads[n_threads];
+
+  // for (u32 thread_index = 0;
+  //      thread_index < n_threads;
+  //      ++thread_index)
+  // {
+  //   pthread_t *thread = threads + thread_index;
+  //   pthread_create(thread), NULL, render, (void *)render_data);
+  // }
+
 }
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps, u32 argc, char *argv[])
+init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer)
 {
-  Rectangle render_region_pixels;
-  render_region_pixels.start = (V2){0, 0};
-  render_region_pixels.end = (V2){frame_buffer->width, frame_buffer->height};
-  render_region_pixels = grow(render_region_pixels, -20);
+  game_state->screen_render_region.start = (V2){0, 0};
+  game_state->screen_render_region.end = (V2){frame_buffer->width, frame_buffer->height};
+  game_state->screen_render_region = grow(game_state->screen_render_region, -20);
 
-  Rectangle world_box = grow(render_region_pixels, -10);
+  game_state->world_render_region = grow(game_state->screen_render_region, -10);
 
-  V2 ns = {1, 1};
-  Rectangle segments[(u32)ns.x*(u32)ns.y];
+  V2 ns = {8, 8};
+  game_state->render_segs.segments = push_structs(memory, Rectangle, ns.x * ns.y);
+  game_state->render_segs.n_segments = ns;
 
   V2 s;
   for (s.y = 0; s.y < ns.y; ++s.y)
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
-      segments[(u32)s.y + (u32)ns.y*(u32)s.x] = get_segment(world_box, s, ns);
+      Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
+      *segment = get_segment(game_state->world_render_region, s, ns);
     }
   }
+}
+
+
+void
+update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps, u32 argc, char *argv[])
+{
 
   if (!game_state->init)
   {
+    init_render_segments(memory, game_state, frame_buffer);
     init_game(memory, game_state, keys, time_us, argc, argv);
     load_maze(memory, game_state, argc, argv);
-    reset_zoom(game_state, world_box);
+    reset_zoom(game_state);
   }
 
   update_inputs(keys, game_state->inputs, time_us);
@@ -195,7 +215,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (game_state->inputs[RESET].active)
   {
     strcpy(game_state->persistent_str, "Reset!");
-    reset_zoom(game_state, world_box);
+    reset_zoom(game_state);
   }
 
   if (game_state->inputs[RESTART].active)
@@ -223,10 +243,10 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   render_basis.scale = squared(game_state->zoom / 30.0f);
   render_basis.scale_focus = game_state->scale_focus;
   render_basis.origin = game_state->maze_pos * game_state->world_per_pixel;
-  render_basis.clip_region = render_region_pixels * game_state->world_per_pixel;
+  render_basis.clip_region = game_state->world_render_region * game_state->world_per_pixel;
 
   RenderBasis orthographic_basis;
-  get_orthographic_basis(&orthographic_basis, render_region_pixels);
+  get_orthographic_basis(&orthographic_basis, game_state->screen_render_region);
 
   //
   // UPDATE WORLD
@@ -255,22 +275,24 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  update_ui(&orthographic_basis, game_state, &game_state->ui, mouse, time_us);
+  update_ui(game_state, &orthographic_basis, &game_state->ui, mouse, time_us);
 
   //
   // RENDER
   //
 
-  fast_draw_box(frame_buffer, &orthographic_basis, (Rectangle){(V2){0,0},size(render_region_pixels)}, (PixelColor){255, 255, 255});
+  fast_draw_box(frame_buffer, &orthographic_basis, (Rectangle){(V2){0,0},size(game_state->screen_render_region)}, (PixelColor){255, 255, 255});
 
+  V2 ns = game_state->render_segs.n_segments;
+  V2 s;
   for (s.y = 0; s.y < ns.y; ++s.y)
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
-      Rectangle segment_rect = segments[(u32)s.y + (u32)ns.y*(u32)s.x];
+      Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
 
       RenderBasis segment_render_basis = render_basis;
-      segment_render_basis.clip_region = segment_rect * game_state->world_per_pixel;
+      segment_render_basis.clip_region = *segment * game_state->world_per_pixel;
 
       render(game_state, &segment_render_basis, frame_buffer, time_us);
     }
