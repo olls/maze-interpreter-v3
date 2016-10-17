@@ -307,4 +307,5 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   // TODO: Get rid of this
   game_state->last_render_basis = render_basis;
+  game_state->panning_this_frame = game_state->currently_panning;
 }

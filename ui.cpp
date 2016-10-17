@@ -87,7 +87,7 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
     {
       item->hovered_at_time = time_us;
 
-      if (mouse->l_down && !game_state->currently_panning && ui->cell_currently_being_edited)
+      if (mouse->l_down && !game_state->panning_this_frame && ui->cell_currently_being_edited)
       {
         ui->cell_currently_being_edited->type = item->cell_type;
       }

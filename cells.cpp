@@ -10,7 +10,7 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
     cell_hovered_over->hovered_at_time = time_us;
   }
 
-  if (mouse->l_on_up && !game_state->currently_panning)
+  if (mouse->l_on_up && !game_state->panning_this_frame)
   {
     if (cell_hovered_over)
     {
