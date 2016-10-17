@@ -58,105 +58,22 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin)
       u32 cell_file_offset = CELL_LENGTH*(rel_cell_pos_x + (rel_cell_pos_y * width)) + n_line_breaks;
       char *file_pos = file + cell_file_offset;
 
-      switch (cell->type)
+      if (cell->type == CELL_FUNCTION)
       {
-        case (CELL_START):
-        {
-          file_pos[0] = '^';
-          file_pos[1] = '^';
-        } break;
-        case (CELL_PATH):
-        {
-          file_pos[0] = '.';
-          file_pos[1] = '.';
-        } break;
-        case (CELL_WALL):
-        {
-          file_pos[0] = '#';
-          file_pos[1] = '#';
-        } break;
-        case (CELL_HOLE):
-        {
-          file_pos[0] = '(';
-          file_pos[1] = ')';
-        } break;
-        case (CELL_SPLITTER):
-        {
-          file_pos[0] = '<';
-          file_pos[1] = '>';
-        } break;
-        case (CELL_FUNCTION):
-        {
-          // TODO!
-          file_pos[0] = 'A';
-          file_pos[1] = 'A';
-        } break;
-        case (CELL_ONCE):
-        {
-          file_pos[0] = '-';
-          file_pos[1] = '-';
-        } break;
-        case (CELL_UP_UNLESS_DETECT):
-        {
-          file_pos[0] = '*';
-          file_pos[1] = 'U';
-        } break;
-        case (CELL_DOWN_UNLESS_DETECT):
-        {
-          file_pos[0] = '*';
-          file_pos[1] = 'D';
-        } break;
-        case (CELL_LEFT_UNLESS_DETECT):
-        {
-          file_pos[0] = '*';
-          file_pos[1] = 'L';
-        } break;
-        case (CELL_RIGHT_UNLESS_DETECT):
-        {
-          file_pos[0] = '*';
-          file_pos[1] = 'R';
-        } break;
-        case (CELL_INP):
-        {
-          file_pos[0] = '<';
-          file_pos[1] = '<';
-        } break;
-        case (CELL_OUT):
-        {
-          file_pos[0] = '>';
-          file_pos[1] = '>';
-        } break;
-        case (CELL_UP):
-        {
-          file_pos[0] = '%';
-          file_pos[1] = 'U';
-        } break;
-        case (CELL_DOWN):
-        {
-          file_pos[0] = '%';
-          file_pos[1] = 'D';
-        } break;
-        case (CELL_LEFT):
-        {
-          file_pos[0] = '%';
-          file_pos[1] = 'L';
-        } break;
-        case (CELL_RIGHT):
-        {
-          file_pos[0] = '%';
-          file_pos[1] = 'R';
-        } break;
-        case (CELL_PAUSE):
-        {
-          // TODO!
-          file_pos[0] = '0';
-          file_pos[1] = '0';
-        } break;
-        default:
-        {
-          file_pos[0] = ' ';
-          file_pos[1] = ' ';
-        } break;
+        // TODO!
+        file_pos[0] = 'A';
+        file_pos[1] = 'A';
+      }
+      else if (cell->type == CELL_PAUSE)
+      {
+        // TODO!
+        file_pos[0] = '0';
+        file_pos[1] = '0';
+      }
+      else
+      {
+        const char *text = CELL_TYPE_TXT[cell->type];
+        memcpy(file_pos, text, 2);
       }
 
       file_pos[2] = ' ';

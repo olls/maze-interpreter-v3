@@ -23,6 +23,53 @@ enum CellType
   N_CELL_TYPES
 };
 
+const char *CELL_TYPE_NAMES[] =
+{
+  "Null",                 // CELL_NULL
+  "Start",                // CELL_START
+  "Path",                 // CELL_PATH
+  "Wall",                 // CELL_WALL
+  "Hole",                 // CELL_HOLE
+  "Splitter",             // CELL_SPLITTER
+  "Function",             // CELL_FUNCTION
+  "Once",                 // CELL_ONCE
+  "Up Unless Detect",     // CELL_UP_UNLESS_DETECT
+  "Down Unless Detect",   // CELL_DOWN_UNLESS_DETECT
+  "Left Unless Detect",   // CELL_LEFT_UNLESS_DETECT
+  "Right Unless Detect",  // CELL_RIGHT_UNLESS_DETECT
+  "Inp",                  // CELL_INP
+  "Out",                  // CELL_OUT
+  "Up",                   // CELL_UP
+  "Down",                 // CELL_DOWN
+  "Left",                 // CELL_LEFT
+  "Right",                // CELL_RIGHT
+  "Pause"                 // CELL_PAUSE
+};
+
+const char *CELL_TYPE_TXT[] =
+{
+  "!!",  // CELL_NULL
+  "^^",  // CELL_START
+  "..",  // CELL_PATH
+  "##",  // CELL_WALL
+  "()",  // CELL_HOLE
+  "<>",  // CELL_SPLITTER
+  "AA",  // CELL_FUNCTION
+  "--",  // CELL_ONCE
+  "*U",  // CELL_UP_UNLESS_DETECT
+  "*D",  // CELL_DOWN_UNLESS_DETECT
+  "*L",  // CELL_LEFT_UNLESS_DETECT
+  "*R",  // CELL_RIGHT_UNLESS_DETECT
+  "<<",  // CELL_INP
+  ">>",  // CELL_OUT
+  "%U",  // CELL_UP
+  "%D",  // CELL_DOWN
+  "%L",  // CELL_LEFT
+  "%R",  // CELL_RIGHT
+  "00"   // CELL_PAUSE
+};
+
+
 struct Cell
 {
   u32 x;
