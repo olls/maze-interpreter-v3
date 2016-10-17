@@ -1,6 +1,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <SDL2/SDL.h>
 
 // Game Independent
@@ -36,6 +37,7 @@
 #include "input.h"
 
 #include "maze-interpreter.h"
+#include "render-queue.h"
 
 #include "functions.cpp"
 #include "particles.cpp"
@@ -48,6 +50,7 @@
 #include "draw.cpp"
 #include "ui.cpp"
 #include "input.cpp"
+#include "render-queue.cpp"
 
 #include "maze-interpreter.cpp"
 

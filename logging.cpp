@@ -15,6 +15,7 @@
           CHANNEL(L_Font) \
           CHANNEL(L_Vector) \
           CHANNEL(L_Render) \
+          CHANNEL(L_RenderQueue) \
           CHANNEL(L_GameLoop) \
           CHANNEL(N_LOGGING_CHANNELS)
 
@@ -49,6 +50,7 @@ channel_enabled(LoggingChannel channel)
     case L_Font:
     case L_Vector:
     case L_Render:
+    // case L_RenderQueue:
     case L_GameLoop:
     {
       return false;

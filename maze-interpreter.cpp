@@ -95,6 +95,35 @@ sim_tick(GameState *game_state, u64 time_us)
 }
 
 
+void *
+consume_from_render_queue(void *q)
+{
+  RenderQueue *render_queue = (RenderQueue *)q;
+
+  while (true)
+  {
+    pthread_mutex_lock(&render_queue->mut);
+
+    while (render_queue->empty)
+    {
+      log(L_RenderQueue, "consumer: queue EMPTY.");
+      pthread_cond_wait(&render_queue->notEmpty, &render_queue->mut);
+    }
+
+    RenderData render_data;
+    queue_del(render_queue, &render_data);
+
+    pthread_mutex_unlock(&render_queue->mut);
+    pthread_cond_signal(&render_queue->notFull);
+
+    render(&render_data.game_state, &render_data.render_basis, render_data.frame_buffer, render_data.time_us);
+    log(L_RenderQueue, "consumer: recieved %d.", render_data.id);
+  }
+
+  return 0;
+}
+
+
 void
 reset_zoom(GameState *game_state)
 {
@@ -129,6 +158,9 @@ load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 }
 
 
+RenderQueue render_queue;
+
+
 void
 init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
 {
@@ -159,18 +191,6 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   strcpy(game_state->persistent_str, "Init!");
 
   init_ui(&game_state->ui);
-
-  // u32 n_threads = 4;
-  // pthread_t threads[n_threads];
-
-  // for (u32 thread_index = 0;
-  //      thread_index < n_threads;
-  //      ++thread_index)
-  // {
-  //   pthread_t *thread = threads + thread_index;
-  //   pthread_create(thread), NULL, render, (void *)render_data);
-  // }
-
 }
 
 
@@ -183,7 +203,7 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
 
   game_state->world_render_region = grow(game_state->screen_render_region, -10);
 
-  V2 ns = {1, 1};
+  V2 ns = {8, 8};
   game_state->render_segs.segments = push_structs(memory, Rectangle, ns.x * ns.y);
   game_state->render_segs.n_segments = ns;
 
@@ -296,12 +316,31 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
+      RenderData render_data;
+
+      memcpy(&render_data.render_basis, &render_basis, sizeof(RenderBasis));
       Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
+      render_data.render_basis.clip_region = *segment * game_state->world_per_pixel;
 
-      RenderBasis segment_render_basis = render_basis;
-      segment_render_basis.clip_region = *segment * game_state->world_per_pixel;
+      memcpy(&render_data.game_state, game_state, sizeof(GameState));
+      render_data.frame_buffer = frame_buffer;
+      render_data.time_us = time_us;
+      static u32 id = 0;
+      render_data.id = ++id;
 
-      render(game_state, &segment_render_basis, frame_buffer, time_us);
+      pthread_mutex_lock(&render_queue.mut);
+
+      while (render_queue.full)
+      {
+        log(L_RenderQueue, "producer: queue FULL.");
+        pthread_cond_wait(&render_queue.notFull, &render_queue.mut);
+      }
+
+      log(L_RenderQueue, "producer: Adding %d.", render_data.id);
+      queue_add(&render_queue, render_data);
+
+      pthread_mutex_unlock(&render_queue.mut);
+      pthread_cond_signal(&render_queue.notEmpty);
     }
   }
 
