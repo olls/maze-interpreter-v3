@@ -345,6 +345,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
       render_data.frame_buffer = frame_buffer;
       render_data.render_operations = &game_state->render_operations;
 
+#ifdef THEADED_RENDERING
       pthread_mutex_lock(&game_state->render_queue.mut);
 
       while (game_state->render_queue.full)
@@ -358,6 +359,9 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
       pthread_mutex_unlock(&game_state->render_queue.mut);
       pthread_cond_signal(&game_state->render_queue.not_empty);
+#else
+      consume_render_operations(render_data.frame_buffer, render_data.render_operations, render_data.clip_region);
+#endif
     }
   }
 
