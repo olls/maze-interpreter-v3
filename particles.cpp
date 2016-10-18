@@ -148,7 +148,7 @@ step_particles(Particles *particles, u64 time_us)
 
 
 void
-render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *render_basis)
+render_particles(Particles *particles, RenderOperations *render_operations, RenderBasis *render_basis)
 {
   for (u32 particle_index = 0;
        particle_index < MAX_PARTICLES;
@@ -171,8 +171,8 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
           r32 left_x = pos.x - pixel_size * 1.5;
           r32 right_x = pos.x + pixel_size * 1.5;
 
-          draw_box(frame_buffer, render_basis, (Rectangle){(V2){pos.x - pixel_size*.5, top_y}, (V2){pos.x + pixel_size*.5, bottom_y}}, particle->color);
-          draw_box(frame_buffer, render_basis, (Rectangle){(V2){left_x, pos.y - pixel_size*.5}, (V2){right_x, pos.y + pixel_size*.5}}, particle->color);
+          add_box_to_render_list(render_operations, render_basis, (Rectangle){(V2){pos.x - pixel_size*.5, top_y}, (V2){pos.x + pixel_size*.5, bottom_y}}, particle->color);
+          add_box_to_render_list(render_operations, render_basis, (Rectangle){(V2){left_x, pos.y - pixel_size*.5}, (V2){right_x, pos.y + pixel_size*.5}}, particle->color);
         } break;
         case PS_GROW:
         {
@@ -185,7 +185,7 @@ render_particles(Particles *particles, FrameBuffer *frame_buffer, RenderBasis *r
           blit_opts.color_multiplier = particle->color;
           blit_opts.hue_shift = particle->hue;
           blit_opts.interpolation = true;
-          blit_bitmap(frame_buffer, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), &blit_opts);
+          add_bitmap_to_render_list(render_operations, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), &blit_opts);
         } break;
       }
     }

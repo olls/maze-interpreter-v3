@@ -14,14 +14,14 @@ get_memu_item_rect(Menu *menu, u32 n)
 
 
 void
-draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, CellType type, u64 time_us)
+draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, CellType type, u64 time_us)
 {
   Rectangle rect;
   rect.start = menu->pos;
   rect.end = rect.start + MENU_ITEM_SIZE * (V2){1, menu->length};
   rect = grow(rect, 2);
 
-  draw_thick_box_outline(frame_buffer, render_basis, rect, FRAME_COLOR, 1);
+  draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR, 1);
 
   for (u32 item_index = 0;
        item_index < menu->length;
@@ -30,18 +30,18 @@ draw_ui_menu(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitm
     MenuItem *item = menu->items + item_index;
 
     rect = get_memu_item_rect(menu, item_index);
-    draw_thick_box_outline(frame_buffer, render_basis, rect, FRAME_COLOR, 1);
+    draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR, 1);
 
     if (item->hovered_at_time == time_us)
     {
-      draw_box(frame_buffer, render_basis, rect, clamp(FRAME_COLOR + 0.5, 1));
+      add_box_to_render_list(render_operations, render_basis, rect, clamp(FRAME_COLOR + 0.5, 1));
     }
     else if (type == item->cell_type)
     {
-      draw_box(frame_buffer, render_basis, rect, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
+      add_box_to_render_list(render_operations, render_basis, rect, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
     }
 
-    draw_string(frame_buffer, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
+    draw_string(render_operations, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
   }
 }
 
@@ -97,10 +97,10 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
 
 
 void
-draw_ui(FrameBuffer *frame_buffer, RenderBasis *render_basis, Bitmaps *bitmaps, UI *ui, u64 time_us)
+draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, UI *ui, u64 time_us)
 {
   if (ui->cell_currently_being_edited)
   {
-    draw_ui_menu(frame_buffer, render_basis, bitmaps, &ui->cell_type_menu, ui->cell_currently_being_edited->type, time_us);
+    draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, ui->cell_currently_being_edited->type, time_us);
   }
 }

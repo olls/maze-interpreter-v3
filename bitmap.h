@@ -40,3 +40,14 @@ struct Bitmap
   s32 green_shift;
   s32 blue_shift;
 };
+
+
+struct BlitBitmapOptions
+{
+  Rectangle crop;
+  V4 color_multiplier;
+  b32 invert;
+  r32 hue_shift;
+  b32 interpolation;
+  r32 scale;
+};

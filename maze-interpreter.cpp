@@ -58,14 +58,32 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
 }
 
 
-void
-render(GameState *game_state, RenderBasis *render_basis, FrameBuffer *frame_buffer, u64 time_us)
+void *
+consume_from_render_queue(void *q)
 {
-  render_cells(game_state, frame_buffer, render_basis, &(game_state->maze.tree), time_us);
-  render_cars(game_state, frame_buffer, render_basis, &(game_state->cars), time_us);
-  // render_particles(&(game_state->particles), frame_buffer, render_basis);
+  RenderQueue *render_queue = (RenderQueue *)q;
 
-  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
+  while (true)
+  {
+    pthread_mutex_lock(&render_queue->mut);
+
+    while (render_queue->empty)
+    {
+      log(L_RenderQueue, "consumer: queue EMPTY.");
+      pthread_cond_wait(&render_queue->not_empty, &render_queue->mut);
+    }
+
+    RenderQueueData render_data;
+    queue_del(render_queue, &render_data);
+
+    pthread_mutex_unlock(&render_queue->mut);
+    pthread_cond_signal(&render_queue->not_full);
+
+    consume_render_operations(render_data.frame_buffer, render_data.render_operations, render_data.clip_region);
+    log(L_RenderQueue, "consumer: recieved.");
+  }
+
+  return 0;
 }
 
 
@@ -92,35 +110,6 @@ sim_tick(GameState *game_state, u64 time_us)
   }
 
   return result;
-}
-
-
-void *
-consume_from_render_queue(void *q)
-{
-  RenderQueue *render_queue = (RenderQueue *)q;
-
-  while (true)
-  {
-    pthread_mutex_lock(&render_queue->mut);
-
-    while (render_queue->empty)
-    {
-      log(L_RenderQueue, "consumer: queue EMPTY.");
-      pthread_cond_wait(&render_queue->notEmpty, &render_queue->mut);
-    }
-
-    RenderData render_data;
-    queue_del(render_queue, &render_data);
-
-    pthread_mutex_unlock(&render_queue->mut);
-    pthread_cond_signal(&render_queue->notFull);
-
-    render(&render_data.game_state, &render_data.render_basis, render_data.frame_buffer, render_data.time_us);
-    log(L_RenderQueue, "consumer: recieved %d.", render_data.id);
-  }
-
-  return 0;
 }
 
 
@@ -156,9 +145,6 @@ load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->last_sim_tick = 0;
   game_state->sim_steps = 0;
 }
-
-
-RenderQueue render_queue;
 
 
 void
@@ -203,7 +189,7 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
 
   game_state->world_render_region = grow(game_state->screen_render_region, -10);
 
-  V2 ns = {8, 8};
+  V2 ns = {4, 4};
   game_state->render_segs.segments = push_structs(memory, Rectangle, ns.x * ns.y);
   game_state->render_segs.n_segments = ns;
 
@@ -213,14 +199,31 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
       Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
-      *segment = get_segment(game_state->world_render_region, s, ns);
+      *segment = grow(get_segment(game_state->screen_render_region, s, ns), 0);
     }
+  }
+
+  game_state->render_queue.empty = true;
+  game_state->render_queue.full = false;
+  game_state->render_queue.head = 0;
+  game_state->render_queue.tail = 0;
+
+  pthread_mutex_init(&game_state->render_queue.mut, 0);
+  pthread_cond_init(&game_state->render_queue.not_full, 0);
+  pthread_cond_init(&game_state->render_queue.not_empty, 0);
+
+  for (u32 t = 0;
+       t < ns.x*ns.y;
+       ++t)
+  {
+    pthread_t thread;
+    pthread_create(&thread, 0, consume_from_render_queue, &game_state->render_queue);
   }
 }
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps, u32 argc, char *argv[])
+update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps , u32 argc, char *argv[])
 {
 
   if (!game_state->init)
@@ -308,7 +311,25 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   // RENDER
   //
 
-  fast_draw_box(frame_buffer, &orthographic_basis, (Rectangle){(V2){0,0},size(game_state->screen_render_region)}, (PixelColor){255, 255, 255});
+  // Add render operations to queue
+
+  game_state->render_operations.next_free = 0;
+
+  add_fast_box_to_render_list(&game_state->render_operations, &orthographic_basis, (Rectangle){(V2){0,0},size(game_state->screen_render_region)}, (PixelColor){255, 255, 255});
+
+  draw_cells(game_state, &game_state->render_operations, &render_basis, &(game_state->maze.tree), time_us);
+  draw_cars(game_state, &game_state->render_operations, &render_basis, &(game_state->cars), time_us);
+  // render_particles(&(game_state->particles), &game_state->render_operations, &render_basis);
+
+  draw_string(&game_state->render_operations, &render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
+
+  draw_ui(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
+
+  char str[256];
+  fmted_str(str, "%d", fps);
+  draw_string(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
+
+  // Add render segments to render queue
 
   V2 ns = game_state->render_segs.n_segments;
   V2 s;
@@ -316,40 +337,31 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   {
     for (s.x = 0; s.x < ns.x; ++s.x)
     {
-      RenderData render_data;
+      RenderQueueData render_data;
 
-      memcpy(&render_data.render_basis, &render_basis, sizeof(RenderBasis));
       Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
-      render_data.render_basis.clip_region = *segment * game_state->world_per_pixel;
+      render_data.clip_region = *segment;
 
-      memcpy(&render_data.game_state, game_state, sizeof(GameState));
       render_data.frame_buffer = frame_buffer;
-      render_data.time_us = time_us;
-      static u32 id = 0;
-      render_data.id = ++id;
+      render_data.render_operations = &game_state->render_operations;
 
-      pthread_mutex_lock(&render_queue.mut);
+      pthread_mutex_lock(&game_state->render_queue.mut);
 
-      while (render_queue.full)
+      while (game_state->render_queue.full)
       {
         log(L_RenderQueue, "producer: queue FULL.");
-        pthread_cond_wait(&render_queue.notFull, &render_queue.mut);
+        pthread_cond_wait(&game_state->render_queue.not_full, &game_state->render_queue.mut);
       }
 
-      log(L_RenderQueue, "producer: Adding %d.", render_data.id);
-      queue_add(&render_queue, render_data);
+      log(L_RenderQueue, "producer: Adding.");
+      queue_add(&game_state->render_queue, render_data);
 
-      pthread_mutex_unlock(&render_queue.mut);
-      pthread_cond_signal(&render_queue.notEmpty);
+      pthread_mutex_unlock(&game_state->render_queue.mut);
+      pthread_cond_signal(&game_state->render_queue.not_empty);
     }
   }
 
-  // TODO: Should go in render?
-  draw_ui(frame_buffer, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
-
-  char str[256];
-  fmted_str(str, "%d", fps);
-  draw_string(frame_buffer, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
+  // TODO: Wait for frame rendering to finish
 
   // TODO: Get rid of this
   game_state->last_render_basis = render_basis;

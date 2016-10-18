@@ -1,28 +1,22 @@
 const u32 RENDER_QUEUE_SIZE = 10;
 
 
-struct
-RenderData
+struct RenderQueueData
 {
-  GameState game_state;
-  RenderBasis render_basis;
   FrameBuffer *frame_buffer;
-  u64 time_us;
-  u32 id;
+  RenderOperations *render_operations;
+  Rectangle clip_region;
 };
 
 
-struct
-RenderQueue
+struct RenderQueue
 {
-  RenderData queue[RENDER_QUEUE_SIZE];
+  RenderQueueData queue[RENDER_QUEUE_SIZE];
   u32 head;
   u32 tail;
-  u32 full;
-  u32 empty;
+  b32 full;
+  b32 empty;
   pthread_mutex_t mut;
-  pthread_cond_t notFull;
-  pthread_cond_t notEmpty;
+  pthread_cond_t not_full;
+  pthread_cond_t not_empty;
 };
-
-

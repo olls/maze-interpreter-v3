@@ -41,7 +41,10 @@ struct GameState
   Rectangle screen_render_region;
   Rectangle world_render_region;
 
+  RenderQueue render_queue;
   RenderSegments render_segs;
+
+  RenderOperations render_operations;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   u32 cell_spacing;

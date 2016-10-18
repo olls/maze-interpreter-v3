@@ -10,6 +10,8 @@
 #include "vectors.h"
 #include "render.h"
 #include "bitmap.h"
+#include "render-operations.h"
+#include "render-queue.h"
 #include "font.h"
 
 #include "main.h"
@@ -21,6 +23,9 @@
 #include "render.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
+#include "render-operations.cpp"
+#include "render-queue.cpp"
+#include "draw-shapes.cpp"
 #include "font.cpp"
 
 // Game Related
@@ -37,7 +42,6 @@
 #include "input.h"
 
 #include "maze-interpreter.h"
-#include "render-queue.h"
 
 #include "functions.cpp"
 #include "particles.cpp"
@@ -50,7 +54,6 @@
 #include "draw.cpp"
 #include "ui.cpp"
 #include "input.cpp"
-#include "render-queue.cpp"
 
 #include "maze-interpreter.cpp"
 

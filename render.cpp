@@ -68,11 +68,11 @@ transform_coord_rect(RenderBasis *render_basis, Rectangle rect)
 
 
 void
-draw_circle(FrameBuffer *frame_buffer,
-            RenderBasis *render_basis,
-            V2 world_pos,
-            r32 world_radius,
-            V4 color)
+render_circle(FrameBuffer *frame_buffer,
+              RenderBasis *render_basis,
+              V2 world_pos,
+              r32 world_radius,
+              V4 color)
 {
   // TODO: There seems to be some off-by-one bug in here, the right /
   //       bottom side of the circle seems to be clipped slightly
@@ -123,7 +123,7 @@ draw_circle(FrameBuffer *frame_buffer,
 
 
 void
-draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
+render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -170,7 +170,7 @@ draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4
 
 
 void
-fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, PixelColor color)
+fast_render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, PixelColor color)
 {
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -196,7 +196,7 @@ fast_draw_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle bo
 
 
 void
-draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
+render_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
 {
   V2 start = transform_coord(render_basis, world_start);
   V2 end = transform_coord(render_basis, world_end);
@@ -280,25 +280,5 @@ draw_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, 
       set_pixel(frame_buffer, pixel_pos.x, pixel_pos.y, color);
       pixel_pos_fract += step;
     }
-  }
-}
-
-
-void
-draw_box_outline(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
-{
-  draw_line(frame_buffer, render_basis, box.start, (V2){box.start.x, box.end.y}, color);
-  draw_line(frame_buffer, render_basis, box.start, (V2){box.end.x, box.start.y}, color);
-  draw_line(frame_buffer, render_basis, (V2){box.start.x, box.end.y}, box.end, color);
-  draw_line(frame_buffer, render_basis, (V2){box.end.x, box.start.y}, box.end, color);
-}
-
-
-void
-draw_thick_box_outline(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color, s32 n)
-{
-  for (s32 i = 0; i < abs(n); ++i)
-  {
-    draw_box_outline(frame_buffer, render_basis, grow(box, -i*sign(n)), color);
   }
 }

@@ -10,21 +10,21 @@ cell_coord_to_world(u32 cell_spacing, u32 cell_x, u32 cell_y)
 
 
 void
-draw_car(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
+draw_car(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
   u32 car_raduis = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
   V2 pos = cell_coord_to_world(game_state->cell_spacing, car->target_cell_x, car->target_cell_y) + car->offset;
 
-  draw_circle(frame_buffer, render_basis, pos, car_raduis, colour);
+  add_circle_to_render_list(render_operations, render_basis, pos, car_raduis, colour);
 
   char str[256];
   fmted_str(str, "%d", car->value);
-  draw_string(frame_buffer, render_basis, &game_state->bitmaps.font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
+  draw_string(render_operations, render_basis, &game_state->bitmaps.font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
 }
 
 
 void
-render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, Cars *cars, u64 time_us)
+draw_cars(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, Cars *cars, u64 time_us)
 {
   // TODO: Loop through only relevant cars?
   //       i.e.: spacial partitioning the storage.
@@ -34,16 +34,16 @@ render_cars(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rende
   while ((car = cars_iterator(cars, &iter)))
   {
 #ifdef DEBUG_BLOCK_COLORS
-    draw_car(game_state, frame_buffer, render_basis, car, time_us, iter.cars_block->c);
+    draw_car(game_state, render_operations, render_basis, car, time_us, iter.cars_block->c);
 #else
-    draw_car(game_state, frame_buffer, render_basis, car, time_us);
+    draw_car(game_state, render_operations, render_basis, car, time_us);
 #endif
   }
 }
 
 
 b32
-render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, u64 time_us)
+draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, u64 time_us)
 {
   b32 selected = false;
 
@@ -114,14 +114,14 @@ render_cell(Cell *cell, GameState *game_state, FrameBuffer *frame_buffer, Render
     color.r = 1;
   }
 
-  draw_box(frame_buffer, render_basis, cell_bounds, color);
+  add_box_to_render_list(render_operations, render_basis, cell_bounds, color);
 
   return selected;
 }
 
 
 void
-render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
+draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
 {
   b32 selected = false;
   b32 on_screen = false;
@@ -140,7 +140,7 @@ render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rend
       {
         Cell *cell = tree->cells + cell_index;
 
-        selected |= render_cell(cell, game_state, frame_buffer, render_basis, time_us);
+        selected |= draw_cell(cell, game_state, render_operations, render_basis, time_us);
       }
     }
 
@@ -155,13 +155,13 @@ render_cells(GameState *game_state, FrameBuffer *frame_buffer, RenderBasis *rend
     RenderBasis tmp_basis = *render_basis;
     tmp_basis.clip_region = grow(tmp_basis.clip_region, 0);
 
-    draw_box_outline(frame_buffer, &tmp_basis, world_tree_bounds, box_color);
+    draw_box_outline(render_operations, &tmp_basis, world_tree_bounds, box_color);
 #endif
 
-    render_cells(game_state, frame_buffer, render_basis, tree->top_right, time_us);
-    render_cells(game_state, frame_buffer, render_basis, tree->top_left, time_us);
-    render_cells(game_state, frame_buffer, render_basis, tree->bottom_right, time_us);
-    render_cells(game_state, frame_buffer, render_basis, tree->bottom_left, time_us);
+    draw_cells(game_state, render_operations, render_basis, tree->top_right, time_us);
+    draw_cells(game_state, render_operations, render_basis, tree->top_left, time_us);
+    draw_cells(game_state, render_operations, render_basis, tree->bottom_right, time_us);
+    draw_cells(game_state, render_operations, render_basis, tree->bottom_left, time_us);
   }
 }
 

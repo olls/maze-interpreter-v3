@@ -1,5 +1,5 @@
 void
-queue_add(RenderQueue *q, RenderData in)
+queue_add(RenderQueue *q, RenderQueueData in)
 {
   q->queue[q->tail] = in;
   q->tail++;
@@ -9,14 +9,14 @@ queue_add(RenderQueue *q, RenderData in)
   }
   if (q->tail == q->head)
   {
-    q->full = 1;
+    q->full = true;
   }
-  q->empty = 0;
+  q->empty = false;
 }
 
 
 void
-queue_del(RenderQueue *q, RenderData *out)
+queue_del(RenderQueue *q, RenderQueueData *out)
 {
   *out = q->queue[q->head];
 
@@ -27,7 +27,7 @@ queue_del(RenderQueue *q, RenderData *out)
   }
   if (q->head == q->tail)
   {
-    q->empty = 1;
+    q->empty = true;
   }
-  q->full = 0;
+  q->full = false;
 }
