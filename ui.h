@@ -20,6 +20,7 @@ const u32 MAX_MENU_ITEMS = 32;
 struct Menu
 {
   Cell *cell;
+  V2 highlighted_cell_pos;
 
   MenuItem items[MAX_MENU_ITEMS];
   u32 length;

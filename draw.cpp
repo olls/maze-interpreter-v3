@@ -43,7 +43,7 @@ draw_cars(GameState *game_state, RenderOperations *render_operations, RenderBasi
 
 
 b32
-draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, u64 time_us)
+draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, u32 cell_radius, u64 time_us)
 {
   b32 selected = false;
 
@@ -94,8 +94,6 @@ draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations
       break;
   }
 
-  u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
-
   // NOTE: Tile centred on coord
   V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
   Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
@@ -109,11 +107,6 @@ draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations
     color.b = min(color.b + 0.15, 1.0f);
   }
 
-  if (cell == game_state->ui.cell_type_menu.cell)
-  {
-    color.r = 1;
-  }
-
   add_box_to_render_list(render_operations, render_basis, cell_bounds, color);
 
   return selected;
@@ -121,7 +114,7 @@ draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations
 
 
 void
-draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
+recursively_draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u32 cell_radius, u64 time_us)
 {
   b32 selected = false;
   b32 on_screen = false;
@@ -140,7 +133,7 @@ draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBas
       {
         Cell *cell = tree->cells + cell_index;
 
-        selected |= draw_cell(cell, game_state, render_operations, render_basis, time_us);
+        selected |= draw_cell(cell, game_state, render_operations, render_basis, cell_radius, time_us);
       }
     }
 
@@ -155,13 +148,46 @@ draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBas
     RenderBasis tmp_basis = *render_basis;
     tmp_basis.clip_region = grow(tmp_basis.clip_region, 0);
 
-    draw_box_outline(render_operations, &tmp_basis, world_tree_bounds, box_color);
+    add_box_outline_to_render_list(render_operations, &tmp_basis, world_tree_bounds, box_color);
 #endif
 
-    draw_cells(game_state, render_operations, render_basis, tree->top_right, time_us);
-    draw_cells(game_state, render_operations, render_basis, tree->top_left, time_us);
-    draw_cells(game_state, render_operations, render_basis, tree->bottom_right, time_us);
-    draw_cells(game_state, render_operations, render_basis, tree->bottom_left, time_us);
+    recursively_draw_cells(game_state, render_operations, render_basis, tree->top_right, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_operations, render_basis, tree->top_left, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_operations, render_basis, tree->bottom_right, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_operations, render_basis, tree->bottom_left, cell_radius, time_us);
   }
 }
 
+
+void
+draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
+{
+  u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
+
+  recursively_draw_cells(game_state, render_operations, render_basis, tree, cell_radius, time_us);
+
+  if (game_state->ui.cell_type_menu.cell)
+  {
+    V2 target_world_pos = cell_coord_to_world(game_state->cell_spacing, game_state->ui.cell_type_menu.cell->x, game_state->ui.cell_type_menu.cell->y);
+
+    V2 world_pos;
+    if (game_state->ui.cell_type_menu.highlighted_cell_pos.x == -1)
+    {
+      game_state->ui.cell_type_menu.highlighted_cell_pos = target_world_pos;
+    }
+    else
+    {
+      V2 d_target = target_world_pos - game_state->ui.cell_type_menu.highlighted_cell_pos;
+      game_state->ui.cell_type_menu.highlighted_cell_pos += d_target * 0.3;
+    }
+
+    Rectangle cell_bounds = radius_rectangle(game_state->ui.cell_type_menu.highlighted_cell_pos, cell_radius);
+
+    V4 highlight_color = {0.3, .9, .1, .2};
+    add_box_outline_to_render_list(render_operations, render_basis, cell_bounds, highlight_color, (s32)cell_radius*0.3);
+  }
+  else
+  {
+    game_state->ui.cell_type_menu.highlighted_cell_pos = (V2){-1, -1};
+  }
+}
