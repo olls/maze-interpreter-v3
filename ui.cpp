@@ -5,7 +5,7 @@ V2 MENU_ITEM_SIZE = {250, 25};
 
 
 Rectangle
-get_memu_item_rect(Menu *menu, u32 n)
+get_menu_item_rect(Menu *menu, u32 n)
 {
   Rectangle result;
   result.start = menu->pos + (V2){0, n}*MENU_ITEM_SIZE;
@@ -79,7 +79,7 @@ update_ui_menu(Menu *menu, V2 world_mouse_coord, b32 panning, b32 mouse_click, u
     {
       MenuItem *item = menu->items + item_index;
 
-      Rectangle rect = get_memu_item_rect(menu, item_index);
+      Rectangle rect = get_menu_item_rect(menu, item_index);
       if (in_rectangle(world_mouse_coord, rect))
       {
         menu->hover_selector.item_n = item_index;
@@ -101,7 +101,7 @@ update_ui_menu(Menu *menu, V2 world_mouse_coord, b32 panning, b32 mouse_click, u
         // Set pos directly if menu just opened, to avoid annimation from unshown position.
         if (menu->opened_on_frame == time_us)
         {
-          V2 selected_item_pos = get_memu_item_rect(menu, item_index).start;
+          V2 selected_item_pos = get_menu_item_rect(menu, item_index).start;
           menu->selected_selector.annimated_pos = selected_item_pos;
         }
       }
@@ -122,7 +122,7 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
 Rectangle
 annimate_menu_item_fill(Menu *menu, MenuItemSelector *menu_item_selector)
 {
-  V2 target_pos = get_memu_item_rect(menu, menu_item_selector->item_n).start;
+  V2 target_pos = get_menu_item_rect(menu, menu_item_selector->item_n).start;
   V2 d_pos = target_pos - menu_item_selector->annimated_pos;
 
   menu_item_selector->annimated_pos += d_pos*MENU_ANNIMATION_SPEED;
@@ -145,7 +145,7 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
     {
       MenuItem *item = menu->items + item_index;
 
-      Rectangle menu_item_rect = get_memu_item_rect(menu, item_index);
+      Rectangle menu_item_rect = get_menu_item_rect(menu, item_index);
       add_box_to_render_list(render_operations, render_basis, menu_item_rect, FRAME_COLOR);
 
       u32 cell_radius = MENU_ITEM_SIZE.y*0.5;
@@ -173,7 +173,7 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
     {
       MenuItem *item = menu->items + item_index;
 
-      Rectangle menu_item_rect = get_memu_item_rect(menu, item_index);
+      Rectangle menu_item_rect = get_menu_item_rect(menu, item_index);
       draw_string(render_operations, render_basis, &bitmaps->font, menu_item_rect.start + 2, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
     }
   }
