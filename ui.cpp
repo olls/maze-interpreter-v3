@@ -30,15 +30,15 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
     MenuItem *item = menu->items + item_index;
 
     rect = get_memu_item_rect(menu, item_index);
-    draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR, 1);
+    draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR);
 
     if (item->hovered_at_time == time_us)
     {
-      add_box_to_render_list(render_operations, render_basis, rect, clamp(FRAME_COLOR + 0.5, 1));
+      add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + 0.5, 1));
     }
     else if (type == item->cell_type)
     {
-      add_box_to_render_list(render_operations, render_basis, rect, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
+      add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
     }
 
     draw_string(render_operations, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
