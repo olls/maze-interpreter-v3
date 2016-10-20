@@ -37,7 +37,7 @@ init_ui(UI *ui)
   }
   ui->cell_type_menu.pos = (V2){10, 10};
 
-  MENU_ITEM_SIZE.x = longest_menu_item * CHAR_SIZE.x * FONT_SIZE;
+  MENU_ITEM_SIZE.x = (longest_menu_item + 1) * CHAR_SIZE.x * FONT_SIZE + MENU_ITEM_SIZE.y;
 }
 
 
@@ -147,6 +147,9 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
 
       Rectangle menu_item_rect = get_memu_item_rect(menu, item_index);
       add_box_to_render_list(render_operations, render_basis, menu_item_rect, FRAME_COLOR);
+
+      u32 cell_radius = MENU_ITEM_SIZE.y*0.5;
+      draw_cell(item->cell_type, render_operations, render_basis, (V2){menu_item_rect.end.x-cell_radius, menu_item_rect.start.y+cell_radius}, MENU_ITEM_SIZE.y*0.5, false);
     }
 
     if (menu->selected_selector.item_n >= 0)

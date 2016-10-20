@@ -43,12 +43,12 @@ draw_cars(GameState *game_state, RenderOperations *render_operations, RenderBasi
 
 
 b32
-draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, u32 cell_radius, u64 time_us)
+draw_cell(CellType type, RenderOperations *render_operations, RenderBasis *render_basis, V2 world_pos, u32 cell_radius, b32 hovered)
 {
   b32 selected = false;
 
   V4 color;
-  switch (cell->type)
+  switch (type)
   {
     case CELL_NULL:     color = (V4){1, 0.0, 0.0, 0.0};
       break;
@@ -94,11 +94,9 @@ draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations
       break;
   }
 
-  // NOTE: Tile centred on coord
-  V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
   Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
 
-  if (cell->hovered_at_time == time_us)
+  if (hovered)
   {
     selected = true;
 
@@ -133,7 +131,8 @@ recursively_draw_cells(GameState *game_state, RenderOperations *render_operation
       {
         Cell *cell = tree->cells + cell_index;
 
-        selected |= draw_cell(cell, game_state, render_operations, render_basis, cell_radius, time_us);
+        V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
+        selected |= draw_cell(cell->type, render_operations, render_basis, world_pos, cell_radius, cell->hovered_at_time == time_us);
       }
     }
 
