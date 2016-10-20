@@ -282,6 +282,8 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   // UPDATE WORLD
   //
 
+  ui_consume_mouse_clicks(game_state, &orthographic_basis, &game_state->ui, mouse);
+
   if (game_state->inputs[SIM_TICKS_INC].active)
   {
     game_state->sim_ticks_per_s += .5f;

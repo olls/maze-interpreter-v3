@@ -9,22 +9,31 @@ struct MenuItem
 };
 
 
+struct MenuItemSelector
+{
+  s32 item_n;
+  V2 annimated_pos;
+};
+
+
 const u32 MAX_MENU_ITEMS = 32;
 struct Menu
 {
+  Cell *cell;
+
+  MenuItem items[MAX_MENU_ITEMS];
   u32 length;
   V2 pos;
-  MenuItem items[MAX_MENU_ITEMS];
 
-  s32 annimated_hover;
-  V2 annimated_hover_pos;
-  s32 annimated_selected;
-  V2 annimated_selected_pos;
+  MenuItemSelector hover_selector;
+  MenuItemSelector selected_selector;
+  u64 opened_on_frame;
 };
 
 
 struct UI
 {
   Menu cell_type_menu;
-  Cell *cell_currently_being_edited;
+
+  b32 mouse_click;
 };

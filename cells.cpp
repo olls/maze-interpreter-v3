@@ -18,19 +18,17 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
       {
         cell_hovered_over->edit_mode_last_change = time_us;
 
-        if (cell_hovered_over == game_state->ui.cell_currently_being_edited)
+        // Only update time if the menu wasn't already open
+        if (game_state->ui.cell_type_menu.cell == 0)
         {
-          game_state->ui.cell_currently_being_edited = 0;
+          game_state->ui.cell_type_menu.opened_on_frame = time_us;
         }
-        else
-        {
-          game_state->ui.cell_currently_being_edited = cell_hovered_over;
-        }
+        game_state->ui.cell_type_menu.cell = cell_hovered_over;
       }
     }
     else
     {
-      game_state->ui.cell_currently_being_edited = 0;
+      game_state->ui.cell_type_menu.cell = 0;
     }
   }
 }

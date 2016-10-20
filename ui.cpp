@@ -1,7 +1,7 @@
-const V4 FRAME_COLOR = {1, 0.15, 0.3, 75};
+const V4 FRAME_COLOR = {1, 0.35, 0.5, .95};
 const r32 FONT_SIZE = 0.2;
-const r32 MENU_ANNIMATION_SPEED = 0.4;
-V2 MENU_ITEM_SIZE = {250, 20};
+const r32 MENU_ANNIMATION_SPEED = .4;
+V2 MENU_ITEM_SIZE = {250, 25};
 
 
 Rectangle
@@ -11,56 +11,6 @@ get_memu_item_rect(Menu *menu, u32 n)
   result.start = menu->pos + (V2){0, n}*MENU_ITEM_SIZE;
   result.end = result.start + MENU_ITEM_SIZE;
   return result;
-}
-
-
-void
-draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, u64 time_us)
-{
-  Rectangle rect;
-  rect.start = menu->pos;
-  rect.end = rect.start + MENU_ITEM_SIZE * (V2){1, menu->length};
-  rect = grow(rect, 2);
-
-  draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR, 1);
-
-  for (u32 item_index = 0;
-       item_index < menu->length;
-       ++item_index)
-  {
-    MenuItem *item = menu->items + item_index;
-
-    rect = get_memu_item_rect(menu, item_index);
-    draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR);
-  }
-
-  if (menu->annimated_hover >= 0)
-  {
-    Rectangle target_rect = get_memu_item_rect(menu, menu->annimated_hover);
-    V2 d_pos = (target_rect.start - menu->annimated_hover_pos);
-    menu->annimated_hover_pos += d_pos*MENU_ANNIMATION_SPEED;
-    rect.start = menu->annimated_hover_pos;
-    rect.end = rect.start + MENU_ITEM_SIZE;
-    add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
-  }
-  if (menu->annimated_selected >= 0)
-  {
-    Rectangle target_rect = get_memu_item_rect(menu, menu->annimated_selected);
-    V2 d_pos = (target_rect.start - menu->annimated_selected_pos);
-    menu->annimated_selected_pos += d_pos*MENU_ANNIMATION_SPEED;
-    rect.start = menu->annimated_selected_pos;
-    rect.end = rect.start + MENU_ITEM_SIZE;
-    add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + 0.5, 1));
-  }
-
-  for (u32 item_index = 0;
-       item_index < menu->length;
-       ++item_index)
-  {
-    MenuItem *item = menu->items + item_index;
-    rect = get_memu_item_rect(menu, item_index);
-    draw_string(render_operations, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
-  }
 }
 
 
@@ -92,31 +42,136 @@ init_ui(UI *ui)
 
 
 void
-update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, u64 time_us)
+ui_consume_mouse_clicks(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse)
 {
-  ui->cell_type_menu.annimated_selected = -1;
-  ui->cell_type_menu.annimated_hover = -1;
+  ui->mouse_click = false;
 
-  for (u32 item_index = 0;
-       item_index < ui->cell_type_menu.length;
-       ++item_index)
+  if (ui->cell_type_menu.cell)
   {
-    MenuItem *item = ui->cell_type_menu.items + item_index;
+    Rectangle rect;
+    rect.start = ui->cell_type_menu.pos;
+    rect.end = rect.start + MENU_ITEM_SIZE*(V2){1, ui->cell_type_menu.length};
 
-    Rectangle rect = get_memu_item_rect(&ui->cell_type_menu, item_index);
-    if (in_rectangle(untransform_coord(render_basis, (V2){mouse->x, mouse->y}), rect))
+    V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
+
+    if (in_rectangle(world_mouse_coord, rect) && mouse->l_on_up && !game_state->currently_panning)
     {
-      ui->cell_type_menu.annimated_hover = item_index;
+      ui->mouse_click = true;
+      mouse->l_on_up = false;
+    }
+  }
+}
 
-      if (mouse->l_down && !game_state->panning_this_frame && ui->cell_currently_being_edited)
+
+void
+update_ui_menu(Menu *menu, V2 world_mouse_coord, b32 panning, b32 mouse_click, u64 time_us)
+{
+  menu->selected_selector.item_n = -1;
+
+  s32 old_hover_selector_item_n = menu->hover_selector.item_n;
+  menu->hover_selector.item_n = -1;
+
+  if (menu->cell)
+  {
+    for (u32 item_index = 0;
+         item_index < menu->length;
+         ++item_index)
+    {
+      MenuItem *item = menu->items + item_index;
+
+      Rectangle rect = get_memu_item_rect(menu, item_index);
+      if (in_rectangle(world_mouse_coord, rect))
       {
-        ui->cell_currently_being_edited->type = item->cell_type;
+        menu->hover_selector.item_n = item_index;
+        if (old_hover_selector_item_n == -1)
+        {
+          menu->hover_selector.annimated_pos = rect.start;
+        }
+
+        if (mouse_click)
+        {
+          menu->cell->type = item->cell_type;
+        }
+      }
+
+      if (menu->cell->type == item->cell_type)
+      {
+        menu->selected_selector.item_n = item_index;
+
+        // Set pos directly if menu just opened, to avoid annimation from unshown position.
+        if (menu->opened_on_frame == time_us)
+        {
+          V2 selected_item_pos = get_memu_item_rect(menu, item_index).start;
+          menu->selected_selector.annimated_pos = selected_item_pos;
+        }
       }
     }
+  }
+}
 
-    if (ui->cell_currently_being_edited && ui->cell_currently_being_edited->type == item->cell_type)
+
+void
+update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, u64 time_us)
+{
+  V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
+
+  update_ui_menu(&ui->cell_type_menu, world_mouse_coord, game_state->panning_this_frame, ui->mouse_click, time_us);
+}
+
+
+Rectangle
+annimate_menu_item_fill(Menu *menu, MenuItemSelector *menu_item_selector)
+{
+  V2 target_pos = get_memu_item_rect(menu, menu_item_selector->item_n).start;
+  V2 d_pos = target_pos - menu_item_selector->annimated_pos;
+
+  menu_item_selector->annimated_pos += d_pos*MENU_ANNIMATION_SPEED;
+
+  Rectangle result;
+  result.start = menu_item_selector->annimated_pos;
+  result.end = result.start + MENU_ITEM_SIZE;
+  return result;
+}
+
+
+void
+draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, u64 time_us)
+{
+  if (menu->cell)
+  {
+    for (u32 item_index = 0;
+         item_index < menu->length;
+         ++item_index)
     {
-      ui->cell_type_menu.annimated_selected = item_index;
+      MenuItem *item = menu->items + item_index;
+
+      Rectangle menu_item_rect = get_memu_item_rect(menu, item_index);
+      add_box_to_render_list(render_operations, render_basis, menu_item_rect, FRAME_COLOR);
+    }
+
+    if (menu->selected_selector.item_n >= 0)
+    {
+      Rectangle selected_rect = annimate_menu_item_fill(menu, &menu->selected_selector);
+      V4 color = clamp(FRAME_COLOR + 0.5, 1);
+      color.a = 0.7;
+      add_box_to_render_list(render_operations, render_basis, selected_rect, color);
+    }
+    if (menu->hover_selector.item_n >= 0)
+    {
+      Rectangle hover_rect = annimate_menu_item_fill(menu, &menu->hover_selector);
+      V4 color = clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1);
+      color.a = 0.7;
+      add_box_to_render_list(render_operations, render_basis, hover_rect, color);
+    }
+
+    for (u32 item_index = 0;
+         item_index < menu->length;
+         ++item_index)
+    {
+      MenuItem *item = menu->items + item_index;
+
+      Rectangle menu_item_rect = get_memu_item_rect(menu, item_index);
+      draw_string(render_operations, render_basis, &bitmaps->font, menu_item_rect.start + 2, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
     }
   }
 }
@@ -125,8 +180,5 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
 void
 draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, UI *ui, u64 time_us)
 {
-  if (ui->cell_currently_being_edited)
-  {
-    draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, time_us);
-  }
+  draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, time_us);
 }

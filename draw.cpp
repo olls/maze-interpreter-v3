@@ -109,7 +109,7 @@ draw_cell(Cell *cell, GameState *game_state, RenderOperations *render_operations
     color.b = min(color.b + 0.15, 1.0f);
   }
 
-  if (cell == game_state->ui.cell_currently_being_edited)
+  if (cell == game_state->ui.cell_type_menu.cell)
   {
     color.r = 1;
   }
