@@ -25,7 +25,7 @@
 #include "bitmap.cpp"
 #include "render-operations.cpp"
 #include "render-queue.cpp"
-#include "draw-shapes.cpp"
+#include "composite-render-operations.cpp"
 #include "font.cpp"
 
 // Game Related
