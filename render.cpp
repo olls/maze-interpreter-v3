@@ -267,7 +267,7 @@ render_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start
 
   r32 num_pixels = max(abs(length_components.x), abs(length_components.y));
 
-  if(num_pixels)
+  if (num_pixels)
   {
     V2 step = length_components / num_pixels;
 

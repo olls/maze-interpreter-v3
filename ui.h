@@ -15,6 +15,11 @@ struct Menu
   u32 length;
   V2 pos;
   MenuItem items[MAX_MENU_ITEMS];
+
+  s32 annimated_hover;
+  V2 annimated_hover_pos;
+  s32 annimated_selected;
+  V2 annimated_selected_pos;
 };
 
 

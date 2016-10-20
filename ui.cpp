@@ -1,5 +1,6 @@
 const V4 FRAME_COLOR = {1, 0.15, 0.3, 75};
 const r32 FONT_SIZE = 0.2;
+const r32 MENU_ANNIMATION_SPEED = 0.4;
 V2 MENU_ITEM_SIZE = {250, 20};
 
 
@@ -14,7 +15,7 @@ get_memu_item_rect(Menu *menu, u32 n)
 
 
 void
-draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, CellType type, u64 time_us)
+draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, u64 time_us)
 {
   Rectangle rect;
   rect.start = menu->pos;
@@ -31,16 +32,33 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
 
     rect = get_memu_item_rect(menu, item_index);
     draw_box_outline(render_operations, render_basis, rect, FRAME_COLOR);
+  }
 
-    if (item->hovered_at_time == time_us)
-    {
-      add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + 0.5, 1));
-    }
-    else if (type == item->cell_type)
-    {
-      add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
-    }
+  if (menu->annimated_hover >= 0)
+  {
+    Rectangle target_rect = get_memu_item_rect(menu, menu->annimated_hover);
+    V2 d_pos = (target_rect.start - menu->annimated_hover_pos);
+    menu->annimated_hover_pos += d_pos*MENU_ANNIMATION_SPEED;
+    rect.start = menu->annimated_hover_pos;
+    rect.end = rect.start + MENU_ITEM_SIZE;
+    add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1));
+  }
+  if (menu->annimated_selected >= 0)
+  {
+    Rectangle target_rect = get_memu_item_rect(menu, menu->annimated_selected);
+    V2 d_pos = (target_rect.start - menu->annimated_selected_pos);
+    menu->annimated_selected_pos += d_pos*MENU_ANNIMATION_SPEED;
+    rect.start = menu->annimated_selected_pos;
+    rect.end = rect.start + MENU_ITEM_SIZE;
+    add_box_to_render_list(render_operations, render_basis, grow(rect, -1)+(Rectangle){(V2){0,0},(V2){0,1}}, clamp(FRAME_COLOR + 0.5, 1));
+  }
 
+  for (u32 item_index = 0;
+       item_index < menu->length;
+       ++item_index)
+  {
+    MenuItem *item = menu->items + item_index;
+    rect = get_memu_item_rect(menu, item_index);
     draw_string(render_operations, render_basis, &bitmaps->font, rect.start, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
   }
 }
@@ -76,6 +94,9 @@ init_ui(UI *ui)
 void
 update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, u64 time_us)
 {
+  ui->cell_type_menu.annimated_selected = -1;
+  ui->cell_type_menu.annimated_hover = -1;
+
   for (u32 item_index = 0;
        item_index < ui->cell_type_menu.length;
        ++item_index)
@@ -85,12 +106,17 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
     Rectangle rect = get_memu_item_rect(&ui->cell_type_menu, item_index);
     if (in_rectangle(untransform_coord(render_basis, (V2){mouse->x, mouse->y}), rect))
     {
-      item->hovered_at_time = time_us;
+      ui->cell_type_menu.annimated_hover = item_index;
 
       if (mouse->l_down && !game_state->panning_this_frame && ui->cell_currently_being_edited)
       {
         ui->cell_currently_being_edited->type = item->cell_type;
       }
+    }
+
+    if (ui->cell_currently_being_edited && ui->cell_currently_being_edited->type == item->cell_type)
+    {
+      ui->cell_type_menu.annimated_selected = item_index;
     }
   }
 }
@@ -101,6 +127,6 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps 
 {
   if (ui->cell_currently_being_edited)
   {
-    draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, ui->cell_currently_being_edited->type, time_us);
+    draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, time_us);
   }
 }
