@@ -236,6 +236,11 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   update_inputs(keys, game_state->inputs, time_us);
 
+  if (game_state->inputs[SAVE].active)
+  {
+    serialize_maze(&game_state->maze, game_state->filename);
+  }
+
   if (game_state->inputs[RELOAD].active)
   {
     strcpy(game_state->persistent_str, "Reload!");

@@ -1,5 +1,5 @@
-u32 fast_key_repeat_rate_limit = 10;
-u32 slow_key_repeat_rate_limit = 5;
+const u32 FAST_KEY_REPEAT_RATE_LIMIT = 10;
+const u32 SLOW_KEY_REPEAT_RATE_LIMIT = 5;
 
 
 struct Input
@@ -16,6 +16,7 @@ enum Inputs
   RESTART,
   RESET,
   RELOAD,
+  SAVE,
   STEP,
   STEP_MODE_TOGGLE,
   ZOOM_IN,
