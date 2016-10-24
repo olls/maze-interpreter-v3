@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 
 // Game Independent
+#include "logging.h"
 #include "platform.h"
 #include "maths.h"
 #include "vectors.h"

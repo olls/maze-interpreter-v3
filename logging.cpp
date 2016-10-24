@@ -1,37 +1,3 @@
-#include <stdarg.h>
-#include <stdio.h>
-
-#define ALL_LOGGING_CHANNELS(CHANNEL) \
-          CHANNEL(L_Main) \
-          CHANNEL(L_CarsStorage) \
-          CHANNEL(L_CarsSim) \
-          CHANNEL(L_CellsStorage) \
-          CHANNEL(L_Cells) \
-          CHANNEL(L_Parser) \
-          CHANNEL(L_Serializer) \
-          CHANNEL(L_Particles) \
-          CHANNEL(L_UI) \
-          CHANNEL(L_Bitmap) \
-          CHANNEL(L_Font) \
-          CHANNEL(L_Vector) \
-          CHANNEL(L_Render) \
-          CHANNEL(L_RenderQueue) \
-          CHANNEL(L_GameLoop) \
-          CHANNEL(N_LOGGING_CHANNELS)
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum LoggingChannel
-{
-  ALL_LOGGING_CHANNELS(GENERATE_ENUM)
-};
-
-static const char *LOGGING_CHANNELS[] = {
-  ALL_LOGGING_CHANNELS(GENERATE_STRING)
-};
-
-
 b32
 channel_enabled(LoggingChannel channel)
 {
@@ -101,25 +67,18 @@ log_d(LoggingChannel channel, V2 direction)
 {
   char s[16] = {};
 
-  if (direction.x == 0 && direction.y == -1)
+  switch (vector_to_compass_dir(direction))
   {
-    strcpy(s, "UP");
-  }
-  else if (direction.x == 0 && direction.y == 1)
-  {
-    strcpy(s, "DOWN");
-  }
-  else if (direction.x == -1 && direction.y == 0)
-  {
-    strcpy(s, "LEFT");
-  }
-  else if (direction.x == 1 && direction.y == 0)
-  {
-    strcpy(s, "RIGHT");
-  }
-  else if (direction.x == 0 && direction.y == 0)
-  {
-    strcpy(s, "STATIONARY");
+    case ('U'): strcpy(s, "UP");
+      break;
+    case ('D'): strcpy(s, "DOWN");
+      break;
+    case ('L'): strcpy(s, "LEFT");
+      break;
+    case ('R'): strcpy(s, "RIGHT");
+      break;
+    case ('N'): strcpy(s, "STATIONARY");
+      break;
   }
 
   if (s[0])

@@ -158,7 +158,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
     case (CELL_FUNCTION):
     {
-      Function *function = functions->hash_map + current_cell->function_index;
+      Function *function = functions->hash_table + current_cell->function_index;
 
       if (function->type == FUNCTION_NULL)
       {

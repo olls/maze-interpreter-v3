@@ -42,11 +42,28 @@ draw_string(RenderOperations *render_operations, RenderBasis *render_basis, Bitm
 }
 
 
-void
-fmted_str(char out[256], const char *pattern,  ...)
+u32
+fmted_str(char *out, u32 max_len, const char *pattern,  ...)
 {
+  u32 result;
+
   va_list aptr;
   va_start(aptr, pattern);
-  vsnprintf(out, 256, pattern, aptr);
+  s32 written = vsnprintf(out, max_len, pattern, aptr);
   va_end(aptr);
+
+  if (written >= 0 && written <= max_len)
+  {
+    result = (u32)written;
+  }
+  else if (written > max_len)
+  {
+    result = max_len;
+  }
+  else
+  {
+    result = 0;
+  }
+
+  return result;
 }

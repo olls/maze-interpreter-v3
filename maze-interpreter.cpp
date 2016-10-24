@@ -238,7 +238,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   if (game_state->inputs[SAVE].active)
   {
-    serialize_maze(&game_state->maze, game_state->filename);
+    serialize_maze(&game_state->maze, &game_state->functions, game_state->filename);
   }
 
   if (game_state->inputs[RELOAD].active)
@@ -332,8 +332,8 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   draw_ui(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
 
-  char str[256];
-  fmted_str(str, "%d", fps);
+  char str[4];
+  fmted_str(str, 4, "%d", fps);
   draw_string(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
 
   // Add render segments to render queue

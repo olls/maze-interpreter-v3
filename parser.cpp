@@ -127,7 +127,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
 
     f_ptr += 2;
 
-    Function *function = functions->hash_map + function_index;
+    Function *function = functions->hash_table + function_index;
 
     if (function->type != FUNCTION_NULL)
     {

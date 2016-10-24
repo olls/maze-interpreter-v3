@@ -75,3 +75,7 @@ const V2 DOWN = {0, 1};
 const V2 LEFT = {-1, 0};
 const V2 RIGHT = {1, 0};
 const V2 STATIONARY = {0, 0};
+
+
+char
+vector_to_compass_dir(V2);

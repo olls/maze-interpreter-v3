@@ -36,6 +36,6 @@ struct Function
 
 struct Functions
 {
-  Function hash_map[MAX_FUNCTIONS];
+  Function hash_table[MAX_FUNCTIONS];
   u32 n_functions;
 };

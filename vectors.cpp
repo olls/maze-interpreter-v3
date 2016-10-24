@@ -1140,3 +1140,33 @@ get_color(s32 i = -1)
 
   return colors[i];
 }
+
+
+char
+vector_to_compass_dir(V2 direction)
+{
+  char result = 0;
+
+  if (direction.x == 0 && direction.y == -1)
+  {
+    result = 'U';
+  }
+  else if (direction.x == 0 && direction.y == 1)
+  {
+    result = 'D';
+  }
+  else if (direction.x == -1 && direction.y == 0)
+  {
+    result = 'L';
+  }
+  else if (direction.x == 1 && direction.y == 0)
+  {
+    result = 'R';
+  }
+  else if (direction.x == 0 && direction.y == 0)
+  {
+    result = 'N';
+  }
+
+  return result;
+}

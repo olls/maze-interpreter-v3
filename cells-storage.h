@@ -112,5 +112,4 @@ struct Maze
   Cell *cache_hash[CELL_CACHE_SIZE];
 
   QuadTree tree;
-  Function functions[MAX_FUNCTIONS];
 };
