@@ -9,6 +9,13 @@ cell_coord_to_world(u32 cell_spacing, u32 cell_x, u32 cell_y)
 }
 
 
+u32
+calc_cell_radius(GameState *game_state)
+{
+  return (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.5;
+}
+
+
 void
 draw_car(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
@@ -95,8 +102,6 @@ draw_cell(CellType type, RenderOperations *render_operations, RenderBasis *rende
       break;
   }
 
-  Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
-
   if (hovered)
   {
     selected = true;
@@ -106,6 +111,7 @@ draw_cell(CellType type, RenderOperations *render_operations, RenderBasis *rende
     color.b = min(color.b + 0.15, 1.0f);
   }
 
+  Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
   add_box_to_render_list(render_operations, render_basis, cell_bounds, color);
 
   return selected;
@@ -162,7 +168,7 @@ recursively_draw_cells(GameState *game_state, RenderOperations *render_operation
 void
 draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
 {
-  u32 cell_radius = (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) / 2;
+  u32 cell_radius = calc_cell_radius(game_state);
 
   recursively_draw_cells(game_state, render_operations, render_basis, tree, cell_radius, time_us);
 

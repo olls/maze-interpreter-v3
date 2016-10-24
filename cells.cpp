@@ -2,33 +2,39 @@ void
 update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *mouse, u64 time_us)
 {
   V2 mouse_maze_pos = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
-  V2 mouse_cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
+  V2 cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
 
-  Cell *cell_hovered_over = get_cell(&game_state->maze, mouse_cell_pos.x, mouse_cell_pos.y);
-  if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
-  {
-    cell_hovered_over->hovered_at_time = time_us;
-  }
+  V2 world_cell_pos = cell_coord_to_world(game_state->cell_spacing, cell_pos.x, cell_pos.y);
+  Rectangle cell_bounds = radius_rectangle(world_cell_pos, calc_cell_radius(game_state));
 
-  if (mouse->l_on_up && !game_state->panning_this_frame)
+  if (in_rectangle(mouse_maze_pos, cell_bounds))
   {
-    if (cell_hovered_over)
+    Cell *cell_hovered_over = get_cell(&game_state->maze, cell_pos.x, cell_pos.y);
+    if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
     {
-      if (time_us >= cell_hovered_over->edit_mode_last_change + seconds_in_u(0.01))
-      {
-        cell_hovered_over->edit_mode_last_change = time_us;
-
-        // Only update time if the menu wasn't already open
-        if (game_state->ui.cell_type_menu.cell == 0)
-        {
-          game_state->ui.cell_type_menu.opened_on_frame = time_us;
-        }
-        game_state->ui.cell_type_menu.cell = cell_hovered_over;
-      }
+      cell_hovered_over->hovered_at_time = time_us;
     }
-    else
+
+    if (mouse->l_on_up && !game_state->panning_this_frame)
     {
-      game_state->ui.cell_type_menu.cell = 0;
+      if (cell_hovered_over)
+      {
+        if (time_us >= cell_hovered_over->edit_mode_last_change + seconds_in_u(0.01))
+        {
+          cell_hovered_over->edit_mode_last_change = time_us;
+
+          // Only update time if the menu wasn't already open
+          if (game_state->ui.cell_type_menu.cell == 0)
+          {
+            game_state->ui.cell_type_menu.opened_on_frame = time_us;
+          }
+          game_state->ui.cell_type_menu.cell = cell_hovered_over;
+        }
+      }
+      else
+      {
+        game_state->ui.cell_type_menu.cell = 0;
+      }
     }
   }
 }
