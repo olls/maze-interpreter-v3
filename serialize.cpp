@@ -101,7 +101,7 @@ get_maze_size(Maze *maze)
 }
 
 
-const u32 MAX_FUNC_LENGTH = 32; // TODO: Actually calculate max len
+const u32 MAX_FUNC_LENGTH = 40;
 
 
 u32
@@ -130,6 +130,7 @@ serialize_function(char buffer[MAX_FUNC_LENGTH], Function *function)
       n_written = fmted_str(buffer+pos, space_left, "%.1s= %d", symbol, function->value);
       INC_POS(n_written);
     } break;
+
     case (FUNCTION_LESS):          strcpy(symbol, "<");   goto LBL_FUNCTION_COND;
     case (FUNCTION_LESS_EQUAL):    strcpy(symbol, "<=");  goto LBL_FUNCTION_COND;
     case (FUNCTION_EQUAL):         strcpy(symbol, "==");  goto LBL_FUNCTION_COND;
@@ -139,15 +140,13 @@ serialize_function(char buffer[MAX_FUNC_LENGTH], Function *function)
 
     LBL_FUNCTION_COND: {
       log(L_Serializer, "Function type: Cond");
-      log(L_Serializer, function->conditional.true_direction);
       char true_direction = vector_to_compass_dir(function->conditional.true_direction);
-      log(L_Serializer, "%c");
       n_written = fmted_str(buffer+pos, space_left, "IF %.2s %d THEN %%%c", symbol, function->conditional.value, true_direction);
       INC_POS(n_written);
 
       if (function->conditional.else_exists)
       {
-        log(L_Serializer, "  written else");
+        log(L_Serializer, "  with else");
         char false_direction = vector_to_compass_dir(function->conditional.false_direction);
         n_written = fmted_str(buffer+pos, space_left, " ELSE %%%c", false_direction);
         INC_POS(n_written);
