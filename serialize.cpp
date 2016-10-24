@@ -40,7 +40,7 @@ find_min_max(QuadTree *tree, V2 *most_left, V2 *most_top, V2 *most_right, V2 *mo
 
 
 void
-write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin)
+write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin, Functions *functions)
 {
   if (tree)
   {
@@ -60,15 +60,12 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin)
 
       if (cell->type == CELL_FUNCTION)
       {
-        // TODO!
-        file_pos[0] = 'A';
-        file_pos[1] = 'A';
+        Function *function = functions->hash_table + cell->function_index;
+        memcpy(file_pos, function->name, 2);
       }
       else if (cell->type == CELL_PAUSE)
       {
-        // TODO!
-        file_pos[0] = '0';
-        file_pos[1] = '0';
+        fmted_str(file_pos, 3, "%02d", cell->pause);
       }
       else
       {
@@ -79,10 +76,10 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin)
       file_pos[2] = ' ';
     }
 
-    write_cells(tree->top_left, file, width, height, maze_origin);
-    write_cells(tree->top_right, file, width, height, maze_origin);
-    write_cells(tree->bottom_left, file, width, height, maze_origin);
-    write_cells(tree->bottom_right, file, width, height, maze_origin);
+    write_cells(tree->top_left, file, width, height, maze_origin, functions);
+    write_cells(tree->top_right, file, width, height, maze_origin, functions);
+    write_cells(tree->bottom_left, file, width, height, maze_origin, functions);
+    write_cells(tree->bottom_right, file, width, height, maze_origin, functions);
   }
 }
 
@@ -174,7 +171,7 @@ void
 serialize_maze(Maze *maze, Functions *functions, const char *filename)
 {
   // TMP: For testing without overwriting
-#if 1
+#if 0
   ((char *)filename)[0] = '_';
 #endif
 
@@ -221,7 +218,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   log(L_Serializer, "Serializing maze");
 
   memset(file, ' ', length);
-  write_cells(&maze->tree, file, width, height, (V2){most_left.x, most_top.y});
+  write_cells(&maze->tree, file, width, height, (V2){most_left.x, most_top.y}, functions);
 
   // Add line breaks to maze
   for (u32 line = 0;
@@ -289,7 +286,6 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   if (ftruncate(fd, length_written) == -1)
   {
     printf("Failed to truncate file for saving.\n");
-    exit(1);
   }
 
   if (close(fd) != 0)
