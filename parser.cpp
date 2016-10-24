@@ -112,7 +112,7 @@ get_direction(char *ptr, V2 *result)
 
 
 char *
-parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
+parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
 {
   u32 function_index = get_function_index(cell_str);
 
@@ -127,7 +127,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
 
     f_ptr += 2;
 
-    Function *function = functions + function_index;
+    Function *function = functions->hash_map + function_index;
 
     if (function->type != FUNCTION_NULL)
     {
@@ -152,6 +152,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
 
         if (end_num_f_ptr == f_ptr)
         {
+          function->type = FUNCTION_NULL;
           log(L_Parser, "  Function invalid: Assignment value missing.");
         }
         else
@@ -179,7 +180,8 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
         char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
         if (end_num_f_ptr == f_ptr)
         {
-          log(L_Parser, "  Function invalid: Operator value missing.");
+          function->type = FUNCTION_NULL;
+          log(L_Parser, "  Invalid function: Operator value missing.");
         }
         else
         {
@@ -252,6 +254,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
         else
         {
           log(L_Parser, "  Invalid function: Conditional operator missing.");
+          function->type = FUNCTION_NULL;
           valid_condition = false;
         }
 
@@ -264,6 +267,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
           if (end_num_f_ptr == f_ptr)
           {
             log(L_Parser, "  Invalid function: Missing condition value.");
+            function->type = FUNCTION_NULL;
           }
           else
           {
@@ -275,6 +279,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
             if (!(str_eq(f_ptr, "THEN", 4) || str_eq(f_ptr, "then", 4)))
             {
               log(L_Parser, "  Invalid function: Missing 'THEN' keyword.");
+              function->type = FUNCTION_NULL;
             }
             else
             {
@@ -286,6 +291,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
               if (end_true_direction_f_ptr == f_ptr)
               {
                 log(L_Parser, "  Invalid function: Missing 'THEN' direction.");
+                function->type = FUNCTION_NULL;
               }
               else
               {
@@ -311,6 +317,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
                   {
                     log(L_Parser, "Invalid function: Missing 'ELSE' direction.");
                     valid_conditional_function = false;
+                    function->type = FUNCTION_NULL;
                   }
                   else
                   {
@@ -341,6 +348,11 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
       }
     }
 
+    if (function->type != FUNCTION_NULL)
+    {
+      ++functions->n_functions;
+    }
+
     consume_until_newline(f_ptr, f_end);
   }
   else
@@ -353,7 +365,7 @@ parse_function_definition(Function functions[], char cell_str[2], char *f_ptr, c
 
 
 char *
-parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
+parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
 {
   if (str_eq(cell_str, "^^", 2))
   {
@@ -380,7 +392,7 @@ parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
   else if (isLetter(cell_str[0]) && (isLetter(cell_str[1]) || isNum(cell_str[1])))
   {
     char *end_function_name_f_ptr = f_ptr + 2;
-    char *end_function_definition_f_ptr = parse_function_definition(maze->functions, cell_str, end_function_name_f_ptr, f_end, cell);
+    char *end_function_definition_f_ptr = parse_function_definition(functions, cell_str, end_function_name_f_ptr, f_end, cell);
     if (end_function_definition_f_ptr != end_function_name_f_ptr)
     {
       f_ptr = end_function_definition_f_ptr;
@@ -465,10 +477,10 @@ parse_cell(Maze *maze, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
 // TODO: Parse comments!
 
 void
-parse(Maze *maze, Memory *memory, const char *filename)
+parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
 {
   clear_maze(maze);
-  zero_n(maze->functions, Function, MAX_FUNCTIONS);
+  zero(functions, Functions);
 
   maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
 
@@ -506,7 +518,7 @@ parse(Maze *maze, Memory *memory, const char *filename)
 
     Cell new_cell = {};
     new_cell.type = CELL_NULL;
-    f_ptr = parse_cell(maze, cell_str, f_ptr, f_end, &new_cell);
+    f_ptr = parse_cell(maze, functions, cell_str, f_ptr, f_end, &new_cell);
 
     if (new_cell.type != CELL_NULL)
     {

@@ -134,7 +134,7 @@ reset_zoom(GameState *game_state)
 void
 load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
-  parse(&game_state->maze, memory, game_state->filename);
+  parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
 
   V2 size = get_maze_size(&game_state->maze);
   game_state->maze.width = size.x;

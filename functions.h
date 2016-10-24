@@ -32,3 +32,10 @@ struct Function
     } conditional;
   };
 };
+
+
+struct Functions
+{
+  Function hash_map[MAX_FUNCTIONS];
+  u32 n_functions;
+};

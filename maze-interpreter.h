@@ -63,6 +63,7 @@ struct GameState
 
   Input inputs[N_INPUTS];
   Maze maze;
+  Functions functions;
   Cars cars;
   Particles particles;
 

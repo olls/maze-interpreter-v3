@@ -110,7 +110,7 @@ cars_in_direct_neighbourhood(Maze *maze, Cars *cars, Cell *cell)
 
 
 void
-car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *maze, Cars *cars, Car *car)
+car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *maze, Functions *functions, Cars *cars, Car *car)
 {
   // TODO: Deal with race cars (conditions) ??
 
@@ -158,7 +158,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
     case (CELL_FUNCTION):
     {
-      Function *function = maze->functions + current_cell->function_index;
+      Function *function = functions->hash_map + current_cell->function_index;
 
       if (function->type == FUNCTION_NULL)
       {
@@ -352,6 +352,7 @@ perform_cars_sim_tick(Memory *memory, GameState *game_state, u64 time_us)
 {
   Cars *cars = &(game_state->cars);
   Maze *maze = &(game_state->maze);
+  Functions *functions = &(game_state->functions);
 
   // Car/cell interactions
 
@@ -362,7 +363,7 @@ perform_cars_sim_tick(Memory *memory, GameState *game_state, u64 time_us)
   {
     if (car->update_next_frame)
     {
-      car_cell_interactions(memory, game_state, time_us, maze, cars, car);
+      car_cell_interactions(memory, game_state, time_us, maze, functions, cars, car);
     }
   }
 
