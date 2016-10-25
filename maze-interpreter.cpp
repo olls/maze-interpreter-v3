@@ -328,7 +328,8 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   draw_cars(game_state, &game_state->render_operations, &render_basis, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), &game_state->render_operations, &render_basis);
 
-  draw_string(&game_state->render_operations, &render_basis, &game_state->bitmaps.font, (V2){0, game_state->maze.height} * game_state->cell_spacing, game_state->persistent_str, 0.3, (V4){1, 0, 0, 0});
+  r32 text_scale = 0.3;
+  draw_string(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1}, game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
 
   draw_ui(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
 
