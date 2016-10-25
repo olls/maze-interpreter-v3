@@ -40,6 +40,9 @@ struct InputBox
   u32 cursor_pos;
   u32 length;
   V2 pos;
+  b32 allow_num;
+  b32 allow_alpha;
+  b32 allow_all;
 };
 
 

@@ -40,6 +40,9 @@ init_ui(UI *ui)
   ui->cell_type_menu.chars_wide = longest_menu_item + 1;
 
   ui->test_input.length = 16;
+  ui->test_input.allow_num = false;
+  ui->test_input.allow_alpha = true;
+  ui->test_input.allow_all = false;
 }
 
 
@@ -135,13 +138,17 @@ update_text_input(InputBox *input_box, Inputs *inputs)
     }
   }
 
-  for (char c = 0; c < array_count(inputs->alpha_num_sym); ++c)
+  for (u32 index = 0; index < array_count(inputs->alpha_num_sym); ++index)
   {
-    if (inputs->alpha_num_sym[c].active &&
+    char c = MIN_CHAR + index;
+    if ((input_box->allow_all ||
+         (input_box->allow_num   && c >= '0' & c <= '9') ||
+         (input_box->allow_alpha && ((c >= 'a' & c <= 'z') || (c >= 'A' & c <= 'Z') || c == ' '))) &&
+        inputs->alpha_num_sym[index].active &&
         input_box->cursor_pos < input_box->length)
     {
-      input_box->text[input_box->cursor_pos++] = MIN_CHAR + c;
-      inputs->alpha_num_sym[c].active = false;
+      input_box->text[input_box->cursor_pos++] = c;
+      inputs->alpha_num_sym[index].active = false;
     }
   }
 }
