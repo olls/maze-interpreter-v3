@@ -72,6 +72,38 @@ get_num(char *ptr, char *f_end, u32 *result)
 
 
 char *
+get_num(char *ptr, char *f_end, s32 *result)
+{
+  char *num_start = ptr;
+
+  b32 coef = 1;
+  if (*ptr == '-')
+  {
+    ++ptr;
+    ++num_start;
+    coef = -1;
+  }
+
+  consume_while(ptr, isNum, f_end);
+
+  *result = 0;
+  u32 num_length = ptr - num_start;
+
+  for (u32 num_pos = 0;
+       num_pos < num_length;
+       ++num_pos)
+  {
+    u32 digit = *(num_start + num_pos) - '0';
+    *result += digit * pow(10, (num_length - num_pos - 1));
+  }
+
+  *result *= coef;
+
+  return ptr;
+}
+
+
+char *
 get_direction(char *ptr, V2 *result)
 {
   *result = STATIONARY;

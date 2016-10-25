@@ -160,12 +160,17 @@ update_text_input(InputBox *input_box, Inputs *inputs)
     }
   }
 
+  if (input_box->allow_num && input_box->cursor_pos == 0 &&
+      inputs->alpha_num_sym['-'-MIN_CHAR].active)
+  {
+    input_box->text[input_box->cursor_pos++] = '-';
+  }
   for (u32 index = 0; index < array_count(inputs->alpha_num_sym); ++index)
   {
     char c = MIN_CHAR + index;
     if ((input_box->allow_all ||
-         (input_box->allow_num   && c >= '0' & c <= '9') ||
-         (input_box->allow_alpha && ((c >= 'a' & c <= 'z') || (c >= 'A' & c <= 'Z') || c == ' '))) &&
+         (input_box->allow_num   && (c >= '0' && c <= '9')) ||
+         (input_box->allow_alpha && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' '))) &&
         inputs->alpha_num_sym[index].active &&
         input_box->cursor_pos < input_box->length)
     {
