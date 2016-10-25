@@ -11,7 +11,7 @@ struct Input
 };
 
 
-enum Inputs
+enum InputMaps
 {
   RESTART,
   RESET,
@@ -23,6 +23,16 @@ enum Inputs
   ZOOM_OUT,
   SIM_TICKS_INC,
   SIM_TICKS_DEC,
+  CURSOR_LEFT,
+  CURSOR_RIGHT,
+  CURSOR_BACKSPACE,
 
   N_INPUTS
+};
+
+
+struct Inputs
+{
+  Input maps[N_INPUTS];
+  Input alpha_num_sym[MAX_CHAR - MIN_CHAR];
 };

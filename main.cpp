@@ -73,24 +73,20 @@ set_keys(Keys *keys)
 {
   keys->updated = false;
 
-  keys->space.on_up = false;
+  keys->up.on_up = false;
   keys->down.on_up = false;
   keys->left.on_up = false;
   keys->right.on_up = false;
-  keys->minus.on_up = false;
-  keys->equals.on_up = false;
 
-  keys->space.on_down = false;
+  keys->up.on_down = false;
   keys->down.on_down = false;
   keys->left.on_down = false;
   keys->right.on_down = false;
-  keys->minus.on_down = false;
-  keys->equals.on_down = false;
 
-  for (u32 i = 0; i < array_count(keys->alpha); ++i)
+  for (u32 i = 0; i < array_count(keys->alpha_num_sym); ++i)
   {
-    keys->alpha[i].on_up = false;
-    keys->alpha[i].on_down = false;
+    keys->alpha_num_sym[i].on_up = false;
+    keys->alpha_num_sym[i].on_down = false;
   }
 }
 
@@ -120,17 +116,14 @@ process_keys(Keys *keys, SDL_Event event)
   {
     Key *input = 0;
     SDL_Keysym key = event.key.keysym;
-    if (key.sym >= 'a' && key.sym <= 'z')
+    if (key.sym >= MIN_CHAR && key.sym < MAX_CHAR)
     {
-      input = keys->alpha + (key.sym - 'a');
+      input = keys->alpha_num_sym + key.sym - MIN_CHAR;
     }
     else
     {
       switch (key.sym)
       {
-      case ' ':
-        input = &keys->space;
-        break;
       case SDLK_UP:
         input = &keys->up;
         break;
@@ -143,11 +136,8 @@ process_keys(Keys *keys, SDL_Event event)
       case SDLK_RIGHT:
         input = &keys->right;
         break;
-      case '-':
-        input = &keys->minus;
-        break;
-      case '=':
-        input = &keys->equals;
+      case SDLK_BACKSPACE:
+        input = &keys->backspace;
         break;
       }
     }

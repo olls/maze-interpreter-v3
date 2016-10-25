@@ -61,7 +61,7 @@ struct GameState
 
   u32 sim_steps;
 
-  Input inputs[N_INPUTS];
+  Inputs inputs;
   Maze maze;
   Functions functions;
   Cars cars;

@@ -50,14 +50,12 @@ struct Keys
 {
   b32 updated;
 
-  Key minus;
-  Key equals;
-  Key space;
   Key up;
   Key down;
   Key left;
   Key right;
-  Key alpha[26];
+  Key backspace;
+  Key alpha_num_sym[MAX_CHAR - MIN_CHAR];
 };
 
 

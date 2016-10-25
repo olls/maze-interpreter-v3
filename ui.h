@@ -24,6 +24,7 @@ struct Menu
 
   MenuItem items[MAX_MENU_ITEMS];
   u32 length;
+  u32 chars_wide;
   V2 pos;
 
   MenuItemSelector hover_selector;
@@ -32,9 +33,20 @@ struct Menu
 };
 
 
+const u32 MAX_TEXT_INPUT = 256;
+struct InputBox
+{
+  char text[MAX_TEXT_INPUT];
+  u32 cursor_pos;
+  u32 length;
+  V2 pos;
+};
+
+
 struct UI
 {
   Menu cell_type_menu;
+  InputBox test_input;
 
   b32 mouse_click;
 };

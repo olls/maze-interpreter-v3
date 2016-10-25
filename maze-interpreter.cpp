@@ -5,11 +5,11 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
 
   game_state->d_zoom += mouse->scroll.y;
 
-  if (game_state->inputs[ZOOM_IN].active)
+  if (game_state->inputs.maps[ZOOM_IN].active)
   {
     game_state->d_zoom += .2;
   }
-  if (game_state->inputs[ZOOM_OUT].active)
+  if (game_state->inputs.maps[ZOOM_OUT].active)
   {
     game_state->d_zoom -= .2;
   }
@@ -96,7 +96,7 @@ sim_tick(GameState *game_state, u64 time_us)
   {
     if (game_state->single_step)
     {
-      if (game_state->inputs[STEP].active)
+      if (game_state->inputs.maps[STEP].active)
       {
         game_state->last_sim_tick = time_us;
         result = true;
@@ -165,7 +165,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
     exit(1);
   }
 
-  setup_inputs(keys, game_state->inputs);
+  setup_inputs(keys, &game_state->inputs);
 
   load_bitmap(&game_state->particles.spark_bitmap, "particles/spark.bmp");
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
@@ -234,26 +234,26 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     reset_zoom(game_state);
   }
 
-  update_inputs(keys, game_state->inputs, time_us);
+  update_inputs(keys, &game_state->inputs, time_us);
 
-  if (game_state->inputs[SAVE].active)
+  if (game_state->inputs.maps[SAVE].active)
   {
     serialize_maze(&game_state->maze, &game_state->functions, game_state->filename);
   }
 
-  if (game_state->inputs[RELOAD].active)
+  if (game_state->inputs.maps[RELOAD].active)
   {
     strcpy(game_state->persistent_str, "Reload!");
     load_maze(memory, game_state, argc, argv);
   }
 
-  if (game_state->inputs[RESET].active)
+  if (game_state->inputs.maps[RESET].active)
   {
     strcpy(game_state->persistent_str, "Reset!");
     reset_zoom(game_state);
   }
 
-  if (game_state->inputs[RESTART].active)
+  if (game_state->inputs.maps[RESTART].active)
   {
     strcpy(game_state->persistent_str, "Restart!");
     delete_all_cars(&(game_state->cars));
@@ -261,7 +261,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
     game_state->sim_steps = 0;
   }
 
-  if (game_state->inputs[STEP_MODE_TOGGLE].active)
+  if (game_state->inputs.maps[STEP_MODE_TOGGLE].active)
   {
     game_state->single_step = !game_state->single_step;
     log(L_GameLoop, "Changing stepping mode");
@@ -289,11 +289,11 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   ui_consume_mouse_clicks(game_state, &orthographic_basis, &game_state->ui, mouse);
 
-  if (game_state->inputs[SIM_TICKS_INC].active)
+  if (game_state->inputs.maps[SIM_TICKS_INC].active)
   {
     game_state->sim_ticks_per_s += .5f;
   }
-  if (game_state->inputs[SIM_TICKS_DEC].active)
+  if (game_state->inputs.maps[SIM_TICKS_DEC].active)
   {
     game_state->sim_ticks_per_s -= .5f;
   }
@@ -312,7 +312,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  update_ui(game_state, &orthographic_basis, &game_state->ui, mouse, time_us);
+  update_ui(game_state, &orthographic_basis, &game_state->ui, mouse, &game_state->inputs, time_us);
 
   //
   // RENDER
@@ -331,7 +331,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   r32 text_scale = 0.3;
   draw_string(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1}, game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
 
-  draw_ui(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps, &game_state->ui, time_us);
+  draw_ui(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, &game_state->ui, time_us);
 
   char str[4];
   fmted_str(str, 4, "%d", fps);

@@ -1,7 +1,7 @@
 const V4 FRAME_COLOR = {1, 0.35, 0.5, .95};
 const r32 FONT_SIZE = 0.2;
 const r32 MENU_ANNIMATION_SPEED = .4;
-V2 MENU_ITEM_SIZE = {250, 25};
+const V2 MENU_ITEM_SIZE = {250, 25};
 
 
 Rectangle
@@ -9,7 +9,7 @@ get_menu_item_rect(Menu *menu, u32 n)
 {
   Rectangle result;
   result.start = menu->pos + (V2){0, n}*MENU_ITEM_SIZE;
-  result.end = result.start + MENU_ITEM_SIZE;
+  result.end = result.start + menu->chars_wide*CHAR_SIZE.x*FONT_SIZE + MENU_ITEM_SIZE.y;
   return result;
 }
 
@@ -35,9 +35,11 @@ init_ui(UI *ui)
       longest_menu_item = len;
     }
   }
-  ui->cell_type_menu.pos = (V2){10, 10};
 
-  MENU_ITEM_SIZE.x = (longest_menu_item + 1) * CHAR_SIZE.x * FONT_SIZE + MENU_ITEM_SIZE.y;
+  ui->cell_type_menu.pos = (V2){10, 10};
+  ui->cell_type_menu.chars_wide = longest_menu_item + 1;
+
+  ui->test_input.length = 16;
 }
 
 
@@ -111,11 +113,48 @@ update_ui_menu(Menu *menu, V2 world_mouse_coord, b32 panning, b32 mouse_click, u
 
 
 void
-update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, u64 time_us)
+update_text_input(InputBox *input_box, Inputs *inputs)
+{
+  if (inputs->maps[CURSOR_LEFT].active && input_box->cursor_pos > 0)
+  {
+    --input_box->cursor_pos;
+  }
+  if (inputs->maps[CURSOR_RIGHT].active && input_box->cursor_pos < input_box->length)
+  {
+    --input_box->cursor_pos;
+  }
+  if (inputs->maps[CURSOR_BACKSPACE].active)
+  {
+    if (input_box->cursor_pos > 0)
+    {
+      --input_box->cursor_pos;
+    }
+    if (input_box->cursor_pos < input_box->length)
+    {
+      input_box->text[input_box->cursor_pos] = '\0';
+    }
+  }
+
+  for (char c = 0; c < array_count(inputs->alpha_num_sym); ++c)
+  {
+    if (inputs->alpha_num_sym[c].active &&
+        input_box->cursor_pos < input_box->length)
+    {
+      input_box->text[input_box->cursor_pos++] = MIN_CHAR + c;
+      inputs->alpha_num_sym[c].active = false;
+    }
+  }
+}
+
+
+void
+update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, Inputs *inputs, u64 time_us)
 {
   V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
 
   update_ui_menu(&ui->cell_type_menu, world_mouse_coord, game_state->panning_this_frame, ui->mouse_click, time_us);
+
+  update_text_input(&ui->test_input, inputs);
 }
 
 
@@ -135,7 +174,7 @@ annimate_menu_item_fill(Menu *menu, MenuItemSelector *menu_item_selector)
 
 
 void
-draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, Menu *menu, u64 time_us)
+draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, Menu *menu, u64 time_us)
 {
   if (menu->cell)
   {
@@ -174,14 +213,28 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
       MenuItem *item = menu->items + item_index;
 
       Rectangle menu_item_rect = get_menu_item_rect(menu, item_index);
-      draw_string(render_operations, render_basis, &bitmaps->font, menu_item_rect.start + 2, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
+      draw_string(render_operations, render_basis, font, menu_item_rect.start + 2, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
     }
   }
 }
 
 
 void
-draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmaps *bitmaps, UI *ui, u64 time_us)
+draw_text_input(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, InputBox *input_box)
 {
-  draw_ui_menu(render_operations, render_basis, bitmaps, &ui->cell_type_menu, time_us);
+  Rectangle input_rect;
+  input_rect.start = input_box->pos;
+  input_rect.end = input_rect.start + (V2){(input_box->length+1)*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  add_box_to_render_list(render_operations, render_basis, input_rect, FRAME_COLOR);
+
+  draw_string(render_operations, render_basis, font, input_rect.start + 2, input_box->text, FONT_SIZE);
+}
+
+
+void
+draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, UI *ui, u64 time_us)
+{
+  draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, time_us);
+
+  draw_text_input(render_operations, render_basis, font, &ui->test_input);
 }

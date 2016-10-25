@@ -1,10 +1,7 @@
-V2 CHAR_SIZE = {66, 116};
-
-
 void
 draw_char(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1})
 {
-  u32 char_index = x - 32;
+  u32 char_index = x - MIN_CHAR;
   V2 bitmap_pos = {
     .x = char_index % 16,
     .y = 5 - (char_index / 16)
