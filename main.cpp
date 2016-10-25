@@ -35,10 +35,10 @@
 #include "cells-storage.h"
 #include "cars-storage.h"
 #include "cars.h"
+#include "draw.h"
 #include "cells.h"
 #include "parser.h"
 #include "serialize.h"
-#include "draw.h"
 #include "ui.h"
 #include "input.h"
 
@@ -49,10 +49,10 @@
 #include "cells-storage.cpp"
 #include "cars-storage.cpp"
 #include "cars.cpp"
+#include "draw.cpp"
 #include "cells.cpp"
 #include "parser.cpp"
 #include "serialize.cpp"
-#include "draw.cpp"
 #include "ui.cpp"
 #include "input.cpp"
 
