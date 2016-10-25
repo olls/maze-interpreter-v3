@@ -3,24 +3,26 @@ setup_inputs(Keys *keys, Inputs *inputs)
 {
   // TODO: Modifier keys
 
-  inputs->maps[RESTART].key_press = &(keys->alpha_num_sym['r'-MIN_CHAR].on_up);
+#define ALPHA_NUM_SYM(c) (keys->alpha_num_sym[(c)-MIN_CHAR])
 
-  inputs->maps[RESET].key_press = &(keys->alpha_num_sym['n'-MIN_CHAR].on_up);
+  inputs->maps[RESTART].key_press = &(ALPHA_NUM_SYM('r').on_up);
 
-  inputs->maps[RELOAD].key_press = &(keys->alpha_num_sym['p'-MIN_CHAR].on_up);
+  inputs->maps[RESET].key_press = &(ALPHA_NUM_SYM('n').on_up);
 
-  inputs->maps[SAVE].key_press = &(keys->alpha_num_sym['s'-MIN_CHAR].on_up);
+  inputs->maps[RELOAD].key_press = &(ALPHA_NUM_SYM('p').on_up);
+
+  inputs->maps[SAVE].key_press = &(ALPHA_NUM_SYM('s').on_up);
   inputs->maps[SAVE].rate_limit = SLOW_KEY_REPEAT_RATE_LIMIT;
 
-  inputs->maps[STEP].key_press = &(keys->alpha_num_sym['j'-MIN_CHAR].down);
+  inputs->maps[STEP].key_press = &(ALPHA_NUM_SYM('j').down);
   inputs->maps[STEP].rate_limit = SLOW_KEY_REPEAT_RATE_LIMIT;
 
-  inputs->maps[STEP_MODE_TOGGLE].key_press = &(keys->alpha_num_sym['k'-MIN_CHAR].on_up);
+  inputs->maps[STEP_MODE_TOGGLE].key_press = &(ALPHA_NUM_SYM('k').on_up);
 
-  inputs->maps[ZOOM_IN].key_press = &(keys->alpha_num_sym['='-MIN_CHAR].down);
+  inputs->maps[ZOOM_IN].key_press = &(ALPHA_NUM_SYM('=').down);
   inputs->maps[ZOOM_IN].rate_limit = FAST_KEY_REPEAT_RATE_LIMIT;
 
-  inputs->maps[ZOOM_OUT].key_press = &(keys->alpha_num_sym['-'-MIN_CHAR].down);
+  inputs->maps[ZOOM_OUT].key_press = &(ALPHA_NUM_SYM('-').down);
   inputs->maps[ZOOM_OUT].rate_limit = FAST_KEY_REPEAT_RATE_LIMIT;
 
   inputs->maps[SIM_TICKS_INC].key_press = &(keys->up.down);
