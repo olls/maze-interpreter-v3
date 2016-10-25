@@ -7,6 +7,9 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
   V2 world_cell_pos = cell_coord_to_world(game_state->cell_spacing, cell_pos.x, cell_pos.y);
   Rectangle cell_bounds = radius_rectangle(world_cell_pos, calc_cell_radius(game_state));
 
+  b32 hide_cell_menu = false;
+  b32 mouse_click = mouse->l_on_up && !game_state->panning_this_frame;
+
   if (in_rectangle(mouse_maze_pos, cell_bounds))
   {
     Cell *cell_hovered_over = get_cell(&game_state->maze, cell_pos.x, cell_pos.y);
@@ -15,7 +18,7 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
       cell_hovered_over->hovered_at_time = time_us;
     }
 
-    if (mouse->l_on_up && !game_state->panning_this_frame)
+    if (mouse_click)
     {
       if (cell_hovered_over)
       {
@@ -33,9 +36,18 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
       }
       else
       {
-        game_state->ui.cell_type_menu.cell = 0;
+        hide_cell_menu = true;
       }
     }
+  }
+  else if (mouse_click)
+  {
+    hide_cell_menu = true;
+  }
+
+  if (hide_cell_menu)
+  {
+    game_state->ui.cell_type_menu.cell = 0;
   }
 }
 
