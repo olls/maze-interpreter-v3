@@ -181,23 +181,23 @@ draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBas
     V2 target_world_pos = cell_coord_to_world(game_state->cell_spacing, game_state->ui.cell_type_menu.cell->x, game_state->ui.cell_type_menu.cell->y);
 
     V2 world_pos;
-    if (game_state->ui.cell_type_menu.highlighted_cell_pos.x == -1)
+    if (game_state->ui.cell_type_menu.annimated_highlighted_cell_pos.x == -1)
     {
-      game_state->ui.cell_type_menu.highlighted_cell_pos = target_world_pos;
+      game_state->ui.cell_type_menu.annimated_highlighted_cell_pos = target_world_pos;
     }
     else
     {
-      V2 d_target = target_world_pos - game_state->ui.cell_type_menu.highlighted_cell_pos;
-      game_state->ui.cell_type_menu.highlighted_cell_pos += d_target * 0.3;
+      V2 d_target = target_world_pos - game_state->ui.cell_type_menu.annimated_highlighted_cell_pos;
+      game_state->ui.cell_type_menu.annimated_highlighted_cell_pos += d_target * 0.3;
     }
 
-    Rectangle cell_bounds = radius_rectangle(game_state->ui.cell_type_menu.highlighted_cell_pos, cell_radius);
+    Rectangle cell_bounds = radius_rectangle(game_state->ui.cell_type_menu.annimated_highlighted_cell_pos, cell_radius);
 
     V4 highlight_color = {0.3, .9, .1, .2};
     add_box_outline_to_render_list(render_operations, render_basis, cell_bounds, highlight_color, (s32)cell_radius*0.3);
   }
   else
   {
-    game_state->ui.cell_type_menu.highlighted_cell_pos = (V2){-1, -1};
+    game_state->ui.cell_type_menu.annimated_highlighted_cell_pos = (V2){-1, -1};
   }
 }

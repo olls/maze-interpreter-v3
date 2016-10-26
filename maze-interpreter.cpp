@@ -46,9 +46,10 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse)
       game_state->currently_panning = true;
     }
   }
-  else
+  else if (game_state->currently_panning && mouse->l_on_up)
   {
     game_state->currently_panning = false;
+    mouse->l_on_up = false;
   }
 
   if (abs(game_state->zoom - old_zoom) > 0.1)
@@ -387,5 +388,4 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   // TODO: Get rid of this
   game_state->last_render_basis = render_basis;
-  game_state->panning_this_frame = game_state->currently_panning;
 }

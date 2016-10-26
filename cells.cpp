@@ -8,7 +8,7 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
   Rectangle cell_bounds = radius_rectangle(world_cell_pos, calc_cell_radius(game_state));
 
   b32 hide_cell_menu = false;
-  b32 mouse_click = mouse->l_on_up && !game_state->panning_this_frame;
+  b32 mouse_click = mouse->l_on_up;
 
   if (in_rectangle(mouse_maze_pos, cell_bounds))
   {
@@ -26,12 +26,7 @@ update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *m
         {
           cell_hovered_over->edit_mode_last_change = time_us;
 
-          // Only update time if the menu wasn't already open
-          if (game_state->ui.cell_type_menu.cell == 0)
-          {
-            game_state->ui.cell_type_menu.opened_on_frame = time_us;
-          }
-          game_state->ui.cell_type_menu.cell = cell_hovered_over;
+          open_cell_type_menu(game_state, cell_hovered_over, time_us);
         }
       }
       else

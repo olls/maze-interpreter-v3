@@ -53,7 +53,6 @@ struct GameState
   V2 maze_pos;
   V2 last_mouse_pos;
   b32 currently_panning;
-  b32 panning_this_frame;
 
   b32 single_step;
   u64 last_sim_tick;

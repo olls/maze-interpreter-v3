@@ -26,7 +26,6 @@ const u32 MAX_MENU_ITEMS = 32;
 struct Menu
 {
   Cell *cell;
-  V2 highlighted_cell_pos;
   b32 clicked;
 
   MenuItem items[MAX_MENU_ITEMS];
@@ -37,6 +36,8 @@ struct Menu
   MenuItemSelector hover_selector;
   MenuItemSelector selected_selector;
   u64 opened_on_frame;
+
+  V2 annimated_highlighted_cell_pos;
 };
 
 

@@ -9,6 +9,16 @@ get_menu_item_rect(Menu *menu, u32 n)
 
 
 Rectangle
+get_input_box_rect(InputBox *input_box)
+{
+  Rectangle result;
+  result.start = input_box->pos;
+  result.end = result.start + (V2){input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  return result;
+}
+
+
+Rectangle
 get_button_rect(Button *button)
 {
   Rectangle result;
@@ -54,36 +64,41 @@ ui_consume_mouse_clicks(GameState *game_state, RenderBasis *render_basis, UI *ui
 
   V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
 
-  if (ui->cell_type_menu.cell)
-  {
-    Rectangle rect;
-    rect.start = ui->cell_type_menu.pos;
-    rect.end = rect.start + MENU_ITEM_SIZE*(V2){1, ui->cell_type_menu.length};
-    ui->cell_type_menu.clicked = false;
-
-    if (in_rectangle(world_mouse_coord, rect) && !game_state->currently_panning)
-    {
-      ui->cell_type_menu.clicked = mouse->l_on_up;
-      consume = true;
-    }
-  }
-
   if (ui->car_inputs)
   {
     CarInput *car_input = ui->car_inputs;
     while (car_input)
     {
       Button *button = &car_input->done;
-
       Rectangle button_rect = get_button_rect(button);
-      if (in_rectangle(world_mouse_coord, button_rect) && !game_state->currently_panning)
+      if (in_rectangle(world_mouse_coord, button_rect))
       {
         button->hovered_at_time = time_us;
         button->activated = mouse->l_on_up;
         consume = true;
       }
 
+      Rectangle input_box_rect = get_input_box_rect(&car_input->input);
+      if (in_rectangle(world_mouse_coord, input_box_rect))
+      {
+        consume = true;
+      }
+
       car_input = car_input->next;
+    }
+  }
+
+  if (!consume && ui->cell_type_menu.cell)
+  {
+    Rectangle rect;
+    rect.start = ui->cell_type_menu.pos;
+    rect.end = rect.start + MENU_ITEM_SIZE*(V2){1, ui->cell_type_menu.length};
+    ui->cell_type_menu.clicked = false;
+
+    if (in_rectangle(world_mouse_coord, rect))
+    {
+      ui->cell_type_menu.clicked = mouse->l_on_up;
+      consume = true;
     }
   }
 
@@ -95,7 +110,19 @@ ui_consume_mouse_clicks(GameState *game_state, RenderBasis *render_basis, UI *ui
 
 
 void
-update_ui_menu(Menu *menu, V2 world_mouse_coord, u64 time_us)
+open_cell_type_menu(GameState *game_state, Cell *cell_hovered_over, u64 time_us)
+{
+  // Only update time if the menu wasn't already open
+  if (game_state->ui.cell_type_menu.cell == 0)
+  {
+    game_state->ui.cell_type_menu.opened_on_frame = time_us;
+  }
+  game_state->ui.cell_type_menu.cell = cell_hovered_over;
+}
+
+
+void
+update_menu(Menu *menu, V2 world_mouse_coord, u64 time_us)
 {
   menu->selected_selector.item_n = -1;
 
@@ -144,13 +171,14 @@ update_ui_menu(Menu *menu, V2 world_mouse_coord, u64 time_us)
     if (close_menu)
     {
       menu->cell = 0;
+      menu->clicked = false;
     }
   }
 }
 
 
 void
-update_text_input(InputBox *input_box, Inputs *inputs)
+update_input_box(InputBox *input_box, Inputs *inputs)
 {
   if (inputs->maps[CURSOR_LEFT].active && input_box->cursor_pos > 0)
   {
@@ -208,7 +236,7 @@ update_car_inputs(GameState *game_state, UI *ui, V2 world_mouse_coord, Inputs *i
     CarInput *prev_car_input = 0;
     while (car_input)
     {
-      update_text_input(&car_input->input, inputs);
+      update_input_box(&car_input->input, inputs);
       update_button(&car_input->done, world_mouse_coord);
 
       if (car_input->done.activated)
@@ -254,7 +282,7 @@ update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse
 {
   V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
 
-  update_ui_menu(&ui->cell_type_menu, world_mouse_coord, time_us);
+  update_menu(&ui->cell_type_menu, world_mouse_coord, time_us);
   update_car_inputs(game_state, ui, world_mouse_coord, inputs);
 }
 
@@ -321,14 +349,12 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
 
 
 void
-draw_text_input(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, InputBox *input_box)
+draw_input_box(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, InputBox *input_box)
 {
-  Rectangle input_rect;
-  input_rect.start = input_box->pos;
-  input_rect.end = input_rect.start + (V2){input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
-  add_box_to_render_list(render_operations, render_basis, input_rect, FRAME_COLOR);
+  Rectangle input_box_rect = get_input_box_rect(input_box);
+  add_box_to_render_list(render_operations, render_basis, input_box_rect, FRAME_COLOR);
 
-  draw_string(render_operations, render_basis, font, input_rect.start + 2, input_box->text, FONT_SIZE);
+  draw_string(render_operations, render_basis, font, input_box_rect.start + 2, input_box->text, FONT_SIZE);
 }
 
 
@@ -355,7 +381,7 @@ draw_car_input(RenderOperations *render_operations, RenderBasis *render_basis, B
   car_input->input.pos = pos;
   car_input->done.pos = car_input->input.pos + (V2){0, MENU_ITEM_SIZE.y};
 
-  draw_text_input(render_operations, render_basis, font, &car_input->input);
+  draw_input_box(render_operations, render_basis, font, &car_input->input);
   draw_button(render_operations, render_basis, font, &car_input->done, time_us);
 }
 
