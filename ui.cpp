@@ -43,10 +43,7 @@ init_ui(UI *ui)
   ui->cell_type_menu.pos = (V2){10, 10};
   ui->cell_type_menu.chars_wide = longest_menu_item + 1;
 
-  ui->test_input.length = 16;
-  ui->test_input.allow_num = false;
-  ui->test_input.allow_alpha = true;
-  ui->test_input.allow_all = false;
+  ui->car_inputs = 0;
 }
 
 
@@ -71,7 +68,22 @@ ui_consume_mouse_clicks(GameState *game_state, RenderBasis *render_basis, UI *ui
     }
   }
 
+  if (ui->car_inputs)
+  {
+    CarInput *car_input = ui->car_inputs;
+    while (car_input)
     {
+      Button *button = &car_input->done;
+
+      Rectangle button_rect = get_button_rect(button);
+      if (in_rectangle(world_mouse_coord, button_rect) && !game_state->currently_panning)
+      {
+        button->hovered_at_time = time_us;
+        button->activated = mouse->l_on_up;
+        consume = true;
+      }
+
+      car_input = car_input->next;
     }
   }
 
@@ -182,13 +194,68 @@ update_text_input(InputBox *input_box, Inputs *inputs)
 
 
 void
+update_button(Button *button, V2 world_mouse_coord)
+{
+}
+
+
+void
+update_car_inputs(GameState *game_state, UI *ui, V2 world_mouse_coord, Inputs *inputs)
+{
+  if (ui->car_inputs)
+  {
+    CarInput *car_input = ui->car_inputs;
+    CarInput *prev_car_input = 0;
+    while (car_input)
+    {
+      update_text_input(&car_input->input, inputs);
+      update_button(&car_input->done, world_mouse_coord);
+
+      if (car_input->done.activated)
+      {
+        Car *car = get_car_with_id(&game_state->cars, car_input->car_id);
+        assert(car);
+
+        get_num(car_input->input.text, car_input->input.text+car_input->input.length, &car->value);
+
+        if (prev_car_input)
+        {
+          prev_car_input->next = car_input->next;
+        }
+        else
+        {
+          ui->car_inputs = car_input->next;
+        }
+
+        CarInput *next = car_input->next;
+
+        car_input->next = ui->free_car_inputs;
+        ui->free_car_inputs = car_input;
+
+        car_input = next;
+      }
+      else
+      {
+        prev_car_input = car_input;
+        car_input = car_input->next;
+      }
+    }
+
+    if (ui->car_inputs == 0)
+    {
+      game_state->finish_sim_step_move = true;
+    }
+  }
+}
+
+
+void
 update_ui(GameState *game_state, RenderBasis *render_basis, UI *ui, Mouse *mouse, Inputs *inputs, u64 time_us)
 {
   V2 world_mouse_coord = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
 
   update_ui_menu(&ui->cell_type_menu, world_mouse_coord, time_us);
-
-  update_text_input(&ui->test_input, inputs);
+  update_car_inputs(game_state, ui, world_mouse_coord, inputs);
 }
 
 
@@ -298,5 +365,47 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *
 {
   draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, time_us);
 
-  draw_text_input(render_operations, render_basis, font, &ui->test_input);
+  V2 car_input_height = (V2){0, 2*MENU_ITEM_SIZE.y};
+  V2 car_input_pos = {0, size(render_basis->clip_region).y - car_input_height.y};
+
+  CarInput *car_input = ui->car_inputs;
+  while (car_input)
+  {
+    draw_car_input(render_operations, render_basis, font, car_input, time_us, car_input_pos);
+    car_input_pos -= car_input_height;
+
+    car_input = car_input->next;
+  }
+}
+
+
+void
+init_car_input_box(Memory *memory, UI *ui, u32 car_id)
+{
+  CarInput *car_input = 0;
+
+  if (ui->free_car_inputs)
+  {
+    car_input = ui->free_car_inputs;
+    ui->free_car_inputs = car_input->next;
+  }
+  else
+  {
+    car_input = push_struct(memory, CarInput);
+  }
+
+  car_input->next = ui->car_inputs;
+  ui->car_inputs = car_input;
+
+  car_input->car_id = car_id;
+
+  zero(&car_input->input, InputBox);
+  car_input->input.length = 10;
+  car_input->input.allow_num = true;
+  car_input->input.allow_alpha = false;
+  car_input->input.allow_all = false;
+
+  strcpy(car_input->done.name, "Set value");
+  car_input->done.length = car_input->input.length;
+  car_input->done.activated = false;
 }

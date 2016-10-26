@@ -76,7 +76,6 @@ const u32 MAX_TEXT_INPUTS = 16;
 struct UI
 {
   Menu cell_type_menu;
-  InputBox test_input;
 
   CarInput *car_inputs;
   CarInput *free_car_inputs;

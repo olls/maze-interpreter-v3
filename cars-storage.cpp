@@ -40,7 +40,8 @@ get_new_car(Memory *memory, Cars *cars)
 }
 
 
-void delete_all_cars(Cars *cars)
+void
+delete_all_cars(Cars *cars)
 {
   CarsBlock *block = cars->first_block;
   if (block)
@@ -174,6 +175,26 @@ cars_iterator(Cars *cars, CarsIterator *iterator)
   {
     result = iterator->cars_block->cars + iterator->car_index;
     ++iterator->car_index;
+  }
+
+  return result;
+}
+
+
+Car *
+get_car_with_id(Cars *cars, u32 car_id)
+{
+  Car *result = 0;
+  CarsIterator iter = {};
+  Car *car;
+
+  while ((car = cars_iterator(cars, &iter)))
+  {
+    if (car->id == car_id)
+    {
+      result = car;
+      break;
+    }
   }
 
   return result;

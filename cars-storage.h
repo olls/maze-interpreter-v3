@@ -25,8 +25,7 @@ struct Car
 {
   b32 update_next_frame;
   b32 dead;
-
-  u32 id; // NOTE: For debugging purposes only
+  u32 id;
 
   s32 value;
 

@@ -9,10 +9,10 @@ calc_car_radius(u32 cell_spacing, r32 cell_margin)
 void
 init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V2 direction = DOWN)
 {
-  static u32 cars_id = 0;
   car->update_next_frame = false;
   car->dead = false;
   car->value = 0;
+  static u32 cars_id = 0;
   car->id = cars_id++;
   car->target_cell_x = cell_x;
   car->target_cell_y = cell_y;
@@ -30,7 +30,7 @@ init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V
 
 
 void
-calculate_car_direction(GameState *game_state, Maze *maze, Car *car)
+move_car(GameState *game_state, Maze *maze, Car *car)
 {
   if (car->direction == STATIONARY)
   {
@@ -286,7 +286,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_INP):
     {
       log(L_CarsSim, "Input");
-      log(L_CarsSim, "Not Implemented!");
+      init_car_input_box(memory, &game_state->ui, car->id);
     } break;
 
     case (CELL_UP):
@@ -390,10 +390,17 @@ perform_cars_sim_tick(Memory *memory, GameState *game_state, u64 time_us)
       car->updated_cell_type = CELL_NULL;
     }
   }
+}
 
-  while ((car = cars_iterator(cars, &iter)))
+
+void
+move_cars(GameState *game_state)
+{
+  CarsIterator iter = {};
+  Car *car;
+  while ((car = cars_iterator(&game_state->cars, &iter)))
   {
-    calculate_car_direction(game_state, maze, car);
+    move_car(game_state, &game_state->maze, car);
   }
 }
 

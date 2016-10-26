@@ -60,6 +60,7 @@ struct GameState
   r32 sim_ticks_per_s;
 
   u32 sim_steps;
+  b32 finish_sim_step_move;
 
   Inputs inputs;
   Maze maze;

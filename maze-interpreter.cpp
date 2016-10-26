@@ -155,6 +155,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   game_state->single_step = false;
   game_state->sim_ticks_per_s = 5;
 
+  game_state->finish_sim_step_move = false;
+
   if (argc > 1)
   {
     game_state->filename = argv[1];
@@ -301,11 +303,19 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
 
   update_cells_ui_state(game_state, &render_basis, mouse, time_us);
 
-  if (sim_tick(game_state, time_us))
+  b32 sim = sim_tick(game_state, time_us);
+
+  if (sim && game_state->ui.car_inputs == 0 && !game_state->finish_sim_step_move)
   {
     perform_cells_sim_tick(memory, game_state, &(game_state->maze.tree), time_us);
     perform_cars_sim_tick(memory, game_state, time_us);
+  }
 
+  if (sim && game_state->ui.car_inputs == 0)
+  {
+    move_cars(game_state);
+
+    game_state->finish_sim_step_move = false;
     ++game_state->sim_steps;
   }
 
