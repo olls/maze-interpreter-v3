@@ -40,6 +40,9 @@ setup_inputs(Keys *keys, Inputs *inputs)
   inputs->maps[CURSOR_BACKSPACE].key_press = &(keys->backspace.down);
   inputs->maps[CURSOR_BACKSPACE].rate_limit = SLOW_KEY_REPEAT_RATE_LIMIT;
 
+  inputs->maps[LINE_BREAK].key_press = &(keys->enter.down);
+  inputs->maps[LINE_BREAK].rate_limit = SLOW_KEY_REPEAT_RATE_LIMIT;
+
   for (u32 i = 0; i <= array_count(inputs->alpha_num_sym); ++i)
   {
     inputs->alpha_num_sym[i].key_press = &(keys->alpha_num_sym[i].down);

@@ -55,6 +55,7 @@ struct Keys
   Key left;
   Key right;
   Key backspace;
+  Key enter;
   Key alpha_num_sym[MAX_CHAR - MIN_CHAR];
 };
 

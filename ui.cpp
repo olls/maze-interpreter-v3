@@ -183,9 +183,11 @@ update_menu(Menu *menu, V2 world_mouse_coord, u64 time_us)
 }
 
 
-void
+b32
 update_input_box(InputBox *input_box, Inputs *inputs)
 {
+  b32 result = false;
+
   if (input_box->active)
   {
     if (inputs->maps[CURSOR_LEFT].active && input_box->cursor_pos > 0)
@@ -206,6 +208,10 @@ update_input_box(InputBox *input_box, Inputs *inputs)
       {
         input_box->text[input_box->cursor_pos] = '\0';
       }
+    }
+    if (inputs->maps[LINE_BREAK].active)
+    {
+      result = true;
     }
 
     if (input_box->allow_num && input_box->cursor_pos == 0 &&
@@ -228,6 +234,8 @@ update_input_box(InputBox *input_box, Inputs *inputs)
       }
     }
   }
+
+  return result;
 }
 
 
@@ -246,10 +254,10 @@ update_car_inputs(GameState *game_state, UI *ui, V2 world_mouse_coord, Inputs *i
     CarInput *prev_car_input = 0;
     while (car_input)
     {
-      update_input_box(&car_input->input, inputs);
+      b32 enter_in_input = update_input_box(&car_input->input, inputs);
       update_button(&car_input->done, world_mouse_coord);
 
-      if (car_input->done.activated)
+      if (car_input->done.activated || enter_in_input)
       {
         Car *car = get_car_with_id(&game_state->cars, car_input->car_id);
         assert(car);

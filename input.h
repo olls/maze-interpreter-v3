@@ -26,6 +26,7 @@ enum InputMaps
   CURSOR_LEFT,
   CURSOR_RIGHT,
   CURSOR_BACKSPACE,
+  LINE_BREAK,
 
   N_INPUTS
 };

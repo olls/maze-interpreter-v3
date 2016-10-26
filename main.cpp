@@ -139,6 +139,9 @@ process_keys(Keys *keys, SDL_Event event)
       case SDLK_BACKSPACE:
         input = &keys->backspace;
         break;
+      case SDLK_RETURN:
+        input = &keys->enter;
+        break;
       }
     }
 
