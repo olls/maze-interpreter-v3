@@ -286,7 +286,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_INP):
     {
       log(L_CarsSim, "Input");
-      init_car_input_box(memory, &game_state->ui, car->id);
+      init_car_input_box(memory, &game_state->ui, car->id, car->value);
     } break;
 
     case (CELL_UP):

@@ -416,7 +416,7 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *
   while (car_input)
   {
     draw_car_input(render_operations, render_basis, font, car_input, time_us, car_input_pos);
-    car_input_pos -= car_input_height;
+    car_input_pos -= car_input_height + (V2){0, 2};
 
     car_input = car_input->next;
   }
@@ -424,7 +424,7 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *
 
 
 void
-init_car_input_box(Memory *memory, UI *ui, u32 car_id)
+init_car_input_box(Memory *memory, UI *ui, u32 car_id, s32 initial_value)
 {
   CarInput *car_input = 0;
 
@@ -448,6 +448,7 @@ init_car_input_box(Memory *memory, UI *ui, u32 car_id)
   car_input->input.allow_num = true;
   car_input->input.allow_alpha = false;
   car_input->input.allow_all = false;
+  car_input->input.cursor_pos = fmted_str(car_input->input.text, car_input->input.length, "%d", initial_value);
 
   strcpy(car_input->done.name, "Set value");
   car_input->done.length = car_input->input.length;
