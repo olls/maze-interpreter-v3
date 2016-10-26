@@ -78,22 +78,28 @@ ui_consume_mouse_clicks(GameState *game_state, RenderBasis *render_basis, UI *ui
         consume = true;
       }
 
-      Rectangle input_box_rect = get_input_box_rect(&car_input->input);
-      if (in_rectangle(world_mouse_coord, input_box_rect))
+      InputBox *input_box = &car_input->input;
+      Rectangle input_box_rect = get_input_box_rect(input_box);
+      if (in_rectangle(world_mouse_coord, input_box_rect) && mouse->l_on_up)
       {
         consume = true;
+        input_box->active = mouse->l_on_up;
+      }
+      else if (mouse->l_on_up)
+      {
+        input_box->active = false;
       }
 
       car_input = car_input->next;
     }
   }
 
+  ui->cell_type_menu.clicked = false;
   if (!consume && ui->cell_type_menu.cell)
   {
     Rectangle rect;
     rect.start = ui->cell_type_menu.pos;
     rect.end = rect.start + MENU_ITEM_SIZE*(V2){1, ui->cell_type_menu.length};
-    ui->cell_type_menu.clicked = false;
 
     if (in_rectangle(world_mouse_coord, rect))
     {
@@ -180,42 +186,46 @@ update_menu(Menu *menu, V2 world_mouse_coord, u64 time_us)
 void
 update_input_box(InputBox *input_box, Inputs *inputs)
 {
-  if (inputs->maps[CURSOR_LEFT].active && input_box->cursor_pos > 0)
+  if (input_box->active)
   {
-    --input_box->cursor_pos;
-  }
-  if (inputs->maps[CURSOR_RIGHT].active && input_box->cursor_pos < input_box->length)
-  {
-    --input_box->cursor_pos;
-  }
-  if (inputs->maps[CURSOR_BACKSPACE].active)
-  {
-    if (input_box->cursor_pos > 0)
+    if (inputs->maps[CURSOR_LEFT].active && input_box->cursor_pos > 0)
     {
       --input_box->cursor_pos;
     }
-    if (input_box->cursor_pos < input_box->length)
+    if (inputs->maps[CURSOR_RIGHT].active && input_box->cursor_pos < input_box->length)
     {
-      input_box->text[input_box->cursor_pos] = '\0';
+      --input_box->cursor_pos;
     }
-  }
-
-  if (input_box->allow_num && input_box->cursor_pos == 0 &&
-      inputs->alpha_num_sym['-'-MIN_CHAR].active)
-  {
-    input_box->text[input_box->cursor_pos++] = '-';
-  }
-  for (u32 index = 0; index < array_count(inputs->alpha_num_sym); ++index)
-  {
-    char c = MIN_CHAR + index;
-    if ((input_box->allow_all ||
-         (input_box->allow_num   && (c >= '0' && c <= '9')) ||
-         (input_box->allow_alpha && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' '))) &&
-        inputs->alpha_num_sym[index].active &&
-        input_box->cursor_pos < input_box->length)
+    if (inputs->maps[CURSOR_BACKSPACE].active)
     {
-      input_box->text[input_box->cursor_pos++] = c;
-      inputs->alpha_num_sym[index].active = false;
+      if (input_box->cursor_pos > 0)
+      {
+        --input_box->cursor_pos;
+      }
+      if (input_box->cursor_pos < input_box->length)
+      {
+        input_box->text[input_box->cursor_pos] = '\0';
+      }
+    }
+
+    if (input_box->allow_num && input_box->cursor_pos == 0 &&
+        inputs->alpha_num_sym['-'-MIN_CHAR].active)
+    {
+      input_box->text[input_box->cursor_pos++] = '-';
+      inputs->alpha_num_sym['-'-MIN_CHAR].active = false;
+    }
+    for (u32 index = 0; index < array_count(inputs->alpha_num_sym); ++index)
+    {
+      char c = MIN_CHAR + index;
+      if ((input_box->allow_all ||
+           (input_box->allow_num   && (c >= '0' && c <= '9')) ||
+           (input_box->allow_alpha && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' '))) &&
+          inputs->alpha_num_sym[index].active &&
+          input_box->cursor_pos < input_box->length)
+      {
+        input_box->text[input_box->cursor_pos++] = c;
+        inputs->alpha_num_sym[index].active = false;
+      }
     }
   }
 }
@@ -352,7 +362,15 @@ void
 draw_input_box(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, InputBox *input_box)
 {
   Rectangle input_box_rect = get_input_box_rect(input_box);
+
   add_box_to_render_list(render_operations, render_basis, input_box_rect, FRAME_COLOR);
+
+  if (input_box->active)
+  {
+    V4 color = clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1);
+    color.a = 0.7;
+    add_box_outline_to_render_list(render_operations, render_basis, input_box_rect, color, 3);
+  }
 
   draw_string(render_operations, render_basis, font, input_box_rect.start + 2, input_box->text, FONT_SIZE);
 }
