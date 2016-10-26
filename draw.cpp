@@ -24,10 +24,14 @@ draw_car(GameState *game_state, RenderOperations *render_operations, RenderBasis
 
   add_circle_to_render_list(render_operations, render_basis, pos, car_raduis, colour);
 
-  u32 max_len = 3;
+  u32 max_len = 16;
   char str[max_len];
-  fmted_str(str, max_len, "%d", car->value);
-  draw_string(render_operations, render_basis, &game_state->bitmaps.font, pos - 0.5*CHAR_SIZE*game_state->world_per_pixel*0.15, str, 0.15);
+  r32 font_size = 0.15;
+
+  u32 chars = fmted_str(str, max_len, "%d", car->value);
+  font_size /= chars;
+
+  draw_string(render_operations, render_basis, &game_state->bitmaps.font, pos - 0.5*(V2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
 }
 
 
