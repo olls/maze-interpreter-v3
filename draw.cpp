@@ -19,10 +19,10 @@ calc_cell_radius(GameState *game_state)
 void
 draw_car(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
 {
-  u32 car_raduis = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
+  u32 car_radius = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
   V2 pos = cell_coord_to_world(game_state->cell_spacing, car->target_cell_x, car->target_cell_y) + car->offset;
 
-  add_circle_to_render_list(render_operations, render_basis, pos, car_raduis, colour);
+  add_circle_to_render_list(render_operations, render_basis, pos, car_radius, colour);
 
   u32 max_len = 16;
   char str[max_len];
