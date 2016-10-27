@@ -404,18 +404,23 @@ draw_button(RenderOperations *render_operations, RenderBasis *render_basis, Bitm
 
 
 void
-draw_car_input(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, CarInput *car_input, u64 time_us, V2 pos)
+draw_car_input(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, CarInput *car_input, V2 pos, u64 time_us)
 {
+  V2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
+  V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
+
   car_input->input.pos = pos;
   car_input->done.pos = car_input->input.pos + (V2){0, MENU_ITEM_SIZE.y};
 
   draw_input_box(render_operations, render_basis, font, &car_input->input);
   draw_button(render_operations, render_basis, font, &car_input->done, time_us);
+
+  add_line_to_render_list(render_operations, render_basis, pos+0, ui_car_pos+0, (V4){1, 0, 0.5, 0});
 }
 
 
 void
-draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, UI *ui, u64 time_us)
+draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, UI *ui, u64 time_us)
 {
   draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, time_us);
 
@@ -425,7 +430,7 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *
   CarInput *car_input = ui->car_inputs;
   while (car_input)
   {
-    draw_car_input(render_operations, render_basis, font, car_input, time_us, car_input_pos);
+    draw_car_input(render_operations, render_basis, world_render_basis, font, car_input, car_input_pos, time_us);
     car_input_pos -= car_input_height + (V2){0, 2};
 
     car_input = car_input->next;
@@ -434,8 +439,10 @@ draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *
 
 
 void
-init_car_input_box(Memory *memory, UI *ui, u32 car_id, s32 initial_value)
+init_car_input_box(Memory *memory, GameState *game_state, u32 car_id, s32 initial_value, u32 car_maze_x, u32 car_maze_y)
 {
+  UI *ui = &game_state->ui;
+
   CarInput *car_input = 0;
 
   if (ui->free_car_inputs)
@@ -452,6 +459,9 @@ init_car_input_box(Memory *memory, UI *ui, u32 car_id, s32 initial_value)
   ui->car_inputs = car_input;
 
   car_input->car_id = car_id;
+
+  u32 car_radius = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
+  car_input->car_world_pos = cell_coord_to_world(game_state->cell_spacing, car_maze_x, car_maze_y) + car_radius;
 
   zero(&car_input->input, InputBox);
   car_input->input.length = 10;

@@ -69,6 +69,7 @@ struct CarInput
   InputBox input;
   Button done;
   u32 car_id;
+  V2 car_world_pos;
 
   CarInput *next;
 };
