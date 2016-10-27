@@ -141,8 +141,10 @@ load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->maze.width = size.x;
   game_state->maze.height = size.y;
 
-  delete_all_cars(&(game_state->cars));
+  delete_all_cars(&game_state->cars);
+  reset_car_inputs(&game_state->ui);
 
+  game_state->finish_sim_step_move = false;
   game_state->last_sim_tick = 0;
   game_state->sim_steps = 0;
 }
@@ -259,7 +261,9 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   if (game_state->inputs.maps[RESTART].active)
   {
     strcpy(game_state->persistent_str, "Restart!");
-    delete_all_cars(&(game_state->cars));
+    delete_all_cars(&game_state->cars);
+    reset_car_inputs(&game_state->ui);
+    game_state->finish_sim_step_move = false;
     game_state->last_sim_tick = 0;
     game_state->sim_steps = 0;
   }

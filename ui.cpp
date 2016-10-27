@@ -464,3 +464,21 @@ init_car_input_box(Memory *memory, UI *ui, u32 car_id, s32 initial_value)
   car_input->done.length = car_input->input.length;
   car_input->done.activated = false;
 }
+
+
+void
+reset_car_inputs(UI *ui)
+{
+  if (ui->car_inputs)
+  {
+    CarInput *last_car_input = ui->car_inputs;
+    while (last_car_input->next)
+    {
+      last_car_input = last_car_input->next;
+    }
+
+    last_car_input->next = ui->free_car_inputs;
+    ui->free_car_inputs = ui->car_inputs;
+    ui->car_inputs = 0;
+  }
+}
