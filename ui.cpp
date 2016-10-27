@@ -375,9 +375,11 @@ draw_input_box(RenderOperations *render_operations, RenderBasis *render_basis, B
 
   if (input_box->active)
   {
-    V4 color = clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1);
-    color.a = 0.7;
-    add_box_outline_to_render_list(render_operations, render_basis, input_box_rect, color, 3);
+    V4 cursor_color = {1, .9, .9, .9};
+    Rectangle cursor_rect;
+    cursor_rect.start = input_box_rect.start + (r32)input_box->cursor_pos*FONT_SIZE*CHAR_SIZE*(V2){1, 0};
+    cursor_rect.end = cursor_rect.start + FONT_SIZE*CHAR_SIZE*(V2){0.15, 1};
+    add_box_to_render_list(render_operations, render_basis, cursor_rect, cursor_color);
   }
 
   draw_string(render_operations, render_basis, font, input_box_rect.start + 2, input_box->text, FONT_SIZE);
