@@ -163,6 +163,16 @@ div_or_0(r32 n, r32 d)
   }
   return result;
 }
+r32
+div_or_1(r32 n, r32 d)
+{
+  r32 result = 1;
+  if (d != 0)
+  {
+    result = n / d;
+  }
+  return result;
+}
 
 s32
 sign(s32 a)

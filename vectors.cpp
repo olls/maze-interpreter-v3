@@ -252,6 +252,14 @@ vector_direction(V2 vec)
   result.y = div_or_0(result.y, abs(result.y));
   return result;
 }
+V2
+vector_direction_or_1(V2 vec)
+{
+  V2 result = vec;
+  result.x = div_or_1(result.x, abs(result.x));
+  result.y = div_or_1(result.y, abs(result.y));
+  return result;
+}
 
 
 b32

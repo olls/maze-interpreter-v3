@@ -404,18 +404,42 @@ draw_button(RenderOperations *render_operations, RenderBasis *render_basis, Bitm
 
 
 void
-draw_car_input(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, CarInput *car_input, V2 pos, u64 time_us)
+draw_car_inputs(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, UI *ui, u64 time_us)
 {
-  V2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
-  V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
+  Layouter layouter = {.next_free = 0};
+  CarInput *car_input = ui->car_inputs;
+  while (car_input)
+  {
+    V2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
+    V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
 
-  car_input->input.pos = pos;
-  car_input->done.pos = car_input->input.pos + (V2){0, MENU_ITEM_SIZE.y};
+    Rectangle input_box_rect = get_input_box_rect(&car_input->input);
 
-  draw_input_box(render_operations, render_basis, font, &car_input->input);
-  draw_button(render_operations, render_basis, font, &car_input->done, time_us);
+    add_box(&layouter, ui_car_pos, size(input_box_rect)*(V2){1, 2});
+    car_input = car_input->next;
+  }
 
-  add_line_to_render_list(render_operations, render_basis, pos+0, ui_car_pos+0, (V4){1, 0, 0.5, 0});
+  layout_boxes(&layouter, render_basis->clip_region);
+
+  car_input = ui->car_inputs;
+  u32 layouter_index = 0;
+  while (car_input)
+  {
+    Rectangle *laidout_rect = layouter.rects + layouter_index++;
+
+    V2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
+    V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
+
+    car_input->input.pos = laidout_rect->start;
+    car_input->done.pos = car_input->input.pos + (V2){0, MENU_ITEM_SIZE.y};
+
+    draw_input_box(render_operations, render_basis, font, &car_input->input);
+    draw_button(render_operations, render_basis, font, &car_input->done, time_us);
+
+    add_line_to_render_list(render_operations, render_basis, laidout_rect->start, ui_car_pos, (V4){1, 0, 0.5, 0});
+
+    car_input = car_input->next;
+  }
 }
 
 
@@ -423,18 +447,7 @@ void
 draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, UI *ui, u64 time_us)
 {
   draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, time_us);
-
-  V2 car_input_height = (V2){0, 2*MENU_ITEM_SIZE.y};
-  V2 car_input_pos = {0, size(render_basis->clip_region).y - car_input_height.y};
-
-  CarInput *car_input = ui->car_inputs;
-  while (car_input)
-  {
-    draw_car_input(render_operations, render_basis, world_render_basis, font, car_input, car_input_pos, time_us);
-    car_input_pos -= car_input_height + (V2){0, 2};
-
-    car_input = car_input->next;
-  }
+  draw_car_inputs(render_operations, render_basis, world_render_basis, font, ui, time_us);
 }
 
 
