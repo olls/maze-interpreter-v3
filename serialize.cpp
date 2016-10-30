@@ -13,21 +13,24 @@ find_min_max(QuadTree *tree, V2 *most_left, V2 *most_top, V2 *most_right, V2 *mo
     {
       Cell *cell = tree->cells + cell_index;
 
-      if (cell->x < most_left->x)
+      if (cell->type != CELL_NULL)
       {
-        *most_left = (V2){cell->x, cell->y};
-      }
-      if (cell->y < most_top->y)
-      {
-        *most_top = (V2){cell->x, cell->y};
-      }
-      if (cell->x > most_right->x)
-      {
-        *most_right = (V2){cell->x, cell->y};
-      }
-      if (cell->y > most_bottom->y)
-      {
-        *most_bottom = (V2){cell->x, cell->y};
+        if (cell->x < most_left->x)
+        {
+          *most_left = (V2){cell->x, cell->y};
+        }
+        if (cell->y < most_top->y)
+        {
+          *most_top = (V2){cell->x, cell->y};
+        }
+        if (cell->x > most_right->x)
+        {
+          *most_right = (V2){cell->x, cell->y};
+        }
+        if (cell->y > most_bottom->y)
+        {
+          *most_bottom = (V2){cell->x, cell->y};
+        }
       }
     }
 
@@ -67,7 +70,7 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, V2 maze_origin, F
       {
         fmted_str(file_pos, 3, "%02d", cell->pause);
       }
-      else
+      else if (cell->type != CELL_NULL)
       {
         const char *text = CELL_TYPE_TXT[cell->type];
         memcpy(file_pos, text, 2);
