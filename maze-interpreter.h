@@ -68,6 +68,7 @@ struct GameState
   Particles particles;
 
   Bitmaps bitmaps;
+  CellBitmaps cell_bitmaps;
 
   char persistent_str[256];
 

@@ -111,12 +111,18 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
     }
     log(L_CellsStorage, "Got cell from quadtree");
 
-    // Add to hash cache
+    // Add all cells in quadtree block to hash cache
     if (cell)
     {
-      log(L_CellsStorage, "Putting cell in hash");
-      Cell **hash_slot = get_cell_from_hash(maze, x, y);
-      *hash_slot = cell;
+      log(L_CellsStorage, "Putting block of cells in hash");
+      for (u32 cell_index = 0;
+           cell_index < tree->used;
+           ++cell_index)
+      {
+        Cell *cell_to_cache = tree->cells + cell_index;
+        Cell **hash_slot = get_cell_from_hash(maze, cell->x, cell->y);
+        *hash_slot = cell_to_cache;
+      }
     }
   }
 

@@ -9,7 +9,7 @@ add_box(Layouter *layouter, V2 desired_pos, V2 desired_size)
 
 
 void
-layout_boxes(Layouter *layouter, Rectangle bounds)
+layout_boxes(Layouter *layouter)
 {
   log_s(L_Layouter, "init\n");
   u32 passes = 0;

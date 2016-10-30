@@ -174,8 +174,14 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   load_bitmap(&game_state->particles.spark_bitmap, "particles/spark.bmp");
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
-  load_bitmap(&game_state->particles.blob_bitmap, "particles/blob.bmp");
+  load_bitmap(&game_state->particles.blob_bitmap,  "particles/blob.bmp");
   load_bitmap(&game_state->particles.smoke_bitmap, "particles/smoke.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_enclosed, "cells/path-enclosed.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_single,   "cells/path-single.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_l,        "cells/path-l.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_straight, "cells/path-straight.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_t,        "cells/path-t.bmp");
+  load_bitmap(&game_state->cell_bitmaps.path_cross,    "cells/path-cross.bmp");
   load_bitmap(&game_state->bitmaps.tile, "tile.bmp");
   load_bitmap(&game_state->bitmaps.font, "font.bmp");
 
@@ -346,7 +352,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
   r32 text_scale = 0.3;
   draw_string(&game_state->render_operations, &orthographic_basis, &game_state->bitmaps.font, size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1}, game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
 
-  draw_ui(&game_state->render_operations, &orthographic_basis, &render_basis, &game_state->bitmaps.font, &game_state->ui, time_us);
+  draw_ui(&game_state->render_operations, &orthographic_basis, &render_basis, &game_state->bitmaps.font, &game_state->cell_bitmaps, &game_state->ui, time_us);
 
   char str[4];
   fmted_str(str, 4, "%d", fps);

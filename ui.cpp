@@ -321,7 +321,7 @@ annimate_menu_item_fill(Menu *menu, MenuItemSelector *menu_item_selector)
 
 
 void
-draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, Menu *menu, u64 time_us)
+draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, Menu *menu, CellBitmaps *cell_bitmaps, u64 time_us)
 {
   if (menu->cell)
   {
@@ -335,7 +335,7 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
       add_box_to_render_list(render_operations, render_basis, menu_item_rect, FRAME_COLOR);
 
       u32 cell_radius = MENU_ITEM_SIZE.y*0.5;
-      draw_cell(item->cell_type, render_operations, render_basis, (V2){menu_item_rect.end.x-cell_radius, menu_item_rect.start.y+cell_radius}, MENU_ITEM_SIZE.y*0.5, false);
+      draw_cell(item->cell_type, render_operations, render_basis, cell_bitmaps, (V2){menu_item_rect.end.x-cell_radius, menu_item_rect.start.y+cell_radius}, MENU_ITEM_SIZE.y*0.5, false);
     }
 
     if (menu->selected_selector.item_n >= 0)
@@ -419,7 +419,7 @@ draw_car_inputs(RenderOperations *render_operations, RenderBasis *render_basis, 
     car_input = car_input->next;
   }
 
-  layout_boxes(&layouter, render_basis->clip_region);
+  layout_boxes(&layouter);
 
   car_input = ui->car_inputs;
   u32 layouter_index = 0;
@@ -444,9 +444,9 @@ draw_car_inputs(RenderOperations *render_operations, RenderBasis *render_basis, 
 
 
 void
-draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, UI *ui, u64 time_us)
+draw_ui(RenderOperations *render_operations, RenderBasis *render_basis, RenderBasis *world_render_basis, Bitmap *font, CellBitmaps *cell_bitmaps, UI *ui, u64 time_us)
 {
-  draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, time_us);
+  draw_ui_menu(render_operations, render_basis, font, &ui->cell_type_menu, cell_bitmaps, time_us);
   draw_car_inputs(render_operations, render_basis, world_render_basis, font, ui, time_us);
 }
 
