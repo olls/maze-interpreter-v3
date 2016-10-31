@@ -375,7 +375,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
       render_data.frame_buffer = frame_buffer;
       render_data.render_operations = &game_state->render_operations;
 
-#ifdef THEADED_RENDERING
+#ifdef THREADED_RENDERING
       pthread_mutex_lock(&game_state->render_queue.mut);
 
       while (game_state->render_queue.full)
