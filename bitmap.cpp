@@ -157,6 +157,7 @@ get_default_blit_bitmap_options(BlitBitmapOptions *opts)
   opts->crop = (Rectangle){-1};
   opts->color_multiplier = (V4){1, 1, 1, 1};
   opts->invert = false;
+  opts->rotate = 0;
   opts->hue_shift = 0;
   opts->interpolation = false;
   opts->scale = 1;
@@ -194,19 +195,49 @@ blit_bitmap(FrameBuffer *frame_buffer,
   Rectangle pixel_space = round_down(fract_pixel_space);
   pixel_space = crop_to(pixel_space, render_region);
 
+  V2 fractional_offset = fract_pixel_space.start - pixel_space.start;
+
   for (u32 pixel_y = pixel_space.start.y;
-       pixel_y < pixel_space.end.y;
+       pixel_y < pixel_space.end.y - 1;
        pixel_y++)
   {
     for (u32 pixel_x = pixel_space.start.x;
-         pixel_x < pixel_space.end.x;
+         pixel_x < pixel_space.end.x - 1;
          pixel_x++)
     {
-      r32 dx = pixel_x - fract_pixel_space.start.x;
-      r32 dy = pixel_y - fract_pixel_space.start.y;
+      r32 dx = ((r32)pixel_x - pixel_space.start.x) - fractional_offset.x;
+      r32 dy = ((r32)pixel_y - pixel_space.start.y) - fractional_offset.y;
 
-      r32 u = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
-      r32 v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+      r32 u, v;
+      if (opts->rotate == 90)
+      {
+        // x'= -y
+        // y'=  x
+
+        u = opts->crop.end.y - ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+        v = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
+      }
+      else if (opts->rotate == 180)
+      {
+        // x'= -x
+        // y'= -y
+
+        u = opts->crop.end.x - (dx / (render_basis->scale * opts->scale));
+        v = opts->crop.end.y - ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+      }
+      else if (opts->rotate == 270)
+      {
+        // x'=  y
+        // y'= -x
+
+        u = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+        v = opts->crop.end.x - (dx / (render_basis->scale * opts->scale));
+      }
+      else
+      {
+        u = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
+        v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+      }
 
       V4 color;
 
@@ -243,6 +274,7 @@ blit_bitmap(FrameBuffer *frame_buffer,
         color = top_left_color;
       }
 
+      color *= opts->color_multiplier;
       if (opts->invert)
       {
         color.r = 1 - color.r;
@@ -250,7 +282,6 @@ blit_bitmap(FrameBuffer *frame_buffer,
         color.b = 1 - color.b;
       }
 
-      color *= opts->color_multiplier;
       if (opts->hue_shift)
       {
         color = shift_hue(color, opts->hue_shift);

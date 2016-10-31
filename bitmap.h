@@ -47,6 +47,7 @@ struct BlitBitmapOptions
   Rectangle crop;
   V4 color_multiplier;
   b32 invert;
+  r32 rotate;
   r32 hue_shift;
   b32 interpolation;
   r32 scale;
