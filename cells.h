@@ -6,6 +6,14 @@ struct CellBitmaps
   Bitmap path_straight; // 2
   Bitmap path_t;        // 3
   Bitmap path_cross;    // 4
+  Bitmap unwalkable;
+};
+
+
+struct CellDisplay
+{
+  Bitmap *bitmap;
+  u32 rotate;
 };
 
 
@@ -13,6 +21,5 @@ V2
 cell_coord_to_world(u32, u32, u32);
 
 
-b32
-draw_cell(CellType type, RenderOperations *render_operations, RenderBasis *render_basis, CellBitmaps *cell_bitmaps, V2 world_pos, u32 cell_radius, b32 hovered, Cell *neighbbours[4] = 0);
-
+void
+draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display = 0);

@@ -182,6 +182,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->cell_bitmaps.path_straight, "cells/path-straight.bmp");
   load_bitmap(&game_state->cell_bitmaps.path_t,        "cells/path-t.bmp");
   load_bitmap(&game_state->cell_bitmaps.path_cross,    "cells/path-cross.bmp");
+  load_bitmap(&game_state->cell_bitmaps.unwalkable,    "cells/unwalkable.bmp");
   load_bitmap(&game_state->bitmaps.tile, "tile.bmp");
   load_bitmap(&game_state->bitmaps.font, "font.bmp");
 

@@ -335,7 +335,12 @@ draw_ui_menu(RenderOperations *render_operations, RenderBasis *render_basis, Bit
       add_box_to_render_list(render_operations, render_basis, menu_item_rect, FRAME_COLOR);
 
       u32 cell_radius = MENU_ITEM_SIZE.y*0.5;
-      draw_cell(item->cell_type, render_operations, render_basis, cell_bitmaps, (V2){menu_item_rect.end.x-cell_radius, menu_item_rect.start.y+cell_radius}, MENU_ITEM_SIZE.y*0.5, false);
+      V2 cell_pos = {
+        menu_item_rect.end.x   - cell_radius,
+        menu_item_rect.start.y + cell_radius
+      };
+
+      draw_cell(render_operations, render_basis, item->cell_type, cell_pos, cell_radius, false, cell_bitmaps);
     }
 
     if (menu->selected_selector.item_n >= 0)

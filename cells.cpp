@@ -105,13 +105,27 @@ directly_neighbouring_cells(Cell *neighbours[4], Maze *maze, u32 cell_x, u32 cel
 
 
 b32
-cell_walkable(Cell *cell)
+cell_walkable(CellType type)
 {
   b32 result = true;
 
-  if (!cell || cell->type == CELL_NULL || cell->type == CELL_WALL)
+  if (type == CELL_NULL || type == CELL_WALL)
   {
     result = false;
+  }
+
+  return result;
+}
+
+
+b32
+cell_walkable(Cell *cell)
+{
+  b32 result = false;
+
+  if (cell)
+  {
+    result = cell_walkable(cell->type);
   }
 
   return result;
@@ -172,196 +186,195 @@ get_cell_color(CellType type)
 }
 
 
-b32
-draw_cell(CellType type, RenderOperations *render_operations, RenderBasis *render_basis, CellBitmaps *cell_bitmaps, V2 world_pos, u32 cell_radius, b32 hovered, Cell *neighbours[4])
+void
+get_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *cell_display_result)
 {
-  b32 selected = false;
+  cell_display_result->rotate = 0;
+
+  if (!cell_walkable(cell))
+  {
+    cell_display_result->bitmap = &cell_bitmaps->unwalkable;
+  }
+  else
+  {
+    Cell *neighbours[4];
+    neighbours[0] = 0;
+    neighbours[1] = 0;
+    neighbours[2] = 0;
+    neighbours[3] = 0;
+
+    directly_neighbouring_cells(neighbours, maze, cell->x, cell->y);
+
+    if (cell_walkable(neighbours[0]) &&
+        cell_walkable(neighbours[1]) &&
+        cell_walkable(neighbours[2]) &&
+        cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_cross;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_t;
+      cell_display_result->rotate = 90;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_t;
+      cell_display_result->rotate = 270;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_t;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_t;
+      cell_display_result->rotate = 180;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_straight;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_straight;
+      cell_display_result->rotate = 90;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_l;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_l;
+      cell_display_result->rotate = 270;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_l;
+      cell_display_result->rotate = 90;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_l;
+      cell_display_result->rotate = 180;
+    }
+    else if (cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_single;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_single;
+      cell_display_result->rotate = 180;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             cell_walkable(neighbours[2]) &&
+             !cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_single;
+      cell_display_result->rotate = 90;
+    }
+    else if (!cell_walkable(neighbours[0]) &&
+             !cell_walkable(neighbours[1]) &&
+             !cell_walkable(neighbours[2]) &&
+             cell_walkable(neighbours[3]))
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_single;
+      cell_display_result->rotate = 270;
+    }
+    else
+    {
+      cell_display_result->bitmap = &cell_bitmaps->path_enclosed;
+    }
+  }
+}
+
+
+void
+draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
+{
+  Bitmap *cell_bitmap;
+  u32 rotate = 0;
+  if (cell_display)
+  {
+    cell_bitmap = cell_display->bitmap;
+    rotate = cell_display->rotate;
+  }
+  else
+  {
+    if (cell_walkable(type))
+    {
+      cell_bitmap = &cell_bitmaps->path_cross;
+    }
+    else
+    {
+      cell_bitmap = &cell_bitmaps->unwalkable;
+    }
+  }
 
   V4 color = get_cell_color(type);
   if (hovered)
   {
-    selected = true;
-
     color.r = min(color.r + 0.15, 1.0f);
     color.g = min(color.g + 0.15, 1.0f);
     color.b = min(color.b + 0.15, 1.0f);
   }
 
-  if (type == CELL_PATH)
-  {
-    Bitmap *cell_bitmap;
-    u32 rotate = 0;
-    b32 flip = false;
+  V2 bitmap_pos = world_pos - cell_radius;
 
-    if (neighbours)
-    {
-      if (cell_walkable(neighbours[0]) &&
-          cell_walkable(neighbours[1]) &&
-          cell_walkable(neighbours[2]) &&
-          cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_cross;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_t;
-        rotate = 90;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_t;
-        rotate = 270;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_t;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_t;
-        rotate = 180;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_straight;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_straight;
-        rotate = 90;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_l;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_l;
-        rotate = 270;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_l;
-        rotate = 90;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_l;
-        rotate = 180;
-      }
-      else if (cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_single;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_single;
-        rotate = 90;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               cell_walkable(neighbours[2]) &&
-               !cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_single;
-        rotate = 90;
-      }
-      else if (!cell_walkable(neighbours[0]) &&
-               !cell_walkable(neighbours[1]) &&
-               !cell_walkable(neighbours[2]) &&
-               cell_walkable(neighbours[3]))
-      {
-        cell_bitmap = &cell_bitmaps->path_single;
-        rotate = 270;
-      }
-      else
-      {
-        cell_bitmap = &cell_bitmaps->path_enclosed;
-      }
-    }
-    else
-    {
-      cell_bitmap = &cell_bitmaps->path_cross;
-    }
+  BlitBitmapOptions opts;
+  get_default_blit_bitmap_options(&opts);
+  opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)cell_bitmap->file->width);
+  opts.interpolation = false;
+  // opts.invert = true;
+  opts.rotate = rotate;
+  opts.color_multiplier = color;
 
-    V2 bitmap_pos = world_pos - cell_radius;
-
-    BlitBitmapOptions opts;
-    get_default_blit_bitmap_options(&opts);
-    opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)cell_bitmap->file->width);
-    opts.interpolation = true;
-    opts.invert = true;
-    opts.color_multiplier = (V4){1, 1, 0.5, 0.3};
-
-    add_bitmap_to_render_list(render_operations, render_basis, cell_bitmap, bitmap_pos, &opts);
-  }
-  else
-  {
-    Rectangle cell_bounds = radius_rectangle(world_pos, cell_radius);
-    add_box_to_render_list(render_operations, render_basis, cell_bounds, color);
-  }
-
-  return selected;
-}
-
-
-b32
-draw_cell(Cell *cell, Maze *maze, RenderOperations *render_operations, RenderBasis *render_basis, CellBitmaps *cell_bitmaps, V2 world_pos, u32 cell_radius, b32 hovered)
-{
-  Cell *neighbours[4];
-  neighbours[0] = 0;
-  neighbours[1] = 0;
-  neighbours[2] = 0;
-  neighbours[3] = 0;
-  if (cell->type == CELL_PATH)
-  {
-    directly_neighbouring_cells(neighbours, maze, cell->x, cell->y);
-  }
-
-  return draw_cell(cell->type, render_operations, render_basis, cell_bitmaps, world_pos, cell_radius, hovered, neighbours);
+  add_bitmap_to_render_list(render_operations, render_basis, cell_bitmap, bitmap_pos, &opts);
 }
 
 
 void
 recursively_draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u32 cell_radius, u64 time_us)
 {
-  b32 selected = false;
   b32 on_screen = false;
 
   Rectangle cell_clip_region_pixels = (Rectangle){render_basis->clip_region.start, render_basis->clip_region.end} / render_basis->world_per_pixel;
@@ -379,7 +392,10 @@ recursively_draw_cells(GameState *game_state, RenderOperations *render_operation
         Cell *cell = tree->cells + cell_index;
 
         V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
-        selected |= draw_cell(cell, &game_state->maze, render_operations, render_basis, &game_state->cell_bitmaps, world_pos, cell_radius, cell->hovered_at_time == time_us);
+
+        CellDisplay cell_display;
+        get_cell_bitmap(&game_state->maze, cell, &game_state->cell_bitmaps, &cell_display);
+        draw_cell(render_operations, render_basis, cell->type, world_pos, cell_radius, cell->hovered_at_time == time_us, &game_state->cell_bitmaps, &cell_display);
       }
     }
 
