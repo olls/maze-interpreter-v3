@@ -337,6 +337,7 @@ main(int argc, char *argv[])
   }
 
   renderer.frame_buffer.buffer = push_structs(&memory, PixelColor, renderer.frame_buffer.width * renderer.frame_buffer.height);
+  memset(renderer.frame_buffer.buffer, 0xCC, renderer.frame_buffer.width*renderer.frame_buffer.height * sizeof(PixelColor));
 
   renderer.sdlRenderer = SDL_CreateRenderer(window, -1, 0);
   renderer.sdlTexture = SDL_CreateTexture(renderer.sdlRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, renderer.frame_buffer.width, renderer.frame_buffer.height);
