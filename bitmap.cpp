@@ -168,13 +168,8 @@ blit_bitmap(FrameBuffer *frame_buffer,
             RenderBasis *render_basis,
             Bitmap *bitmap,
             V2 pos,
-            BlitBitmapOptions *opts = 0)
+            BlitBitmapOptions *opts)
 {
-  if (opts == 0)
-  {
-    get_default_blit_bitmap_options(opts);
-  }
-
   if (opts->crop.start.x == -1)
   {
     opts->crop.start = (V2){0, 0};

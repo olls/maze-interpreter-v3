@@ -68,7 +68,7 @@ add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis,
 
 
 void
-add_bitmap_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, Bitmap *bitmap, V2 pos, BlitBitmapOptions *opts)
+add_bitmap_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, Bitmap *bitmap, V2 pos, BlitBitmapOptions *opts = 0)
 {
   RenderOperation operation;
   operation.type = RENDER_OP_BITMAP;
@@ -76,7 +76,15 @@ add_bitmap_to_render_list(RenderOperations *render_ops, RenderBasis *render_basi
 
   operation.bitmap.bitmap = bitmap;
   operation.bitmap.pos = pos;
-  operation.bitmap.opts = *opts;
+
+  if (opts == 0)
+  {
+    get_default_blit_bitmap_options(&operation.bitmap.opts);
+  }
+  else
+  {
+    operation.bitmap.opts = *opts;
+  }
 
   add_to_render_list(render_ops, &operation);
 }
