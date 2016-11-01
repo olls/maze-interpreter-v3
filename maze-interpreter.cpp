@@ -173,15 +173,10 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
   load_bitmap(&game_state->particles.blob_bitmap,  "particles/blob.bmp");
   load_bitmap(&game_state->particles.smoke_bitmap, "particles/smoke.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_enclosed, "cells/path-enclosed.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_single,   "cells/path-single.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_l,        "cells/path-l.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_straight, "cells/path-straight.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_t,        "cells/path-t.bmp");
-  load_bitmap(&game_state->cell_bitmaps.path_cross,    "cells/path-cross.bmp");
-  load_bitmap(&game_state->cell_bitmaps.unwalkable,    "cells/unwalkable.bmp");
   load_bitmap(&game_state->bitmaps.tile, "tile.bmp");
   load_bitmap(&game_state->bitmaps.font, "font.bmp");
+
+  load_cell_bitmaps(&game_state->cell_bitmaps);
 
   strcpy(game_state->persistent_str, "Init!");
 

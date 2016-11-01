@@ -1,12 +1,20 @@
+enum CellDisplayType
+{
+  DISP_TYPE_ENCLOSED,
+  DISP_TYPE_SINGLE,
+  DISP_TYPE_L,
+  DISP_TYPE_STRAIGHT,
+  DISP_TYPE_T,
+  DISP_TYPE_CROSS,
+
+  N_DISP_TYPES
+};
+
+
 struct CellBitmaps
 {
-  Bitmap path_enclosed; // 0
-  Bitmap path_single;   // 1
-  Bitmap path_l;        // 2
-  Bitmap path_straight; // 2
-  Bitmap path_t;        // 3
-  Bitmap path_cross;    // 4
-  Bitmap unwalkable;
+  Bitmap walkable[N_DISP_TYPES];
+  Bitmap unwalkable[N_DISP_TYPES];
 };
 
 

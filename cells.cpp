@@ -95,6 +95,24 @@ perform_cells_sim_tick(Memory *memory, GameState *game_state, QuadTree *tree, u6
 
 
 void
+load_cell_bitmaps(CellBitmaps *cell_bitmaps)
+{
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_ENCLOSED], "cells/path-enclosed.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_SINGLE],   "cells/path-single.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_L],        "cells/path-l.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_STRAIGHT], "cells/path-straight.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_T],        "cells/path-t.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_CROSS],    "cells/path-cross.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_ENCLOSED], "cells/unwalkable-enclosed.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_SINGLE],   "cells/unwalkable-single.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_L],        "cells/unwalkable-l.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_STRAIGHT], "cells/unwalkable-straight.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_T],        "cells/unwalkable-t.bmp");
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_CROSS],    "cells/unwalkable-cross.bmp");
+}
+
+
+void
 directly_neighbouring_cells(Cell *neighbours[4], Maze *maze, u32 cell_x, u32 cell_y)
 {
   neighbours[0] = get_cell(maze, cell_x, cell_y-1);
@@ -190,140 +208,114 @@ void
 get_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *cell_display_result)
 {
   cell_display_result->rotate = 0;
+  b32 walkable = cell_walkable(cell);
 
-  if (!cell_walkable(cell))
+  Cell *n[] = {0, 0, 0, 0};
+  directly_neighbouring_cells(n, maze, cell->x, cell->y);
+
+  CellDisplayType cell_display_type;
+  if      (walkable == cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
   {
-    cell_display_result->bitmap = &cell_bitmaps->unwalkable;
+    cell_display_type = DISP_TYPE_CROSS;
+    cell_display_result->rotate = 0;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_T;
+    cell_display_result->rotate = 90;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_T;
+    cell_display_result->rotate = 270;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_T;
+    cell_display_result->rotate = 0;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_T;
+    cell_display_result->rotate = 180;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_STRAIGHT;
+    cell_display_result->rotate = 0;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_STRAIGHT;
+    cell_display_result->rotate = 90;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_L;
+    cell_display_result->rotate = 0;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_L;
+    cell_display_result->rotate = 270;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_L;
+    cell_display_result->rotate = 90;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_L;
+    cell_display_result->rotate = 180;
+  }
+  else if (walkable == cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_SINGLE;
+    cell_display_result->rotate = 0;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable == cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_SINGLE;
+    cell_display_result->rotate = 180;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable == cell_walkable(n[2]) && walkable != cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_SINGLE;
+    cell_display_result->rotate = 90;
+  }
+  else if (walkable != cell_walkable(n[0]) && walkable != cell_walkable(n[1]) &&
+           walkable != cell_walkable(n[2]) && walkable == cell_walkable(n[3]))
+  {
+    cell_display_type = DISP_TYPE_SINGLE;
+    cell_display_result->rotate = 270;
   }
   else
   {
-    Cell *neighbours[4];
-    neighbours[0] = 0;
-    neighbours[1] = 0;
-    neighbours[2] = 0;
-    neighbours[3] = 0;
+    cell_display_type = DISP_TYPE_ENCLOSED;
+  }
 
-    directly_neighbouring_cells(neighbours, maze, cell->x, cell->y);
-
-    if (cell_walkable(neighbours[0]) &&
-        cell_walkable(neighbours[1]) &&
-        cell_walkable(neighbours[2]) &&
-        cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_cross;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_t;
-      cell_display_result->rotate = 90;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_t;
-      cell_display_result->rotate = 270;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_t;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_t;
-      cell_display_result->rotate = 180;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_straight;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_straight;
-      cell_display_result->rotate = 90;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_l;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_l;
-      cell_display_result->rotate = 270;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_l;
-      cell_display_result->rotate = 90;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_l;
-      cell_display_result->rotate = 180;
-    }
-    else if (cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_single;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_single;
-      cell_display_result->rotate = 180;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             cell_walkable(neighbours[2]) &&
-             !cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_single;
-      cell_display_result->rotate = 90;
-    }
-    else if (!cell_walkable(neighbours[0]) &&
-             !cell_walkable(neighbours[1]) &&
-             !cell_walkable(neighbours[2]) &&
-             cell_walkable(neighbours[3]))
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_single;
-      cell_display_result->rotate = 270;
-    }
-    else
-    {
-      cell_display_result->bitmap = &cell_bitmaps->path_enclosed;
-    }
+  if (walkable)
+  {
+    cell_display_result->bitmap = &cell_bitmaps->walkable[cell_display_type];
+  }
+  else
+  {
+    cell_display_result->bitmap = &cell_bitmaps->unwalkable[cell_display_type];
   }
 }
 
@@ -342,11 +334,11 @@ draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellTy
   {
     if (cell_walkable(type))
     {
-      cell_bitmap = &cell_bitmaps->path_cross;
+      cell_bitmap = &cell_bitmaps->walkable[DISP_TYPE_CROSS];
     }
     else
     {
-      cell_bitmap = &cell_bitmaps->unwalkable;
+      cell_bitmap = &cell_bitmaps->unwalkable[DISP_TYPE_CROSS];
     }
   }
 
