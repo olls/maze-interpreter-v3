@@ -82,7 +82,7 @@ update_inputs(Keys *keys, Inputs *inputs, u64 time_us)
     update_input(input, time_us);
   }
 
-  for (u32 i = 0; i <= array_count(inputs->alpha_num_sym); ++i)
+  for (u32 i = 0; i < array_count(inputs->alpha_num_sym); ++i)
   {
     Input *input = inputs->alpha_num_sym + i;
     update_input(input, time_us);
