@@ -127,7 +127,8 @@ reset_zoom(GameState *game_state)
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )
   game_state->zoom = 30;
 
-  V2 maze_size_in_pixels = (V2){game_state->maze.width, game_state->maze.height} * game_state->cell_spacing / game_state->world_per_pixel;
+  V2 maze_size = get_maze_size(&game_state->maze);
+  V2 maze_size_in_pixels = maze_size * game_state->cell_spacing / game_state->world_per_pixel;
   game_state->maze_pos = (0.5f * size(game_state->world_render_region)) - (0.5f * maze_size_in_pixels);
 }
 
@@ -136,10 +137,6 @@ void
 load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
   parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
-
-  V2 size = get_maze_size(&game_state->maze);
-  game_state->maze.width = size.x;
-  game_state->maze.height = size.y;
 
   delete_all_cars(&game_state->cars);
   reset_car_inputs(&game_state->ui);
