@@ -1,11 +1,15 @@
 void
 add_to_render_list(RenderOperations *render_ops, RenderOperation *operation)
 {
-  assert(render_ops->next_free < MAX_RENDER_OPS);
-
-  RenderOperation *render_op_slot = render_ops->ops + render_ops->next_free++;
-
-  *render_op_slot = *operation;
+  if (render_ops->next_free >= MAX_RENDER_OPS)
+  {
+    log(L_Render, "Error: Ran out of render operation slots!");
+  }
+  else
+  {
+    RenderOperation *render_op_slot = render_ops->ops + render_ops->next_free++;
+    *render_op_slot = *operation;
+  }
 }
 
 
