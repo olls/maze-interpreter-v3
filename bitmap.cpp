@@ -100,51 +100,61 @@ load_bitmap(Bitmap *result, const char *filename)
 V4
 get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 {
-  u32 bytes_per_pixel = bitmap->file->bits_per_pixel / 8;
-  u32 bytes_per_width = bitmap->file->width * bytes_per_pixel;
+  V4 result;
 
-  // NOTE: Round up to 32 bit boundary
-  if ((bytes_per_width % 4) != 0)
+  if (x < bitmap->file->width &&
+      y < bitmap->file->height)
   {
-    bytes_per_width += 4 - (bytes_per_width % 4);
-  }
+    u32 bytes_per_pixel = bitmap->file->bits_per_pixel / 8;
+    u32 bytes_per_width = bitmap->file->width * bytes_per_pixel;
 
-  u32 pixel_offset_bytes = (y * bytes_per_width) + (x * bytes_per_pixel);
-  u32 raw_pixel = *(u32 *)(bitmap->pixels + pixel_offset_bytes);
-
-  u32 pixel;
-  if (bitmap->file->bits_per_pixel == 8)
-  {
-    u32 index = (u8)raw_pixel;
-    pixel = *(&bitmap->file->color_table + index);
-  }
-  else
-  {
-    pixel = raw_pixel;
-  }
-
-  V4 result = {(r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
-               (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
-               (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
-               (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
-
-  if (bitmap->file->compression == 3 && bitmap->alpha_shift < 0)
-  {
-    result.a = 1;
-  }
-
-  // Basic alpha for 8 bit images
-  // TODO: This isn't really a good solution
-  if (bitmap->file->bits_per_pixel == 8)
-  {
-    if (result.r == 0xec && result.g == 0xd9 && result.b == 0x9f)
+    // NOTE: Round up to 32 bit boundary
+    if ((bytes_per_width % 4) != 0)
     {
-      result = (V4){0,1,1,1};
+      bytes_per_width += 4 - (bytes_per_width % 4);
+    }
+
+    u32 pixel_offset_bytes = (y * bytes_per_width) + (x * bytes_per_pixel);
+    u32 raw_pixel = *(u32 *)(bitmap->pixels + pixel_offset_bytes);
+
+    u32 pixel;
+    if (bitmap->file->bits_per_pixel == 8)
+    {
+      u32 index = (u8)raw_pixel;
+      pixel = *(&bitmap->file->color_table + index);
     }
     else
     {
+      pixel = raw_pixel;
+    }
+
+    result = (V4){(r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
+                  (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
+                  (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
+                  (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
+
+    if (bitmap->file->compression == 3 && bitmap->alpha_shift < 0)
+    {
       result.a = 1;
     }
+
+    // Basic alpha for 8 bit images
+    // TODO: This isn't really a good solution
+    if (bitmap->file->bits_per_pixel == 8)
+    {
+      if (result.r == 0xec && result.g == 0xd9 && result.b == 0x9f)
+      {
+        result = (V4){0,1,1,1};
+      }
+      else
+      {
+        result.a = 1;
+      }
+    }
+  }
+  else
+  {
+    result = (V4){1, 1, 0, 0};
   }
 
   return result;
@@ -176,8 +186,10 @@ blit_bitmap(FrameBuffer *frame_buffer,
     opts->crop.end = (V2){bitmap->file->width, bitmap->file->height};
   }
 
+  r32 scale = render_basis->scale * opts->scale;
+
   V2 crop_size = opts->crop.end - opts->crop.start;
-  V2 fract_pixel_space_size = crop_size * render_basis->scale * opts->scale;
+  V2 fract_pixel_space_size = crop_size * scale;
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -187,86 +199,78 @@ blit_bitmap(FrameBuffer *frame_buffer,
   fract_pixel_space.start = transform_coord(render_basis, pos);
   fract_pixel_space.end = fract_pixel_space.start + fract_pixel_space_size;
 
-  Rectangle pixel_space = round_down(fract_pixel_space);
-  pixel_space = crop_to(pixel_space, render_region);
+  Rectangle cropped_fract_pixel_space = crop_to(fract_pixel_space, render_region);
+  V2 offset = fract_pixel_space.start - cropped_fract_pixel_space.start;
 
-  V2 fractional_offset = fract_pixel_space.start - pixel_space.start;
+  Rectangle pixel_space = round_down(cropped_fract_pixel_space);
+  V2 fract_offset = pixel_space.start - cropped_fract_pixel_space.start;
 
-  for (u32 pixel_y = pixel_space.start.y;
-       pixel_y < pixel_space.end.y - 1;
+  for (u32 pixel_y = pixel_space.start.y+1;
+       pixel_y <= pixel_space.end.y;
        pixel_y++)
   {
-    for (u32 pixel_x = pixel_space.start.x;
-         pixel_x < pixel_space.end.x - 1;
+    for (u32 pixel_x = pixel_space.start.x+1;
+         pixel_x <= pixel_space.end.x;
          pixel_x++)
     {
-      r32 dx = ((r32)pixel_x - pixel_space.start.x) - fractional_offset.x;
-      r32 dy = ((r32)pixel_y - pixel_space.start.y) - fractional_offset.y;
+      V2 image_fract_pixel = ((V2){(r32)pixel_x, (r32)pixel_y} - pixel_space.start) - offset + fract_offset;
 
-      r32 u, v;
+      V2 image_pos = image_fract_pixel / fract_pixel_space_size;
+
+      V2 rot_image_pos;
       if (opts->rotate == 90)
       {
-        // x'= -y
-        // y'=  x
-
-        u = opts->crop.end.y - ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
-        v = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
+        rot_image_pos.u =     image_pos.v;
+        rot_image_pos.v =     image_pos.u;
       }
       else if (opts->rotate == 180)
       {
-        // x'= -x
-        // y'= -y
-
-        u = opts->crop.end.x - (dx / (render_basis->scale * opts->scale));
-        v = opts->crop.end.y - ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+        rot_image_pos.u = 1 - image_pos.u;
+        rot_image_pos.v =     image_pos.v;
       }
       else if (opts->rotate == 270)
       {
-        // x'=  y
-        // y'= -x
-
-        u = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
-        v = opts->crop.end.x - (dx / (render_basis->scale * opts->scale));
+        rot_image_pos.u = 1 - image_pos.v;
+        rot_image_pos.v = 1 - image_pos.u;
       }
       else
       {
-        u = opts->crop.start.x + (dx / (render_basis->scale * opts->scale));
-        v = opts->crop.start.y + ((fract_pixel_space_size.y - dy) / (render_basis->scale * opts->scale) - 1);
+        rot_image_pos.u =     image_pos.u;
+        rot_image_pos.v = 1 - image_pos.v;
       }
 
-      V4 color;
+      V2 image_pixel = opts->crop.start + rot_image_pos * crop_size;
 
       // TODO: Fix interpolation on edges of crop
 
-      if (opts->interpolation && u < (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
-      {
-        V4 top_left_color     = get_bitmap_color(bitmap, u,     v);
-        V4 top_right_color    = get_bitmap_color(bitmap, u + 1, v);
-        V4 bottom_left_color  = get_bitmap_color(bitmap, u,     v + 1);
-        V4 bottom_right_color = get_bitmap_color(bitmap, u + 1, v + 1);
+      V4 top_left_color     = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y);
+      V4 top_right_color    = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y);
+      V4 bottom_left_color  = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y + 1);
+      V4 bottom_right_color = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y + 1);
 
-        color = lerp(lerp(top_left_color,    (u - (u32)u), top_right_color), (v - (u32)v),
-                     lerp(bottom_left_color, (u - (u32)u), bottom_right_color));
-      }
-      else if (opts->interpolation && u < (bitmap->file->width - 1) && v >= (bitmap->file->height - 1))
-      {
-        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-        V4 top_right_color = get_bitmap_color(bitmap,    u + 1, v);
+      V2 frac_pixel = image_pixel - round_down(image_pixel);
 
-        color = lerp(top_left_color, (u - (u32)u), top_right_color);
-      }
-      else if (opts->interpolation && u >= (bitmap->file->width - 1) && v < (bitmap->file->height - 1))
-      {
-        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-        V4 bottom_left_color = get_bitmap_color(bitmap,  u, v + 1);
+      V4 color = top_left_color;
 
-        color = lerp(top_left_color, (v - (u32)v), bottom_left_color);
-      }
-      else
+      if (opts->interpolation)
       {
-        V4 top_left_color = get_bitmap_color(bitmap,     u,     v);
-
-        color = top_left_color;
+        if (image_pixel.x < (bitmap->file->width - 1) &&
+            image_pixel.y < (bitmap->file->height - 1))
+        {
+          color = lerp(lerp(top_left_color,    frac_pixel.x, top_right_color),
+                       frac_pixel.y,
+                       lerp(bottom_left_color, frac_pixel.x, bottom_right_color));
+        }
+        else if (image_pixel.x <  (bitmap->file->width - 1) &&
+                 image_pixel.y >= (bitmap->file->height - 1))
+        {
+          color = lerp(top_left_color, frac_pixel.x, top_right_color);
+        }
+        else if (image_pixel.x >= (bitmap->file->width - 1) &&
+                 image_pixel.y <  (bitmap->file->height - 1))
+        {
+          color = lerp(top_left_color, frac_pixel.y, bottom_left_color);
+        }
       }
 
       color *= opts->color_multiplier;

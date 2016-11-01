@@ -121,7 +121,7 @@ reset_zoom(GameState *game_state)
   //       the cell position?
   game_state->world_per_pixel = 64*64;
   game_state->cell_spacing = 100000;
-  game_state->cell_margin = 0.2f;
+  game_state->cell_margin = 0;
   game_state->last_mouse_pos = (V2){0};
 
   // NOTE: Somewhere between the sqrt( [ MIN, MAX ]_WORLD_PER_PIXEL )

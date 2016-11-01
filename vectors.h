@@ -5,6 +5,11 @@ union V2
     r32 x;
     r32 y;
   };
+  struct
+  {
+    r32 u;
+    r32 v;
+  };
 };
 
 
