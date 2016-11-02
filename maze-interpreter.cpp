@@ -229,7 +229,6 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
 void
 update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps , u32 argc, char *argv[])
 {
-
   if (!game_state->init)
   {
     init_render_segments(memory, game_state, frame_buffer);

@@ -109,6 +109,8 @@ load_cell_bitmaps(CellBitmaps *cell_bitmaps)
   load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_STRAIGHT], "cells/unwalkable-straight.bmp");
   load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_T],        "cells/unwalkable-t.bmp");
   load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_CROSS],    "cells/unwalkable-cross.bmp");
+
+  load_bitmap(&cell_bitmaps->arrow, "cells/arrow.bmp");
 }
 
 
@@ -205,7 +207,7 @@ get_cell_color(CellType type)
 
 
 void
-get_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *cell_display_result)
+calc_connected_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *cell_display_result)
 {
   cell_display_result->rotate = 0;
   b32 walkable = cell_walkable(cell);
@@ -320,6 +322,65 @@ get_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *
 }
 
 
+V2
+get_direction_cell_direction(CellType type)
+{
+  V2 result = {0, 0};
+
+  switch (type)
+  {
+    case CELL_UP:
+    case CELL_UP_UNLESS_DETECT:
+      result = UP;
+      break;
+    case CELL_DOWN:
+    case CELL_DOWN_UNLESS_DETECT:
+      result = DOWN;
+      break;
+    case CELL_LEFT:
+    case CELL_LEFT_UNLESS_DETECT:
+      result = LEFT;
+      break;
+    case CELL_RIGHT:
+    case CELL_RIGHT_UNLESS_DETECT:
+      result = RIGHT;
+      break;
+
+    default: break;
+  }
+
+  return result;
+}
+
+
+void
+get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overlay_display_result)
+{
+  V2 cell_direction = get_direction_cell_direction(type);
+  if (cell_direction != (V2){0, 0})
+  {
+    overlay_display_result->bitmap = &cell_bitmaps->arrow;
+    overlay_display_result->rotate = angle_from_vector(cell_direction);
+
+    if (type == CELL_UP_UNLESS_DETECT ||
+        type == CELL_DOWN_UNLESS_DETECT ||
+        type == CELL_LEFT_UNLESS_DETECT ||
+        type == CELL_RIGHT_UNLESS_DETECT)
+    {
+      overlay_display_result->color = (V4){1, 1, 0, 0};
+    }
+    else
+    {
+      overlay_display_result->color = (V4){1, 1, 1, 1};
+    }
+  }
+  else
+  {
+    overlay_display_result->bitmap = 0;
+  }
+}
+
+
 void
 draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
 {
@@ -350,17 +411,26 @@ draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellTy
     color.b = min(color.b + 0.15, 1.0f);
   }
 
+  CellDisplay overlay_display;
+  get_overlay_display(type, cell_bitmaps, &overlay_display);
+
   V2 bitmap_pos = world_pos - cell_radius;
 
   BlitBitmapOptions opts;
   get_default_blit_bitmap_options(&opts);
   opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)cell_bitmap->file->width);
   opts.interpolation = false;
-  // opts.invert = true;
-  opts.rotate = rotate;
-  opts.color_multiplier = color;
 
+  opts.color_multiplier = color;
+  opts.rotate = rotate;
   add_bitmap_to_render_list(render_operations, render_basis, cell_bitmap, bitmap_pos, &opts);
+
+  if (overlay_display.bitmap)
+  {
+    opts.rotate = overlay_display.rotate;
+    opts.color_multiplier = overlay_display.color;
+    add_bitmap_to_render_list(render_operations, render_basis, overlay_display.bitmap, bitmap_pos, &opts);
+  }
 }
 
 
@@ -386,7 +456,7 @@ recursively_draw_cells(GameState *game_state, RenderOperations *render_operation
         V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
 
         CellDisplay cell_display;
-        get_cell_bitmap(&game_state->maze, cell, &game_state->cell_bitmaps, &cell_display);
+        calc_connected_cell_bitmap(&game_state->maze, cell, &game_state->cell_bitmaps, &cell_display);
         draw_cell(render_operations, render_basis, cell->type, world_pos, cell_radius, cell->hovered_at_time == time_us, &game_state->cell_bitmaps, &cell_display);
       }
     }

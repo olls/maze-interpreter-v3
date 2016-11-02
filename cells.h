@@ -15,13 +15,16 @@ struct CellBitmaps
 {
   Bitmap walkable[N_DISP_TYPES];
   Bitmap unwalkable[N_DISP_TYPES];
+  Bitmap arrow;
 };
 
 
 struct CellDisplay
 {
   Bitmap *bitmap;
+  Bitmap *bitmap_overlay;
   u32 rotate;
+  V4 color;
 };
 
 

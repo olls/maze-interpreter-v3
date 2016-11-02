@@ -1178,3 +1178,32 @@ vector_to_compass_dir(V2 direction)
 
   return result;
 }
+
+
+r32
+angle_from_vector(V2 direction)
+{
+  r32 result = 0;
+
+  // TODO: Once our blit_bitmap handles more than 90deg segments, use this instead...
+  // result = atan2(direction.x, direction.y) * 180.0 / M_PI;
+
+  if (direction == UP)
+  {
+      result = 0;
+  }
+  else if (direction == DOWN)
+  {
+      result = 180;
+  }
+  else if (direction == RIGHT)
+  {
+      result = 90;
+  }
+  else if (direction == LEFT)
+  {
+      result = 270;
+  }
+
+  return result;
+}

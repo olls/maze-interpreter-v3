@@ -110,3 +110,7 @@ struct Maze
 
   QuadTree tree;
 };
+
+
+V2
+get_direction_cell_direction(CellType);

@@ -290,27 +290,12 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     } break;
 
     case (CELL_UP):
-    {
-      log(L_CarsSim, "Up");
-      car->direction = UP;
-    } break;
-
     case (CELL_DOWN):
-    {
-      log(L_CarsSim, "Down");
-      car->direction = DOWN;
-    } break;
-
     case (CELL_LEFT):
-    {
-      log(L_CarsSim, "Left");
-      car->direction = LEFT;
-    } break;
-
     case (CELL_RIGHT):
     {
-      log(L_CarsSim, "Right");
-      car->direction = RIGHT;
+      log(L_CarsSim, "Direction");
+      car->direction = get_direction_cell_direction(current_cell->type);
     } break;
 
     case (CELL_PAUSE):
