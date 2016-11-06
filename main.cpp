@@ -265,7 +265,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
       }
     }
 
-    update_and_render(memory, &game_state, &(renderer->frame_buffer), &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
+    update_and_render(memory, &game_state, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
 
     SDL_UpdateTexture(renderer->sdlTexture, 0, renderer->frame_buffer.buffer, renderer->frame_buffer.width * sizeof(u32));
     SDL_RenderCopy(renderer->sdlRenderer, renderer->sdlTexture, 0, 0);

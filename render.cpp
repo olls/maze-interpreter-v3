@@ -1,21 +1,21 @@
 void
-set_pixel(FrameBuffer *frame_buffer, u32 pixel_x, u32 pixel_y, V4 color)
+set_pixel(Renderer *renderer, u32 pixel_x, u32 pixel_y, V4 color)
 {
-  assert(pixel_x >= 0 && pixel_x < frame_buffer->width);
-  assert(pixel_y >= 0 && pixel_y < frame_buffer->height);
+  assert(pixel_x >= 0 && pixel_x < renderer->frame_buffer.width);
+  assert(pixel_y >= 0 && pixel_y < renderer->frame_buffer.height);
 
-  u32 pixel_pos = (pixel_y * frame_buffer->width) + pixel_x;
+  u32 pixel_pos = (pixel_y * renderer->frame_buffer.width) + pixel_x;
 
-  V3 prev_color = pixel_color_to_V3(frame_buffer->buffer[pixel_pos]);
+  V3 prev_color = pixel_color_to_V3(renderer->frame_buffer.buffer[pixel_pos]);
   V3 new_color = remove_alpha(color) * 255.0;
 
   PixelColor alpha_blended = to_color((color.a * new_color) + ((1.0f - color.a) * prev_color));
-  frame_buffer->buffer[pixel_pos] = alpha_blended;
+  renderer->frame_buffer.buffer[pixel_pos] = alpha_blended;
 }
 
 
 void
-render_circle(FrameBuffer *frame_buffer,
+render_circle(Renderer *renderer,
               RenderBasis *render_basis,
               V2 world_pos,
               r32 world_radius,
@@ -31,7 +31,7 @@ render_circle(FrameBuffer *frame_buffer,
   r32 radius_sq = squared(radius);
   r32 radius_minus_one_sq = squared(radius - 1);
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
@@ -62,7 +62,7 @@ render_circle(FrameBuffer *frame_buffer,
           this_color.a *= diff;
         }
 
-        set_pixel(frame_buffer, pixel_x, pixel_y, this_color);
+        set_pixel(renderer, pixel_x, pixel_y, this_color);
       }
     }
   }
@@ -70,9 +70,9 @@ render_circle(FrameBuffer *frame_buffer,
 
 
 void
-render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, V4 color)
+render_box(Renderer *renderer, RenderBasis *render_basis, Rectangle box, V4 color)
 {
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
@@ -110,16 +110,16 @@ render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, 
         this_color.a *= fract_pixel_space.end.y - (pixel_space.end.y - 1);
       }
 
-      set_pixel(frame_buffer, pixel_x, pixel_y, this_color);
+      set_pixel(renderer, pixel_x, pixel_y, this_color);
     }
   }
 }
 
 
 void
-fast_render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle box, PixelColor color)
+fast_render_box(Renderer *renderer, RenderBasis *render_basis, Rectangle box, PixelColor color)
 {
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
@@ -136,14 +136,14 @@ fast_render_box(FrameBuffer *frame_buffer, RenderBasis *render_basis, Rectangle 
          pixel_x < pixel_space.end.x;
          pixel_x++)
     {
-      frame_buffer->buffer[pixel_x + pixel_y * frame_buffer->width] = color;
+      renderer->frame_buffer.buffer[pixel_x + pixel_y * renderer->frame_buffer.width] = color;
     }
   }
 }
 
 
 void
-render_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
+render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
 {
   V2 start = transform_coord(render_basis, world_start);
   V2 end = transform_coord(render_basis, world_end);
@@ -153,7 +153,7 @@ render_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start
     start = end, end = start;
   }
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = crop_to(render_region, window_region);
 
@@ -224,7 +224,7 @@ render_line(FrameBuffer *frame_buffer, RenderBasis *render_basis, V2 world_start
          ++pixel_n)
     {
       V2 pixel_pos = round_down(pixel_pos_fract);
-      set_pixel(frame_buffer, pixel_pos.x, pixel_pos.y, color);
+      set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
       pixel_pos_fract += step;
     }
   }

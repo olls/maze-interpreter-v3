@@ -174,7 +174,7 @@ get_default_blit_bitmap_options(BlitBitmapOptions *opts)
 }
 
 void
-blit_bitmap(FrameBuffer *frame_buffer,
+blit_bitmap(Renderer *renderer,
             RenderBasis *render_basis,
             Bitmap *bitmap,
             V2 pos,
@@ -191,7 +191,7 @@ blit_bitmap(FrameBuffer *frame_buffer,
   V2 crop_size = opts->crop.end - opts->crop.start;
   V2 fract_pixel_space_size = crop_size * scale;
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){frame_buffer->width, frame_buffer->height}};
+  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
@@ -286,7 +286,7 @@ blit_bitmap(FrameBuffer *frame_buffer,
         color = shift_hue(color, opts->hue_shift);
       }
 
-      set_pixel(frame_buffer, pixel_x, pixel_y, color);
+      set_pixel(renderer, pixel_x, pixel_y, color);
     }
   }
 }

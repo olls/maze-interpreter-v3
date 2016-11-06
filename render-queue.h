@@ -3,7 +3,7 @@ const u32 RENDER_QUEUE_SIZE = 10;
 
 struct RenderQueueData
 {
-  FrameBuffer *frame_buffer;
+  Renderer *renderer;
   RenderOperations *render_operations;
   Rectangle clip_region;
 };

@@ -95,7 +95,7 @@ add_bitmap_to_render_list(RenderOperations *render_ops, RenderBasis *render_basi
 
 
 void
-consume_render_operations(FrameBuffer *frame_buffer, RenderOperations *render_ops, Rectangle clip_region)
+consume_render_operations(Renderer *renderer, RenderOperations *render_ops, Rectangle clip_region)
 {
   u32 next_to_consume = 0;
   while (next_to_consume < render_ops->next_free)
@@ -109,23 +109,23 @@ consume_render_operations(FrameBuffer *frame_buffer, RenderOperations *render_op
     {
       case (RENDER_OP_CIRCLE):
       {
-        render_circle(frame_buffer, &render_basis, operation->circle.world_pos, operation->circle.world_radius, operation->circle.color);
+        render_circle(renderer, &render_basis, operation->circle.world_pos, operation->circle.world_radius, operation->circle.color);
       } break;
       case (RENDER_OP_BOX):
       {
-        render_box(frame_buffer, &render_basis, operation->box.box, operation->box.color);
+        render_box(renderer, &render_basis, operation->box.box, operation->box.color);
       } break;
       case (RENDER_OP_FAST_BOX):
       {
-        fast_render_box(frame_buffer, &render_basis, operation->fast_box.box, operation->fast_box.color);
+        fast_render_box(renderer, &render_basis, operation->fast_box.box, operation->fast_box.color);
       } break;
       case (RENDER_OP_LINE):
       {
-        render_line(frame_buffer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color);
+        render_line(renderer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color);
       } break;
       case (RENDER_OP_BITMAP):
       {
-        blit_bitmap(frame_buffer, &render_basis, operation->bitmap.bitmap, operation->bitmap.pos, &operation->bitmap.opts);
+        blit_bitmap(renderer, &render_basis, operation->bitmap.bitmap, operation->bitmap.pos, &operation->bitmap.opts);
       } break;
     };
   }

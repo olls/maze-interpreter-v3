@@ -80,7 +80,7 @@ consume_from_render_queue(void *q)
     pthread_mutex_unlock(&render_queue->mut);
     pthread_cond_signal(&render_queue->not_full);
 
-    consume_render_operations(render_data.frame_buffer, render_data.render_operations, render_data.clip_region);
+    consume_render_operations(render_data.renderer, render_data.render_operations, render_data.clip_region);
     log(L_RenderQueue, "consumer: recieved.");
   }
 
@@ -185,10 +185,10 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
 
 void
-init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer)
+init_render_segments(Memory *memory, GameState *game_state, Renderer *renderer)
 {
   game_state->screen_render_region.start = (V2){0, 0};
-  game_state->screen_render_region.end = (V2){frame_buffer->width, frame_buffer->height};
+  game_state->screen_render_region.end = (V2){renderer->frame_buffer.width, renderer->frame_buffer.height};
   game_state->screen_render_region = grow(game_state->screen_render_region, -20);
 
   game_state->world_render_region = grow(game_state->screen_render_region, -10);
@@ -227,11 +227,11 @@ init_render_segments(Memory *memory, GameState *game_state, FrameBuffer *frame_b
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buffer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps , u32 argc, char *argv[])
+update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps , u32 argc, char *argv[])
 {
   if (!game_state->init)
   {
-    init_render_segments(memory, game_state, frame_buffer);
+    init_render_segments(memory, game_state, renderer);
     init_game(memory, game_state, keys, time_us, argc, argv);
     load_maze(memory, game_state, argc, argv);
     reset_zoom(game_state);
@@ -363,7 +363,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
       Rectangle *segment = game_state->render_segs.segments + (u32)s.y + (u32)ns.y*(u32)s.x;
       render_data.clip_region = *segment;
 
-      render_data.frame_buffer = frame_buffer;
+      render_data.renderer = renderer;
       render_data.render_operations = &game_state->render_operations;
 
 #ifdef THREADED_RENDERING
@@ -381,7 +381,7 @@ update_and_render(Memory *memory, GameState *game_state, FrameBuffer *frame_buff
       pthread_mutex_unlock(&game_state->render_queue.mut);
       pthread_cond_signal(&game_state->render_queue.not_empty);
 #else
-      consume_render_operations(render_data.frame_buffer, render_data.render_operations, render_data.clip_region);
+      consume_render_operations(render_data.renderer, render_data.render_operations, render_data.clip_region);
 #endif
     }
   }
