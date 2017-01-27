@@ -15,6 +15,7 @@
 #include "render-queue.h"
 #include "font.h"
 #include "layouter.h"
+#include "text.h"
 
 #include "main.h"
 
@@ -30,6 +31,7 @@
 #include "composite-render-operations.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
+#include "text.cpp"
 
 // Game Related
 #include "functions.h"

@@ -1,4 +1,3 @@
-
 #define push_structs(memory, type, n) ((type *)push_mem(memory, (sizeof(type) * (n))))
 #define push_struct(memory, type) ((type *)push_mem(memory, sizeof(type)))
 void *

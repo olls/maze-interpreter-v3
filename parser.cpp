@@ -1,108 +1,3 @@
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#define consume_whitespace(ptr, end) while ((*(ptr) == ' ' || *(ptr) == '\t') && (ptr) < (end)) ++(ptr)
-#define consume_whitespace_nl(ptr, end) while ((*(ptr) == ' ' || *(ptr) == '\t' || isNewline(*(ptr))) && (ptr) < (end)) ++(ptr)
-#define consume_while(ptr, func, end) while (func(*(ptr)) && (ptr) < (end)) ++(ptr)
-#define consume_until(ptr, func, end) while (!func(*(ptr)) && (ptr) < (end)) ++(ptr)
-#define consume_until_newline(ptr, end) consume_until(ptr, isNewline, end)
-
-
-bool
-str_eq(const char *a, const char *b, u32 n)
-{
-  for (u32 i = 0; i < n; ++i)
-  {
-    if (a[i] != b[i])
-    {
-      return false;;
-    }
-  }
-
-  return true;
-}
-
-
-b32
-isNum(char character)
-{
-  b32 result = (character >= '0') && (character <= '9');
-  return result;
-}
-
-
-b32
-isLetter(char character)
-{
-  b32 result = (((character >= 'a') && (character <= 'z')) ||
-                ((character >= 'A') && (character <= 'Z')));
-  return result;
-}
-
-
-b32
-isNewline(char character)
-{
-  b32 result = (character == '\n') || (character == '\r');
-  return result;
-}
-
-
-char *
-get_num(char *ptr, char *f_end, u32 *result)
-{
-  char *num_start = ptr;
-
-  consume_while(ptr, isNum, f_end);
-
-  *result = 0;
-  u32 num_length = ptr - num_start;
-
-  for (u32 num_pos = 0;
-       num_pos < num_length;
-       ++num_pos)
-  {
-    u32 digit = *(num_start + num_pos) - '0';
-    *result += digit * pow(10, (num_length - num_pos - 1));
-  }
-
-  return ptr;
-}
-
-
-char *
-get_num(char *ptr, char *f_end, s32 *result)
-{
-  char *num_start = ptr;
-
-  b32 coef = 1;
-  if (*ptr == '-')
-  {
-    ++ptr;
-    ++num_start;
-    coef = -1;
-  }
-
-  consume_while(ptr, isNum, f_end);
-
-  *result = 0;
-  u32 num_length = ptr - num_start;
-
-  for (u32 num_pos = 0;
-       num_pos < num_length;
-       ++num_pos)
-  {
-    u32 digit = *(num_start + num_pos) - '0';
-    *result += digit * pow(10, (num_length - num_pos - 1));
-  }
-
-  *result *= coef;
-
-  return ptr;
-}
-
-
 char *
 get_direction(char *ptr, V2 *result)
 {
@@ -421,7 +316,7 @@ parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char
   {
     cell->type = CELL_SPLITTER;
   }
-  else if (isLetter(cell_str[0]) && (isLetter(cell_str[1]) || isNum(cell_str[1])))
+  else if (is_letter(cell_str[0]) && (is_letter(cell_str[1]) || is_num(cell_str[1])))
   {
     char *end_function_name_f_ptr = f_ptr + 2;
     char *end_function_definition_f_ptr = parse_function_definition(functions, cell_str, end_function_name_f_ptr, f_end, cell);
@@ -488,7 +383,7 @@ parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char
   {
     cell->type = CELL_RIGHT;
   }
-  else if (isNum(cell_str[0]) && isNum(cell_str[1]))
+  else if (is_num(cell_str[0]) && is_num(cell_str[1]))
   {
     cell->type = CELL_PAUSE;
 
@@ -507,6 +402,7 @@ parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char
 
 
 // TODO: Parse comments!
+
 
 void
 parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
