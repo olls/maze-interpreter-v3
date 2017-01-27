@@ -196,31 +196,13 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
 
   u32 length = maze_length + gap_length + functions_length;
 
-  u32 fd = open(filename, O_RDWR | O_TRUNC);
-  if (fd == -1)
-  {
-    printf("Failed to open file for saving.\n");
-    exit(1);
-  }
-
-  // 'Expand' to predicted size
-  if (ftruncate(fd, length) == -1)
-  {
-    printf("Failed to open file for saving.\n");
-    exit(1);
-  }
-
-  char *file = (char *)mmap(NULL, length, PROT_WRITE, MAP_SHARED, fd, 0);
-  if (file == MAP_FAILED)
-  {
-    printf("Failed to open file for saving.\n");
-    exit(1);
-  }
+  File file;
+  open_file(filename, &file, O_RDWR | O_TRUNC, length);
 
   log(L_Serializer, "Serializing maze");
 
-  memset(file, ' ', length);
-  write_cells(&maze->tree, file, width, height, (V2){most_left.x, most_top.y}, functions);
+  memset(&file.text, ' ', length);
+  write_cells(&maze->tree, file.text, width, height, (V2){most_left.x, most_top.y}, functions);
 
   // Add line breaks to maze
   for (u32 line = 0;
@@ -228,7 +210,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
        ++line)
   {
     u32 file_offset = (line+1) * width * CELL_LENGTH + line;
-    file[file_offset] = '\n';
+    file.text[file_offset] = '\n';
   }
 
   // Add line breaks for gap between maze and function defs
@@ -237,7 +219,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
        ++line)
   {
     u32 file_offset = maze_length + line;
-    file[file_offset] = '\n';
+    file.text[file_offset] = '\n';
   }
 
   log(L_Serializer, "Serializing functions");
@@ -267,7 +249,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
         u32 file_pos = maze_length + gap_length + length_funcs_written;
 
         u32 func_length = serialize_function(tmp_function_buffer, function);
-        memcpy(file + file_pos, tmp_function_buffer, func_length);
+        memcpy(file.text + file_pos, tmp_function_buffer, func_length);
 
         log(L_Serializer, "%.*s", func_length, tmp_function_buffer);
         length_funcs_written += func_length;
@@ -279,20 +261,6 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   log(L_Serializer, "Overestimated bytes: %d", length - length_written);
   log(L_Serializer, "Done");
 
-  if (munmap((void *)file, length) != 0)
-  {
-    printf("Error unmapping file.");
-  }
-
-  // Truncate delta from predicted size
-  if (ftruncate(fd, length_written) == -1)
-  {
-    printf("Failed to truncate file for saving.\n");
-  }
-
-  if (close(fd) != 0)
-  {
-    printf("Error while closing file descriptor.");
-  }
+  close_file(&file, length_written);
 }
 

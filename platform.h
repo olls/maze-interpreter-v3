@@ -1,4 +1,3 @@
-
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -19,4 +18,12 @@ struct Memory
   u8 * memory;
   size_t used;
   size_t total;
+};
+
+
+struct File
+{
+  u32 fd;
+  char *text;
+  u32 size;
 };

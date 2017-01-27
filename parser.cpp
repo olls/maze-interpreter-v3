@@ -415,30 +415,12 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
   u32 x = 0;
   u32 y = 0;
 
-  u32 fd = open(filename, O_RDONLY);
-  if (fd == -1)
-  {
-    printf("Failed to open file.\n");
-    exit(1);
-  }
-
-  struct stat sb;
-  if (fstat(fd, &sb) == -1)
-  {
-    printf("Failed to open file.\n");
-    exit(1);
-  }
-
-  char *file = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-  if (file == MAP_FAILED)
-  {
-    printf("Failed to open file.\n");
-    exit(1);
-  }
+  File file;
+  open_file(filename, &file);
 
   char cell_str[2] = {};
-  char *f_ptr = file;
-  char *f_end = f_ptr + sb.st_size;
+  char *f_ptr = file.text;
+  char *f_end = f_ptr + file.size;
   while (f_ptr < f_end)
   {
     cell_str[0] = f_ptr[0];
@@ -476,13 +458,5 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
 
   log_s(L_Parser, "\n");
 
-  if (munmap((void *)file, sb.st_size) != 0)
-  {
-    printf("Error unmapping file.");
-  }
-
-  if (close(fd) != 0)
-  {
-    printf("Error while closing file descriptor.");
-  }
+  close_file(&file);
 }

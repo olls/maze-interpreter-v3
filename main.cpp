@@ -2,6 +2,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <SDL2/SDL.h>
 
 // Game Independent
