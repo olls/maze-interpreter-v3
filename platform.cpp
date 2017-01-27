@@ -26,9 +26,25 @@ _zero(void *mem, u32 size)
 
 
 void
-open_file(const char *filename, File *result, u32 flags = O_RDONLY, s32 trunc_to = -1)
+open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = -1)
 {
-  result->fd = open(filename, flags);
+  s32 open_flags;
+  s32 mmap_flags;
+  s32 mmap_prot;
+  if (write)
+  {
+    open_flags = O_RDWR | O_TRUNC;
+    mmap_prot = PROT_READ | PROT_WRITE;
+    mmap_flags = MAP_SHARED;
+  }
+  else
+  {
+    open_flags = O_RDONLY;
+    mmap_prot = PROT_READ;
+    mmap_flags = MAP_PRIVATE;
+  }
+
+  result->fd = open(filename, open_flags);
   if (result->fd == -1)
   {
     printf("Failed to open file.\n");
@@ -40,7 +56,7 @@ open_file(const char *filename, File *result, u32 flags = O_RDONLY, s32 trunc_to
     struct stat sb;
     if (fstat(result->fd, &sb) == -1)
     {
-      printf("Failed to open file.\n");
+      printf("Failed to fstat file.\n");
       exit(1);
     }
     result->size = sb.st_size;
@@ -50,15 +66,15 @@ open_file(const char *filename, File *result, u32 flags = O_RDONLY, s32 trunc_to
     result->size = trunc_to;
     if (ftruncate(result->fd, result->size) == -1)
     {
-      printf("Failed to open file.\n");
+      printf("Failed to ftruncate file.\n");
       exit(1);
     }
   }
 
-  result->text = (char *)mmap(NULL, result->size, PROT_READ, MAP_PRIVATE, result->fd, 0);
+  result->text = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
   if (result->text == MAP_FAILED)
   {
-    printf("Failed to open file.\n");
+    printf("Failed to map file.\n");
     exit(1);
   }
 }
@@ -71,7 +87,7 @@ close_file(File *file, s32 trunc_to = -1)
 
   if (munmap((void *)file->text, file->size) != 0)
   {
-    printf("Error unmapping file.");
+    printf("Error unmapping file.\n");
     error = true;
   }
 
@@ -86,7 +102,7 @@ close_file(File *file, s32 trunc_to = -1)
 
   if (close(file->fd) != 0)
   {
-    printf("Error while closing file descriptor.");
+    printf("Error while closing file descriptor.\n");
     error = true;
   }
 

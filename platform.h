@@ -23,7 +23,7 @@ struct Memory
 
 struct File
 {
-  u32 fd;
+  s32 fd;
   char *text;
-  u32 size;
+  s32 size;
 };

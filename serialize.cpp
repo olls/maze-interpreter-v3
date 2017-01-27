@@ -197,11 +197,11 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   u32 length = maze_length + gap_length + functions_length;
 
   File file;
-  open_file(filename, &file, O_RDWR | O_TRUNC, length);
+  open_file(filename, &file, true, length);
 
   log(L_Serializer, "Serializing maze");
 
-  memset(&file.text, ' ', length);
+  memset(file.text, ' ', length);
   write_cells(&maze->tree, file.text, width, height, (V2){most_left.x, most_top.y}, functions);
 
   // Add line breaks to maze
