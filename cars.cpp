@@ -121,13 +121,13 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_NULL):
     {
       log(L_CarsSim, "Null");
-      invalid_code_path;
+      car->direction = STATIONARY;
     } break;
 
     case (CELL_WALL):
     {
       log(L_CarsSim, "Wall");
-      invalid_code_path;
+      car->direction = STATIONARY;
     } break;
 
     case (CELL_START):

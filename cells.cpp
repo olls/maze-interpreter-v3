@@ -111,6 +111,7 @@ load_cell_bitmaps(CellBitmaps *cell_bitmaps)
   load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_CROSS],    "cells/unwalkable-cross.bmp");
 
   load_bitmap(&cell_bitmaps->arrow, "cells/arrow.bmp");
+  load_bitmap(&cell_bitmaps->splitter, "cells/splitter.bmp");
 }
 
 
@@ -373,6 +374,11 @@ get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overl
     {
       overlay_display_result->color = (V4){1, 1, 1, 1};
     }
+  }
+  else if (type == CELL_SPLITTER)
+  {
+    overlay_display_result->color = (V4){1, 1, 1, 1};
+    overlay_display_result->bitmap = &cell_bitmaps->splitter;
   }
   else
   {

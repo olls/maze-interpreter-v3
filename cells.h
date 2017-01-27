@@ -16,6 +16,7 @@ struct CellBitmaps
   Bitmap walkable[N_DISP_TYPES];
   Bitmap unwalkable[N_DISP_TYPES];
   Bitmap arrow;
+  Bitmap splitter;
 };
 
 
