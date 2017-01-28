@@ -20,6 +20,7 @@
 #include "font.h"
 #include "layouter.h"
 #include "text.h"
+#include "string.h"
 
 #include "main.h"
 
@@ -37,6 +38,7 @@
 #include "font.cpp"
 #include "layouter.cpp"
 #include "text.cpp"
+#include "string.cpp"
 
 // Game Related
 #include "functions.h"
