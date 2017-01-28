@@ -1,9 +1,9 @@
 struct XMLAttr
 {
   String name;
+  String value;
 
-  char *value;
-  u32 value_len;
+  XMLAttr *next_attr;
 };
 
 
@@ -28,7 +28,6 @@ struct XMLTag
   char *file_end;
 
   XMLAttr *attrs;
-  u32 n_attrs;
 
   XMLTag *next_sibling;
 

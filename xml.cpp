@@ -12,85 +12,29 @@ not_label(char c)
 }
 
 
-void
-get_label(char *c, char *end_f, String *result)
+char *
+get_label(char *start, char *end_f, String *result)
 {
+  char *c = start;
   consume_until(c, is_letter, end_f);
 
   result->text = c;
 
   consume_until(c, not_label, end_f);
   result->length = c - result->text;
+
+  return c;
 }
-
-
-char *
-get_tag_attrs(Memory *memory, char *text, char *end_f, XMLTag *tag)
-{
-  tag->attrs = 0;
-  tag->n_attrs = 0;
-
-  XMLAttr tmp_attr;
-
-  while (text < end_f)
-  {
-    consume_whitespace(text, end_f);
-
-    tmp_attr.name.text = text;
-    consume_while(text, is_letter, end_f);
-    tmp_attr.name.length = text - tmp_attr.name.text;
-
-    if (tmp_attr.name.length == 0 || text == end_f) break;
-
-    consume_until_char(text, '=', end_f);
-    if (text == end_f) break;
-
-    consume_until_char(text, '"', end_f);
-    if (text == end_f) break;
-
-    tmp_attr.value = text;
-
-    consume_until_char(text, '"', end_f);
-    if (text == end_f) break;
-
-    tmp_attr.value_len = text - tmp_attr.value;
-
-    XMLAttr *attr = push_struct(memory, XMLAttr);
-    if (tag->attrs == 0)
-    {
-      tag->attrs = attr;
-    }
-
-    *attr = tmp_attr;
-    ++tag->n_attrs;
-  }
-
-  return text;
-}
-
-
-/*
-    new_c = get_tag_name(c, end_f, &tag);
-    if (new_c != end_f)
-    {
-      c = new_c;
-    }
-
-    printf("%d\n", tag.name.length);
-    print(&tag.name);
-    printf("\n");
-
-    new_c = get_tag_attrs(memory, c, end_f, &tag);
-    if (new_c != end_f)
-    {
-      c = new_c;
-    }
-*/
 
 
 XMLTag *
-parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
+parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
 {
+  // Creates a array of tokens, each representing "< ... >", sequentially in memory
+
+  char *end_f = file->text + file->size;
+  char *c = file->text;
+
   XMLTag *result = 0;
 
   while (c < end_f)
@@ -156,10 +100,12 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
       tag->type = XML_ELEMENT_START;
     }
 
-    if (!(tag->type == XML_COMMENT ||
-          tag->type == XML_DECLARATION))
+    if (tag->type == XML_EMPTY_ELEMENT ||
+        tag->type == XML_ELEMENT_START ||
+        tag->type == XML_ELEMENT_END)
     {
-      get_label(tag->file_start, end_f, &tag->name);
+      get_label(tag->file_start, tag->file_end, &tag->name);
+
       log(L_XMLTokens, " %.*s", tag->name.length, tag->name.text);
     }
 
@@ -170,8 +116,65 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
 }
 
 
+void
+parse_tag_attrs(Memory *memory, XMLTag *tag)
+{
+  char *c = tag->name.text + tag->name.length;
+
+  tag->attrs = 0;
+
+  XMLAttr tmp_attr;
+
+  while (c < tag->file_end)
+  {
+    char *new_c = get_label(c, tag->file_end, &tmp_attr.name);
+    if (tmp_attr.name.length == 0 || c == tag->file_end) break;
+    c = new_c;
+
+    consume_until_char(c, '=', tag->file_end);
+    if (c == tag->file_end) break;
+    ++c;
+
+    consume_until_char(c, '"', tag->file_end);
+    if (c == tag->file_end) break;
+    ++c;
+
+    tmp_attr.value.text = c;
+
+    consume_until_char(c, '"', tag->file_end);
+    if (c == tag->file_end) break;
+
+    tmp_attr.value.length = c - tmp_attr.value.text;
+
+    ++c;
+
+    XMLAttr *attr = push_struct(memory, XMLAttr);
+    *attr = tmp_attr;
+
+    attr->next_attr = tag->attrs;
+    tag->attrs = attr;
+  }
+}
+
+
+void
+parse_xml_tags(Memory *memory, XMLTag *start_of_tokens, XMLTag *end_of_tokens)
+{
+  for (XMLTag *tag_token = start_of_tokens;
+       tag_token < end_of_tokens;
+       ++tag_token)
+  {
+    if (tag_token->type == XML_ELEMENT_START ||
+        tag_token->type == XML_EMPTY_ELEMENT)
+    {
+      parse_tag_attrs(memory, tag_token);
+    }
+  }
+}
+
+
 XMLTag *
-traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32 level=0)
+parse_xml_structure(Memory *memory, XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32 level=0)
 {
   XMLTag *tag_token;
 
@@ -193,7 +196,7 @@ traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32
         parent->first_child = tag_token;
 
         log_ind(L_XML, level, "Starting: %.*s {", tag_token->name.length, tag_token->name.text);
-        tag_token = traverse_xml(tag_token, tag_token+1, end_of_tokens, level+1);
+        tag_token = parse_xml_structure(memory, tag_token, tag_token+1, end_of_tokens, level+1);
         log_ind(L_XML, level, "}");
       } break;
 
@@ -224,7 +227,7 @@ traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32
 
       default:
       {
-        printf("Error: Shouldn't be looping over alredy parsed tokens\n");
+        printf("Error: Shouldn't be looping over already parsed tokens (type = %d)\n", tag_token->type);
       } break;
     }
 
@@ -241,12 +244,15 @@ traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32
 void
 parse_xml(Memory *memory, File *file, XMLTag **root)
 {
-  char *end_f = file->text + file->size;
-
   u32 n_tokens;
-  *root = parse_tag_tokens(memory, file->text, end_f, &n_tokens);
+  *root = parse_tag_tokens(memory, file, &n_tokens);
 
-  traverse_xml(*root, *root, *root + n_tokens);
+  XMLTag *start_of_tokens = *root;
+  XMLTag *end_of_tokens = *root + n_tokens;
+
+  parse_xml_tags(memory, start_of_tokens, end_of_tokens);
+
+  parse_xml_structure(memory, *root, start_of_tokens, end_of_tokens);
 }
 
 
@@ -270,6 +276,14 @@ test_traverse_xml_struct(LoggingChannel channel, XMLTag *parent, u32 level=0)
   while (child)
   {
     log_ind(channel, level, "%.*s", child->name.length, child->name.text);
+    ++level;
+
+    XMLAttr *attr = child->attrs;
+    while (attr)
+    {
+      log_ind(channel, level, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
+      attr = attr->next_attr;
+    }
 
     if (child->type == XML_ELEMENT)
     {
