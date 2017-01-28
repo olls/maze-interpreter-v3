@@ -13,8 +13,8 @@ channel_enabled(LoggingChannel channel)
     case L_Particles:
     case L_UI:
     case L_Bitmap:
-    case L_SVG:
-    case L_SVGTokens:
+    case L_XML:
+    case L_XMLTokens:
     case L_Font:
     case L_Vector:
     case L_Render:

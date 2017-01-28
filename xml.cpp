@@ -115,7 +115,7 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
     if (tag->file_start[0] == '?' && tag->file_end[-1] == '?')
     {
       // XML declaration
-      log(L_SVGTokens, "XML declaration");
+      log(L_XMLTokens, "XML declaration");
 
       tag->type = XML_DECLARATION;
 
@@ -125,7 +125,7 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
     else if (tag->file_end[-1] == '/')
     {
       // Empty-element tag
-      log(L_SVGTokens, "Empty-element tag");
+      log(L_XMLTokens, "Empty-element tag");
 
       tag->type = XML_EMPTY_ELEMENT;
 
@@ -134,7 +134,7 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
     else if (str_eq(tag->file_start, "!--", 3) && str_eq((tag->file_end - 2), "--", 2))
     {
       // Comment
-      log(L_SVGTokens, "Comment");
+      log(L_XMLTokens, "Comment");
 
       tag->type = XML_COMMENT;
 
@@ -144,14 +144,14 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
     else if (tag->file_start[0] == '/')
     {
       // Tag
-      log(L_SVGTokens, "Tag end");
+      log(L_XMLTokens, "Tag end");
 
       tag->type = XML_ELEMENT_END;
     }
     else
     {
       // Tag
-      log(L_SVGTokens, "Tag");
+      log(L_XMLTokens, "Tag");
 
       tag->type = XML_ELEMENT_START;
     }
@@ -160,7 +160,7 @@ parse_tag_tokens(Memory *memory, char *c, char *end_f, u32 *n_tokens)
           tag->type == XML_DECLARATION))
     {
       get_label(tag->file_start, end_f, &tag->name);
-      log(L_SVGTokens, " %.*s", tag->name.length, tag->name.text);
+      log(L_XMLTokens, " %.*s", tag->name.length, tag->name.text);
     }
 
     ++c;
@@ -192,9 +192,9 @@ traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32
         tag_token->next_sibling = parent->first_child;
         parent->first_child = tag_token;
 
-        log_ind(L_SVG, level, "Starting: %.*s {", tag_token->name.length, tag_token->name.text);
+        log_ind(L_XML, level, "Starting: %.*s {", tag_token->name.length, tag_token->name.text);
         tag_token = traverse_xml(tag_token, tag_token+1, end_of_tokens, level+1);
-        log_ind(L_SVG, level, "}");
+        log_ind(L_XML, level, "}");
       } break;
 
       case (XML_ELEMENT_END):
@@ -205,14 +205,14 @@ traverse_xml(XMLTag *parent, XMLTag *start_of_tokens, XMLTag *end_of_tokens, u32
         }
         else
         {
-          log_ind(L_SVG, level, "Error in XML: Closing tag doesn't match opening tag");
+          log_ind(L_XML, level, "Error in XML: Closing tag doesn't match opening tag");
           loop_break = true;
         }
       } break;
 
       case (XML_EMPTY_ELEMENT):
       {
-        log_ind(L_SVG, level, "Found: %.*s", tag_token->name.length, tag_token->name.text);
+        log_ind(L_XML, level, "Found: %.*s", tag_token->name.length, tag_token->name.text);
 
         tag_token->next_sibling = parent->first_child;
         parent->first_child = tag_token;
