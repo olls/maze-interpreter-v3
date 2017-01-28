@@ -1,15 +1,21 @@
-#define STACK_STR(name, lit) String (name); { char s[] = (lit); (name).text = s; } (name).length = strlen(lit);
+#define String(lit) (ConstString){ .text = lit, .length = strlen(lit) }
 
 
 s32
-print(String *string)
+print(ConstString *string)
 {
     return printf("%.*s", string->length, string->text);
 }
 
+s32
+print(String *string)
+{
+  return print((ConstString *)string);
+}
+
 
 b32
-str_eq(String *a, String *b)
+str_eq(ConstString *a, ConstString *b)
 {
   b32 result;
   u32 length;
@@ -23,4 +29,16 @@ str_eq(String *a, String *b)
   }
 
   return result;
+}
+
+b32
+str_eq(String *a, ConstString b)
+{
+  return str_eq((ConstString *)a, &b);
+}
+
+b32
+str_eq(String *a, String *b)
+{
+  return str_eq((ConstString *)a, (ConstString *)b);
 }
