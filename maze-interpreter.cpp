@@ -181,6 +181,9 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   strcpy(game_state->persistent_str, "Init!");
 
   init_ui(&game_state->ui);
+
+  XMLTag *arrow = load_xml("cells/arrow.svg", memory);
+  test_traverse_xml_struct(L_GameLoop, arrow);
 }
 
 

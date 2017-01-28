@@ -13,6 +13,8 @@ channel_enabled(LoggingChannel channel)
     case L_Particles:
     case L_UI:
     case L_Bitmap:
+    case L_SVG:
+    case L_SVGTokens:
     case L_Font:
     case L_Vector:
     case L_Render:
@@ -59,6 +61,22 @@ log(LoggingChannel channel, const char *text, ...)
     va_end(aptr);
 
     printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, LOGGING_CHANNELS[channel], buf);
+  }
+}
+
+
+void
+log_ind(LoggingChannel channel, u32 n, const char *text, ...)
+{
+  if (channel_enabled(channel))
+  {
+    char buf[256];
+    va_list aptr;
+    va_start(aptr, text);
+    vsnprintf(buf, 256, text, aptr);
+    va_end(aptr);
+
+    printf("\e[01;3%dm%s\e[0m -> %*s%s\n", channel % 8, LOGGING_CHANNELS[channel], n, "", buf);
   }
 }
 

@@ -21,6 +21,7 @@
 #include "layouter.h"
 #include "text.h"
 #include "string.h"
+#include "xml.h"
 
 #include "main.h"
 
@@ -39,6 +40,7 @@
 #include "layouter.cpp"
 #include "text.cpp"
 #include "string.cpp"
+#include "xml.cpp"
 
 // Game Related
 #include "functions.h"
