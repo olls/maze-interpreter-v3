@@ -150,7 +150,9 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
 
   if (start.x > end.x)
   {
-    start = end, end = start;
+    V2 tmp = start;
+    start = end;
+    end = tmp;
   }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
