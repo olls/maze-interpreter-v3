@@ -156,3 +156,44 @@ get_num(char *ptr, char *f_end, r32 *result)
 
   return ptr;
 }
+
+
+u32
+hex_string_to_int(String string)
+{
+  u32 result = 0;
+
+  u32 position = string.length - 1;
+  for (char *c = string.text;
+       c < string.text + string.length;
+       ++c)
+  {
+    char this_c = *c;
+    u32 char_num = 0;
+
+    if (is_num(this_c))
+    {
+      char_num = this_c - '0';
+    }
+    else if ((this_c >= 'A' && this_c <= 'F') ||
+             (this_c >= 'a' && this_c <= 'f'))
+    {
+      if (this_c > 'F')
+      {
+        this_c -= 'a';
+      }
+      else
+      {
+        this_c -= 'A';
+      }
+
+      char_num = this_c + 10;
+    }
+
+    result += char_num * pow(16, position);
+
+    --position;
+  }
+
+  return result;
+}

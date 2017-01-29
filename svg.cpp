@@ -266,16 +266,73 @@ find_svg_style(char *c, char *end, String *label_result, String *value_result)
 }
 
 
+b32
+parse_colour_string(String string, V4 *result)
+{
+  b32 parsed = true;
+
+  if (string.text[0] == '#')
+  {
+    // UNIMPLEMENTED: Named colours, eg: red, green, fuchsia
+
+    if (string.length == 4)
+    {
+      // #rgb
+      String channel_str = {.length = 1};
+
+      channel_str.text = string.text + 1;
+      result->r = (1.0/15.0) * (r32)hex_string_to_int(channel_str);
+
+      channel_str.text = string.text + 2;
+      result->g = (1.0/15.0) * (r32)hex_string_to_int(channel_str);
+
+      channel_str.text = string.text + 3;
+      result->b = (1.0/15.0) * (r32)hex_string_to_int(channel_str);
+    }
+    else if (string.length == 7)
+    {
+      // #rrggbb
+      String channel_str = {.length = 2};
+
+      channel_str.text = string.text + 1;
+      result->r = (1.0/255.0) * (r32)hex_string_to_int(channel_str);
+
+      channel_str.text = string.text + 3;
+      result->g = (1.0/255.0) * (r32)hex_string_to_int(channel_str);
+
+      channel_str.text = string.text + 5;
+      result->b = (1.0/255.0) * (r32)hex_string_to_int(channel_str);
+    }
+    else
+    {
+      parsed = false;
+    }
+  }
+  else
+  {
+    parsed = false;
+  }
+
+  return parsed;
+}
+
+
 void
 parse_svg_style(String label, String value, SVGStyle *result)
 {
   if (str_eq(label, String("fill")))
   {
     log(L_SVG, "Style lable: fill");
+
+    result->fill_colour = (V4){0, 0, 0, 0};
+    result->filled = parse_colour_string(value, &result->fill_colour);
   }
   else if (str_eq(label, String("stroke")))
   {
     log(L_SVG, "Style lable: stroke");
+
+    result->stroke_colour = (V4){0, 0, 0, 0};
+    parse_colour_string(value, &result->stroke_colour);
   }
   else if (str_eq(label, String("stroke-width")))
   {
@@ -304,10 +361,13 @@ parse_svg_styles(String style, SVGStyle *result)
   char *c = style.text;
   char *end = style.text + style.length;
 
-  String label, value;
-  find_svg_style(c, end, &label, &value);
+  while (c < end)
+  {
+    String label, value;
+    c = find_svg_style(c, end, &label, &value);
 
-  parse_svg_style(label, value, result);
+    parse_svg_style(label, value, result);
+  }
 }
 
 
