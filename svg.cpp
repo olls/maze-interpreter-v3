@@ -264,11 +264,6 @@ parse_svg_transform(String transform_attr)
       {
         consume_until(c, is_num_or_sign, end_translate);
         c = get_num(c, end_translate, &result.y);
-
-        if (c == end_translate)
-        {
-          log(L_SVG, "Invalid translate() in transform");
-        }
       }
     }
   }
