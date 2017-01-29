@@ -317,38 +317,96 @@ parse_colour_string(String string, V4 *result)
 }
 
 
+SVGStrokeLinecap
+parse_svg_stroke_linecap(String value)
+{
+  SVGStrokeLinecap result = LINECAP_BUTT;
+
+  if (str_eq(value, String("butt")))
+  {
+    result = LINECAP_BUTT;
+  }
+  else if (str_eq(value, String("round")))
+  {
+    result = LINECAP_ROUND;
+  }
+  else if (str_eq(value, String("square")))
+  {
+    result = LINECAP_SQUARE;
+  }
+
+  return result;
+}
+
+
+SVGStrokeLinejoin
+parse_svg_stroke_linejoin(String value)
+{
+  SVGStrokeLinejoin result = LINEJOIN_MITER;
+
+  if (str_eq(value, String("miter")))
+  {
+    result = LINEJOIN_MITER;
+  }
+  else if (str_eq(value, String("round")))
+  {
+    result = LINEJOIN_ROUND;
+  }
+  else if (str_eq(value, String("square")))
+  {
+    result = LINEJOIN_SQUARE;
+  }
+
+  return result;
+}
+
+
 void
 parse_svg_style(String label, String value, SVGStyle *result)
 {
   if (str_eq(label, String("fill")))
   {
-    log(L_SVG, "Style lable: fill");
+    log(L_SVG, "Style label: fill");
 
     result->fill_colour = (V4){0, 0, 0, 0};
     result->filled = parse_colour_string(value, &result->fill_colour);
   }
+  else if (str_eq(label, String("fill-opacity")))
+  {
+    log(L_SVG, "Style label: fill-opacity");
+
+    get_num(value.text, value.text + value.length, &result->fill_colour.a);
+  }
   else if (str_eq(label, String("stroke")))
   {
-    log(L_SVG, "Style lable: stroke");
+    log(L_SVG, "Style label: stroke");
 
     result->stroke_colour = (V4){0, 0, 0, 0};
     parse_colour_string(value, &result->stroke_colour);
   }
+  else if (str_eq(label, String("stroke-opacity")))
+  {
+    log(L_SVG, "Style label: stroke-opacity");
+
+    get_num(value.text, value.text + value.length, &result->stroke_colour.a);
+  }
   else if (str_eq(label, String("stroke-width")))
   {
-    log(L_SVG, "Style lable: stroke-width");
+    log(L_SVG, "Style label: stroke-width");
+
+    get_num(value.text, value.text + value.length, &result->stroke_width);
   }
   else if (str_eq(label, String("stroke-linecap")))
   {
-    log(L_SVG, "Style lable: stroke-linecap");
+    log(L_SVG, "Style label: stroke-linecap");
+
+    result->stroke_linecap = parse_svg_stroke_linecap(value);
   }
   else if (str_eq(label, String("stroke-linejoin")))
   {
-    log(L_SVG, "Style lable: stroke-linejoin");
-  }
-  else if (str_eq(label, String("stroke-opacity")))
-  {
-    log(L_SVG, "Style lable: stroke-opacity");
+    log(L_SVG, "Style label: stroke-linejoin");
+
+    result->stroke_linejoin = parse_svg_stroke_linejoin(value);
   }
 }
 
@@ -368,6 +426,15 @@ parse_svg_styles(String style, SVGStyle *result)
 
     parse_svg_style(label, value, result);
   }
+
+  log(L_SVG, "Styles:");
+
+  log(L_SVG, "stroke_width: %d", result->stroke_width);
+  log(L_SVG, "stroke_colour: (%f,%f,%f,%f)", result->stroke_colour.a, result->stroke_colour.r, result->stroke_colour.g, result->stroke_colour.b);
+  log(L_SVG, "stroke_linecap: %d", result->stroke_linecap);
+  log(L_SVG, "stroke_linejoin: %d", result->stroke_linejoin);
+  log(L_SVG, "filled: %d", result->filled);
+  log(L_SVG, "fill_colour: (%f,%f,%f,%f)", result->fill_colour.a, result->fill_colour.r, result->fill_colour.g, result->fill_colour.b);
 }
 
 
