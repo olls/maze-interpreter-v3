@@ -1,4 +1,6 @@
 #define consume_while(ptr, func, end) while (func(*(ptr)) && (ptr) < (end)) ++(ptr)
+#define consume_while_f1_or_f2(ptr, f1, f2, end) while ((f1(*(ptr)) || f2(*(ptr))) && (ptr) < (end)) ++(ptr)
+#define consume_while_f_or_char(ptr, func, c, end) while ((func(*(ptr)) || *(ptr) == (c)) && (ptr) < (end)) ++(ptr)
 #define consume_whitespace(ptr, end) consume_while(ptr, is_whitespace, end)
 #define consume_whitespace_nl(ptr, end) consume_while(ptr, is_whitespace_nl, end)
 #define consume_until(ptr, func, end) while (!func(*(ptr)) && (ptr) < (end)) ++(ptr)

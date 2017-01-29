@@ -221,6 +221,96 @@ parse_path_d(Memory *memory, XMLTag *path_tag, String d_attr, V2 origin)
 }
 
 
+b32
+is_style_value_char(char character)
+{
+  return is_letter(character) ||
+         is_num_or_sign(character) ||
+         character == '.' ||
+         character == '#';
+}
+
+
+char *
+find_svg_style(char *c, char *end, String *label_result, String *value_result)
+{
+  consume_whitespace_nl(c, end);
+  char *start_label = c;
+
+  consume_while_f_or_char(c, is_letter, '-', end);
+  char *end_label = c;
+
+  *label_result = (String){
+    .text = start_label,
+    .length = end_label - start_label
+  };
+
+  consume_until_char(c, ':', end);
+  ++c;
+
+  consume_whitespace(c, end);
+  char *start_value = c;
+
+  consume_while(c, is_style_value_char, end);
+  char *end_value = c;
+
+  *value_result = (String){
+    .text = start_value,
+    .length = end_value - start_value
+  };
+
+  consume_until_char(c, ';', end);
+  ++c;
+
+  return c;
+}
+
+
+void
+parse_svg_style(String label, String value, SVGStyle *result)
+{
+  if (str_eq(label, String("fill")))
+  {
+    log(L_SVG, "Style lable: fill");
+  }
+  else if (str_eq(label, String("stroke")))
+  {
+    log(L_SVG, "Style lable: stroke");
+  }
+  else if (str_eq(label, String("stroke-width")))
+  {
+    log(L_SVG, "Style lable: stroke-width");
+  }
+  else if (str_eq(label, String("stroke-linecap")))
+  {
+    log(L_SVG, "Style lable: stroke-linecap");
+  }
+  else if (str_eq(label, String("stroke-linejoin")))
+  {
+    log(L_SVG, "Style lable: stroke-linejoin");
+  }
+  else if (str_eq(label, String("stroke-opacity")))
+  {
+    log(L_SVG, "Style lable: stroke-opacity");
+  }
+}
+
+
+void
+parse_svg_styles(String style, SVGStyle *result)
+{
+  log(L_SVG, "Parsing style: %.*s", style.length, style.text);
+
+  char *c = style.text;
+  char *end = style.text + style.length;
+
+  String label, value;
+  find_svg_style(c, end, &label, &value);
+
+  parse_svg_style(label, value, result);
+}
+
+
 SVGPath
 parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
 {
@@ -230,6 +320,12 @@ parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
   if (d_attr.text != 0)
   {
     result = parse_path_d(memory, path_tag, d_attr, origin);
+  }
+
+  String style_attr = get_attr_value(path_tag, String("style"));
+  if (style_attr.text != 0)
+  {
+    parse_svg_styles(style_attr, &result.style);
   }
 
   return result;
