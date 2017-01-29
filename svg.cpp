@@ -7,7 +7,7 @@ struct ParsePathCommandResult
 };
 
 ParsePathCommandResult
-parse_path_command(Memory *memory, char command, char *c, char *c_after_command, char *end_f, SVGPath *path, V2 last_point)
+parse_path_command(Memory *memory, char command, char *c, char *c_after_command, char *end_f, SVGPath *path, V2 last_point, V2 origin)
 {
   ParsePathCommandResult result;
 
@@ -36,7 +36,7 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
       }
       else
       {
-        last_point = d_move;
+        last_point = origin + d_move;
       }
     } break;
 
@@ -60,6 +60,11 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
       {
         line_seg->end += line_seg->start;
       }
+      else
+      {
+        line_seg->start += origin;
+        line_seg->end += origin;
+      }
     } break;
 
     case ('h'):
@@ -81,6 +86,11 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
       {
         line_seg->end.x += line_seg->start.x;
       }
+      else
+      {
+        line_seg->start += origin;
+        line_seg->end += origin;
+      }
     } break;
 
     case ('v'):
@@ -101,6 +111,11 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
       if (delta)
       {
         line_seg->end.y += line_seg->start.y;
+      }
+      else
+      {
+        line_seg->start += origin;
+        line_seg->end += origin;
       }
     } break;
 
@@ -140,7 +155,7 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
 
 
 SVGPath
-parse_path(Memory *memory, XMLTag *path_tag)
+parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
 {
   SVGPath path = {.segments = 0, .n_segments = 0};
 
@@ -152,7 +167,7 @@ parse_path(Memory *memory, XMLTag *path_tag)
   {
     char *end_f = d_attr.text + d_attr.length;
 
-    V2 current_point = (V2){0, 0};
+    V2 current_point = origin;
 
     char last_command = 0;
 
@@ -164,7 +179,7 @@ parse_path(Memory *memory, XMLTag *path_tag)
       char command = *c;
       char *after_command = c + 1;
 
-      ParsePathCommandResult command_parse_result = parse_path_command(memory, command, c, after_command, end_f, &path, current_point);
+      ParsePathCommandResult command_parse_result = parse_path_command(memory, command, c, after_command, end_f, &path, current_point, origin);
       current_point = command_parse_result.last_point;
       c = command_parse_result.c;
       if (command_parse_result.added_segment && path.segments == 0)
@@ -190,7 +205,7 @@ parse_path(Memory *memory, XMLTag *path_tag)
             last_command = 'L';
           }
 
-          command_parse_result = parse_path_command(memory, last_command, c, c, end_f, &path, current_point);
+          command_parse_result = parse_path_command(memory, last_command, c, c, end_f, &path, current_point, origin);
           current_point = command_parse_result.last_point;
           c = command_parse_result.c;
           if (command_parse_result.added_segment && path.segments == 0)
@@ -212,8 +227,69 @@ parse_path(Memory *memory, XMLTag *path_tag)
 }
 
 
+// NOTE: Only implements translate()
+V2
+parse_svg_transform(String *transform_attr)
+{
+  V2 result = {0, 0};
+
+  char *c = transform_attr->text;
+  char *end_f = transform_attr->text + transform_attr->length;
+
+  consume_whitespace(c, end_f);
+  if (str_eq(c, String("translate")))
+  {
+    consume_until_char(c, '(', end_f);
+    char *start_translate = c;
+
+    consume_until_char(c, ')', end_f);
+    char *end_translate = c;
+
+    if (start_translate == end_f || end_translate == end_f)
+    {
+      log(L_SVG, "Invalid translate() in transform");
+    }
+    else
+    {
+      c = start_translate + 1;
+
+      consume_until(c, is_num_or_sign, end_translate);
+      c = get_num(c, end_translate, &result.x);
+
+      if (c == end_translate)
+      {
+        log(L_SVG, "Invalid translate: No dx provided");
+      }
+      else
+      {
+        consume_until(c, is_num_or_sign, end_translate);
+        c = get_num(c, end_translate, &result.y);
+
+        if (c == end_translate)
+        {
+          log(L_SVG, "Invalid translate() in transform");
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+
+V2
+parse_svg_group(XMLTag *g_tag)
+{
+  String transform_attr = get_attr_value(g_tag, String("transform"));
+
+  V2 d = parse_svg_transform(&transform_attr);
+
+  return d;
+}
+
+
 void
-get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result)
+get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
 {
   XMLTag *child = tag->first_child;
   while (child)
@@ -226,17 +302,17 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result)
       (*result)->type = SVG_OP_PATH;
       (*result)->next = old_start;
 
-      (*result)->path = parse_path(memory, child);
+      (*result)->path = parse_path(memory, child, delta);
     }
     else if (str_eq(child->name, String("g")))
     {
-      // TODO: Handle transform attribute!
+      delta += parse_svg_group(child);
 
-      get_svg_operations(memory, child, result);
+      get_svg_operations(memory, child, result, delta);
     }
     else if (str_eq(child->name, String("svg")))
     {
-      get_svg_operations(memory, child, result);
+      get_svg_operations(memory, child, result, delta);
     }
 
     child = child->next_sibling;

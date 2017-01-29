@@ -48,3 +48,9 @@ str_eq(String *a, String *b)
 {
   return str_eq((ConstString *)a, (ConstString *)b);
 }
+
+b32
+str_eq(char *a, ConstString b)
+{
+  return str_eq((String){ .text = a, .length = b.length }, b);
+}
