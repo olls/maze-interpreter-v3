@@ -35,3 +35,53 @@ draw_cars(GameState *game_state, RenderOperations *render_operations, RenderBasi
   }
 }
 
+
+void
+draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2 origin, SVGPath *path)
+{
+  V4 colour = {1, 1, 0, 1};
+
+  for (u32 segment_n = 0;
+       segment_n < path->n_segments;
+       ++segment_n)
+  {
+    LineSegment *segment = path->segments + segment_n;
+
+    V2 start = segment->start;
+    V2 end = segment->end;
+
+    start += origin;
+    end   += origin;
+
+    add_line_to_render_list(render_operations, render_basis, start, end, colour);
+  }
+}
+
+
+void
+draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 origin, SVGOperation *svg_operations)
+{
+  Rectangle box;
+  box.start = origin;
+  box.end = (V2){300, 300};
+  add_box_outline_to_render_list(render_operations, render_basis, box, (V4){1, 1, 0, 1});
+
+  SVGOperation *operation = svg_operations;
+  while (operation)
+  {
+    switch (operation->type)
+    {
+      case (SVG_OP_PATH):
+      {
+        draw_svg_path(render_operations, render_basis, origin, &operation->path);
+      } break;
+
+      default:
+      {
+        invalid_code_path;
+      } break;
+    }
+
+    operation = operation->next;
+  }
+}

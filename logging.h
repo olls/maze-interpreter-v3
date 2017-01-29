@@ -9,6 +9,7 @@
           CHANNEL(L_Particles) \
           CHANNEL(L_UI) \
           CHANNEL(L_Bitmap) \
+          CHANNEL(L_SVG) \
           CHANNEL(L_XML) \
           CHANNEL(L_XMLTokens) \
           CHANNEL(L_Font) \

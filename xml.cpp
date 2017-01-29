@@ -244,7 +244,7 @@ parse_xml_structure(Memory *memory, XMLTag *parent, XMLTag *start_of_tokens, XML
 void
 parse_xml(Memory *memory, File *file, XMLTag **root)
 {
-  u32 n_tokens;
+  u32 n_tokens = 0;
   *root = parse_tag_tokens(memory, file, &n_tokens);
 
   XMLTag *start_of_tokens = *root;
@@ -264,6 +264,8 @@ load_xml(const char filename[], Memory *memory)
 
   XMLTag *result;
   parse_xml(memory, &file, &result);
+
+  // Leave file open, as we don't copy the data out of the memory map
 
   return result;
 }
@@ -292,4 +294,25 @@ test_traverse_xml_struct(LoggingChannel channel, XMLTag *parent, u32 level=0)
 
     child = child->next_sibling;
   }
+}
+
+
+String
+get_attr_value(XMLTag *tag, ConstString name)
+{
+  String result = {.text = 0};
+
+  XMLAttr *attr = tag->attrs;
+  while (attr)
+  {
+    if (str_eq(&attr->name, name))
+    {
+      result = attr->value;
+      break;
+    }
+
+    attr = attr->next_attr;
+  }
+
+  return result;
 }

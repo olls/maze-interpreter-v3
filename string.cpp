@@ -38,6 +38,12 @@ str_eq(String *a, ConstString b)
 }
 
 b32
+str_eq(String a, ConstString b)
+{
+  return str_eq((ConstString *)&a, &b);
+}
+
+b32
 str_eq(String *a, String *b)
 {
   return str_eq((ConstString *)a, (ConstString *)b);

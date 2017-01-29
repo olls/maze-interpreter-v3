@@ -183,6 +183,11 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
   init_ui(&game_state->ui);
 
   XMLTag *arrow = load_xml("cells/arrow.svg", memory);
+  test_traverse_xml_struct(L_GameLoop, arrow);
+
+  game_state->arrow_svg = 0;
+  get_svg_operations(memory, arrow, &game_state->arrow_svg);
+  test_log_svg_operations(game_state->arrow_svg);
 }
 
 
@@ -338,6 +343,8 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, Key
   game_state->render_operations.next_free = 0;
 
   add_fast_box_to_render_list(&game_state->render_operations, &orthographic_basis, (Rectangle){(V2){0,0},size(game_state->screen_render_region)}, (PixelColor){255, 255, 255});
+
+  draw_svg(&game_state->render_operations, &orthographic_basis, (V2){50, 50}, game_state->arrow_svg);
 
   draw_cells(game_state, &game_state->render_operations, &render_basis, &(game_state->maze.tree), time_us);
   draw_cars(game_state, &game_state->render_operations, &render_basis, &(game_state->cars), time_us);

@@ -70,6 +70,8 @@ struct GameState
   Bitmaps bitmaps;
   CellBitmaps cell_bitmaps;
 
+  SVGOperation *arrow_svg;
+
   char persistent_str[256];
 
   UI ui;

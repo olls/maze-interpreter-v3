@@ -30,6 +30,14 @@ is_num(char character)
 
 
 b32
+is_num_or_sign(char character)
+{
+  b32 result = is_num(character) || character == '-';
+  return result;
+}
+
+
+b32
 is_letter(char character)
 {
   b32 result = (((character >= 'a') && (character <= 'z')) ||
@@ -87,15 +95,14 @@ get_num(char *ptr, char *f_end, u32 *result)
 char *
 get_num(char *ptr, char *f_end, s32 *result)
 {
-  char *num_start = ptr;
-
   b32 coef = 1;
   if (*ptr == '-')
   {
     ++ptr;
-    ++num_start;
     coef = -1;
   }
+
+  char *num_start = ptr;
 
   consume_while(ptr, is_num, f_end);
 
@@ -111,6 +118,39 @@ get_num(char *ptr, char *f_end, s32 *result)
   }
 
   *result *= coef;
+
+  return ptr;
+}
+
+
+char*
+get_num(char *ptr, char *f_end, r32 *result)
+{
+  s32 whole_num;
+  ptr = get_num(ptr, f_end, &whole_num);
+
+  *result = whole_num;
+
+  if (*ptr == '.')
+  {
+    ++ptr;
+
+    u32 frac_num;
+    ptr = get_num(ptr, f_end, &frac_num);
+
+    r32 frac_part = frac_num;
+    while (frac_part > 1)
+    {
+      frac_part /= 10;
+    }
+
+    if (whole_num < 0)
+    {
+      frac_part *= -1;
+    }
+
+    *result += frac_part;
+  }
 
   return ptr;
 }

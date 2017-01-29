@@ -22,6 +22,7 @@
 #include "text.h"
 #include "string.h"
 #include "xml.h"
+#include "svg.h"
 
 #include "main.h"
 
@@ -41,6 +42,7 @@
 #include "text.cpp"
 #include "string.cpp"
 #include "xml.cpp"
+#include "svg.cpp"
 
 // Game Related
 #include "functions.h"
