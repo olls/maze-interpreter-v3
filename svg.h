@@ -28,3 +28,4 @@ struct SVGOperation
 
   SVGOperation *next;
 };
+

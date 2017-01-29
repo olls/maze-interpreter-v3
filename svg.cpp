@@ -229,12 +229,12 @@ parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
 
 // NOTE: Only implements translate()
 V2
-parse_svg_transform(String *transform_attr)
+parse_svg_transform(String transform_attr)
 {
   V2 result = {0, 0};
 
-  char *c = transform_attr->text;
-  char *end_f = transform_attr->text + transform_attr->length;
+  char *c = transform_attr.text;
+  char *end_f = transform_attr.text + transform_attr.length;
 
   consume_whitespace(c, end_f);
   if (str_eq(c, String("translate")))
@@ -280,11 +280,15 @@ parse_svg_transform(String *transform_attr)
 V2
 parse_svg_group(XMLTag *g_tag)
 {
+  V2 result = {0, 0};
+
   String transform_attr = get_attr_value(g_tag, String("transform"));
+  if (transform_attr.text != 0)
+  {
+    result = parse_svg_transform(transform_attr);
+  }
 
-  V2 d = parse_svg_transform(&transform_attr);
-
-  return d;
+  return result;
 }
 
 
