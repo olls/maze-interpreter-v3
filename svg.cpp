@@ -155,75 +155,84 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
 
 
 SVGPath
-parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
+parse_path_d(Memory *memory, XMLTag *path_tag, String d_attr, V2 origin)
 {
   SVGPath path = {.segments = 0, .n_segments = 0};
 
-  String d_attr = get_attr_value(path_tag, String("d"));
+  log(L_SVG, "Parsing d: '%.*s'", d_attr.length, d_attr.text);
+  char *end_f = d_attr.text + d_attr.length;
 
-  log(L_SVG, "Parsing: '%.*s'", d_attr.length, d_attr.text);
+  V2 current_point = origin;
 
-  if (d_attr.text != 0)
+  char last_command = 0;
+
+  char *c = d_attr.text;
+  while (c < end_f)
   {
-    char *end_f = d_attr.text + d_attr.length;
+    consume_whitespace(c, end_f);
 
-    V2 current_point = origin;
+    char command = *c;
+    char *after_command = c + 1;
 
-    char last_command = 0;
-
-    char *c = d_attr.text;
-    while (c < end_f)
+    ParsePathCommandResult command_parse_result = parse_path_command(memory, command, c, after_command, end_f, &path, current_point, origin);
+    current_point = command_parse_result.last_point;
+    c = command_parse_result.c;
+    if (command_parse_result.added_segment && path.segments == 0)
     {
-      consume_whitespace(c, end_f);
+      path.segments = command_parse_result.added_segment;
+    }
 
-      char command = *c;
-      char *after_command = c + 1;
-
-      ParsePathCommandResult command_parse_result = parse_path_command(memory, command, c, after_command, end_f, &path, current_point, origin);
-      current_point = command_parse_result.last_point;
-      c = command_parse_result.c;
-      if (command_parse_result.added_segment && path.segments == 0)
+    if (command_parse_result.found_command)
+    {
+      last_command = command;
+    }
+    else
+    {
+      if (last_command != 0)
       {
-        path.segments = command_parse_result.added_segment;
-      }
+        // Special case where subsequent coords after a move command, are treated as line commands
+        if (last_command == 'm')
+        {
+          last_command = 'l';
+        }
+        if (last_command == 'M')
+        {
+          last_command = 'L';
+        }
 
-      if (command_parse_result.found_command)
-      {
-        last_command = command;
+        command_parse_result = parse_path_command(memory, last_command, c, c, end_f, &path, current_point, origin);
+        current_point = command_parse_result.last_point;
+        c = command_parse_result.c;
+        if (command_parse_result.added_segment && path.segments == 0)
+        {
+          path.segments = command_parse_result.added_segment;
+        }
+
+        assert(command_parse_result.found_command);
       }
       else
       {
-        if (last_command != 0)
-        {
-          // Special case where subsequent coords after a move command, are treated as line commands
-          if (last_command == 'm')
-          {
-            last_command = 'l';
-          }
-          if (last_command == 'M')
-          {
-            last_command = 'L';
-          }
-
-          command_parse_result = parse_path_command(memory, last_command, c, c, end_f, &path, current_point, origin);
-          current_point = command_parse_result.last_point;
-          c = command_parse_result.c;
-          if (command_parse_result.added_segment && path.segments == 0)
-          {
-            path.segments = command_parse_result.added_segment;
-          }
-
-          assert(command_parse_result.found_command);
-        }
-        else
-        {
-          printf("Error: SVG path doesn't contain a command\n");
-        }
+        printf("Error: SVG path doesn't contain a command\n");
       }
     }
   }
 
   return path;
+}
+
+
+SVGPath
+parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
+{
+  SVGPath result;
+
+  String d_attr = get_attr_value(path_tag, String("d"));
+  if (d_attr.text != 0)
+  {
+    result = parse_path_d(memory, path_tag, d_attr, origin);
+  }
+
+  return result;
 }
 
 
@@ -290,11 +299,15 @@ parse_svg_group(XMLTag *g_tag)
 void
 get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
 {
+  // TODO: Get width/height
+
   XMLTag *child = tag->first_child;
   while (child)
   {
     if (str_eq(child->name, String("path")))
     {
+      log(L_SVG, "Found: path");
+
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);
 
@@ -305,12 +318,16 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
     }
     else if (str_eq(child->name, String("g")))
     {
+      log(L_SVG, "Found: g");
+
       delta += parse_svg_group(child);
 
       get_svg_operations(memory, child, result, delta);
     }
     else if (str_eq(child->name, String("svg")))
     {
+      log(L_SVG, "Found: svg");
+
       get_svg_operations(memory, child, result, delta);
     }
 
