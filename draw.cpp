@@ -39,7 +39,7 @@ draw_cars(GameState *game_state, RenderOperations *render_operations, RenderBasi
 void
 draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2 origin, SVGPath *path)
 {
-  V4 colour = {1, 1, 0, 1};
+  V4 colour = path->style.stroke_colour;
 
   for (u32 segment_n = 0;
        segment_n < path->n_segments;
