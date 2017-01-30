@@ -62,11 +62,6 @@ draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2
 void
 draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 origin, SVGOperation *svg_operations)
 {
-  Rectangle box;
-  box.start = origin;
-  box.end = (V2){300, 300};
-  add_box_outline_to_render_list(render_operations, render_basis, box, (V4){1, 1, 0, 1});
-
   SVGOperation *operation = svg_operations;
   while (operation)
   {
@@ -75,6 +70,12 @@ draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 orig
       case (SVG_OP_PATH):
       {
         draw_svg_path(render_operations, render_basis, origin, &operation->path);
+      } break;
+
+      case (SVG_OP_RECT):
+      {
+        SVGRect *rect = &operation->rect;
+        add_box_outline_to_render_list(render_operations, render_basis, origin + rect->rect, rect->style.stroke_colour, rect->style.stroke_width);
       } break;
 
       default:

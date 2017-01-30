@@ -42,9 +42,18 @@ struct SVGPath
 };
 
 
+struct SVGRect
+{
+  Rectangle rect;
+
+  SVGStyle style;
+};
+
+
 enum SVGOperationType
 {
-  SVG_OP_PATH
+  SVG_OP_PATH,
+  SVG_OP_RECT
 };
 
 
@@ -54,6 +63,7 @@ struct SVGOperation
 
   union {
     SVGPath path;
+    SVGRect rect;
   };
 
   SVGOperation *next;

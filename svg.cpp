@@ -519,11 +519,35 @@ parse_svg_group(XMLTag *g_tag)
 }
 
 
+SVGRect
+get_svg_root_rect(XMLTag *root, V2 origin)
+{
+  SVGRect result;
+  result.rect = (Rectangle){ .start = origin, .end = origin};
+
+  String width_str = get_attr_value(root, String("width"));
+  String height_str = get_attr_value(root, String("height"));
+
+  V2 size;
+  get_num(width_str.text, width_str.text + width_str.length, &size.x);
+  get_num(height_str.text, height_str.text + height_str.length, &size.y);
+
+  result.rect.end += size;
+  result.style = (SVGStyle){
+    .stroke_width = 1,
+    .stroke_colour = (V4){1, 1, 1, 0},
+    .stroke_linecap = LINECAP_SQUARE,
+    .stroke_linejoin = LINEJOIN_SQUARE,
+    .filled = false
+  };
+
+  return result;
+}
+
+
 void
 get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
 {
-  // TODO: Get width/height
-
   XMLTag *child = tag->first_child;
   while (child)
   {
@@ -550,6 +574,14 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
     else if (str_eq(child->name, String("svg")))
     {
       log(L_SVG, "Found: svg");
+
+      SVGOperation *old_start = *result;
+      *result = push_struct(memory, SVGOperation);
+
+      (*result)->type = SVG_OP_RECT;
+      (*result)->next = old_start;
+
+      (*result)->rect = get_svg_root_rect(child, delta);
 
       get_svg_operations(memory, child, result, delta);
     }
