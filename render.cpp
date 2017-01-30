@@ -143,10 +143,11 @@ fast_render_box(Renderer *renderer, RenderBasis *render_basis, Rectangle box, Pi
 
 
 void
-render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
+render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 world_width)
 {
   V2 start = transform_coord(render_basis, world_start);
   V2 end = transform_coord(render_basis, world_end);
+  r32 width = render_basis->scale * world_width / render_basis->world_per_pixel;
 
   if (start.x > end.x)
   {
@@ -158,6 +159,8 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = crop_to(render_region, window_region);
+
+  // Clip line endpoints to screen
 
   r32 x_gradient = (end.y - start.y) / (end.x - start.x);
   r32 y_gradient = (end.x - start.x) / (end.y - start.y);
@@ -209,25 +212,63 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
     }
   }
 
-  // TODO: IMPORTANT: Sub-pixel rendering!!!
+  // Calculate line width stuff
 
   V2 length_components = {(end.x - start.x),
                           (end.y - start.y)};
 
-  r32 num_pixels = max(abs(length_components.x), abs(length_components.y));
+  r32 x_length = abs(length_components.x);
+  r32 y_length = abs(length_components.y);
 
-  if (num_pixels)
+  r32 theta = atan2(length_components.y, length_components.x);
+
+  r32 num_steps;
+  r32 width_comp;
+  V2 axis;
+
+  if (x_length > y_length)
   {
-    V2 step = length_components / num_pixels;
+    r32 width_y_component = abs(width / (r32)sin((M_PI*.5)-theta));
 
-    V2 pixel_pos_fract = start;
+    num_steps = x_length;
+    axis = (V2){0, 1};
+    width_comp = width_y_component;
+  }
+  else
+  {
+    r32 width_x_component = abs(width / (r32)sin(theta));
+
+    num_steps = y_length;
+    axis = (V2){1, 0};
+    width_comp = width_x_component;
+  }
+
+  // TODO: Sub-pixel rendering
+  // TODO: End-caps
+
+  if (num_steps)
+  {
+    V2 step = length_components / num_steps;
+
+    V2 line_center_fract = start;
     for (u32 pixel_n = 0;
-         pixel_n < num_pixels;
+         pixel_n < num_steps;
          ++pixel_n)
     {
-      V2 pixel_pos = round_down(pixel_pos_fract);
-      set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
-      pixel_pos_fract += step;
+
+      V2 pixel_pos_fract = line_center_fract - (axis * width_comp * 0.5);
+      for (u32 offset = 0;
+           offset < width_comp;
+           ++offset)
+      {
+        V2 pixel_pos = round_down(pixel_pos_fract);
+        set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
+
+        pixel_pos_fract += axis;
+      }
+
+      // set_pixel(renderer, line_center_fract.x, line_center_fract.y, (V4){1, 1, 0, 0});
+      line_center_fract += step;
     }
   }
 }

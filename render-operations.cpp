@@ -57,7 +57,7 @@ add_fast_box_to_render_list(RenderOperations *render_ops, RenderBasis *render_ba
 
 
 void
-add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color)
+add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 width = 50)
 {
   RenderOperation operation;
   operation.type = RENDER_OP_LINE;
@@ -66,6 +66,7 @@ add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis,
   operation.line.world_start = world_start;
   operation.line.world_end = world_end;
   operation.line.color = color;
+  operation.line.width = width;
 
   add_to_render_list(render_ops, &operation);
 }
@@ -121,7 +122,7 @@ consume_render_operations(Renderer *renderer, RenderOperations *render_ops, Rect
       } break;
       case (RENDER_OP_LINE):
       {
-        render_line(renderer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color);
+        render_line(renderer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color, operation->line.width);
       } break;
       case (RENDER_OP_BITMAP):
       {

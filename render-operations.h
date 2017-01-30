@@ -39,6 +39,7 @@ struct RenderOperation
       V2 world_start;
       V2 world_end;
       V4 color;
+      r32 width;
     } line;
     struct
     {
