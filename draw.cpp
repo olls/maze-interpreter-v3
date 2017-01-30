@@ -40,6 +40,7 @@ void
 draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2 origin, SVGPath *path)
 {
   V4 colour = path->style.stroke_colour;
+  r32 width = path->style.stroke_width;
 
   for (u32 segment_n = 0;
        segment_n < path->n_segments;
@@ -53,7 +54,7 @@ draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2
     start += origin;
     end   += origin;
 
-    add_line_to_render_list(render_operations, render_basis, start, end, colour);
+    add_line_to_render_list(render_operations, render_basis, start, end, colour, width);
   }
 }
 
