@@ -11,6 +11,14 @@ enum CellDisplayType
 };
 
 
+enum CellConnectedState
+{
+  WALKABLE,
+  UNWALKABLE,
+  UNCONNECTED
+};
+
+
 struct CellBitmaps
 {
   Bitmap walkable[N_DISP_TYPES];

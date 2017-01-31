@@ -125,24 +125,28 @@ directly_neighbouring_cells(Cell *neighbours[4], Maze *maze, u32 cell_x, u32 cel
 }
 
 
-b32
+CellConnectedState
 cell_walkable(CellType type)
 {
-  b32 result = true;
+  CellConnectedState result = WALKABLE;
 
-  if (type == CELL_NULL || type == CELL_WALL)
+  if (type == CELL_WALL)
   {
-    result = false;
+    result = UNWALKABLE;
+  }
+  else if (type == CELL_NULL)
+  {
+    result = UNCONNECTED;
   }
 
   return result;
 }
 
 
-b32
+CellConnectedState
 cell_walkable(Cell *cell)
 {
-  b32 result = false;
+  CellConnectedState result = UNCONNECTED;
 
   if (cell)
   {
@@ -211,7 +215,7 @@ void
 calc_connected_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, CellDisplay *cell_display_result)
 {
   cell_display_result->rotate = 0;
-  b32 walkable = cell_walkable(cell);
+  CellConnectedState walkable = cell_walkable(cell);
 
   Cell *n[] = {0, 0, 0, 0};
   directly_neighbouring_cells(n, maze, cell->x, cell->y);
@@ -312,7 +316,7 @@ calc_connected_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, Ce
     cell_display_type = DISP_TYPE_ENCLOSED;
   }
 
-  if (walkable)
+  if (walkable == WALKABLE)
   {
     cell_display_result->bitmap = &cell_bitmaps->walkable[cell_display_type];
   }
@@ -399,7 +403,7 @@ draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellTy
   }
   else
   {
-    if (cell_walkable(type))
+    if (cell_walkable(type) == WALKABLE)
     {
       cell_bitmap = &cell_bitmaps->walkable[DISP_TYPE_CROSS];
     }
