@@ -609,10 +609,6 @@ test_log_svg_operations(SVGOperation *svg_operations)
         // log(L_SVG, "    (%f,%f)", line_seg->end.x, line_seg->end.y);
       }
     }
-    else
-    {
-      log(L_SVG, "ERROR");
-    }
 
     current = current->next;
   }

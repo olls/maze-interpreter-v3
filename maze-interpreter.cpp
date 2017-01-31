@@ -187,7 +187,6 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   game_state->arrow_svg = 0;
   get_svg_operations(memory, arrow, &game_state->arrow_svg);
-  test_log_svg_operations(game_state->arrow_svg);
 }
 
 
