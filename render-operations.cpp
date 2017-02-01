@@ -14,7 +14,7 @@ add_to_render_list(RenderOperations *render_ops, RenderOperation *operation)
 
 
 void
-add_circle_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_pos, r32 world_radius, V4 color)
+add_circle_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_pos, r32 world_radius, V4 color, r32 world_outline_width = -1)
 {
   RenderOperation operation;
   operation.type = RENDER_OP_CIRCLE;
@@ -23,6 +23,7 @@ add_circle_to_render_list(RenderOperations *render_ops, RenderBasis *render_basi
   operation.circle.world_pos = world_pos;
   operation.circle.world_radius = world_radius;
   operation.circle.color = color;
+  operation.circle.world_outline_width = world_outline_width;
 
   add_to_render_list(render_ops, &operation);
 }
@@ -110,7 +111,7 @@ consume_render_operations(Renderer *renderer, RenderOperations *render_ops, Rect
     {
       case (RENDER_OP_CIRCLE):
       {
-        render_circle(renderer, &render_basis, operation->circle.world_pos, operation->circle.world_radius, operation->circle.color);
+        render_circle(renderer, &render_basis, operation->circle.world_pos, operation->circle.world_radius, operation->circle.color, operation->circle.world_outline_width);
       } break;
       case (RENDER_OP_BOX):
       {

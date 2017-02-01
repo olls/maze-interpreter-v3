@@ -19,7 +19,8 @@ render_circle(Renderer *renderer,
               RenderBasis *render_basis,
               V2 world_pos,
               r32 world_radius,
-              V4 color)
+              V4 color,
+              r32 world_outline_width = -1)
 {
   // TODO: There seems to be some off-by-one bug in here, the right /
   //       bottom side of the circle seems to be clipped slightly
@@ -30,6 +31,23 @@ render_circle(Renderer *renderer,
   r32 radius = (world_radius / render_basis->world_per_pixel) * render_basis->scale;
   r32 radius_sq = squared(radius);
   r32 radius_minus_one_sq = squared(radius - 1);
+
+  r32 inner_radius;
+  r32 inner_radius_sq;
+  r32 inner_radius_minus_one_sq;
+  b32 outline = false;
+  if (world_outline_width > 0)
+  {
+    r32 outline_width = (world_outline_width / render_basis->world_per_pixel) * render_basis->scale;
+    if (outline_width < radius)
+    {
+      inner_radius = radius - outline_width;
+      inner_radius_sq = squared(inner_radius);
+      inner_radius_minus_one_sq = squared(inner_radius - 1);
+
+      outline = true;
+    }
+  }
 
   Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
@@ -52,13 +70,20 @@ render_circle(Renderer *renderer,
       V2 d_center = (V2){pixel_x, pixel_y} - fract_pixel_pos;
       r32 dist_sq = length_sq(d_center);
 
-      if (dist_sq < radius_sq)
+      if (dist_sq < radius_sq &&
+          (!outline || dist_sq > inner_radius_minus_one_sq))
       {
         V4 this_color = color;
 
         if (dist_sq > radius_minus_one_sq)
         {
           r32 diff = radius - sqrt(dist_sq);
+          this_color.a *= diff;
+        }
+
+        if (outline && dist_sq < inner_radius_sq)
+        {
+          r32 diff = 1 - (inner_radius - sqrt(dist_sq));
           this_color.a *= diff;
         }
 

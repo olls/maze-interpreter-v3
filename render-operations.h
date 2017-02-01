@@ -23,6 +23,7 @@ struct RenderOperation
       V2 world_pos;
       r32 world_radius;
       V4 color;
+      r32 world_outline_width;
     } circle;
     struct
     {
