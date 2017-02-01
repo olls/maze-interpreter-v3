@@ -575,6 +575,46 @@ parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
 }
 
 
+SVGLine
+parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
+{
+  SVGLine result;
+
+  String transform_attr = get_attr_value(line_tag, String("transform"));
+  if (transform_attr.text != 0)
+  {
+    origin += parse_svg_transform(transform_attr);
+  }
+
+  String x1_str = get_attr_value(line_tag, String("x1"));
+  String y1_str = get_attr_value(line_tag, String("y1"));
+  String x2_str = get_attr_value(line_tag, String("x2"));
+  String y2_str = get_attr_value(line_tag, String("y2"));
+
+  log(L_SVG, "%.*s", x1_str.length, x1_str.text);
+  log(L_SVG, "%.*s", y1_str.length, y1_str.text);
+  log(L_SVG, "%.*s", x2_str.length, x2_str.text);
+  log(L_SVG, "%.*s", y2_str.length, y2_str.text);
+
+  V2 start, end;
+  get_num(x1_str.text, x1_str.text + x1_str.length, &start.x);
+  get_num(y1_str.text, y1_str.text + y1_str.length, &start.y);
+  get_num(x2_str.text, x2_str.text + x2_str.length,   &end.x);
+  get_num(y2_str.text, y2_str.text + y2_str.length,   &end.y);
+
+  result.line.start = origin + start;
+  result.line.end = origin + end;
+
+  String style_attr = get_attr_value(line_tag, String("style"));
+  if (style_attr.text != 0)
+  {
+    parse_svg_styles(style_attr, &result.style);
+  }
+
+  return result;
+}
+
+
 V2
 parse_svg_group(XMLTag *g_tag)
 {
@@ -659,6 +699,18 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->circle = parse_circle(memory, child, delta);
+    }
+    else if (str_eq(child->name, String("line")))
+    {
+      log(L_SVG, "Found: line");
+
+      SVGOperation *old_start = *result;
+      *result = push_struct(memory, SVGOperation);
+
+      (*result)->type = SVG_OP_LINE;
+      (*result)->next = old_start;
+
+      (*result)->line = parse_line(memory, child, delta);
     }
     else if (str_eq(child->name, String("g")))
     {

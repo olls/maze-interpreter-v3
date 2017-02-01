@@ -59,11 +59,20 @@ struct SVGCircle
 };
 
 
+struct SVGLine
+{
+  LineSegment line;
+
+  SVGStyle style;
+};
+
+
 enum SVGOperationType
 {
   SVG_OP_PATH,
   SVG_OP_RECT,
-  SVG_OP_CIRCLE
+  SVG_OP_CIRCLE,
+  SVG_OP_LINE
 };
 
 
@@ -77,6 +86,7 @@ struct SVGOperation
     SVGPath path;
     SVGRect rect;
     SVGCircle circle;
+    SVGLine line;
   };
 
   SVGOperation *next;
