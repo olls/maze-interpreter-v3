@@ -97,8 +97,10 @@ get_num(char *ptr, char *f_end, u32 *result)
 char *
 get_num(char *ptr, char *f_end, s32 *result)
 {
+  *result = 0;
+
   b32 coef = 1;
-  if (*ptr == '-')
+  if (ptr != f_end && *ptr == '-')
   {
     ++ptr;
     coef = -1;
@@ -108,7 +110,6 @@ get_num(char *ptr, char *f_end, s32 *result)
 
   consume_while(ptr, is_num, f_end);
 
-  *result = 0;
   u32 num_length = ptr - num_start;
 
   for (u32 num_pos = 0;
@@ -128,16 +129,16 @@ get_num(char *ptr, char *f_end, s32 *result)
 char*
 get_num(char *ptr, char *f_end, r32 *result)
 {
-  s32 whole_num;
+  s32 whole_num = 0;
   ptr = get_num(ptr, f_end, &whole_num);
 
   *result = whole_num;
 
-  if (*ptr == '.')
+  if (ptr != f_end && *ptr == '.')
   {
     ++ptr;
 
-    u32 frac_num;
+    u32 frac_num = 0;
     ptr = get_num(ptr, f_end, &frac_num);
 
     r32 frac_part = frac_num;

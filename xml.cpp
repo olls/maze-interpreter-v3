@@ -3,7 +3,7 @@ not_label(char c)
 {
   b32 result = true;
 
-  if (is_letter(c) || c == ':')
+  if (is_letter(c) || is_num(c) || c == ':' || c == '-' || c == '_')
   {
     result = false;
   }
@@ -31,6 +31,7 @@ XMLTag *
 parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
 {
   // Creates a array of tokens, each representing "< ... >", sequentially in memory
+  // TODO: This really doesn't handle comments well.
 
   char *end_f = file->text + file->size;
   char *c = file->text;
@@ -300,7 +301,7 @@ test_traverse_xml_struct(LoggingChannel channel, XMLTag *parent, u32 level=0)
 String
 get_attr_value(XMLTag *tag, ConstString name)
 {
-  String result = {.text = 0};
+  String result = {.text = 0, .length = 0};
 
   XMLAttr *attr = tag->attrs;
   while (attr)
