@@ -521,15 +521,21 @@ parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
   String y_str = get_attr_value(rect_tag, String("y"));
   String width_str  = get_attr_value(rect_tag, String("width"));
   String height_str = get_attr_value(rect_tag, String("height"));
+  String r_str = get_attr_value(rect_tag, String("ry"));
 
-  V2 pos, size;
+  V2 pos = {0, 0};
+  V2 size = {0, 0};
+  r32 radius = 0;
+
   get_num(x_str.text, x_str.text + x_str.length, &pos.x);
   get_num(y_str.text, y_str.text + y_str.length, &pos.y);
   get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
   get_num(height_str.text, height_str.text + height_str.length, &size.y);
+  get_num(r_str.text, r_str.text + r_str.length, &radius);
 
   result.rect.start = origin + pos;
   result.rect.end = result.rect.start + size;
+  result.radius = radius;
 
   String style_attr = get_attr_value(rect_tag, String("style"));
   if (style_attr.text != 0)
@@ -639,11 +645,12 @@ get_svg_root_rect(XMLTag *root, V2 origin)
   String width_str  = get_attr_value(root, String("width"));
   String height_str = get_attr_value(root, String("height"));
 
-  V2 size;
+  V2 size = {0, 0};
   get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
   get_num(height_str.text, height_str.text + height_str.length, &size.y);
 
   result.rect.end += size;
+  result.radius = 0;
   result.style = (SVGStyle){
     .stroke_width = 1,
     .stroke_colour = (V4){1, 1, 1, 0},

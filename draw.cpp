@@ -75,7 +75,7 @@ draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 orig
       case (SVG_OP_RECT):
       {
         SVGRect *rect = &operation->rect;
-        add_box_outline_to_render_list(render_operations, render_basis, origin + rect->rect, rect->style.stroke_colour, rect->style.stroke_width);
+        add_box_outline_to_render_list(render_operations, render_basis, origin + rect->rect, rect->style.stroke_colour, rect->style.stroke_width, rect->radius);
       } break;
 
       case (SVG_OP_CIRCLE):

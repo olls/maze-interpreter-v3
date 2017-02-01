@@ -20,7 +20,8 @@ render_circle(Renderer *renderer,
               V2 world_pos,
               r32 world_radius,
               V4 color,
-              r32 world_outline_width = -1)
+              r32 world_outline_width = -1,
+              u32 corners = 0b1111)
 {
   // TODO: There seems to be some off-by-one bug in here, the right /
   //       bottom side of the circle seems to be clipped slightly
@@ -53,8 +54,32 @@ render_circle(Renderer *renderer,
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
-  Rectangle fract_pixels_circle_region = {fract_pixel_pos - radius,
-                                          fract_pixel_pos + radius + 1};
+  Rectangle fract_pixels_circle_region = {fract_pixel_pos, fract_pixel_pos};
+  if (corners & 0b1000)
+  {
+    fract_pixels_circle_region = get_union(fract_pixels_circle_region,
+                                           (Rectangle){(V2){fract_pixel_pos.x,              fract_pixel_pos.y - radius},
+                                                       (V2){fract_pixel_pos.x + radius + 1, fract_pixel_pos.y         }});
+  }
+  if (corners & 0b0100)
+  {
+    fract_pixels_circle_region = get_union(fract_pixels_circle_region,
+                                           (Rectangle){fract_pixel_pos,
+                                                       fract_pixel_pos + radius + 1});
+  }
+  if (corners & 0b0010)
+  {
+    fract_pixels_circle_region = get_union(fract_pixels_circle_region,
+                                           (Rectangle){(V2){fract_pixel_pos.x - radius, fract_pixel_pos.y             },
+                                                       (V2){fract_pixel_pos.x,          fract_pixel_pos.y + radius + 1}});
+  }
+  if (corners & 0b0001)
+  {
+    fract_pixels_circle_region = get_union(fract_pixels_circle_region,
+                                           (Rectangle){fract_pixel_pos - radius,
+                                                       fract_pixel_pos + 1});
+  }
+
   fract_pixels_circle_region = crop_to(fract_pixels_circle_region, render_region);
 
   Rectangle pixels_circle_region = round_down(fract_pixels_circle_region);

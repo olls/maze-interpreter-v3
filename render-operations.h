@@ -24,6 +24,7 @@ struct RenderOperation
       r32 world_radius;
       V4 color;
       r32 world_outline_width;
+      u32 corners;
     } circle;
     struct
     {

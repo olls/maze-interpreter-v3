@@ -639,6 +639,15 @@ get_nth_vertical_fraction(Rectangle rect, r32 frac, u32 n)
   return result;
 }
 
+Rectangle
+get_union(Rectangle a, Rectangle b)
+{
+  Rectangle result;
+  result.start = min_V2(a.start, b.start);
+  result.end   = max_V2(a.end,   b.end);
+  return result;
+}
+
 
 b32
 operator==(V3 a, V3 b)

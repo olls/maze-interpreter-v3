@@ -45,6 +45,7 @@ struct SVGPath
 struct SVGRect
 {
   Rectangle rect;
+  r32 radius;
 
   SVGStyle style;
 };
