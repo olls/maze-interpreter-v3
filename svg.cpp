@@ -419,6 +419,13 @@ parse_svg_styles(String style, SVGStyle *result)
   char *c = style.text;
   char *end = style.text + style.length;
 
+  result->stroke_width = 1;
+  result->stroke_colour = (V4){0, 0, 0, 0};
+  result->stroke_linecap = LINECAP_BUTT;
+  result->stroke_linejoin = LINEJOIN_MITER;
+  result->filled = false;
+  result->fill_colour = (V4){1, 0, 0, 0};
+
   while (c < end)
   {
     String label, value;
