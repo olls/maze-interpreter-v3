@@ -50,20 +50,33 @@ struct SVGRect
 };
 
 
+struct SVGCircle
+{
+  V2 position;
+  r32 radius;
+
+  SVGStyle style;
+};
+
+
 enum SVGOperationType
 {
   SVG_OP_PATH,
-  SVG_OP_RECT
+  SVG_OP_RECT,
+  SVG_OP_CIRCLE
 };
 
 
 struct SVGOperation
 {
+  // TODO: Move SVGStyle into here instead of duplicating it in all the shape structs
+
   SVGOperationType type;
 
   union {
     SVGPath path;
     SVGRect rect;
+    SVGCircle circle;
   };
 
   SVGOperation *next;

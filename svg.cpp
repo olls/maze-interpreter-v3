@@ -504,6 +504,77 @@ parse_svg_transform(String transform_attr)
 }
 
 
+SVGRect
+parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
+{
+  SVGRect result;
+
+  String transform_attr = get_attr_value(rect_tag, String("transform"));
+  if (transform_attr.text != 0)
+  {
+    origin += parse_svg_transform(transform_attr);
+  }
+
+  result.rect = (Rectangle){ .start = origin, .end = origin};
+
+  String x_str = get_attr_value(rect_tag, String("x"));
+  String y_str = get_attr_value(rect_tag, String("y"));
+  String width_str  = get_attr_value(rect_tag, String("width"));
+  String height_str = get_attr_value(rect_tag, String("height"));
+
+  V2 pos, size;
+  get_num(x_str.text, x_str.text + x_str.length, &pos.x);
+  get_num(y_str.text, y_str.text + y_str.length, &pos.y);
+  get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
+  get_num(height_str.text, height_str.text + height_str.length, &size.y);
+
+  result.rect.start = origin + pos;
+  result.rect.end = result.rect.start + size;
+
+  String style_attr = get_attr_value(rect_tag, String("style"));
+  if (style_attr.text != 0)
+  {
+    parse_svg_styles(style_attr, &result.style);
+  }
+
+  return result;
+}
+
+
+SVGCircle
+parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
+{
+  SVGCircle result;
+
+  String transform_attr = get_attr_value(circle_tag, String("transform"));
+  if (transform_attr.text != 0)
+  {
+    origin += parse_svg_transform(transform_attr);
+  }
+
+  String x_str = get_attr_value(circle_tag, String("cx"));
+  String y_str = get_attr_value(circle_tag, String("cy"));
+  String radius_str  = get_attr_value(circle_tag, String("r"));
+
+  V2 pos;
+  r32 radius;
+  get_num(x_str.text, x_str.text + x_str.length, &pos.x);
+  get_num(y_str.text, y_str.text + y_str.length, &pos.y);
+  get_num(radius_str.text, radius_str.text + radius_str.length, &radius);
+
+  result.position = origin + pos;
+  result.radius = radius;
+
+  String style_attr = get_attr_value(circle_tag, String("style"));
+  if (style_attr.text != 0)
+  {
+    parse_svg_styles(style_attr, &result.style);
+  }
+
+  return result;
+}
+
+
 V2
 parse_svg_group(XMLTag *g_tag)
 {
@@ -525,11 +596,11 @@ get_svg_root_rect(XMLTag *root, V2 origin)
   SVGRect result;
   result.rect = (Rectangle){ .start = origin, .end = origin};
 
-  String width_str = get_attr_value(root, String("width"));
+  String width_str  = get_attr_value(root, String("width"));
   String height_str = get_attr_value(root, String("height"));
 
   V2 size;
-  get_num(width_str.text, width_str.text + width_str.length, &size.x);
+  get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
   get_num(height_str.text, height_str.text + height_str.length, &size.y);
 
   result.rect.end += size;
@@ -548,6 +619,8 @@ get_svg_root_rect(XMLTag *root, V2 origin)
 void
 get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
 {
+  // TODO: Parse the style and transform attributes in here instead of separately for each type
+
   XMLTag *child = tag->first_child;
   while (child)
   {
@@ -562,6 +635,30 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->path = parse_path(memory, child, delta);
+    }
+    else if (str_eq(child->name, String("rect")))
+    {
+      log(L_SVG, "Found: rect");
+
+      SVGOperation *old_start = *result;
+      *result = push_struct(memory, SVGOperation);
+
+      (*result)->type = SVG_OP_RECT;
+      (*result)->next = old_start;
+
+      (*result)->rect = parse_rect(memory, child, delta);
+    }
+    else if (str_eq(child->name, String("circle")))
+    {
+      log(L_SVG, "Found: circle");
+
+      SVGOperation *old_start = *result;
+      *result = push_struct(memory, SVGOperation);
+
+      (*result)->type = SVG_OP_CIRCLE;
+      (*result)->next = old_start;
+
+      (*result)->circle = parse_circle(memory, child, delta);
     }
     else if (str_eq(child->name, String("g")))
     {

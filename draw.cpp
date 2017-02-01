@@ -78,6 +78,12 @@ draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 orig
         add_box_outline_to_render_list(render_operations, render_basis, origin + rect->rect, rect->style.stroke_colour, rect->style.stroke_width);
       } break;
 
+      case (SVG_OP_CIRCLE):
+      {
+        SVGCircle *circle = &operation->circle;
+        add_circle_to_render_list(render_operations, render_basis, origin + circle->position, circle->radius, circle->style.stroke_colour, circle->style.stroke_width);
+      } break;
+
       default:
       {
         invalid_code_path;
