@@ -1,8 +1,18 @@
 void
 set_pixel(Renderer *renderer, u32 pixel_x, u32 pixel_y, V4 color)
 {
-  assert(pixel_x >= 0 && pixel_x < renderer->frame_buffer.width);
-  assert(pixel_y >= 0 && pixel_y < renderer->frame_buffer.height);
+  b32 x_on_screen = pixel_x < renderer->frame_buffer.width;
+  b32 y_on_screen = pixel_y < renderer->frame_buffer.height;
+
+#ifdef DEBUG
+  assert(x_on_screen);
+  assert(y_on_screen);
+#else
+  if (!x_on_screen || !y_on_screen)
+  {
+    return;
+  }
+#endif
 
   u32 pixel_pos = (pixel_y * renderer->frame_buffer.width) + pixel_x;
 
@@ -211,6 +221,7 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
   render_region = crop_to(render_region, window_region);
 
   // Clip line endpoints to screen
+  // TODO: This doesn't really behave correctly when width > 1
 
   r32 x_gradient = (end.y - start.y) / (end.x - start.x);
   r32 y_gradient = (end.x - start.x) / (end.y - start.y);
