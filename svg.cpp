@@ -410,27 +410,97 @@ parse_svg_style(String label, String value, SVGStyle *result)
 
 
 void
-parse_svg_styles(String style, SVGStyle *result)
+get_svg_styles_from_attrs(XMLTag *tag, SVGStyle *result)
 {
-  log(L_SVG, "Parsing style: %.*s", style.length, style.text);
-
-  char *c = style.text;
-  char *end = style.text + style.length;
-
-  result->stroke_width = 1;
-  result->stroke_colour = (V4){1, 0, 0, 0};
-  result->stroke_linecap = LINECAP_BUTT;
-  result->stroke_linejoin = LINEJOIN_MITER;
-  result->filled = false;
-  result->fill_colour = (V4){1, 0, 0, 0};
-
-  while (c < end)
+  String fill = get_attr_value(tag, String("fill"));
+  if (fill.text != 0)
   {
-    String label, value;
-    c = find_svg_style(c, end, &label, &value);
+    log(L_SVG, "Style label: fill");
 
-    parse_svg_style(label, value, result);
+    result->filled = parse_colour_string(fill, &result->fill_colour);
   }
+
+  String fill_opacity = get_attr_value(tag, String("fill-opacity"));
+  if (fill_opacity.text != 0)
+  {
+    log(L_SVG, "Style label: fill-opacity");
+
+    get_num(fill_opacity.text, fill_opacity.text + fill_opacity.length, &result->fill_colour.a);
+  }
+
+  String stroke = get_attr_value(tag, String("stroke"));
+  if (stroke.text != 0)
+  {
+    log(L_SVG, "Style label: stroke");
+
+    parse_colour_string(stroke, &result->stroke_colour);
+  }
+
+  String stroke_opacity = get_attr_value(tag, String("stroke-opacity"));
+  if (stroke_opacity.text != 0)
+  {
+    log(L_SVG, "Style label: stroke-opacity");
+
+    get_num(stroke_opacity.text, stroke_opacity.text + stroke_opacity.length, &result->stroke_colour.a);
+  }
+
+  String stroke_width = get_attr_value(tag, String("stroke-width"));
+  if (stroke_width.text != 0)
+  {
+    log(L_SVG, "Style label: stroke-width");
+
+    get_num(stroke_width.text, stroke_width.text + stroke_width.length, &result->stroke_width);
+  }
+
+  String stroke_linecap = get_attr_value(tag, String("stroke-linecap"));
+  if (stroke_linecap.text != 0)
+  {
+    log(L_SVG, "Style label: stroke-linecap");
+
+    result->stroke_linecap = parse_svg_stroke_linecap(stroke_linecap);
+  }
+
+  String stroke_linejoin = get_attr_value(tag, String("stroke-linejoin"));
+  if (stroke_linejoin.text != 0)
+  {
+    log(L_SVG, "Style label: stroke-linejoin");
+
+    result->stroke_linejoin = parse_svg_stroke_linejoin(stroke_linejoin);
+  }
+}
+
+
+void
+parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
+{
+  // Get styles from style attribute
+
+  String style = get_attr_value(from_tag, String("style"));
+  if (style.text != 0)
+  {
+    log(L_SVG, "Parsing style: %.*s", style.length, style.text);
+
+    char *c = style.text;
+    char *end = style.text + style.length;
+
+    result->stroke_width = 1;
+    result->stroke_colour = (V4){1, 0, 0, 0};
+    result->stroke_linecap = LINECAP_BUTT;
+    result->stroke_linejoin = LINEJOIN_MITER;
+    result->filled = false;
+    result->fill_colour = (V4){1, 0, 0, 0};
+
+    while (c < end)
+    {
+      String label, value;
+      c = find_svg_style(c, end, &label, &value);
+
+      parse_svg_style(label, value, result);
+    }
+  }
+
+  // Get styles from individual attributes (overriding previous styles)
+  get_svg_styles_from_attrs(from_tag, result);
 
   log(L_SVG, "Styles:");
 
@@ -454,11 +524,7 @@ parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
     result = parse_path_d(memory, path_tag, d_attr, origin);
   }
 
-  String style_attr = get_attr_value(path_tag, String("style"));
-  if (style_attr.text != 0)
-  {
-    parse_svg_styles(style_attr, &result.style);
-  }
+  parse_svg_styles(path_tag, &result.style);
 
   return result;
 }
@@ -542,11 +608,7 @@ parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
   result.rect.end = result.rect.start + size;
   result.radius = radius;
 
-  String style_attr = get_attr_value(rect_tag, String("style"));
-  if (style_attr.text != 0)
-  {
-    parse_svg_styles(style_attr, &result.style);
-  }
+  parse_svg_styles(rect_tag, &result.style);
 
   return result;
 }
@@ -576,11 +638,7 @@ parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
   result.position = origin + pos;
   result.radius = radius;
 
-  String style_attr = get_attr_value(circle_tag, String("style"));
-  if (style_attr.text != 0)
-  {
-    parse_svg_styles(style_attr, &result.style);
-  }
+  parse_svg_styles(circle_tag, &result.style);
 
   return result;
 }
@@ -611,11 +669,7 @@ parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
   result.line.start = origin + start;
   result.line.end = origin + end;
 
-  String style_attr = get_attr_value(line_tag, String("style"));
-  if (style_attr.text != 0)
-  {
-    parse_svg_styles(style_attr, &result.style);
-  }
+  parse_svg_styles(line_tag, &result.style);
 
   return result;
 }
