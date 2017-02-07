@@ -524,8 +524,6 @@ parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
     result = parse_path_d(memory, path_tag, d_attr, origin);
   }
 
-  parse_svg_styles(path_tag, &result.style);
-
   return result;
 }
 
@@ -608,8 +606,6 @@ parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
   result.rect.end = result.rect.start + size;
   result.radius = radius;
 
-  parse_svg_styles(rect_tag, &result.style);
-
   return result;
 }
 
@@ -637,8 +633,6 @@ parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
 
   result.position = origin + pos;
   result.radius = radius;
-
-  parse_svg_styles(circle_tag, &result.style);
 
   return result;
 }
@@ -668,8 +662,6 @@ parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
 
   result.line.start = origin + start;
   result.line.end = origin + end;
-
-  parse_svg_styles(line_tag, &result.style);
 
   return result;
 }
@@ -705,13 +697,6 @@ get_svg_root_rect(XMLTag *root, V2 origin)
 
   result.rect.end += size;
   result.radius = 0;
-  result.style = (SVGStyle){
-    .stroke_width = 1,
-    .stroke_colour = (V4){0.2, 1, 1, 0},
-    .stroke_linecap = LINECAP_SQUARE,
-    .stroke_linejoin = LINEJOIN_MITER,
-    .filled = false
-  };
 
   return result;
 }
@@ -720,8 +705,6 @@ get_svg_root_rect(XMLTag *root, V2 origin)
 void
 get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
 {
-  // TODO: Parse the style and transform attributes in here instead of separately for each type
-
   XMLTag *child = tag->first_child;
   while (child)
   {
@@ -736,6 +719,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->path = parse_path(memory, child, delta);
+      parse_svg_styles(child, &((*result)->style));
     }
     else if (str_eq(child->name, String("rect")))
     {
@@ -748,6 +732,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->rect = parse_rect(memory, child, delta);
+      parse_svg_styles(child, &((*result)->style));
     }
     else if (str_eq(child->name, String("circle")))
     {
@@ -760,6 +745,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->circle = parse_circle(memory, child, delta);
+      parse_svg_styles(child, &((*result)->style));
     }
     else if (str_eq(child->name, String("line")))
     {
@@ -772,6 +758,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->line = parse_line(memory, child, delta);
+      parse_svg_styles(child, &((*result)->style));
     }
     else if (str_eq(child->name, String("g")))
     {
@@ -792,6 +779,15 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       (*result)->next = old_start;
 
       (*result)->rect = get_svg_root_rect(child, delta);
+
+      // TODO: Temporary hack for displaying rectangle around SVGs
+      (*result)->style = (SVGStyle){
+        .stroke_width = 1,
+        .stroke_colour = (V4){0.2, 1, 1, 0},
+        .stroke_linecap = LINECAP_SQUARE,
+        .stroke_linejoin = LINEJOIN_MITER,
+        .filled = false
+      };
 
       get_svg_operations(memory, child, result, delta);
     }

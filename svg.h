@@ -37,8 +37,6 @@ struct SVGPath
 {
   LineSegment *segments;
   u32 n_segments;
-
-  SVGStyle style;
 };
 
 
@@ -46,8 +44,6 @@ struct SVGRect
 {
   Rectangle rect;
   r32 radius;
-
-  SVGStyle style;
 };
 
 
@@ -55,16 +51,12 @@ struct SVGCircle
 {
   V2 position;
   r32 radius;
-
-  SVGStyle style;
 };
 
 
 struct SVGLine
 {
   LineSegment line;
-
-  SVGStyle style;
 };
 
 
@@ -89,6 +81,8 @@ struct SVGOperation
     SVGCircle circle;
     SVGLine line;
   };
+
+  SVGStyle style;
 
   SVGOperation *next;
 };
