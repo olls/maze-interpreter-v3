@@ -126,7 +126,6 @@ get_num(char *ptr, char *f_end, s32 *result)
 }
 
 
-// TODO: IMPORTANT: This seems to be parsing 0.1 as 1.0 !!
 char*
 get_num(char *ptr, char *f_end, r32 *result)
 {
@@ -143,7 +142,7 @@ get_num(char *ptr, char *f_end, r32 *result)
     ptr = get_num(ptr, f_end, &frac_num);
 
     r32 frac_part = frac_num;
-    while (frac_part > 1)
+    while (frac_part >= 1)
     {
       frac_part /= 10;
     }
