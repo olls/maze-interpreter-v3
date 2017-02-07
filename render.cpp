@@ -270,31 +270,52 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
   r32 x_length = abs(length_components.x);
   r32 y_length = abs(length_components.y);
 
-  r32 theta = atan2(length_components.y, length_components.x);
+  r32 theta = atan2f(length_components.y, length_components.x);
 
-  r32 num_steps;
-  r32 width_comp;
-  V2 axis;
+  V2 width_components = {abs(width / (r32)sin(theta)),
+                         abs(width / (r32)sin((M_PI*.5)-theta))};
 
+  // Extension for the butt end caps.
+  r32 extenstion;
   if (x_length > y_length)
   {
-    r32 width_y_component = abs(width / (r32)sin((M_PI*.5)-theta));
-
-    num_steps = x_length;
-    axis = (V2){0, 1};
-    width_comp = width_y_component;
+    extenstion = width * abs((r32)tan(theta)) * 0.5;
   }
   else
   {
-    r32 width_x_component = abs(width / (r32)sin(theta));
+    extenstion = width * abs((r32)tan((M_PI*.5) - theta)) * 0.5;
+  }
 
+  V2 direction = unit_vector(length_components);
+  V2 extenstion_components = extenstion * direction;
+  start -= extenstion_components;
+  end   += extenstion_components;
+
+  length_components += extenstion_components * 2;
+  x_length += abs(extenstion_components.x) * 2;
+  y_length += abs(extenstion_components.y) * 2;
+
+  r32 num_steps;
+  r32 width_comp;
+  V2 drawing_axis;
+  r32 extenstion_comp;
+
+  if (x_length > y_length)
+  {
+    num_steps = x_length;
+    drawing_axis = (V2){0, 1};
+    width_comp = width_components.y;
+    extenstion_comp = abs(extenstion_components.x);
+  }
+  else
+  {
     num_steps = y_length;
-    axis = (V2){1, 0};
-    width_comp = width_x_component;
+    drawing_axis = (V2){1, 0};
+    width_comp = width_components.x;
+    extenstion_comp = abs(extenstion_components.y);
   }
 
   // TODO: Sub-pixel rendering
-  // TODO: End-caps
 
   if (num_steps)
   {
@@ -305,19 +326,72 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
          pixel_n < num_steps;
          ++pixel_n)
     {
-
-      V2 pixel_pos_fract = line_center_fract - (axis * width_comp * 0.5);
-      for (u32 offset = 0;
-           offset < width_comp;
-           ++offset)
+      r32 end_slant_comp = extenstion_comp*2;
+      if (pixel_n <= end_slant_comp || pixel_n >= num_steps - end_slant_comp)
       {
-        V2 pixel_pos = round_down(pixel_pos_fract);
-        set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
+        // End caps
+        u32 d;
+        b32 start;
+        if (pixel_n <= end_slant_comp)
+        {
+          start = true;
+          d = abs(end_slant_comp - pixel_n);
+        }
+        else
+        {
+          start = false;
+          d = abs((num_steps - end_slant_comp) - pixel_n);
+        }
 
-        pixel_pos_fract += axis;
+        b32 flip_axis = start;
+        if (drawing_axis.y == 1 && length_components.y < 0)
+        {
+          flip_axis = !start;
+        }
+
+        V2 this_cap_drawing_axis;
+        if (flip_axis)
+        {
+          this_cap_drawing_axis = -drawing_axis;
+        }
+        else
+        {
+          this_cap_drawing_axis = drawing_axis;
+        }
+
+        r32 this_width_comp = width_comp * (1 - (d / end_slant_comp));
+
+        r32 width_start_line_center_offset = width_comp * 0.5;
+        V2 pixel_pos_fract = line_center_fract - (width_start_line_center_offset * this_cap_drawing_axis);
+
+        for (u32 offset = 0;
+             offset < this_width_comp;
+             ++offset)
+        {
+          V2 pixel_pos = round_down(pixel_pos_fract);
+          set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
+
+          pixel_pos_fract += this_cap_drawing_axis;
+        }
+      }
+      else
+      {
+        // Main line bulk
+
+        r32 width_start_line_center_offset = width_comp * 0.5;
+        V2 pixel_pos_fract = line_center_fract - (width_start_line_center_offset * drawing_axis);
+
+        for (u32 offset = 0;
+             offset < width_comp;
+             ++offset)
+        {
+          V2 pixel_pos = round_down(pixel_pos_fract);
+          set_pixel(renderer, pixel_pos.x, pixel_pos.y, color);
+
+          pixel_pos_fract += drawing_axis;
+        }
       }
 
-      // set_pixel(renderer, line_center_fract.x, line_center_fract.y, (V4){1, 1, 0, 0});
       line_center_fract += step;
     }
   }
