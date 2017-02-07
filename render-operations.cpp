@@ -59,7 +59,7 @@ add_fast_box_to_render_list(RenderOperations *render_ops, RenderBasis *render_ba
 
 
 void
-add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 width = 50, SVGStrokeLinecap linecap = LINECAP_BUTT)
+add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 width = 50, LineEndStyle line_end = LINE_END_NULL, LineEndStyle end_line_end = LINE_END_NULL)
 {
   RenderOperation operation;
   operation.type = RENDER_OP_LINE;
@@ -69,7 +69,17 @@ add_line_to_render_list(RenderOperations *render_ops, RenderBasis *render_basis,
   operation.line.world_end = world_end;
   operation.line.color = color;
   operation.line.width = width;
-  operation.line.linecap = linecap;
+
+  if (line_end == LINE_END_NULL)
+  {
+    line_end = LINE_END_BUTT;
+  }
+  if (end_line_end == LINE_END_NULL)
+  {
+    end_line_end = line_end;
+  }
+  operation.line.start_line_end = line_end;
+  operation.line.end_line_end   = end_line_end;
 
   add_to_render_list(render_ops, &operation);
 }
@@ -125,7 +135,7 @@ consume_render_operations(Renderer *renderer, RenderOperations *render_ops, Rect
       } break;
       case (RENDER_OP_LINE):
       {
-        render_line(renderer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color, operation->line.width, operation->line.linecap);
+        render_line(renderer, &render_basis, operation->line.world_start, operation->line.world_end, operation->line.color, operation->line.width, operation->line.start_line_end, operation->line.end_line_end);
       } break;
       case (RENDER_OP_BITMAP):
       {

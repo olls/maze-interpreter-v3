@@ -41,6 +41,8 @@ draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2
 {
   V4 colour = path->style.stroke_colour;
   r32 width = path->style.stroke_width;
+  LineEndStyle line_end = svg_linecap_to_line_end(path->style.stroke_linecap);
+  LineEndStyle line_join = svg_linejoin_to_line_end(path->style.stroke_linejoin);
 
   for (u32 segment_n = 0;
        segment_n < path->n_segments;
@@ -54,7 +56,19 @@ draw_svg_path(RenderOperations *render_operations, RenderBasis *render_basis, V2
     start += origin;
     end   += origin;
 
-    add_line_to_render_list(render_operations, render_basis, start, end, colour, width);
+    LineEndStyle this_line_cap_start = line_join;
+    LineEndStyle this_line_cap_end = line_join;
+
+    if (segment_n == 0)
+    {
+      this_line_cap_start = line_end;
+    }
+    if (segment_n == path->n_segments-1)
+    {
+      this_line_cap_end = line_end;
+    }
+
+    add_line_to_render_list(render_operations, render_basis, start, end, colour, width, this_line_cap_start, this_line_cap_end);
   }
 }
 
@@ -87,7 +101,7 @@ draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 orig
       case (SVG_OP_LINE):
       {
         SVGLine *line = &operation->line;
-        add_line_to_render_list(render_operations, render_basis, origin + line->line.start, origin + line->line.end, line->style.stroke_colour, line->style.stroke_width, line->style.stroke_linecap);
+        add_line_to_render_list(render_operations, render_basis, origin + line->line.start, origin + line->line.end, line->style.stroke_colour, line->style.stroke_width, svg_linecap_to_line_end(line->style.stroke_linecap));
       } break;
 
       default:

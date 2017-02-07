@@ -352,9 +352,9 @@ parse_svg_stroke_linejoin(String value)
   {
     result = LINEJOIN_ROUND;
   }
-  else if (str_eq(value, String("square")))
+  else if (str_eq(value, String("bevel")))
   {
-    result = LINEJOIN_SQUARE;
+    result = LINEJOIN_BEVEL;
   }
 
   return result;
@@ -368,7 +368,6 @@ parse_svg_style(String label, String value, SVGStyle *result)
   {
     log(L_SVG, "Style label: fill");
 
-    result->fill_colour = (V4){0, 0, 0, 0};
     result->filled = parse_colour_string(value, &result->fill_colour);
   }
   else if (str_eq(label, String("fill-opacity")))
@@ -381,7 +380,6 @@ parse_svg_style(String label, String value, SVGStyle *result)
   {
     log(L_SVG, "Style label: stroke");
 
-    result->stroke_colour = (V4){0, 0, 0, 0};
     parse_colour_string(value, &result->stroke_colour);
   }
   else if (str_eq(label, String("stroke-opacity")))
@@ -420,7 +418,7 @@ parse_svg_styles(String style, SVGStyle *result)
   char *end = style.text + style.length;
 
   result->stroke_width = 1;
-  result->stroke_colour = (V4){0, 0, 0, 0};
+  result->stroke_colour = (V4){1, 0, 0, 0};
   result->stroke_linecap = LINECAP_BUTT;
   result->stroke_linejoin = LINEJOIN_MITER;
   result->filled = false;
@@ -655,9 +653,9 @@ get_svg_root_rect(XMLTag *root, V2 origin)
   result.radius = 0;
   result.style = (SVGStyle){
     .stroke_width = 1,
-    .stroke_colour = (V4){1, 1, 1, 0},
+    .stroke_colour = (V4){0.2, 1, 1, 0},
     .stroke_linecap = LINECAP_SQUARE,
-    .stroke_linejoin = LINEJOIN_SQUARE,
+    .stroke_linejoin = LINEJOIN_MITER,
     .filled = false
   };
 
@@ -770,4 +768,54 @@ test_log_svg_operations(SVGOperation *svg_operations)
 
     current = current->next;
   }
+}
+
+
+LineEndStyle
+svg_linecap_to_line_end(SVGStrokeLinecap linecap)
+{
+  LineEndStyle result;
+
+  switch (linecap)
+  {
+    case (LINECAP_BUTT):
+      result = LINE_END_BUTT;
+      break;
+    case (LINECAP_SQUARE):
+      result = LINE_END_SQUARE;
+      break;
+    case (LINECAP_ROUND):
+      result = LINE_END_ROUND;
+      break;
+    default:
+      result = LINE_END_NULL;
+      break;
+  }
+
+  return result;
+}
+
+
+LineEndStyle
+svg_linejoin_to_line_end(SVGStrokeLinejoin linejoin)
+{
+  LineEndStyle result;
+
+  switch (linejoin)
+  {
+    case (LINEJOIN_MITER):
+      result = LINE_END_MITER;
+      break;
+    case (LINEJOIN_ROUND):
+      result = LINE_END_ROUND;
+      break;
+    case (LINEJOIN_BEVEL):
+      result = LINE_END_BEVEL;
+      break;
+    default:
+      result = LINE_END_NULL;
+      break;
+  }
+
+  return result;
 }

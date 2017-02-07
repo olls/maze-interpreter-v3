@@ -126,6 +126,7 @@ get_num(char *ptr, char *f_end, s32 *result)
 }
 
 
+// TODO: IMPORTANT: This seems to be parsing 0.1 as 1.0 !!
 char*
 get_num(char *ptr, char *f_end, r32 *result)
 {
