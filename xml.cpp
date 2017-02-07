@@ -279,18 +279,17 @@ test_traverse_xml_struct(LoggingChannel channel, XMLTag *parent, u32 level=0)
   while (child)
   {
     log_ind(channel, level, "%.*s", child->name.length, child->name.text);
-    ++level;
 
     XMLAttr *attr = child->attrs;
     while (attr)
     {
-      log_ind(channel, level, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
+      log_ind(channel, level + 1, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
       attr = attr->next_attr;
     }
 
     if (child->type == XML_ELEMENT)
     {
-      test_traverse_xml_struct(channel, child, level + 1);
+      test_traverse_xml_struct(channel, child, level + 2);
     }
 
     child = child->next_sibling;
