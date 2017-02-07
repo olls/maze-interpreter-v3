@@ -34,6 +34,9 @@ channel_enabled(LoggingChannel channel)
 }
 
 
+#ifdef DEBUG
+
+
 void
 log_s(LoggingChannel channel, const char *text, ...)
 {
@@ -131,3 +134,42 @@ log(LoggingChannel channel, Rectangle rect)
 {
   log(channel, "((%f, %f), (%f, %f))", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
 }
+
+
+#else
+
+
+void
+log_s(LoggingChannel channel, const char *text, ...)
+{}
+
+void
+log(LoggingChannel channel, const char *text, ...)
+{}
+
+void
+log_ind(LoggingChannel channel, u32 n, const char *text, ...)
+{}
+
+void
+log_d(LoggingChannel channel, V2 direction)
+{}
+
+void
+log(LoggingChannel channel, V4 vec)
+{}
+
+void
+log(LoggingChannel channel, V2 vec)
+{}
+
+void
+log(LoggingChannel channel, V3 vec)
+{}
+
+void
+log(LoggingChannel channel, Rectangle rect)
+{}
+
+
+#endif

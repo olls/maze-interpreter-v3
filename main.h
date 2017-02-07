@@ -8,7 +8,6 @@
 #define assert(x) ((void)(!(x) && printf("Assertion Failed: "__FILE__":"S__LINE__":  ("#x")") && (exit(1), 1)))
 #else
 #define assert(x) ((void)sizeof(x))
-#define log(x, ...) ((void)sizeof(x))
 #endif
 
 #define invalid_code_path assert(!"Invalid Code Path! D:")
