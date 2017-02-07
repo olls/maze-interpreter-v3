@@ -87,7 +87,7 @@ draw_svg(RenderOperations *render_operations, RenderBasis *render_basis, V2 orig
       case (SVG_OP_LINE):
       {
         SVGLine *line = &operation->line;
-        add_line_to_render_list(render_operations, render_basis, origin + line->line.start, origin + line->line.end, line->style.stroke_colour, line->style.stroke_width);
+        add_line_to_render_list(render_operations, render_basis, origin + line->line.start, origin + line->line.end, line->style.stroke_colour, line->style.stroke_width, line->style.stroke_linecap);
       } break;
 
       default:

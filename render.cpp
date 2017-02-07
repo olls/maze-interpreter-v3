@@ -203,7 +203,7 @@ fast_render_box(Renderer *renderer, RenderBasis *render_basis, Rectangle box, Pi
 
 
 void
-render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 world_width)
+render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 world_end, V4 color, r32 world_width, SVGStrokeLinecap linecap)
 {
   V2 start = transform_coord(render_basis, world_start);
   V2 end = transform_coord(render_basis, world_end);
@@ -281,6 +281,21 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
   r32 x_length = abs(length_components.x);
   r32 y_length = abs(length_components.y);
 
+  V2 direction = unit_vector(length_components);
+
+  if (linecap == LINECAP_SQUARE)
+  {
+    // Extend line by width/2 at each end
+    V2 width_vector = width * direction;
+
+    start -= width_vector * 0.5;
+    end   += width_vector * 0.5;
+
+    length_components += width_vector;
+    x_length += abs(width_vector.x);
+    y_length += abs(width_vector.y);
+  }
+
   r32 theta = atan2f(length_components.y, length_components.x);
 
   V2 width_components = {abs(width / (r32)sin(theta)),
@@ -297,14 +312,13 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
     extenstion = width * abs((r32)tan((M_PI*.5) - theta)) * 0.5;
   }
 
-  V2 direction = unit_vector(length_components);
-  V2 extenstion_components = extenstion * direction;
-  start -= extenstion_components;
-  end   += extenstion_components;
+  V2 extenstion_vector = extenstion * direction;
+  start -= extenstion_vector;
+  end   += extenstion_vector;
 
-  length_components += extenstion_components * 2;
-  x_length += abs(extenstion_components.x) * 2;
-  y_length += abs(extenstion_components.y) * 2;
+  length_components += extenstion_vector * 2;
+  x_length += abs(extenstion_vector.x) * 2;
+  y_length += abs(extenstion_vector.y) * 2;
 
   r32 num_steps;
   r32 width_comp;
@@ -316,14 +330,14 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
     num_steps = x_length;
     drawing_axis = (V2){0, 1};
     width_comp = width_components.y;
-    extenstion_comp = abs(extenstion_components.x);
+    extenstion_comp = abs(extenstion_vector.x);
   }
   else
   {
     num_steps = y_length;
     drawing_axis = (V2){1, 0};
     width_comp = width_components.x;
-    extenstion_comp = abs(extenstion_components.y);
+    extenstion_comp = abs(extenstion_vector.y);
   }
 
   // TODO: Sub-pixel rendering
@@ -405,5 +419,15 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
 
       line_center_fract += step;
     }
+  }
+
+  if (linecap == LINECAP_ROUND)
+  {
+    // Draw circles
+
+    r32 world_radius = world_width * 0.5;
+
+    render_circle(renderer,render_basis, world_start, world_radius, color);
+    render_circle(renderer,render_basis, world_end,   world_radius, color);
   }
 }

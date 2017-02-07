@@ -42,6 +42,7 @@ struct RenderOperation
       V2 world_end;
       V4 color;
       r32 width;
+      SVGStrokeLinecap linecap;
     } line;
     struct
     {

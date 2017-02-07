@@ -604,11 +604,6 @@ parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
   String x2_str = get_attr_value(line_tag, String("x2"));
   String y2_str = get_attr_value(line_tag, String("y2"));
 
-  log(L_SVG, "%.*s", x1_str.length, x1_str.text);
-  log(L_SVG, "%.*s", y1_str.length, y1_str.text);
-  log(L_SVG, "%.*s", x2_str.length, x2_str.text);
-  log(L_SVG, "%.*s", y2_str.length, y2_str.text);
-
   V2 start, end;
   get_num(x1_str.text, x1_str.text + x1_str.length, &start.x);
   get_num(y1_str.text, y1_str.text + y1_str.length, &start.y);

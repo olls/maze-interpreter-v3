@@ -12,6 +12,10 @@
 #include "platform.h"
 #include "maths.h"
 #include "vectors.h"
+#include "text.h"
+#include "string.h"
+#include "xml.h"
+#include "svg.h"
 #include "render-scale.h"
 #include "render.h"
 #include "bitmap.h"
@@ -19,10 +23,6 @@
 #include "render-queue.h"
 #include "font.h"
 #include "layouter.h"
-#include "text.h"
-#include "string.h"
-#include "xml.h"
-#include "svg.h"
 
 #include "main.h"
 
@@ -32,6 +32,10 @@
 #include "vectors.cpp"
 #include "render-scale.cpp"
 #include "render.cpp"
+#include "text.cpp"
+#include "string.cpp"
+#include "xml.cpp"
+#include "svg.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
 #include "render-operations.cpp"
@@ -39,10 +43,6 @@
 #include "composite-render-operations.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
-#include "text.cpp"
-#include "string.cpp"
-#include "xml.cpp"
-#include "svg.cpp"
 
 // Game Related
 #include "functions.h"
