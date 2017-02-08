@@ -439,6 +439,7 @@ draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellTy
   {
     opts.rotate = overlay_display.rotate;
     opts.color_multiplier = overlay_display.color;
+    opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)overlay_display.bitmap->file->width);
     add_bitmap_to_render_list(render_operations, render_basis, overlay_display.bitmap, bitmap_pos, &opts);
   }
 }
