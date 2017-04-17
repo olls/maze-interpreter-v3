@@ -1,7 +1,7 @@
-u32
-calc_car_radius(u32 cell_spacing, r32 cell_margin)
+r32
+calc_car_radius(r32 cell_margin)
 {
-  u32 result = (cell_spacing - (cell_spacing * cell_margin)) * 0.35f;
+  r32 result = (1 - cell_margin) * 0.35f;
   return result;
 }
 
@@ -14,17 +14,16 @@ init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V
   car->value = 0;
   static u32 cars_id = 0;
   car->id = cars_id++;
-  car->target_cell_x = cell_x;
-  car->target_cell_y = cell_y;
-  car->offset = (V2){0, 0};
+  car->cell_pos.cell_x = cell_x;
+  car->cell_pos.cell_y = cell_y;
+  car->cell_pos.offset = (V2){0, 0};
   car->direction = direction;
   car->pause_left = 0;
   car->unpause_direction = STATIONARY;
   car->updated_cell_type = CELL_NULL;
 
-  V2 pos = (V2){cell_x, cell_y} * game_state->cell_spacing + car->offset;
-  car->particle_source = new_particle_source(&(game_state->particles), pos, PS_GROW, time_us);
-  car->particle_source->particle_prototype.grow.initial_radius = calc_car_radius(game_state->cell_spacing, game_state->cell_margin);
+  car->particle_source = new_particle_source(&(game_state->particles), car->cell_pos, PS_GROW, time_us);
+  car->particle_source->particle_prototype.grow.initial_radius = calc_car_radius(game_state->cell_margin);
   car->particle_source->particle_prototype.bitmap = &(game_state->particles.smoke_bitmap);
 }
 
@@ -65,7 +64,7 @@ move_car(GameState *game_state, Maze *maze, Car *car)
     {
       V2 test_direction = directions[direction_index];
 
-      Cell *test_cell = get_cell(maze, (car->target_cell_x + test_direction.x), (car->target_cell_y + test_direction.y));
+      Cell *test_cell = get_cell(maze, (car->cell_pos.cell_x + test_direction.x), (car->cell_pos.cell_y + test_direction.y));
       if (test_cell &&
           test_cell->type != CELL_WALL &&
           test_cell->type != CELL_NULL)
@@ -78,9 +77,15 @@ move_car(GameState *game_state, Maze *maze, Car *car)
 
     if (can_move)
     {
-      car->offset = -car->direction * game_state->cell_spacing;
-      car->target_cell_x += car->direction.x;
-      car->target_cell_y += car->direction.y;
+      car->cell_pos.cell_x += car->direction.x;
+      car->cell_pos.cell_y += car->direction.y;
+
+      // TODO: The offset is set to minus direction in order to place the car
+      //         in the centre of the cell it was previously in, we should
+      //         really be calculating the car's actual distance from the new
+      //         cell and setting the offset to minus that, and adjusting the
+      //         speed to compensate.
+      car->cell_pos.offset = -car->direction;
     }
   }
 }
@@ -95,8 +100,8 @@ cars_in_direct_neighbourhood(Maze *maze, Cars *cars, Cell *cell)
   CarsIterator iter = {};
   while ((test_car = cars_iterator(cars, &iter)))
   {
-    u32 test_x = test_car->target_cell_x;
-    u32 test_y = test_car->target_cell_y;
+    u32 test_x = test_car->cell_pos.cell_x;
+    u32 test_y = test_car->cell_pos.cell_y;
 
     if (((test_x == cell->x - 1 || test_x == cell->x + 1) && test_y == cell->y) ||
         ((test_y == cell->y - 1 || test_y == cell->y + 1) && test_x == cell->x))
@@ -114,7 +119,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 {
   // TODO: Deal with race cars (conditions) ??
 
-  Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+  Cell *current_cell = get_cell(maze, car->cell_pos.cell_x, car->cell_pos.cell_y);
 
   switch (current_cell->type)
   {
@@ -150,7 +155,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
       log(L_CarsSim, "Splitter");
 
       Car *new_car = get_new_car(memory, cars);
-      init_car(game_state, time_us, new_car, car->target_cell_x, car->target_cell_y, RIGHT);
+      init_car(game_state, time_us, new_car, car->cell_pos.cell_x, car->cell_pos.cell_y, RIGHT);
       new_car->value = car->value;
       new_car->direction = RIGHT;
       car->direction = LEFT;
@@ -286,7 +291,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_INP):
     {
       log(L_CarsSim, "Input");
-      init_car_input_box(memory, game_state, car->id, car->value, car->target_cell_x, car->target_cell_y);
+      init_car_input_box(memory, game_state, car->id, car->value, car->cell_pos);
     } break;
 
     case (CELL_UP):
@@ -370,7 +375,7 @@ perform_cars_sim_tick(Memory *memory, GameState *game_state, u64 time_us)
   {
     if (car->updated_cell_type != CELL_NULL)
     {
-      Cell *current_cell = get_cell(maze, car->target_cell_x, car->target_cell_y);
+      Cell *current_cell = get_cell(maze, car->cell_pos.cell_x, car->cell_pos.cell_y);
       current_cell->type = car->updated_cell_type;
       car->updated_cell_type = CELL_NULL;
     }
@@ -394,31 +399,31 @@ void
 update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
 {
 #if 1
-  r32 speed = (last_frame_dt / 1000000.0) * game_state->sim_ticks_per_s * game_state->cell_spacing;
-  V2 direction = -unit_vector(car->offset);
+  r32 speed = (last_frame_dt / 1000000.0) * game_state->sim_ticks_per_s;
+  V2 direction = -unit_vector(car->cell_pos.offset);
 
   V2 movement = direction * speed;
 
-  if (abs(car->offset.x) >= abs(movement.x))
+  if (abs(car->cell_pos.offset.x) >= abs(movement.x))
   {
-    car->offset.x += movement.x;
+    car->cell_pos.offset.x += movement.x;
   }
   else
   {
-    car->offset.x = 0;
+    car->cell_pos.offset.x = 0;
   }
 
-  if (abs(car->offset.y) >= abs(movement.y))
+  if (abs(car->cell_pos.offset.y) >= abs(movement.y))
   {
-    car->offset.y += movement.y;
+    car->cell_pos.offset.y += movement.y;
   }
   else
   {
-    car->offset.y = 0;
+    car->cell_pos.offset.y = 0;
   }
 
 #else
-  car->offset = (V2){0};
+  car->cell_pos.offset = (V2){0};
 #endif
 }
 
@@ -431,6 +436,8 @@ annimate_cars(GameState *game_state, u32 last_frame_dt)
   while ((car = cars_iterator(&game_state->cars, &iter)))
   {
     update_car_position(game_state, car, last_frame_dt);
-    car->particle_source->pos = (V2){car->target_cell_x, car->target_cell_y} * game_state->cell_spacing + car->offset;
+
+    // Update this car's particle source to match the cars position.
+    car->particle_source->pos = car->cell_pos;
   }
 }

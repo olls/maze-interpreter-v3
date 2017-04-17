@@ -1,4 +1,4 @@
-const u32 MAX_RENDER_OPS = 512;
+const u32 MAX_RENDER_OPS = 10024;
 
 
 enum RenderOperationType

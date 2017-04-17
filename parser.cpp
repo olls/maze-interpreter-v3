@@ -410,7 +410,7 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
   clear_maze(maze);
   zero(functions, Functions);
 
-  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){10000, 10000}};
+  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){0xFFFF, 0xFFFF}};
 
   u32 x = 0;
   u32 y = 0;

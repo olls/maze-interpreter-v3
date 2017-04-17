@@ -161,18 +161,7 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 }
 
 
-void
-get_default_blit_bitmap_options(BlitBitmapOptions *opts)
-{
-  opts->crop = (Rectangle){-1};
-  opts->color_multiplier = (V4){1, 1, 1, 1};
-  opts->invert = false;
-  opts->rotate = 0;
-  opts->hue_shift = 0;
-  opts->interpolation = false;
-  opts->scale = 1;
-}
-
+#if 0
 void
 blit_bitmap(Renderer *renderer,
             RenderBasis *render_basis,
@@ -290,3 +279,4 @@ blit_bitmap(Renderer *renderer,
     }
   }
 }
+#endif

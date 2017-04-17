@@ -37,9 +37,5 @@ struct CellDisplay
 };
 
 
-V2
-cell_coord_to_world(u32, u32, u32);
-
-
 void
-draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display = 0);
+draw_cell(CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display = 0);

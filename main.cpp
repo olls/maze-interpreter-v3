@@ -6,6 +6,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
 
 // Game Independent
 #include "logging.h"
@@ -17,10 +21,9 @@
 #include "xml.h"
 #include "svg.h"
 #include "render-scale.h"
+#include "opengl-renderer.h"
 #include "render.h"
 #include "bitmap.h"
-#include "render-operations.h"
-#include "render-queue.h"
 #include "font.h"
 #include "layouter.h"
 
@@ -31,21 +34,19 @@
 #include "maths.cpp"
 #include "vectors.cpp"
 #include "render-scale.cpp"
-#include "render.cpp"
+#include "opengl-renderer.cpp"
 #include "text.cpp"
 #include "string.cpp"
 #include "xml.cpp"
 #include "svg.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
-#include "render-operations.cpp"
-#include "render-queue.cpp"
-#include "composite-render-operations.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
 
 // Game Related
 #include "functions.h"
+#include "world-position.h"
 #include "particles.h"
 #include "cells-storage.h"
 #include "cars-storage.h"
@@ -60,6 +61,7 @@
 #include "maze-interpreter.h"
 
 #include "functions.cpp"
+#include "world-position.cpp"
 #include "particles.cpp"
 #include "cells-storage.cpp"
 #include "cars-storage.cpp"
@@ -113,6 +115,9 @@ set_mouse(Mouse *mouse)
   mouse->r_on_down = false;
   mouse->l_on_up = false;
   mouse->r_on_up = false;
+
+  mouse->scroll.x = 0;
+  mouse->scroll.y = 0;
 }
 
 
@@ -206,8 +211,8 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
     case SDL_MOUSEWHEEL:
     {
-      mouse->scroll.x -= event.wheel.x;
-      mouse->scroll.y -= event.wheel.y;
+      mouse->scroll.x = -event.wheel.x;
+      mouse->scroll.y = -event.wheel.y;
     } break;
   }
 }
@@ -278,9 +283,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
 
     update_and_render(memory, &game_state, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
 
-    SDL_UpdateTexture(renderer->sdlTexture, 0, renderer->frame_buffer.buffer, renderer->frame_buffer.width * sizeof(u32));
-    SDL_RenderCopy(renderer->sdlRenderer, renderer->sdlTexture, 0, 0);
-    SDL_RenderPresent(renderer->sdlRenderer);
+    SDL_GL_SwapWindow(renderer->window);
 
     ++fps.frame_count;
     if (last_frame_end >= fps.last_update + seconds_in_u(1))
@@ -295,6 +298,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
     if (frame_dt < useconds_per_frame)
     {
       usleep(useconds_per_frame - frame_dt);
+      frame_dt = useconds_per_frame;
     }
     else
     {
@@ -316,24 +320,35 @@ main(int argc, char *argv[])
 
   Renderer renderer;
 
-  SDL_Init(SDL_INIT_VIDEO);
+  if (SDL_Init(SDL_INIT_VIDEO) != 0)
+  {
+      log(L_Main, "Failed to get init SDL.");
+      exit(1);
+  }
 
-  SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+  SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
   if (FULLSCREEN)
   {
     flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
   }
   else
   {
-    renderer.frame_buffer.width = WINDOW_WIDTH;
-    renderer.frame_buffer.height = WINDOW_HEIGHT;
+    renderer.width = WINDOW_WIDTH;
+    renderer.height = WINDOW_HEIGHT;
   }
 
-  SDL_Window *window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.frame_buffer.width, renderer.frame_buffer.height, flags);
+  renderer.window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.width, renderer.height, flags);
+  if (!renderer.window)
+  {
+    log(L_Main, "Failed to initialise SDL window.");
+  }
 
   if (FULLSCREEN)
   {
-    s32 display_index = SDL_GetWindowDisplayIndex(window);
+    s32 display_index = SDL_GetWindowDisplayIndex(renderer.window);
     if (display_index < 0)
     {
       log(L_Main, "Failed to get display index.");
@@ -345,21 +360,23 @@ main(int argc, char *argv[])
       log(L_Main, "Failed to get display bounds.");
       exit(1);
     }
-    renderer.frame_buffer.width = window_rect.w;
-    renderer.frame_buffer.height = window_rect.h;
+    renderer.width = window_rect.w;
+    renderer.height = window_rect.h;
   }
 
-  renderer.frame_buffer.buffer = push_structs(&memory, PixelColor, renderer.frame_buffer.width * renderer.frame_buffer.height);
-  memset(renderer.frame_buffer.buffer, 0xCC, renderer.frame_buffer.width*renderer.frame_buffer.height * sizeof(PixelColor));
+  renderer.gl_context = SDL_GL_CreateContext(renderer.window);
+  if (!renderer.gl_context)
+  {
+    log(L_Main, "Failed to create OpenGL context.");
+    exit(1);
+  }
 
-  renderer.sdlRenderer = SDL_CreateRenderer(window, -1, 0);
-  renderer.sdlTexture = SDL_CreateTexture(renderer.sdlRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, renderer.frame_buffer.width, renderer.frame_buffer.height);
+  gl_init();
+  gl_set_viewport(renderer.width, renderer.height);
 
   game_loop(&memory, &renderer, argc, argv);
 
-  SDL_DestroyTexture(renderer.sdlTexture);
-  SDL_DestroyRenderer(renderer.sdlRenderer);
-  SDL_DestroyWindow(window);
+  SDL_DestroyWindow(renderer.window);
   SDL_Quit();
   free(memory.memory);
 

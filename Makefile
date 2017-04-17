@@ -1,6 +1,6 @@
 CC         = clang++
 CFLAGS     = -Werror -g -ferror-limit=1 -Ofast
-LIBS       = -lSDL2 -lpthread
+LIBS       = -lSDL2 -lGL -lGLU -lpthread
 SOURCES    = main.cpp
 EXECUTABLE = maze-interpreter
 

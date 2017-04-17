@@ -1,5 +1,5 @@
 void
-draw_char(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1})
+draw_char(Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1})
 {
   u32 char_index = x - MIN_CHAR;
   V2 bitmap_pos = {
@@ -21,19 +21,19 @@ draw_char(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap
   {
     blit_opts.color_multiplier = color;
   }
-  add_bitmap_to_render_list(render_operations, render_basis, font, world_pos, &blit_opts);
+  draw_bitmap(font, world_pos, &blit_opts);
 }
 
 
 void
-draw_string(RenderOperations *render_operations, RenderBasis *render_basis, Bitmap *font, V2 world_pos, const char str[], r32 scale = 1, V4 color = (V4){-1})
+draw_string(Bitmap *font, V2 world_pos, const char str[], r32 scale = 1, V4 color = (V4){-1})
 {
   u32 i = 0;
   while (str[i])
   {
-    draw_char(render_operations, render_basis, font, world_pos, str[i], scale, color);
+    draw_char(font, world_pos, str[i], scale, color);
 
-    world_pos.x += CHAR_SIZE.x * render_basis->world_per_pixel * scale;
+    world_pos.x += CHAR_SIZE.x * scale;
     ++i;
   }
 }

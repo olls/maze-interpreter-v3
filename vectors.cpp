@@ -261,6 +261,15 @@ vector_direction_or_1(V2 vec)
   return result;
 }
 
+V2
+vector_tangent(V2 vec)
+{
+  V2 result;
+  result.x =  vec.y;
+  result.y = -vec.x;
+  return result;
+}
+
 
 b32
 operator==(Rectangle a, Rectangle b)

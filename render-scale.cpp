@@ -49,3 +49,19 @@ transform_coord_rect(RenderBasis *render_basis, Rectangle rect)
 
   return result;
 }
+
+
+V2
+rotate_point(V2 point, V2 origin, r32 theta)
+{
+  V2 result;
+
+  point -= origin;
+
+  result.x = point.x * cos(theta) - point.y * sin(theta);
+  result.x = point.x * sin(theta) + point.y * cos(theta);
+
+  result += origin;
+
+  return result;
+}

@@ -1,5 +1,5 @@
 ParticleSource *
-new_particle_source(Particles *particles, V2 pos, ParticleType type, u64 time_us)
+new_particle_source(Particles *particles, WorldSpace pos, ParticleType type, u64 time_us)
 {
   ParticleSource *result = 0;
 
@@ -81,7 +81,7 @@ step_particles(Particles *particles, u64 time_us)
             *new_particle = source->particle_prototype;
 
             new_particle->t0 = time_us;
-            new_particle->pos = source->pos;
+            new_particle->source_pos = source->pos;
             new_particle->offset = (V2){0};
 
             // NOTE: Initial setup of particles
@@ -148,7 +148,7 @@ step_particles(Particles *particles, u64 time_us)
 
 
 void
-render_particles(Particles *particles, RenderOperations *render_operations, RenderBasis *render_basis)
+render_particles(Particles *particles, RenderWindow *render_window)
 {
   for (u32 particle_index = 0;
        particle_index < MAX_PARTICLES;
@@ -158,7 +158,11 @@ render_particles(Particles *particles, RenderOperations *render_operations, Rend
 
     if (particle->t0)
     {
-      V2 pos = particle->pos + particle->offset;
+      WorldSpace particle_pos = particle->source_pos;
+      particle_pos.offset += particle->offset;
+      re_form_world_coord(&particle_pos);
+
+      V2 normalised_pos = world_coord_to_render_window_coord(render_window, particle_pos);
 
       switch (particle->type)
       {
@@ -166,13 +170,13 @@ render_particles(Particles *particles, RenderOperations *render_operations, Rend
         {
           u32 pixel_size = 4000;
 
-          r32 top_y = pos.y - pixel_size * 1.5;
-          r32 bottom_y = pos.y + pixel_size * 1.5;
-          r32 left_x = pos.x - pixel_size * 1.5;
-          r32 right_x = pos.x + pixel_size * 1.5;
+          r32 top_y = normalised_pos.y - pixel_size * 1.5;
+          r32 bottom_y = normalised_pos.y + pixel_size * 1.5;
+          r32 left_x = normalised_pos.x - pixel_size * 1.5;
+          r32 right_x = normalised_pos.x + pixel_size * 1.5;
 
-          add_box_to_render_list(render_operations, render_basis, (Rectangle){(V2){pos.x - pixel_size*.5, top_y}, (V2){pos.x + pixel_size*.5, bottom_y}}, particle->color);
-          add_box_to_render_list(render_operations, render_basis, (Rectangle){(V2){left_x, pos.y - pixel_size*.5}, (V2){right_x, pos.y + pixel_size*.5}}, particle->color);
+          draw_box((Rectangle){(V2){normalised_pos.x - pixel_size*.5, top_y}, (V2){normalised_pos.x + pixel_size*.5, bottom_y}}, particle->color);
+          draw_box((Rectangle){(V2){left_x, normalised_pos.y - pixel_size*.5}, (V2){right_x, normalised_pos.y + pixel_size*.5}}, particle->color);
         } break;
         case PS_GROW:
         {
@@ -185,7 +189,7 @@ render_particles(Particles *particles, RenderOperations *render_operations, Rend
           blit_opts.color_multiplier = particle->color;
           blit_opts.hue_shift = particle->hue;
           blit_opts.interpolation = true;
-          add_bitmap_to_render_list(render_operations, render_basis, particle->bitmap, pos - (bitmap_size * .5f * render_basis->world_per_pixel), &blit_opts);
+          draw_bitmap(particle->bitmap, normalised_pos - (bitmap_size * .5f), &blit_opts);
         } break;
       }
     }

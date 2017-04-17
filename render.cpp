@@ -441,3 +441,10 @@ render_line(Renderer *renderer, RenderBasis *render_basis, V2 world_start, V2 wo
     render_circle(renderer, render_basis, world_end, world_radius, color);
   }
 }
+
+
+void
+render_rotated_box(Renderer *renderer, RenderBasis *render_basis, Rectangle world_box, V2 world_rotation_origin, r32 theta, V4 colour)
+{
+  transform_coord_rect(render_basis, world_box);
+}

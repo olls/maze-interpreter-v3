@@ -1,2 +1,2 @@
-u32
-calc_car_radius(u32, r32);
+r32
+calc_car_radius(r32);

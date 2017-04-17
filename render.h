@@ -8,21 +8,13 @@ struct RenderBasis
 };
 
 
-struct FrameBuffer
-{
-  u32 width;
-  u32 height;
-
-  PixelColor *buffer;
-};
-
-
 struct Renderer
 {
-  SDL_Renderer *sdlRenderer;
-  SDL_Texture * sdlTexture;
+  SDL_Window *window;
+  SDL_GLContext gl_context;
 
-  FrameBuffer frame_buffer;
+  u32 width;
+  u32 height;
 };
 
 

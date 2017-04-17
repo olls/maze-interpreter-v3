@@ -1,9 +1,8 @@
-// NOTE: 256 sub-pixel steps!
-const u32 MIN_WORLD_PER_PIXEL = 256;
-const u32 MAX_WORLD_PER_PIXEL = 65536;
-
 const r32 MIN_ZOOM = 10;
 const r32 MAX_ZOOM = 200;
+
+const r32 ZOOM_MIN_CELLS_ON_SCREEN = 100;
+const r32 ZOOM_MAX_CELLS_ON_SCREEN = 2;
 
 // const char MAZE_FILENAME[] = "programs/test-huge.mz";
 // const char MAZE_FILENAME[] = "programs/test-big.mz";
@@ -32,25 +31,23 @@ struct GameState
   const char *filename;
 
   u32 world_per_pixel;
-  r32 d_zoom;
-  r32 zoom;
-  V2 scale_focus;
 
-  RenderBasis last_render_basis;
+  r32 zoom_multiplier;
+  r32 zoom;
+  r32 old_zoom;
+  V2 scale_focus_pixels;
+
+  OpenGLViewport viewport;
+  OpenGLProjection ui_transform;
+  OpenGLProjection world_transform;
 
   Rectangle screen_render_region;
   Rectangle world_render_region;
 
-  RenderQueue render_queue;
-  RenderSegments render_segs;
-
-  RenderOperations render_operations;
-
   // NOTE: Things are scaled relatively to cell_spacing.
-  u32 cell_spacing;
   r32 cell_margin;
 
-  V2 maze_pos;
+  WorldSpace world_maze_pos;
   V2 last_mouse_pos;
   b32 currently_panning;
 

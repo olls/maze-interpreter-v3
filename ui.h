@@ -37,7 +37,7 @@ struct Menu
   MenuItemSelector selected_selector;
   u64 opened_on_frame;
 
-  V2 annimated_highlighted_cell_pos;
+  V2 highlighted_cell_annimation_offset;
 };
 
 
@@ -69,7 +69,8 @@ struct CarInput
   InputBox input;
   Button done;
   u32 car_id;
-  V2 car_world_pos;
+  WorldSpace car_world_pos;
+  V2 car_world_pos_offset;
 
   CarInput *next;
 };

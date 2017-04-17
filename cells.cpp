@@ -1,34 +1,21 @@
-V2
-cell_coord_to_world(u32 cell_spacing, u32 cell_x, u32 cell_y)
-{
-  // TODO: Is there any point in world space any more???
-  //       Cars have cell_x/y and offset, is that all we need? (Help
-  //       with precision?)
-  V2 result = ((V2){cell_x, cell_y} * cell_spacing);
-  return result;
-}
-
-
 u32
 calc_cell_radius(GameState *game_state)
 {
-  return (game_state->cell_spacing - (game_state->cell_spacing * game_state->cell_margin)) * 0.5;
+  return 1 - (game_state->cell_margin * 0.5);
 }
 
 
 void
-update_cells_ui_state(GameState *game_state, RenderBasis *render_basis, Mouse *mouse, u64 time_us)
+update_cells_ui_state(GameState *game_state, Mouse *mouse, WorldSpace _mouse_pos, u64 time_us)
 {
-  V2 mouse_maze_pos = untransform_coord(render_basis, (V2){mouse->x, mouse->y});
-  V2 cell_pos = round_down((mouse_maze_pos / game_state->cell_spacing) + 0.5f);
-
-  V2 world_cell_pos = cell_coord_to_world(game_state->cell_spacing, cell_pos.x, cell_pos.y);
-  Rectangle cell_bounds = radius_rectangle(world_cell_pos, calc_cell_radius(game_state));
+  V2 cell_pos;
+  V2 mouse_pos;
+  Rectangle cell_bounds = radius_rectangle(cell_pos, calc_cell_radius(game_state));
 
   b32 hide_cell_menu = false;
   b32 mouse_click = mouse->l_on_up;
 
-  if (in_rectangle(mouse_maze_pos, cell_bounds))
+  if (in_rectangle(mouse_pos, cell_bounds))
   {
     Cell *cell_hovered_over = get_cell(&game_state->maze, cell_pos.x, cell_pos.y);
     if (cell_hovered_over && cell_hovered_over->type != CELL_NULL)
@@ -392,7 +379,7 @@ get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overl
 
 
 void
-draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
+draw_cell(CellType type, V2 normalised_world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
 {
   Bitmap *cell_bitmap;
   u32 rotate = 0;
@@ -424,37 +411,45 @@ draw_cell(RenderOperations *render_operations, RenderBasis *render_basis, CellTy
   CellDisplay overlay_display;
   get_overlay_display(type, cell_bitmaps, &overlay_display);
 
-  V2 bitmap_pos = world_pos - cell_radius;
+  glPushMatrix();
+    glTranslatef(normalised_world_pos.x, normalised_world_pos.y, 0);
+    glColor3f(color.r, color.g, color.b);
 
-  BlitBitmapOptions opts;
-  get_default_blit_bitmap_options(&opts);
-  opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)cell_bitmap->file->width);
-  opts.interpolation = false;
+    draw_box();
+  glPopMatrix();
 
-  opts.color_multiplier = color;
-  opts.rotate = rotate;
-  add_bitmap_to_render_list(render_operations, render_basis, cell_bitmap, bitmap_pos, &opts);
+  normalised_world_pos -= cell_radius;
+  // BlitBitmapOptions opts;
+  // get_default_blit_bitmap_options(&opts);
+  // opts.scale = 2.0*cell_radius / (r32)cell_bitmap->file->width;
+  // opts.interpolation = false;
 
-  if (overlay_display.bitmap)
-  {
-    opts.rotate = overlay_display.rotate;
-    opts.color_multiplier = overlay_display.color;
-    opts.scale = 2.0*cell_radius / (render_basis->world_per_pixel*(r32)overlay_display.bitmap->file->width);
-    add_bitmap_to_render_list(render_operations, render_basis, overlay_display.bitmap, bitmap_pos, &opts);
-  }
+  // opts.color_multiplier = color;
+  // opts.rotate = rotate;
+  // draw_bitmap(cell_bitmap, normalised_world_pos, &opts);
+
+  // if (overlay_display.bitmap)
+  // {
+  //   opts.rotate = overlay_display.rotate;
+  //   opts.color_multiplier = overlay_display.color;
+  //   opts.scale = 2.0*cell_radius / (r32)overlay_display.bitmap->file->width;
+  //   draw_bitmap(overlay_display.bitmap, normalised_world_pos, &opts);
+  // }
 }
 
 
 void
-recursively_draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u32 cell_radius, u64 time_us)
+recursively_draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u32 cell_radius, u64 time_us)
 {
   b32 on_screen = false;
 
-  Rectangle cell_clip_region_pixels = (Rectangle){render_basis->clip_region.start, render_basis->clip_region.end} / render_basis->world_per_pixel;
+  // Rectangle cell_clip_region_pixels = (Rectangle){render_basis->clip_region.start, render_basis->clip_region.end} / render_basis->world_per_pixel;
 
   if (tree)
   {
-    on_screen = overlaps(cell_clip_region_pixels, transform_coord_rect(render_basis, grow(tree->bounds, .5) * game_state->cell_spacing));
+    // TODO: Update this to work with opengl
+    // on_screen = overlaps(cell_clip_region_pixels, transform_coord_rect(render_basis, grow(tree->bounds, .5) * game_state->cell_spacing));
+    on_screen = true;
 
     if (on_screen)
     {
@@ -464,46 +459,33 @@ recursively_draw_cells(GameState *game_state, RenderOperations *render_operation
       {
         Cell *cell = tree->cells + cell_index;
 
-        V2 world_pos = cell_coord_to_world(game_state->cell_spacing, cell->x, cell->y);
+        V2 normalised_cell_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
 
         CellDisplay cell_display;
         calc_connected_cell_bitmap(&game_state->maze, cell, &game_state->cell_bitmaps, &cell_display);
-        draw_cell(render_operations, render_basis, cell->type, world_pos, cell_radius, cell->hovered_at_time == time_us, &game_state->cell_bitmaps, &cell_display);
+
+        draw_cell(cell->type, normalised_cell_pos, cell_radius, cell->hovered_at_time == time_us, &game_state->cell_bitmaps, &cell_display);
       }
     }
 
-#if 0
-    V4 box_color = (V4){0.5f, 0, 0, 0};
-    Rectangle world_tree_bounds = (tree->bounds * game_state->cell_spacing);
-    if (on_screen)
-    {
-      box_color.a = 1;
-      box_color.r = 1;
-    }
-    RenderBasis tmp_basis = *render_basis;
-    tmp_basis.clip_region = grow(tmp_basis.clip_region, 0);
-
-    add_box_outline_to_render_list(render_operations, &tmp_basis, world_tree_bounds, box_color);
-#endif
-
-    recursively_draw_cells(game_state, render_operations, render_basis, tree->top_right, cell_radius, time_us);
-    recursively_draw_cells(game_state, render_operations, render_basis, tree->top_left, cell_radius, time_us);
-    recursively_draw_cells(game_state, render_operations, render_basis, tree->bottom_right, cell_radius, time_us);
-    recursively_draw_cells(game_state, render_operations, render_basis, tree->bottom_left, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_window, tree->top_right, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_window, tree->top_left, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_window, tree->bottom_right, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_window, tree->bottom_left, cell_radius, time_us);
   }
 }
 
 
 void
-recursively_draw_tree_blocks(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree)
+recursively_draw_tree_blocks(GameState *game_state, RenderWindow *render_window, QuadTree *tree)
 {
-
-  Rectangle cell_clip_region_pixels = (Rectangle){render_basis->clip_region.start, render_basis->clip_region.end};
+  // Low-res cell drawing
+  // TODO: Do we still need this with OpenGL rendering?
 
   if (tree)
   {
     V4 avg_color = {0, 0, 0, 0};
-    Rectangle bounds = {{0, 0}, {0, 0}};
+    Rectangle normalised_bounds = {{0, 0}, {0, 0}};
     for (u32 cell_index = 0;
          cell_index < tree->used;
          ++cell_index)
@@ -511,77 +493,90 @@ recursively_draw_tree_blocks(GameState *game_state, RenderOperations *render_ope
       Cell *cell = tree->cells + cell_index;
       avg_color += get_cell_color(cell->type);
 
-      if (cell->x < bounds.start.x)
+      V2 normalised_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
+
+      if (normalised_pos.x < normalised_bounds.start.x)
       {
-        bounds.start.x = cell->x;
+        normalised_bounds.start.x = normalised_pos.x;
       }
-      if (cell->y < bounds.start.y)
+      if (normalised_pos.y < normalised_bounds.start.y)
       {
-        bounds.start.y = cell->y;
+        normalised_bounds.start.y = normalised_pos.y;
       }
-      if (cell->x > bounds.end.x)
+      if (normalised_pos.x > normalised_bounds.end.x)
       {
-        bounds.end.x = cell->x;
+        normalised_bounds.end.x = normalised_pos.x;
       }
-      if (cell->y > bounds.end.y)
+      if (normalised_pos.y > normalised_bounds.end.y)
       {
-        bounds.end.y = cell->y;
+        normalised_bounds.end.y = normalised_pos.y;
       }
     }
     avg_color /= tree->used;
 
-    b32 on_screen = overlaps(render_basis->clip_region,  transform_coord_rect(render_basis, tree->bounds*game_state->cell_spacing));
+    // TODO: Update this to work with OpenGL
+    // b32 on_screen = overlaps(render_basis->clip_region,  transform_coord_rect(render_basis, tree->bounds*game_state->cell_spacing));
+    b32 on_screen = true;
 
     if (on_screen)
     {
-      log(L_Render, "Oh, shit");
-      add_box_to_render_list(render_operations, render_basis, bounds*game_state->cell_spacing, avg_color);
-
+      draw_box(normalised_bounds, avg_color);
     }
-    recursively_draw_tree_blocks(game_state, render_operations, render_basis, tree->top_right);
-    recursively_draw_tree_blocks(game_state, render_operations, render_basis, tree->top_left);
-    recursively_draw_tree_blocks(game_state, render_operations, render_basis, tree->bottom_right);
-    recursively_draw_tree_blocks(game_state, render_operations, render_basis, tree->bottom_left);
+
+    recursively_draw_tree_blocks(game_state, render_window, tree->top_right);
+    recursively_draw_tree_blocks(game_state, render_window, tree->top_left);
+    recursively_draw_tree_blocks(game_state, render_window, tree->bottom_right);
+    recursively_draw_tree_blocks(game_state, render_window, tree->bottom_left);
   }
 }
 
 
 void
-draw_cells(GameState *game_state, RenderOperations *render_operations, RenderBasis *render_basis, QuadTree *tree, u64 time_us)
+draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u64 time_us)
 {
-  if (render_basis->scale >= 0.01)
+  // TODO:
+  // if (render_basis->scale >= 0.01)
+  if (1)
   {
     u32 cell_radius = calc_cell_radius(game_state);
 
-    recursively_draw_cells(game_state, render_operations, render_basis, tree, cell_radius, time_us);
+    recursively_draw_cells(game_state, render_window, tree, cell_radius, time_us);
 
+    // Animate highlight for cell which is currently being edited
     if (game_state->ui.cell_type_menu.cell)
     {
-      V2 target_world_pos = cell_coord_to_world(game_state->cell_spacing, game_state->ui.cell_type_menu.cell->x, game_state->ui.cell_type_menu.cell->y);
-
-      V2 world_pos;
-      if (game_state->ui.cell_type_menu.annimated_highlighted_cell_pos.x == -1)
+      if (game_state->ui.cell_type_menu.highlighted_cell_annimation_offset.x == -1)
       {
-        game_state->ui.cell_type_menu.annimated_highlighted_cell_pos = target_world_pos;
+        // No animation if there was no previously highlighted cell
+        game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (V2){0, 0};
       }
       else
       {
-        V2 d_target = target_world_pos - game_state->ui.cell_type_menu.annimated_highlighted_cell_pos;
-        game_state->ui.cell_type_menu.annimated_highlighted_cell_pos += d_target * 0.3;
+        // TODO: Proper animation
+        game_state->ui.cell_type_menu.highlighted_cell_annimation_offset *= 0.3;
       }
 
-      Rectangle cell_bounds = radius_rectangle(game_state->ui.cell_type_menu.annimated_highlighted_cell_pos, cell_radius);
+      WorldSpace highlight_world_pos = {
+        game_state->ui.cell_type_menu.cell->x,
+        game_state->ui.cell_type_menu.cell->y,
+        game_state->ui.cell_type_menu.highlighted_cell_annimation_offset
+      };
+
+      re_form_world_coord(&highlight_world_pos);
+      V2 normalised_highlight_pos = world_coord_to_render_window_coord(render_window, highlight_world_pos);
+
+      Rectangle cell_bounds = radius_rectangle(normalised_highlight_pos, cell_radius);
 
       V4 highlight_color = {0.3, .9, .1, .2};
-      add_box_outline_to_render_list(render_operations, render_basis, cell_bounds, highlight_color, (s32)cell_radius*0.3);
+      draw_box_outline(cell_bounds, highlight_color, (s32)cell_radius*0.3);
     }
     else
     {
-      game_state->ui.cell_type_menu.annimated_highlighted_cell_pos = (V2){-1, -1};
+      game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (V2){-1, -1};
     }
   }
   else
   {
-    recursively_draw_tree_blocks(game_state, render_operations, render_basis, tree);
+    recursively_draw_tree_blocks(game_state, render_window, tree);
   }
 }

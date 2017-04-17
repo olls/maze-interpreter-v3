@@ -13,8 +13,12 @@ struct Particle
 {
   u64 t0;
   u32 ttl;
-  V2 pos;
+
+  WorldSpace source_pos;
+
+  // The position of the particle relative to it's initial (source) position
   V2 offset;
+
   r32 speed;
   V4 color;
   r32 hue;
@@ -38,7 +42,7 @@ struct Particle
 
 struct ParticleSource
 {
-  V2 pos;
+  WorldSpace pos;
   r32 spawn_rate;
   u64 last_spawn;
   u64 t0;

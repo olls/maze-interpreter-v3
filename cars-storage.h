@@ -29,11 +29,7 @@ struct Car
 
   s32 value;
 
-  u32 target_cell_x;
-  u32 target_cell_y;
-
-  // NOTE: Used for sub-cell positioning, in world space.
-  V2 offset;
+  WorldSpace cell_pos;
 
   V2 direction;
 
