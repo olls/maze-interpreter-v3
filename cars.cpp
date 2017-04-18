@@ -441,3 +441,51 @@ annimate_cars(GameState *game_state, u32 last_frame_dt)
     car->particle_source->pos = car->cell_pos;
   }
 }
+
+
+void
+draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
+{
+  r32 car_radius = calc_car_radius(game_state->cell_margin);
+
+  V2 pos = world_coord_to_render_window_coord(render_window, car->cell_pos);
+
+  glPushMatrix();
+    glTranslatef(pos.x, pos.y, 0);
+
+    glPushMatrix();
+      glScalef(car_radius, car_radius, 1);
+      gl_set_color(colour);
+
+      draw_circle();
+    glPopMatrix();
+
+    u32 max_len = 16;
+    char str[max_len];
+    r32 font_size = 0.15;
+
+    u32 chars = fmted_str(str, max_len, "%d", car->value);
+    font_size /= chars;
+
+    draw_string(&game_state->bitmaps.font, pos - 0.5*(V2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
+  glPopMatrix();
+}
+
+
+void
+draw_cars(GameState *game_state, RenderWindow *render_window, Cars *cars, u64 time_us)
+{
+  // TODO: Loop through only relevant cars?
+  //       i.e.: spacial partitioning the storage.
+  //       Store the cars in the quad-tree?
+  CarsIterator iter = {};
+  Car *car;
+  while ((car = cars_iterator(cars, &iter)))
+  {
+#ifdef DEBUG_BLOCK_COLORS
+    draw_car(game_state, render_window, car, time_us, iter.cars_block->c);
+#else
+    draw_car(game_state, render_window, car, time_us);
+#endif
+  }
+}

@@ -168,15 +168,12 @@ render_particles(Particles *particles, RenderWindow *render_window)
       {
         case PS_CIRCLE:
         {
-          u32 pixel_size = 4000;
-
-          r32 top_y = normalised_pos.y - pixel_size * 1.5;
-          r32 bottom_y = normalised_pos.y + pixel_size * 1.5;
-          r32 left_x = normalised_pos.x - pixel_size * 1.5;
-          r32 right_x = normalised_pos.x + pixel_size * 1.5;
-
-          draw_box((Rectangle){(V2){normalised_pos.x - pixel_size*.5, top_y}, (V2){normalised_pos.x + pixel_size*.5, bottom_y}}, particle->color);
-          draw_box((Rectangle){(V2){left_x, normalised_pos.y - pixel_size*.5}, (V2){right_x, normalised_pos.y + pixel_size*.5}}, particle->color);
+          glPushMatrix();
+            gl_set_color(particle->color);
+            glTranslatef(normalised_pos.x, normalised_pos.y, 0);
+            glScalef(0.1, 0.1, 0.1);
+            draw_circle();
+          glPopMatrix();
         } break;
         case PS_GROW:
         {

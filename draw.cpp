@@ -1,26 +1,134 @@
 void
-draw_box_outline(Rectangle box, V4 color, r32 thickness = 1, r32 radius = 0)
+draw_circle_segment(r32 start, r32 end, r32 stroke_plus, r32 stroke_minus)
 {
-  // Square and rounded box are in separate paths because the rounded version with radius = 0 overlaps the corners of the lines, messing up the alpha.
+  V2 seg_start = {sin(start), cos(start)};
+  V2 seg_end   = {sin(end), cos(end)};
+  glBegin(GL_POLYGON);
+    glVertex3f( stroke_plus*seg_end.x,    stroke_plus*seg_end.y,   0);
+    glVertex3f( stroke_plus*seg_start.x,  stroke_plus*seg_start.y, 0);
+    glVertex3f(stroke_minus*seg_start.x, stroke_minus*seg_start.y, 0);
+    glVertex3f(stroke_minus*seg_end.x,   stroke_minus*seg_end.y,   0);
+  glEnd();
+}
 
-  if (radius > 0)
+
+void
+draw_circle_outline(r32 stroke_width = 0,
+                    r32 start_arc = 0,
+                    r32 end_arc = 1,
+                    r32 stroke_offset = 0)
+{
+  u32 n_segs = 32;
+  r32 seg_size = 2.0*M_PI/n_segs;
+
+  r32 start = start_arc * 2*M_PI;
+  r32 end   =   end_arc * 2*M_PI;
+
+  r32 seg_start,
+      seg_end;
+  for (seg_start = start,
+         seg_end = seg_start+seg_size;
+       seg_end < end;
+       seg_start += seg_size,
+         seg_end += seg_size)
   {
-    draw_circle((V2){box.end.x - radius, box.start.y + radius}, radius, color, thickness, 0b1000);
-    draw_circle(box.end - radius,                               radius, color, thickness, 0b0100);
-    draw_circle((V2){box.start.x + radius, box.end.y - radius}, radius, color, thickness, 0b0010);
-    draw_circle(box.start + radius,                             radius, color, thickness, 0b0001);
-
-    draw_box((Rectangle){ (V2){ box.start.x+radius , box.start.y         }, (V2){ box.end.x-radius     , box.start.y+thickness } }, color);
-    draw_box((Rectangle){ (V2){ box.start.x+radius , box.end.y-thickness }, (V2){ box.end.x-radius     , box.end.y             } }, color);
-    draw_box((Rectangle){ (V2){ box.start.x        , box.start.y+radius  }, (V2){ box.start.x+thickness, box.end.y-radius      } }, color);
-    draw_box((Rectangle){ (V2){ box.end.x-thickness, box.start.y+radius  }, (V2){ box.end.x            , box.end.y-radius      } }, color);
+    draw_circle_segment(seg_start, seg_end, 1+stroke_offset+(0.5*stroke_width),
+                                            1+stroke_offset-(0.5*stroke_width));
   }
-  else
+  draw_circle_segment(seg_start, end, 1+stroke_offset+(0.5*stroke_width),
+                                      1+stroke_offset-(0.5*stroke_width));
+}
+
+
+void
+draw_circle(r32 start_arc = 0,
+            r32 end_arc = 1)
+{
+  return draw_circle_outline(1, start_arc, end_arc, -0.5);
+}
+
+
+void
+draw_box()
+{
+  glBegin(GL_QUADS);
+    glVertex3f( 0.5,  0.5, 0);
+    glVertex3f( 0.5, -0.5, 0);
+    glVertex3f(-0.5, -0.5, 0);
+    glVertex3f(-0.5,  0.5, 0);
+  glEnd();
+}
+
+
+void
+draw_box(Rectangle rect, V4 color)
+{
+  V2 radius = 0.5*size(rect);
+  V2 center = rect.start + radius;
+
+  glPushMatrix();
+    gl_set_color(color);
+    glTranslatef(center.x, center.y, 0);
+    glScalef(radius.x, radius.y, 1);
+
+    draw_box();
+  glPopMatrix();
+}
+
+
+void
+draw_line(V2 start, V2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NULL, LineEndStyle end_line_end = LINE_END_NULL)
+{
+  // glColor3f(color.r, color.g, color.b);
+
+  if (line_end == LINE_END_NULL)
   {
-    draw_box((Rectangle){ (V2){ box.start.x        , box.start.y           }, (V2){ box.end.x            , box.start.y+thickness } }, color);
-    draw_box((Rectangle){ (V2){ box.start.x        , box.end.y-thickness   }, (V2){ box.end.x            , box.end.y             } }, color);
-    draw_box((Rectangle){ (V2){ box.start.x        , box.start.y+thickness }, (V2){ box.start.x+thickness, box.end.y-thickness   } }, color);
-    draw_box((Rectangle){ (V2){ box.end.x-thickness, box.start.y+thickness }, (V2){ box.end.x            , box.end.y-thickness   } }, color);
+    line_end = LINE_END_BUTT;
+  }
+  if (end_line_end == LINE_END_NULL)
+  {
+    end_line_end = line_end;
+  }
+
+  V2 line_direction = unit_vector(end - start);
+  V2 width_vector = width * 0.5 * line_direction;
+
+  if (line_end == LINE_END_SQUARE)
+  {
+    start -= width_vector;
+  }
+  if (end_line_end == LINE_END_SQUARE)
+  {
+    end += width_vector;
+  }
+
+  V2 width_comp = vector_tangent(width_vector);
+
+  glBegin(GL_QUADS);
+    glVertex3f(start.x-width_comp.x, start.y-width_comp.y, 0);
+    glVertex3f(start.x+width_comp.x, start.y+width_comp.y, 0);
+    glVertex3f(  end.x+width_comp.x,   end.y+width_comp.y, 0);
+    glVertex3f(  end.x-width_comp.x,   end.y-width_comp.y, 0);
+  glEnd();
+
+  if (line_end == LINE_END_ROUND)
+  {
+    glPushMatrix();
+      glTranslatef(start.x, start.y, 0);
+      glScalef(width*0.5, width*0.5, 1);
+
+      draw_circle();
+    glPopMatrix();
+  }
+
+  if (end_line_end == LINE_END_ROUND)
+  {
+    glPushMatrix();
+      glTranslatef(end.x, end.y, 0);
+      glScalef(width*0.5, width*0.5, 1);
+
+      draw_circle();
+    glPopMatrix();
   }
 }
 
@@ -60,56 +168,8 @@ draw_box_outline(V2 size, r32 thickness = 1, r32 radius = 0)
   }
   draw_line(-0.5*size + (V2){corner_ext, 0         }, (V2){ 0.5*size.x-corner_ext, -0.5*size.y           }, thickness);
   draw_line(-0.5*size + (V2){0         , corner_ext}, (V2){-0.5*size.x           ,  0.5*size.y-corner_ext}, thickness);
-  draw_line( 0.5*size - (V2){corner_ext, 0         }, (V2){-0.5*size.x-corner_ext,  0.5*size.y           }, thickness);
+  draw_line( 0.5*size - (V2){corner_ext, 0         }, (V2){-0.5*size.x+corner_ext,  0.5*size.y           }, thickness);
   draw_line( 0.5*size - (V2){0         , corner_ext}, (V2){ 0.5*size.x           , -0.5*size.y+corner_ext}, thickness);
-}
-
-
-void
-draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
-{
-  r32 car_radius = calc_car_radius(game_state->cell_margin);
-
-  V2 pos = world_coord_to_render_window_coord(render_window, car->cell_pos);
-
-  glPushMatrix();
-    glTranslatef(pos.x, pos.y, 0);
-
-    glPushMatrix();
-      glScalef(car_radius, car_radius, 1);
-      gl_set_color(colour);
-
-      draw_circle();
-    glPopMatrix();
-
-    u32 max_len = 16;
-    char str[max_len];
-    r32 font_size = 0.15;
-
-    u32 chars = fmted_str(str, max_len, "%d", car->value);
-    font_size /= chars;
-
-    draw_string(&game_state->bitmaps.font, pos - 0.5*(V2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
-  glPopMatrix();
-}
-
-
-void
-draw_cars(GameState *game_state, RenderWindow *render_window, Cars *cars, u64 time_us)
-{
-  // TODO: Loop through only relevant cars?
-  //       i.e.: spacial partitioning the storage.
-  //       Store the cars in the quad-tree?
-  CarsIterator iter = {};
-  Car *car;
-  while ((car = cars_iterator(cars, &iter)))
-  {
-#ifdef DEBUG_BLOCK_COLORS
-    draw_car(game_state, render_window, car, time_us, iter.cars_block->c);
-#else
-    draw_car(game_state, render_window, car, time_us);
-#endif
-  }
 }
 
 

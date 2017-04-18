@@ -565,10 +565,12 @@ draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u
       re_form_world_coord(&highlight_world_pos);
       V2 normalised_highlight_pos = world_coord_to_render_window_coord(render_window, highlight_world_pos);
 
-      Rectangle cell_bounds = radius_rectangle(normalised_highlight_pos, cell_radius);
+      glPushMatrix();
+        gl_set_color((V4){0.3, .9, .1, .2});
+        glTranslatef(normalised_highlight_pos.x, normalised_highlight_pos.y, 0);
 
-      V4 highlight_color = {0.3, .9, .1, .2};
-      draw_box_outline(cell_bounds, highlight_color, (s32)cell_radius*0.3);
+        draw_box_outline((V2){cell_radius, cell_radius}, 0.3);
+      glPopMatrix();
     }
     else
     {
