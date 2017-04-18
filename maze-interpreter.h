@@ -41,9 +41,6 @@ struct GameState
   OpenGLProjection ui_transform;
   OpenGLProjection world_transform;
 
-  Rectangle screen_render_region;
-  Rectangle world_render_region;
-
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;
 

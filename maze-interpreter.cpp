@@ -156,18 +156,14 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
 
 void
-update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps, u32 argc, char *argv[])
+update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_Library *font_library,
+                  Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
+                  u32 argc, char *argv[])
 {
   V2 screen_size = (V2){renderer->width, renderer->height};
 
   if (!game_state->init)
   {
-    game_state->screen_render_region.start = (V2){0, 0};
-    game_state->screen_render_region.end = screen_size;
-    game_state->screen_render_region = grow(game_state->screen_render_region, -20);
-
-    game_state->world_render_region = grow(game_state->screen_render_region, -10);
-
     init_game(memory, game_state, keys, time_us, argc, argv);
     load_maze(memory, game_state, argc, argv);
     reset_zoom(game_state);
