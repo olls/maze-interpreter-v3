@@ -404,59 +404,65 @@ parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char
 // TODO: Parse comments!
 
 
-void
+bool
 parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
 {
+  bool success = true;
+
   clear_maze(maze);
   zero(functions, Functions);
 
-  maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){0xFFFF, 0xFFFF}};
-
-  u32 x = 0;
-  u32 y = 0;
-
   File file;
-  open_file(filename, &file);
-
-  char cell_str[2] = {};
-  char *f_ptr = file.text;
-  char *f_end = f_ptr + file.size;
-  while (f_ptr < f_end)
+  success &= open_file(filename, &file);
+  if (success)
   {
-    cell_str[0] = f_ptr[0];
-    cell_str[1] = f_ptr[1];
+    maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){MAX_MAZE_SIZE, MAX_MAZE_SIZE}};
 
-    Cell new_cell = {};
-    new_cell.type = CELL_NULL;
-    f_ptr = parse_cell(maze, functions, cell_str, f_ptr, f_end, &new_cell);
+    u32 x = 0;
+    u32 y = 0;
 
-    if (new_cell.type != CELL_NULL)
+    char cell_str[2] = {};
+    char *f_ptr = file.text;
+    char *f_end = f_ptr + file.size;
+    while (f_ptr < f_end)
     {
-      Cell *cell = get_cell(maze, x, y, memory);
+      cell_str[0] = f_ptr[0];
+      cell_str[1] = f_ptr[1];
 
-      cell->type = new_cell.type;
-      cell->pause = new_cell.pause;
-      cell->function_index = new_cell.function_index;
+      Cell new_cell = {};
+      new_cell.type = CELL_NULL;
+      f_ptr = parse_cell(maze, functions, cell_str, f_ptr, f_end, &new_cell);
 
-      cell->name[0] = cell_str[0];
-      cell->name[1] = cell_str[1];
-
-      log_s(L_Parser, "%.2s ", cell_str);
-      ++x;
-    }
-    else
-    {
-      if (cell_str[0] == '\n')
+      if (new_cell.type != CELL_NULL)
       {
-        x = 0;
-        ++y;
-        log_s(L_Parser, "\n");
+        Cell *cell = get_cell(maze, x, y, memory);
+
+        cell->type = new_cell.type;
+        cell->pause = new_cell.pause;
+        cell->function_index = new_cell.function_index;
+
+        cell->name[0] = cell_str[0];
+        cell->name[1] = cell_str[1];
+
+        log_s(L_Parser, "%.2s ", cell_str);
+        ++x;
       }
-      f_ptr += 1;
+      else
+      {
+        if (cell_str[0] == '\n')
+        {
+          x = 0;
+          ++y;
+          log_s(L_Parser, "\n");
+        }
+        f_ptr += 1;
+      }
     }
+
+    log_s(L_Parser, "\n");
+
+    close_file(&file);
   }
 
-  log_s(L_Parser, "\n");
-
-  close_file(&file);
+  return success;
 }

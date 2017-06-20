@@ -37,6 +37,10 @@ struct GameState
   r32 old_zoom;
   V2 scale_focus_pixels;
 
+  OpenGLShaderProgram shader_program;
+  GLuint vbo_id;
+  u32 vbo_size;
+
   OpenGLViewport viewport;
   OpenGLProjection ui_transform;
   OpenGLProjection world_transform;
@@ -65,6 +69,8 @@ struct GameState
   CellBitmaps cell_bitmaps;
 
   SVGOperation *arrow_svg;
+
+  FT_Face font_face;
 
   char persistent_str[256];
 

@@ -25,9 +25,11 @@ _zero(void *mem, u32 size)
 }
 
 
-void
+bool
 open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = -1)
 {
+  b32 success = true;
+
   s32 open_flags;
   s32 mmap_flags;
   s32 mmap_prot;
@@ -47,36 +49,66 @@ open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = 
   result->fd = open(filename, open_flags);
   if (result->fd == -1)
   {
-    printf("Failed to open file.\n");
-    exit(1);
-  }
-
-  if (trunc_to < 0)
-  {
-    struct stat sb;
-    if (fstat(result->fd, &sb) == -1)
-    {
-      printf("Failed to fstat file.\n");
-      exit(1);
-    }
-    result->size = sb.st_size;
+    printf("Failed to open file: \"%s\"\n", filename);
+    success = false;
   }
   else
   {
-    result->size = trunc_to;
-    if (ftruncate(result->fd, result->size) == -1)
+    if (trunc_to < 0)
     {
-      printf("Failed to ftruncate file.\n");
-      exit(1);
+      struct stat sb;
+      if (fstat(result->fd, &sb) == -1)
+      {
+        printf("Failed to fstat : \"%s\"\n", filename);
+        success = false;
+      }
+      else
+      {
+        result->size = sb.st_size;
+      }
+    }
+    else
+    {
+      result->size = trunc_to;
+      if (ftruncate(result->fd, result->size) == -1)
+      {
+        printf("Failed to ftruncate file: \"%s\"\n", filename);
+        success = false;
+      }
+    }
+
+    if (success)
+    {
+      result->text = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
+      if (result->text == MAP_FAILED)
+      {
+        printf("Failed to map file: \"%s\"\n", filename);
+        success = false;
+      }
+      else
+      {
+        if (write)
+        {
+          result->read_only = NULL;
+        }
+        else
+        {
+          result->read_only = result->text;
+        }
+      }
     }
   }
 
-  result->text = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
-  if (result->text == MAP_FAILED)
+  if (!success)
   {
-    printf("Failed to map file.\n");
-    exit(1);
+    close(result->fd);
+    result->fd = -1;
+    result->text = 0;
+    result->read_only = 0;
+    result->size = 0;
   }
+
+  return success;
 }
 
 

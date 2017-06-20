@@ -25,5 +25,6 @@ struct File
 {
   s32 fd;
   char *text;
+  const char *read_only;
   s32 size;
 };

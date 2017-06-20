@@ -1,0 +1,1 @@
+const u32 MAX_MAZE_SIZE = 10000;

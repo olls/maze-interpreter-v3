@@ -20,6 +20,7 @@ channel_enabled(LoggingChannel channel)
     case L_Vector:
     case L_Render:
     case L_RenderQueue:
+    // case L_OpenGL:
     case L_Layouter:
     case L_GameLoop:
     {

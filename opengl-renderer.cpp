@@ -1,12 +1,12 @@
 void
 gl_init()
 {
-    glShadeModel(GL_SMOOTH);
+    // glShadeModel(GL_SMOOTH);
     glClearColor(1, 1, 1, 1);
-    glClearDepth(1.0f);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    // glClearDepth(1.0f);
+    // glEnable(GL_DEPTH_TEST);
+    // glDepthFunc(GL_LEQUAL);
+    // glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
 
@@ -56,6 +56,48 @@ gl_set_color(V4 color)
 {
   // TODO: Alpha!
   glColor3f(color.r, color.g, color.b);
+}
+
+
+bool
+initialise_vbo(OpenGLShaderProgram *shader_program, GLuint *vbo_result)
+{
+  bool success = true;
+
+  // Create buffer
+  u32 n_buffers = 1;
+  glGenBuffers(n_buffers, vbo_result);
+
+  // Bind this buffer as the ARRAY_BUFFER
+  glBindBuffer(GL_ARRAY_BUFFER, *vbo_result);
+
+  // Specify data format
+  GLintptr base_offset = 0;
+  u32 binding_index = 0;
+  glBindVertexBuffer(binding_index, *vbo_result, base_offset, sizeof(ShaderAttributes));
+
+  // Bind the vertex shader attributes
+  glVertexAttribFormat(shader_program->attribute_world_cell_position_x, 1, GL_INT, GL_FALSE, offsetof(ShaderAttributes, world_cell_position_x));
+  glVertexAttribBinding(shader_program->attribute_world_cell_position_x, binding_index);
+
+  glVertexAttribFormat(shader_program->attribute_world_cell_position_y, 1, GL_INT, GL_FALSE, offsetof(ShaderAttributes, world_cell_position_y));
+  glVertexAttribBinding(shader_program->attribute_world_cell_position_y, binding_index);
+
+  glVertexAttribFormat(shader_program->attribute_world_cell_offset, 2, GL_FLOAT, GL_FALSE, offsetof(ShaderAttributes, world_cell_offset));
+  glVertexAttribBinding(shader_program->attribute_world_cell_offset, binding_index);
+
+  glVertexAttribFormat(shader_program->attribute_colour, 4, GL_FLOAT, GL_FALSE, offsetof(ShaderAttributes, colour));
+  glVertexAttribBinding(shader_program->attribute_colour, binding_index);
+
+  return success;
+}
+
+
+void
+load_coords_into_vbo(GLuint vbo_id, ShaderAttributes coords[], u32 n_coords)
+{
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+  glBufferData(GL_ARRAY_BUFFER, n_coords * sizeof(ShaderAttributes), coords, GL_STREAM_DRAW);
 }
 
 

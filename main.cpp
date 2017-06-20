@@ -6,10 +6,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <SDL2/SDL.h>
+
+#include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 // Game Independent
 #include "logging.h"
@@ -21,6 +26,7 @@
 #include "xml.h"
 #include "svg.h"
 #include "opengl-renderer.h"
+#include "opengl-shaders.h"
 #include "draw.h"
 #include "bitmap.h"
 #include "font.h"
@@ -37,11 +43,13 @@
 #include "xml.cpp"
 #include "svg.cpp"
 #include "opengl-renderer.cpp"
+#include "opengl-shaders.cpp"
 #include "draw.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
+#include "freetype.cpp"
 
 // Game Related
 #include "functions.h"
@@ -216,7 +224,7 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
 
 void
-game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
+game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, char *argv[])
 {
   b32 running = true;
 
@@ -278,7 +286,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, char *argv[])
       }
     }
 
-    update_and_render(memory, &game_state, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
+    running &= update_and_render(memory, &game_state, renderer, font_library, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
 
     SDL_GL_SwapWindow(renderer->window);
 
@@ -319,12 +327,13 @@ main(int argc, char *argv[])
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
   {
-      log(L_Main, "Failed to get init SDL.");
+      printf("Failed to init SDL.\n");
       exit(1);
   }
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
   SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
   if (FULLSCREEN)
@@ -340,7 +349,8 @@ main(int argc, char *argv[])
   renderer.window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.width, renderer.height, flags);
   if (!renderer.window)
   {
-    log(L_Main, "Failed to initialise SDL window.");
+    printf("Failed to initialise SDL window.\n");
+    exit(1);
   }
 
   if (FULLSCREEN)
@@ -348,13 +358,13 @@ main(int argc, char *argv[])
     s32 display_index = SDL_GetWindowDisplayIndex(renderer.window);
     if (display_index < 0)
     {
-      log(L_Main, "Failed to get display index.");
+      printf("Failed to get display index.\n");
       exit(1);
     }
     SDL_Rect window_rect;
     if (SDL_GetDisplayBounds(display_index, &window_rect))
     {
-      log(L_Main, "Failed to get display bounds.");
+      printf("Failed to get display bounds.\n");
       exit(1);
     }
     renderer.width = window_rect.w;
@@ -364,14 +374,31 @@ main(int argc, char *argv[])
   renderer.gl_context = SDL_GL_CreateContext(renderer.window);
   if (!renderer.gl_context)
   {
-    log(L_Main, "Failed to create OpenGL context.");
+    printf("Failed to create OpenGL context.\n");
     exit(1);
   }
+
+  GLenum glew_status = glewInit();
+  if (glew_status != GLEW_OK)
+  {
+    printf("Failed to init GLEW: \"%s\"\n", glewGetErrorString(glew_status));
+    exit(1);
+  }
+
+  const unsigned char *opengl_version = glGetString(GL_VERSION);
+  log(L_OpenGL, "OpenGL Version: %s\n", opengl_version);
 
   gl_init();
   gl_set_viewport(renderer.width, renderer.height);
 
-  game_loop(&memory, &renderer, argc, argv);
+  FT_Library font_library;
+  if (init_freetype(&font_library))
+  {
+    printf("Failed to init freetype library.\n");
+    exit(1);
+  }
+
+  game_loop(&memory, &renderer, &font_library, argc, argv);
 
   SDL_DestroyWindow(renderer.window);
   SDL_Quit();

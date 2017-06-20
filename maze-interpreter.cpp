@@ -98,10 +98,11 @@ reset_zoom(GameState *game_state)
 }
 
 
-void
+bool
 load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
 {
-  parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
+  bool success = true;
+  success &= parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
 
   delete_all_cars(&game_state->cars);
   reset_car_inputs(&game_state->ui);
@@ -109,30 +110,20 @@ load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
   game_state->finish_sim_step_move = false;
   game_state->last_sim_tick = 0;
   game_state->sim_steps = 0;
+
+  return success;
 }
 
 
-void
-init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, char *argv[])
+bool
+load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
 {
-  game_state->init = true;
+  bool success = true;
 
-  game_state->single_step = false;
-  game_state->sim_ticks_per_s = 5;
-
-  game_state->finish_sim_step_move = false;
-
-  if (argc > 1)
+  if (load_font(font_library, &game_state->font_face))
   {
-    game_state->filename = argv[1];
+    success = false;
   }
-  else
-  {
-    printf("Error: No Maze filename supplied.\n");
-    exit(1);
-  }
-
-  setup_inputs(keys, &game_state->inputs);
 
   load_bitmap(&game_state->particles.spark_bitmap, "particles/spark.bmp");
   load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
@@ -152,21 +143,62 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   game_state->arrow_svg = 0;
   get_svg_operations(memory, arrow, &game_state->arrow_svg);
+
+  return success;
 }
 
 
-void
+bool
+init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, char *argv[])
+{
+  bool success = true;
+
+  game_state->init = true;
+
+  game_state->single_step = false;
+  game_state->sim_ticks_per_s = 5;
+
+  game_state->finish_sim_step_move = false;
+
+  if (argc > 1)
+  {
+    game_state->filename = argv[1];
+  }
+  else
+  {
+    printf("Error: No Maze filename supplied.\n");
+    success = false;
+  }
+
+  success &= load_maze(memory, game_state, argc, argv);
+  reset_zoom(game_state);
+
+  setup_inputs(keys, &game_state->inputs);
+
+  success &= load_assets(memory, game_state, font_library);
+  success &= load_shaders(&game_state->shader_program);
+
+  success &= initialise_vbo(&game_state->shader_program, &game_state->vbo_id);
+
+  return success;
+}
+
+
+bool
 update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_Library *font_library,
                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
                   u32 argc, char *argv[])
 {
+  bool keep_running = true;
   V2 screen_size = (V2){renderer->width, renderer->height};
 
   if (!game_state->init)
   {
-    init_game(memory, game_state, keys, time_us, argc, argv);
-    load_maze(memory, game_state, argc, argv);
-    reset_zoom(game_state);
+    if (!init_game(memory, game_state, keys, font_library, time_us, argc, argv))
+    {
+      keep_running = false;
+      return keep_running;
+    }
   }
 
   update_inputs(keys, &game_state->inputs, time_us);
@@ -210,18 +242,6 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
 
   update_pan_and_zoom(game_state, mouse, screen_size);
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gl_set_viewport(renderer->width, renderer->height);
-  glGetIntegerv(GL_VIEWPORT, game_state->viewport);
-
-  // World space
-  glPushMatrix();
-    r32 aspect = (r32)renderer->width / (r32)renderer->height;
-    glOrtho(-1*aspect,  1*aspect,
-             1,        -1,
-             1, -1);
-
 // TODO: Get zooming at mouse pointer working
 #if 0
     // Convert from -0.5*size -> 0.5*size coordinates, to size -> 0
@@ -251,7 +271,8 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
 
     log(L_GameLoop, "Zoom: %f", game_state->zoom);
     log(L_GameLoop, "Scale Focus: (%f, %f)", scale_focus_world.x, scale_focus_world.y);
-    log(L_GameLoop, "World Pos: (%d, %d) . (%f, %f)", game_state->world_maze_pos.cell_x, game_state->world_maze_pos.cell_y, game_state->world_maze_pos.offset.x, game_state->world_maze_pos.offset.y);
+    log(L_GameLoop, "World Pos: (%d, %d) . (%f, %f)", game_state->world_maze_pos.cell_x, game_state->world_maze_pos.cell_y,
+                                                      game_state->world_maze_pos.offset.x, game_state->world_maze_pos.offset.y);
 
     glPushMatrix();
       glTranslatef(scale_focus_world.x, scale_focus_world.y, 0);
@@ -260,38 +281,39 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
     glPopMatrix();
 #endif
 
-    glScalef(game_state->zoom, game_state->zoom, 1);
+  //   glScalef(game_state->zoom, game_state->zoom, 1);
 
-    // Save the world's matrices
-    glGetDoublev( GL_MODELVIEW_MATRIX, game_state->world_transform.modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, game_state->world_transform.projection);
+  //   // Save the world's matrices
+  //   glGetDoublev( GL_MODELVIEW_MATRIX, game_state->world_transform.modelview);
+  //   glGetDoublev(GL_PROJECTION_MATRIX, game_state->world_transform.projection);
 
-  glPopMatrix();
+  // glPopMatrix();
 
   // Screen space
-  glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glOrtho(-0.5*renderer->width,   0.5*renderer->width,
-             0.5*renderer->height, -0.5*renderer->height, 1, -1);
+  // glPushMatrix();
+  //   glMatrixMode(GL_MODELVIEW);
+  //   glLoadIdentity();
+  //   glOrtho(-0.5*renderer->width,   0.5*renderer->width,
+  //            0.5*renderer->height, -0.5*renderer->height, 1, -1);
 
-    glGetDoublev( GL_MODELVIEW_MATRIX, game_state->ui_transform.modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, game_state->ui_transform.projection);
-  glPopMatrix();
+  //   glGetDoublev( GL_MODELVIEW_MATRIX, game_state->ui_transform.modelview);
+  //   glGetDoublev(GL_PROJECTION_MATRIX, game_state->ui_transform.projection);
+  // glPopMatrix();
 
 
   RenderWindow render_window = {game_state->world_maze_pos, (Rectangle){}};
 
-  V2 render_window_mouse = un_project_mouse(game_state->viewport, &game_state->world_transform, renderer, mouse);
-  WorldSpace world_mouse = render_window_coord_to_world_coord(&render_window, render_window_mouse);
+  // TODO: This line causing a GL_INVALID_ENUM
+  // V2 render_window_mouse = un_project_mouse(game_state->viewport, &game_state->world_transform, renderer, mouse);
+  // WorldSpace world_mouse = render_window_coord_to_world_coord(&render_window, render_window_mouse);
 
-  V2 ui_mouse = un_project_mouse(game_state->viewport, &game_state->ui_transform, renderer, mouse);
+  // V2 ui_mouse = un_project_mouse(game_state->viewport, &game_state->ui_transform, renderer, mouse);
 
   //
   // UPDATE WORLD
   //
 
-  ui_consume_mouse_clicks(&game_state->ui, mouse, ui_mouse, time_us);
+  // ui_consume_mouse_clicks(&game_state->ui, mouse, ui_mouse, time_us);
 
   if (game_state->inputs.maps[SIM_TICKS_INC].active)
   {
@@ -303,7 +325,7 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
   }
   game_state->sim_ticks_per_s = clamp(.5, game_state->sim_ticks_per_s, 20);
 
-  update_cells_ui_state(game_state, mouse, world_mouse, time_us);
+  // update_cells_ui_state(game_state, mouse, world_mouse, time_us);
 
   b32 sim = sim_tick(game_state, time_us);
 
@@ -324,7 +346,7 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
   annimate_cars(game_state, last_frame_dt);
   step_particles(&(game_state->particles), time_us);
 
-  update_ui(game_state, &game_state->ui, ui_mouse, &game_state->inputs, time_us);
+  // update_ui(game_state, &game_state->ui, ui_mouse, &game_state->inputs, time_us);
 
   //
   // RENDER
@@ -334,22 +356,67 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // World Space
-  load_matrix(&game_state->world_transform);
+  // load_matrix(&game_state->world_transform);
 
-  draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
-  draw_cars(game_state, &render_window, &(game_state->cars), time_us);
+  // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
+  // draw_cars(game_state, &render_window, &(game_state->cars), time_us);
   // render_particles(&(game_state->particles), renderer, &render_basis);
-  glTranslatef(-(r32)game_state->world_maze_pos.cell_x-game_state->world_maze_pos.offset.x, -(r32)game_state->world_maze_pos.cell_y-game_state->world_maze_pos.offset.y, 0);
+  // glTranslatef(-(r32)game_state->world_maze_pos.cell_x-game_state->world_maze_pos.offset.x,
+  //              -(r32)game_state->world_maze_pos.cell_y-game_state->world_maze_pos.offset.y, 0);
+  // draw_svg(game_state->arrow_svg);
 
   // Screen Space
-  load_matrix(&game_state->ui_transform);
+  // load_matrix(&game_state->ui_transform);
+  // glPushMatrix();
+  //   glScalef(0.2, 0.2, 1);
+  //   draw_string(font_library, game_state->font_face, String("Hello World!"));
+  // glPopMatrix();
 
-  r32 text_scale = 0.3;
-  // draw_string(renderer, &orthographic_basis, &\game_state->bitmaps.font, size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1}, game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
+  // r32 text_scale = 0.3;
+  // draw_string(renderer, &orthographic_basis, &\game_state->bitmaps.font,
+  //             size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1},
+  //             game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
 
-  draw_ui(&render_window, &game_state->bitmaps.font, &game_state->cell_bitmaps, &game_state->ui, time_us);
+  // draw_ui(&render_window, &game_state->bitmaps.font, &game_state->cell_bitmaps, &game_state->ui, time_us);
 
-  char str[4];
-  fmted_str(str, 4, "%d", fps);
+  // char str[4];
+  // fmted_str(str, 4, "%d", fps);
   // draw_string(renderer, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
+
+
+  // Shader rendering
+
+  if (game_state->vbo_size == 0)
+  {
+    ShaderAttributes coords[] = {
+      {.world_cell_position_x =  0, .world_cell_position_y =  0, .world_cell_offset = {0, 0}, .colour = {1, 0, 0, 1}},
+      {.world_cell_position_x =  0, .world_cell_position_y =  0, .world_cell_offset = {1, 0}, .colour = {1, 0, 0, 1}},
+      {.world_cell_position_x =  0, .world_cell_position_y =  0, .world_cell_offset = {1, 1}, .colour = {1, 0, 0, 1}},
+      {.world_cell_position_x =  0, .world_cell_position_y =  0, .world_cell_offset = {0, 1}, .colour = {1, 0, 0, 1}},
+    };
+    game_state->vbo_size = array_count(coords);
+    load_coords_into_vbo(game_state->vbo_id, coords, game_state->vbo_size);
+  }
+
+  glUniform1i(game_state->shader_program.uniform_int_render_origin_cell_x, 0);
+  glUniform1i(game_state->shader_program.uniform_int_render_origin_cell_y, 0);
+  glUniform2f(game_state->shader_program.uniform_vec2_render_origin_offset, 0.5, 0);
+  glUniform1f(game_state->shader_program.uniform_float_scale, 0.5);
+
+  glUseProgram(game_state->shader_program.program);
+  glEnableVertexAttribArray(game_state->shader_program.attribute_world_cell_position_x);
+  glEnableVertexAttribArray(game_state->shader_program.attribute_world_cell_position_y);
+  glEnableVertexAttribArray(game_state->shader_program.attribute_world_cell_offset);
+  glEnableVertexAttribArray(game_state->shader_program.attribute_colour);
+
+  glDrawArrays(GL_QUADS, 0, game_state->vbo_size);
+
+  glDisableVertexAttribArray(game_state->shader_program.attribute_world_cell_position_x);
+  glDisableVertexAttribArray(game_state->shader_program.attribute_world_cell_position_y);
+  glDisableVertexAttribArray(game_state->shader_program.attribute_world_cell_offset);
+  glDisableVertexAttribArray(game_state->shader_program.attribute_colour);
+
+  gl_get_errors();
+
+  return keep_running;
 }
