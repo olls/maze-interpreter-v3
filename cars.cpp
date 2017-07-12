@@ -455,7 +455,7 @@ draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_
 
     glPushMatrix();
       glScalef(car_radius, car_radius, 1);
-      gl_set_color(colour);
+      glColor3f(colour.r, colour.g, colour.b);
 
       draw_circle();
     glPopMatrix();

@@ -67,7 +67,7 @@ draw_box(Rectangle rect, V4 color)
   V2 center = rect.start + radius;
 
   glPushMatrix();
-    gl_set_color(color);
+    glColor3f(color.r, color.g, color.b);
     glTranslatef(center.x, center.y, 0);
     glScalef(radius.x, radius.y, 1);
 
@@ -176,7 +176,7 @@ draw_box_outline(V2 size, r32 thickness = 1, r32 radius = 0)
 void
 draw_svg_path(SVGPath *path, SVGStyle *style)
 {
-  gl_set_color(style->stroke_colour);
+  glColor3f(style->stroke_colour.r, style->stroke_colour.g, style->stroke_colour.b);
 
   r32 width = style->stroke_width;
   LineEndStyle line_end = svg_linecap_to_line_end(style->stroke_linecap);
@@ -227,7 +227,7 @@ draw_svg(SVGOperation *svg_operations)
         glPushMatrix();
           V2 center = rect->rect.start + size(rect->rect)*0.5;
           glTranslatef(center.x, center.y, 0);
-          gl_set_color(operation->style.stroke_colour);
+          glColor3f(operation->style.stroke_colour.r, operation->style.stroke_colour.g, operation->style.stroke_colour.b);
 
           draw_box_outline(size(rect->rect), operation->style.stroke_width, rect->radius);
         glPopMatrix();
@@ -239,7 +239,7 @@ draw_svg(SVGOperation *svg_operations)
         glPushMatrix();
           glTranslatef(circle->position.x, circle->position.y, 0);
           glScalef(circle->radius, circle->radius, 1);
-          gl_set_color(operation->style.stroke_colour);
+          glColor3f(operation->style.stroke_colour.r, operation->style.stroke_colour.g, operation->style.stroke_colour.b);
 
           r32 stroke_as_fraction_of_radius = operation->style.stroke_width / circle->radius;
           draw_circle_outline(stroke_as_fraction_of_radius);
@@ -249,7 +249,7 @@ draw_svg(SVGOperation *svg_operations)
       case (SVG_OP_LINE):
       {
         SVGLine *line = &operation->line;
-        gl_set_color(operation->style.stroke_colour);
+        glColor3f(operation->style.stroke_colour.r, operation->style.stroke_colour.g, operation->style.stroke_colour.b);
         draw_line(line->line.start, line->line.end, operation->style.stroke_width, svg_linecap_to_line_end(operation->style.stroke_linecap));
       } break;
 

@@ -87,7 +87,6 @@ struct Cell
   };
 };
 
-
 const u32 QUAD_STORE_N = 16;
 struct QuadTree
 {

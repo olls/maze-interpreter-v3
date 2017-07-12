@@ -441,7 +441,7 @@ draw_car_inputs(RenderWindow *render_window, Bitmap *font, UI *ui, u64 time_us)
     draw_input_box(font, &car_input->input);
     draw_button(render_window, font, &car_input->done, time_us);
 
-    gl_set_color((V4){1, 0, 0.5, 0});
+    glColor3f(0, 0.5, 0);
     draw_line(laidout_rect->start, ui_car_pos);
 
     car_input = car_input->next;

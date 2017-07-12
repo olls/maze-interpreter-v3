@@ -169,7 +169,7 @@ render_particles(Particles *particles, RenderWindow *render_window)
         case PS_CIRCLE:
         {
           glPushMatrix();
-            gl_set_color(particle->color);
+            glColor3f(particle->color.r, particle->color.g, particle->color.b);
             glTranslatef(normalised_pos.x, normalised_pos.y, 0);
             glScalef(0.1, 0.1, 0.1);
             draw_circle();
@@ -180,13 +180,13 @@ render_particles(Particles *particles, RenderWindow *render_window)
           V2 bitmap_size = {particle->bitmap->file->width,
                             particle->bitmap->file->height};
 
-          BlitBitmapOptions blit_opts;
-          get_default_blit_bitmap_options(&blit_opts);
+          // BlitBitmapOptions blit_opts;
+          // get_default_blit_bitmap_options(&blit_opts);
 
-          blit_opts.color_multiplier = particle->color;
-          blit_opts.hue_shift = particle->hue;
-          blit_opts.interpolation = true;
-          draw_bitmap(particle->bitmap, normalised_pos - (bitmap_size * .5f), &blit_opts);
+          // blit_opts.color_multiplier = particle->color;
+          // blit_opts.hue_shift = particle->hue;
+          // blit_opts.interpolation = true;
+          // draw_bitmap(particle->bitmap, normalised_pos - (bitmap_size * .5f), &blit_opts);
         } break;
       }
     }

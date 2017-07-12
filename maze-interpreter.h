@@ -18,13 +18,6 @@ struct Bitmaps
 };
 
 
-struct RenderSegments
-{
-  V2 n_segments;
-  Rectangle *segments;
-};
-
-
 struct GameState
 {
   b32 init;
@@ -37,13 +30,9 @@ struct GameState
   r32 old_zoom;
   V2 scale_focus_pixels;
 
-  OpenGLShaderProgram shader_program;
-  GLuint vbo_id;
-  u32 vbo_size;
-
-  OpenGLViewport viewport;
-  OpenGLProjection ui_transform;
-  OpenGLProjection world_transform;
+  GLuint shader_program;
+  OpenGL_VBOs opengl_vbos;
+  Uniforms uniforms;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;

@@ -566,7 +566,7 @@ draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u
       V2 normalised_highlight_pos = world_coord_to_render_window_coord(render_window, highlight_world_pos);
 
       glPushMatrix();
-        gl_set_color((V4){0.3, .9, .1, .2});
+        glColor3f(.9, .1, .2); // TODO: Alpha: 0.3
         glTranslatef(normalised_highlight_pos.x, normalised_highlight_pos.y, 0);
 
         draw_box_outline((V2){cell_radius, cell_radius}, 0.3);

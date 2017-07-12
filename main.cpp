@@ -25,12 +25,11 @@
 #include "string.h"
 #include "xml.h"
 #include "svg.h"
-#include "opengl-renderer.h"
-#include "opengl-shaders.h"
 #include "draw.h"
 #include "bitmap.h"
 #include "font.h"
 #include "layouter.h"
+#include "opengl-util.h"
 
 #include "main.h"
 
@@ -42,14 +41,13 @@
 #include "string.cpp"
 #include "xml.cpp"
 #include "svg.cpp"
-#include "opengl-renderer.cpp"
-#include "opengl-shaders.cpp"
 #include "draw.cpp"
 #include "colors.cpp"
 #include "bitmap.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
 #include "freetype.cpp"
+#include "opengl-util.cpp"
 
 // Game Related
 #include "functions.h"
@@ -63,6 +61,7 @@
 #include "cells.h"
 #include "serialize.h"
 #include "input.h"
+#include "opengl-cells-instancing.h"
 
 #include "maze-interpreter.h"
 
@@ -77,6 +76,7 @@
 #include "cells.cpp"
 #include "serialize.cpp"
 #include "input.cpp"
+#include "opengl-cells-instancing.cpp"
 
 #include "maze-interpreter.cpp"
 
@@ -246,16 +246,16 @@ game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc
   {
     u64 last_frame_end = get_us();
 
-    mouse.scroll -= mouse.scroll / 6.0f;
-    r32 epsilon = 1.5f;
-    if (abs(mouse.scroll.y) < epsilon)
-    {
-      mouse.scroll.y = 0;
-    }
-    if (abs(mouse.scroll.x) < epsilon)
-    {
-      mouse.scroll.x = 0;
-    }
+    // mouse.scroll -= mouse.scroll / 6.0f;
+    // r32 epsilon = 1.5f;
+    // if (abs(mouse.scroll.y) < epsilon)
+    // {
+    //   mouse.scroll.y = 0;
+    // }
+    // if (abs(mouse.scroll.x) < epsilon)
+    // {
+    //   mouse.scroll.x = 0;
+    // }
 
     set_keys(&keys);
     set_mouse(&mouse);
@@ -331,9 +331,11 @@ main(int argc, char *argv[])
       exit(1);
   }
 
-  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
   SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
   if (FULLSCREEN)
@@ -378,6 +380,10 @@ main(int argc, char *argv[])
     exit(1);
   }
 
+  SDL_GL_SetSwapInterval(1);
+
+  glewExperimental = GL_TRUE;
+
   GLenum glew_status = glewInit();
   if (glew_status != GLEW_OK)
   {
@@ -385,11 +391,13 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  const unsigned char *opengl_version = glGetString(GL_VERSION);
-  log(L_OpenGL, "OpenGL Version: %s\n", opengl_version);
+  glViewport(0, 0, renderer.width, renderer.height);
+  glEnable(GL_DEPTH_TEST);
 
-  gl_init();
-  gl_set_viewport(renderer.width, renderer.height);
+  const unsigned char *opengl_version = glGetString(GL_VERSION);
+  printf("OpenGL Version: %s\n", opengl_version);
+  print_gl_errors();
+  printf("OpenGL init finished.\n");
 
   FT_Library font_library;
   if (init_freetype(&font_library))
@@ -400,6 +408,7 @@ main(int argc, char *argv[])
 
   game_loop(&memory, &renderer, &font_library, argc, argv);
 
+  SDL_GL_DeleteContext(renderer.gl_context);
   SDL_DestroyWindow(renderer.window);
   SDL_Quit();
   free(memory.memory);

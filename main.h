@@ -38,6 +38,17 @@ const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(200);
 
 
+
+struct Renderer
+{
+  SDL_Window *window;
+  SDL_GLContext gl_context;
+
+  u32 width;
+  u32 height;
+};
+
+
 struct Key
 {
   b32 down;

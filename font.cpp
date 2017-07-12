@@ -12,16 +12,16 @@ draw_char(Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1}
     .end = bitmap_pos * CHAR_SIZE + CHAR_SIZE
   };
 
-  BlitBitmapOptions blit_opts;
-  get_default_blit_bitmap_options(&blit_opts);
-  blit_opts.crop = char_box;
-  blit_opts.interpolation = true;
-  blit_opts.scale = scale;
-  if (color.a != -1)
-  {
-    blit_opts.color_multiplier = color;
-  }
-  draw_bitmap(font, world_pos, &blit_opts);
+  // BlitBitmapOptions blit_opts;
+  // get_default_blit_bitmap_options(&blit_opts);
+  // blit_opts.crop = char_box;
+  // blit_opts.interpolation = true;
+  // blit_opts.scale = scale;
+  // if (color.a != -1)
+  // {
+  //   blit_opts.color_multiplier = color;
+  // }
+  // draw_bitmap(font, world_pos, &blit_opts);
 }
 
 
