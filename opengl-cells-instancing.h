@@ -1,9 +1,10 @@
 struct Uniforms
 {
   union {
-    Uniform array[4];
+    Uniform array[5];
 
     struct {
+      Uniform mat4_projection_matrix;
       Uniform int_render_origin_cell_x;
       Uniform int_render_origin_cell_y;
       Uniform vec2_render_origin_offset;

@@ -287,6 +287,13 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
   glClearColor(1, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  r32 aspect = (r32)renderer->height / renderer->width;
+  mat4 projection_matrix = {aspect, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1};
+  glUniformMatrix4fv(game_state->uniforms.mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
+
   glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, 0);
   glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, 0);
   glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, 0, 0);

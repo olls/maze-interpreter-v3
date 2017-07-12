@@ -187,7 +187,7 @@ get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
     current->location = glGetUniformLocation(shader_program, current->name);
     if (current->location == -1)
     {
-      log(L_OpenGL, "Failed to find uniform int %s", current->name);
+      log(L_OpenGL, "Failed to find uniform %s", current->name);
       current->location = 0;
       success &= false;
     }

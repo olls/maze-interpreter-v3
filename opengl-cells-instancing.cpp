@@ -94,6 +94,7 @@ setup_cell_instancing(GameState *game_state)
   };
   load_cell_instances(&game_state->opengl_vbos, cell_instances, array_count(cell_instances));
 
+  game_state->uniforms.mat4_projection_matrix.name = "projection_matrix";
   game_state->uniforms.int_render_origin_cell_x.name = "render_origin_cell_x";
   game_state->uniforms.int_render_origin_cell_y.name = "render_origin_cell_y";
   game_state->uniforms.vec2_render_origin_offset.name = "render_origin_offset";

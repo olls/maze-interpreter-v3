@@ -1,0 +1,40 @@
+#version 330 core
+
+// TODO: Convert to a transformation matrix?
+uniform int render_origin_cell_x;
+uniform int render_origin_cell_y;
+uniform vec2 render_origin_offset;
+uniform float scale;
+
+uniform mat4 projection_matrix;
+
+// Instance inputs
+layout (location = 0) in int world_cell_position_x;
+layout (location = 1) in int world_cell_position_y;
+layout (location = 2) in vec2 world_cell_offset;
+layout (location = 4) in vec4 colour;
+
+// Vertex inputs
+layout (location = 8) in vec2 vertex;
+
+// Outputs
+out vec4 colour_varying;
+out vec4 gl_Position;
+
+void
+main(void)
+{
+  // Recentre the world coordinate about the centre of the window, allowing the offset to be added without loss of precision
+
+  int recentred_cell_x = world_cell_position_x - render_origin_cell_x;
+  int recentred_cell_y = world_cell_position_y - render_origin_cell_y;
+  vec2 recentred_cell_coord = vec2(recentred_cell_x, recentred_cell_y);
+
+  vec2 screen_postion = recentred_cell_coord - render_origin_offset + world_cell_offset;
+
+  screen_postion += vertex;
+  screen_postion *= scale;
+
+  gl_Position = projection_matrix * vec4(screen_postion, 0.0, 1.0);
+  colour_varying = colour;
+}
