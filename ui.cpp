@@ -2,8 +2,8 @@ Rectangle
 get_menu_item_rect(Menu *menu, u32 n)
 {
   Rectangle result;
-  result.start = menu->pos + (V2){0, n}*MENU_ITEM_SIZE;
-  result.end = result.start + (V2){menu->chars_wide*CHAR_SIZE.x*FONT_SIZE + MENU_ITEM_SIZE.y, MENU_ITEM_SIZE.y};
+  result.start = menu->pos + (vec2){0, n}*MENU_ITEM_SIZE;
+  result.end = result.start + (vec2){menu->chars_wide*CHAR_SIZE.x*FONT_SIZE + MENU_ITEM_SIZE.y, MENU_ITEM_SIZE.y};
   return result;
 }
 
@@ -13,7 +13,7 @@ get_input_box_rect(InputBox *input_box)
 {
   Rectangle result;
   result.start = input_box->pos;
-  result.end = result.start + (V2){input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  result.end = result.start + (vec2){input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
   return result;
 }
 
@@ -23,7 +23,7 @@ get_button_rect(Button *button)
 {
   Rectangle result;
   result.start = button->pos;
-  result.end = result.start + (V2){button->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  result.end = result.start + (vec2){button->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
   return result;
 }
 
@@ -50,7 +50,7 @@ init_ui(UI *ui)
     }
   }
 
-  ui->cell_type_menu.pos = (V2){10, 10};
+  ui->cell_type_menu.pos = (vec2){10, 10};
   ui->cell_type_menu.chars_wide = longest_menu_item + 1;
 
   ui->car_inputs = 0;
@@ -58,7 +58,7 @@ init_ui(UI *ui)
 
 
 void
-ui_consume_mouse_clicks(UI *ui, Mouse *mouse, V2 mouse_pos, u64 time_us)
+ui_consume_mouse_clicks(UI *ui, Mouse *mouse, vec2 mouse_pos, u64 time_us)
 {
   b32 consume = false;
 
@@ -97,7 +97,7 @@ ui_consume_mouse_clicks(UI *ui, Mouse *mouse, V2 mouse_pos, u64 time_us)
   {
     Rectangle rect;
     rect.start = ui->cell_type_menu.pos;
-    rect.end = rect.start + MENU_ITEM_SIZE*(V2){1, ui->cell_type_menu.length};
+    rect.end = rect.start + MENU_ITEM_SIZE*(vec2){1, ui->cell_type_menu.length};
 
     if (in_rectangle(mouse_pos, rect))
     {
@@ -126,7 +126,7 @@ open_cell_type_menu(GameState *game_state, Cell *cell_hovered_over, u64 time_us)
 
 
 void
-update_menu(Menu *menu, V2 mouse, u64 time_us)
+update_menu(Menu *menu, vec2 mouse, u64 time_us)
 {
   menu->selected_selector.item_n = -1;
 
@@ -166,7 +166,7 @@ update_menu(Menu *menu, V2 mouse, u64 time_us)
         // Set pos directly if menu just opened, to avoid annimation from unshown position.
         if (menu->opened_on_frame == time_us)
         {
-          V2 selected_item_pos = get_menu_item_rect(menu, item_index).start;
+          vec2 selected_item_pos = get_menu_item_rect(menu, item_index).start;
           menu->selected_selector.annimated_pos = selected_item_pos;
         }
       }
@@ -238,13 +238,13 @@ update_input_box(InputBox *input_box, Inputs *inputs)
 
 
 void
-update_button(Button *button, V2 mouse)
+update_button(Button *button, vec2 mouse)
 {
 }
 
 
 void
-update_car_inputs(GameState *game_state, UI *ui, V2 mouse, Inputs *inputs)
+update_car_inputs(GameState *game_state, UI *ui, vec2 mouse, Inputs *inputs)
 {
   if (ui->car_inputs)
   {
@@ -294,7 +294,7 @@ update_car_inputs(GameState *game_state, UI *ui, V2 mouse, Inputs *inputs)
 
 
 void
-update_ui(GameState *game_state, UI *ui, V2 mouse, Inputs *inputs, u64 time_us)
+update_ui(GameState *game_state, UI *ui, vec2 mouse, Inputs *inputs, u64 time_us)
 {
   update_menu(&ui->cell_type_menu, mouse, time_us);
   update_car_inputs(game_state, ui, mouse, inputs);
@@ -305,7 +305,7 @@ Rectangle
 annimate_menu_item_fill(Menu *menu, MenuItemSelector *menu_item_selector)
 {
   Rectangle menu_item_rect = get_menu_item_rect(menu, menu_item_selector->item_n);
-  V2 d_pos = menu_item_rect.start - menu_item_selector->annimated_pos;
+  vec2 d_pos = menu_item_rect.start - menu_item_selector->annimated_pos;
 
   menu_item_selector->annimated_pos += d_pos*MENU_ANNIMATION_SPEED;
 
@@ -331,7 +331,7 @@ draw_ui_menu(Bitmap *font, Menu *menu, CellBitmaps *cell_bitmaps, u64 time_us)
       draw_box(menu_item_rect, FRAME_COLOR);
 
       u32 cell_radius = MENU_ITEM_SIZE.y*0.5;
-      V2 cell_pos = {
+      vec2 cell_pos = {
         menu_item_rect.end.x   - cell_radius,
         menu_item_rect.start.y + cell_radius
       };
@@ -342,14 +342,14 @@ draw_ui_menu(Bitmap *font, Menu *menu, CellBitmaps *cell_bitmaps, u64 time_us)
     if (menu->selected_selector.item_n >= 0)
     {
       Rectangle selected_rect = annimate_menu_item_fill(menu, &menu->selected_selector);
-      V4 color = clamp(FRAME_COLOR + 0.5, 1);
+      vec4 color = clamp(FRAME_COLOR + 0.5, 1);
       color.a = 0.7;
       draw_box(selected_rect, color);
     }
     if (menu->hover_selector.item_n >= 0)
     {
       Rectangle hover_rect = annimate_menu_item_fill(menu, &menu->hover_selector);
-      V4 color = clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1);
+      vec4 color = clamp(FRAME_COLOR + (vec4){0, 1, 0, 0}, 1);
       color.a = 0.7;
       draw_box(hover_rect, color);
     }
@@ -361,7 +361,7 @@ draw_ui_menu(Bitmap *font, Menu *menu, CellBitmaps *cell_bitmaps, u64 time_us)
       MenuItem *item = menu->items + item_index;
 
       Rectangle menu_item_rect = get_menu_item_rect(menu, item_index);
-      draw_string(font, menu_item_rect.start + 2, item->name, FONT_SIZE, (V4){1, 0, 0, 0});
+      draw_string(font, menu_item_rect.start + 2, item->name, FONT_SIZE, (vec4){1, 0, 0, 0});
     }
   }
 }
@@ -376,10 +376,10 @@ draw_input_box(Bitmap *font, InputBox *input_box)
 
   if (input_box->active)
   {
-    V4 cursor_color = {1, .9, .9, .9};
+    vec4 cursor_color = {1, .9, .9, .9};
     Rectangle cursor_rect;
-    cursor_rect.start = input_box_rect.start + (r32)input_box->cursor_pos*FONT_SIZE*CHAR_SIZE*(V2){1, 0};
-    cursor_rect.end = cursor_rect.start + FONT_SIZE*CHAR_SIZE*(V2){0.15, 1};
+    cursor_rect.start = input_box_rect.start + (r32)input_box->cursor_pos*FONT_SIZE*CHAR_SIZE*(vec2){1, 0};
+    cursor_rect.end = cursor_rect.start + FONT_SIZE*CHAR_SIZE*(vec2){0.15, 1};
     draw_box(cursor_rect, cursor_color);
   }
 
@@ -397,7 +397,7 @@ draw_button(RenderWindow *render_window, Bitmap *font, Button *button, u64 time_
 
   if (button->hovered_at_time == time_us)
   {
-    V4 color = clamp(FRAME_COLOR + (V4){0, 1, 0, 0}, 1);
+    vec4 color = clamp(FRAME_COLOR + (vec4){0, 1, 0, 0}, 1);
     color.a = 0.7;
     draw_box(button_rect, color);
   }
@@ -412,14 +412,14 @@ draw_car_inputs(RenderWindow *render_window, Bitmap *font, UI *ui, u64 time_us)
   while (car_input)
   {
     // Transform from world coord -> normalised -> pixel space
-    V2 normalised_car_pos = world_coord_to_render_window_coord(render_window, car_input->car_world_pos);
+    vec2 normalised_car_pos = world_coord_to_render_window_coord(render_window, car_input->car_world_pos);
     // TODO: Transform to pixel space
-    // V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
-    V2 ui_car_pos;
+    // vec2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
+    vec2 ui_car_pos;
 
     Rectangle input_box_rect = get_input_box_rect(&car_input->input);
 
-    add_box(&layouter, ui_car_pos, size(input_box_rect)*(V2){1, 2});
+    add_box(&layouter, ui_car_pos, size(input_box_rect)*(vec2){1, 2});
     car_input = car_input->next;
   }
 
@@ -431,12 +431,12 @@ draw_car_inputs(RenderWindow *render_window, Bitmap *font, UI *ui, u64 time_us)
   {
     Rectangle *laidout_rect = layouter.rects + layouter_index++;
 
-    // V2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
-    // V2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
-    V2 ui_car_pos;
+    // vec2 screen_car_pos = transform_coord(world_render_basis, car_input->car_world_pos);
+    // vec2 ui_car_pos = untransform_coord(render_basis, screen_car_pos);
+    vec2 ui_car_pos;
 
     car_input->input.pos = laidout_rect->start;
-    car_input->done.pos = car_input->input.pos + (V2){0, MENU_ITEM_SIZE.y};
+    car_input->done.pos = car_input->input.pos + (vec2){0, MENU_ITEM_SIZE.y};
 
     draw_input_box(font, &car_input->input);
     draw_button(render_window, font, &car_input->done, time_us);
@@ -481,7 +481,7 @@ init_car_input_box(Memory *memory, GameState *game_state, u32 car_id, s32 initia
 
   u32 car_radius = calc_car_radius(game_state->cell_margin);
   car_input->car_world_pos = world_pos;
-  car_input->car_world_pos_offset = (V2){car_radius, car_radius};
+  car_input->car_world_pos_offset = (vec2){car_radius, car_radius};
 
   zero(&car_input->input, InputBox);
   car_input->input.length = 10;

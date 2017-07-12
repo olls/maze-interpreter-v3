@@ -8,8 +8,8 @@ calc_cell_radius(GameState *game_state)
 void
 update_cells_ui_state(GameState *game_state, Mouse *mouse, WorldSpace _mouse_pos, u64 time_us)
 {
-  V2 cell_pos;
-  V2 mouse_pos;
+  vec2 cell_pos;
+  vec2 mouse_pos;
   Rectangle cell_bounds = radius_rectangle(cell_pos, calc_cell_radius(game_state));
 
   b32 hide_cell_menu = false;
@@ -144,49 +144,49 @@ cell_walkable(Cell *cell)
 }
 
 
-V4
+vec4
 get_cell_color(CellType type)
 {
-  V4 result;
+  vec4 result;
   switch (type)
   {
-    case CELL_NULL:     result = (V4){1, 0.0, 0.0, 0.0};
+    case CELL_NULL:     result = (vec4){1, 0.0, 0.0, 0.0};
       break;
-    case CELL_START:    result = (V4){1, 0.7, 0.3, 0.3};
+    case CELL_START:    result = (vec4){1, 0.7, 0.3, 0.3};
       break;
-    case CELL_PATH:     result = (V4){1, 0.8, 0.8, 0.9};
+    case CELL_PATH:     result = (vec4){1, 0.8, 0.8, 0.9};
       break;
-    case CELL_WALL:     result = (V4){1, 0.9, 0.8, 0.9};
+    case CELL_WALL:     result = (vec4){1, 0.9, 0.8, 0.9};
       break;
-    case CELL_HOLE:     result = (V4){1, 0.0, 0.2, 0.7};
+    case CELL_HOLE:     result = (vec4){1, 0.0, 0.2, 0.7};
       break;
-    case CELL_SPLITTER: result = (V4){1, 0.7, 0.6, 0.0};
+    case CELL_SPLITTER: result = (vec4){1, 0.7, 0.6, 0.0};
       break;
-    case CELL_FUNCTION: result = (V4){1, 0.7, 0.5, 0.3};
+    case CELL_FUNCTION: result = (vec4){1, 0.7, 0.5, 0.3};
       break;
-    case CELL_ONCE:     result = (V4){1, 0.7, 0.4, 0.0};
+    case CELL_ONCE:     result = (vec4){1, 0.7, 0.4, 0.0};
       break;
-    case CELL_UP_UNLESS_DETECT:     result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_UP_UNLESS_DETECT:     result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_DOWN_UNLESS_DETECT:   result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_DOWN_UNLESS_DETECT:   result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_LEFT_UNLESS_DETECT:   result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_LEFT_UNLESS_DETECT:   result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_RIGHT_UNLESS_DETECT:  result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_RIGHT_UNLESS_DETECT:  result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_OUT:      result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_OUT:      result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_INP:      result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_INP:      result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_UP:       result = (V4){1, 0.0, 0.0, 0.0};
+    case CELL_UP:       result = (vec4){1, 0.0, 0.0, 0.0};
       break;
-    case CELL_DOWN:     result = (V4){1, 0.3, 0.0, 0.0};
+    case CELL_DOWN:     result = (vec4){1, 0.3, 0.0, 0.0};
       break;
-    case CELL_LEFT:     result = (V4){1, 0.0, 0.1, 0.3};
+    case CELL_LEFT:     result = (vec4){1, 0.0, 0.1, 0.3};
       break;
-    case CELL_RIGHT:    result = (V4){1, 0.3, 0.1, 0.3};
+    case CELL_RIGHT:    result = (vec4){1, 0.3, 0.1, 0.3};
       break;
-    case CELL_PAUSE:    result = (V4){1, 0.3, 0.0, 0.7};
+    case CELL_PAUSE:    result = (vec4){1, 0.3, 0.0, 0.7};
       break;
 
     default:
@@ -314,10 +314,10 @@ calc_connected_cell_bitmap(Maze *maze, Cell *cell, CellBitmaps *cell_bitmaps, Ce
 }
 
 
-V2
+vec2
 get_direction_cell_direction(CellType type)
 {
-  V2 result = {0, 0};
+  vec2 result = {0, 0};
 
   switch (type)
   {
@@ -348,8 +348,8 @@ get_direction_cell_direction(CellType type)
 void
 get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overlay_display_result)
 {
-  V2 cell_direction = get_direction_cell_direction(type);
-  if (cell_direction != (V2){0, 0})
+  vec2 cell_direction = get_direction_cell_direction(type);
+  if (cell_direction != (vec2){0, 0})
   {
     overlay_display_result->bitmap = &cell_bitmaps->arrow;
     overlay_display_result->rotate = angle_from_vector(cell_direction);
@@ -359,16 +359,16 @@ get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overl
         type == CELL_LEFT_UNLESS_DETECT ||
         type == CELL_RIGHT_UNLESS_DETECT)
     {
-      overlay_display_result->color = (V4){1, 1, 0, 0};
+      overlay_display_result->color = (vec4){1, 1, 0, 0};
     }
     else
     {
-      overlay_display_result->color = (V4){1, 1, 1, 1};
+      overlay_display_result->color = (vec4){1, 1, 1, 1};
     }
   }
   else if (type == CELL_SPLITTER)
   {
-    overlay_display_result->color = (V4){1, 1, 1, 1};
+    overlay_display_result->color = (vec4){1, 1, 1, 1};
     overlay_display_result->bitmap = &cell_bitmaps->splitter;
   }
   else
@@ -379,7 +379,7 @@ get_overlay_display(CellType type, CellBitmaps *cell_bitmaps, CellDisplay *overl
 
 
 void
-draw_cell(CellType type, V2 normalised_world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
+draw_cell(CellType type, vec2 normalised_world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display)
 {
   Bitmap *cell_bitmap;
   u32 rotate = 0;
@@ -400,7 +400,7 @@ draw_cell(CellType type, V2 normalised_world_pos, u32 cell_radius, b32 hovered, 
     }
   }
 
-  V4 color = get_cell_color(type);
+  vec4 color = get_cell_color(type);
   if (hovered)
   {
     color.r = min(color.r + 0.15, 1.0f);
@@ -459,7 +459,7 @@ recursively_draw_cells(GameState *game_state, RenderWindow *render_window, QuadT
       {
         Cell *cell = tree->cells + cell_index;
 
-        V2 normalised_cell_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
+        vec2 normalised_cell_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
 
         CellDisplay cell_display;
         calc_connected_cell_bitmap(&game_state->maze, cell, &game_state->cell_bitmaps, &cell_display);
@@ -484,7 +484,7 @@ recursively_draw_tree_blocks(GameState *game_state, RenderWindow *render_window,
 
   if (tree)
   {
-    V4 avg_color = {0, 0, 0, 0};
+    vec4 avg_color = {0, 0, 0, 0};
     Rectangle normalised_bounds = {{0, 0}, {0, 0}};
     for (u32 cell_index = 0;
          cell_index < tree->used;
@@ -493,7 +493,7 @@ recursively_draw_tree_blocks(GameState *game_state, RenderWindow *render_window,
       Cell *cell = tree->cells + cell_index;
       avg_color += get_cell_color(cell->type);
 
-      V2 normalised_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
+      vec2 normalised_pos = world_coord_to_render_window_coord(render_window, cell->x, cell->y);
 
       if (normalised_pos.x < normalised_bounds.start.x)
       {
@@ -548,7 +548,7 @@ draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u
       if (game_state->ui.cell_type_menu.highlighted_cell_annimation_offset.x == -1)
       {
         // No animation if there was no previously highlighted cell
-        game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (V2){0, 0};
+        game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (vec2){0, 0};
       }
       else
       {
@@ -563,18 +563,18 @@ draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u
       };
 
       re_form_world_coord(&highlight_world_pos);
-      V2 normalised_highlight_pos = world_coord_to_render_window_coord(render_window, highlight_world_pos);
+      vec2 normalised_highlight_pos = world_coord_to_render_window_coord(render_window, highlight_world_pos);
 
       glPushMatrix();
         glColor3f(.9, .1, .2); // TODO: Alpha: 0.3
         glTranslatef(normalised_highlight_pos.x, normalised_highlight_pos.y, 0);
 
-        draw_box_outline((V2){cell_radius, cell_radius}, 0.3);
+        draw_box_outline((vec2){cell_radius, cell_radius}, 0.3);
       glPopMatrix();
     }
     else
     {
-      game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (V2){-1, -1};
+      game_state->ui.cell_type_menu.highlighted_cell_annimation_offset = (vec2){-1, -1};
     }
   }
   else

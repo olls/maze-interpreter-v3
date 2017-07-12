@@ -21,6 +21,7 @@
 #include "platform.h"
 #include "maths.h"
 #include "vectors.h"
+#include "matrices.h"
 #include "text.h"
 #include "string.h"
 #include "xml.h"
@@ -37,6 +38,7 @@
 #include "platform.cpp"
 #include "maths.cpp"
 #include "vectors.cpp"
+#include "matrices.cpp"
 #include "text.cpp"
 #include "string.cpp"
 #include "xml.cpp"
@@ -383,7 +385,6 @@ main(int argc, char *argv[])
   SDL_GL_SetSwapInterval(1);
 
   glewExperimental = GL_TRUE;
-
   GLenum glew_status = glewInit();
   if (glew_status != GLEW_OK)
   {

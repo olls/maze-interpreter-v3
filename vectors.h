@@ -1,65 +1,109 @@
-union V2
+struct vec2
 {
-  struct
+  union
   {
-    r32 x;
-    r32 y;
+    r32 elem[2];
+    struct
+    {
+      r32 x;
+      r32 y;
+    };
   };
-  struct
+};
+
+
+struct vec3
+{
+  union
   {
-    r32 u;
-    r32 v;
+    r32 elem[3];
+    struct
+    {
+      r32 x;
+      r32 y;
+      r32 z;
+    };
+    struct
+    {
+      r32 r;
+      r32 g;
+      r32 b;
+    };
+    struct
+    {
+      r32 h;
+      r32 s;
+      r32 v;
+    };
+    struct
+    {
+      vec2 xy;
+      r32 _1;
+    };
+    struct
+    {
+      r32 _2;
+      vec2 yz;
+    };
+  };
+};
+
+
+struct vec4
+{
+  union
+  {
+    r32 elem[4];
+    struct
+    {
+      r32 w;
+      r32 x;
+      r32 y;
+      r32 z;
+    };
+    struct
+    {
+      r32 a;
+      r32 r;
+      r32 g;
+      r32 b;
+    };
+    struct
+    {
+      r32 _1;
+      r32 h;
+      r32 s;
+      r32 v;
+    };
+    struct
+    {
+      vec2 wx;
+      vec2 yz;
+    };
+    struct
+    {
+      r32 _2;
+      vec2 xy;
+      r32 _3;
+    };
+    struct
+    {
+      vec3 wxy;
+      r32 _4;
+    };
+    struct
+    {
+      r32 _5;
+      vec3 xyz;
+    };
   };
 };
 
 
 struct Rectangle
 {
-  V2 start;
-  V2 end;
-};
-
-
-union V3
-{
-  struct
-  {
-    r32 x;
-    r32 y;
-    r32 z;
-  };
-  struct
-  {
-    r32 r;
-    r32 g;
-    r32 b;
-  };
-};
-
-
-union V4
-{
-  struct
-  {
-    r32 w;
-    r32 x;
-    r32 y;
-    r32 z;
-  };
-  struct
-  {
-    r32 a;
-    r32 r;
-    r32 g;
-    r32 b;
-  };
-  struct
-  {
-    r32 _a;
-    r32 h;
-    r32 s;
-    r32 v;
-  };
+  vec2 start;
+  vec2 end;
 };
 
 
@@ -75,12 +119,12 @@ union PixelColor
 };
 
 
-const V2 UP = {0, -1};
-const V2 DOWN = {0, 1};
-const V2 LEFT = {-1, 0};
-const V2 RIGHT = {1, 0};
-const V2 STATIONARY = {0, 0};
+const vec2 UP = {0, -1};
+const vec2 DOWN = {0, 1};
+const vec2 LEFT = {-1, 0};
+const vec2 RIGHT = {1, 0};
+const vec2 STATIONARY = {0, 0};
 
 
 char
-vector_to_compass_dir(V2);
+vector_to_compass_dir(vec2);

@@ -1,8 +1,8 @@
 void
 draw_circle_segment(r32 start, r32 end, r32 stroke_plus, r32 stroke_minus)
 {
-  V2 seg_start = {sin(start), cos(start)};
-  V2 seg_end   = {sin(end), cos(end)};
+  vec2 seg_start = {sin(start), cos(start)};
+  vec2 seg_end   = {sin(end), cos(end)};
   glBegin(GL_POLYGON);
     glVertex3f( stroke_plus*seg_end.x,    stroke_plus*seg_end.y,   0);
     glVertex3f( stroke_plus*seg_start.x,  stroke_plus*seg_start.y, 0);
@@ -61,10 +61,10 @@ draw_box()
 
 
 void
-draw_box(Rectangle rect, V4 color)
+draw_box(Rectangle rect, vec4 color)
 {
-  V2 radius = 0.5*size(rect);
-  V2 center = rect.start + radius;
+  vec2 radius = 0.5*size(rect);
+  vec2 center = rect.start + radius;
 
   glPushMatrix();
     glColor3f(color.r, color.g, color.b);
@@ -77,7 +77,7 @@ draw_box(Rectangle rect, V4 color)
 
 
 void
-draw_line(V2 start, V2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NULL, LineEndStyle end_line_end = LINE_END_NULL)
+draw_line(vec2 start, vec2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NULL, LineEndStyle end_line_end = LINE_END_NULL)
 {
   // glColor3f(color.r, color.g, color.b);
 
@@ -90,8 +90,8 @@ draw_line(V2 start, V2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NUL
     end_line_end = line_end;
   }
 
-  V2 line_direction = unit_vector(end - start);
-  V2 width_vector = width * 0.5 * line_direction;
+  vec2 line_direction = unit_vector(end - start);
+  vec2 width_vector = width * 0.5 * line_direction;
 
   if (line_end == LINE_END_SQUARE)
   {
@@ -102,7 +102,7 @@ draw_line(V2 start, V2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NUL
     end += width_vector;
   }
 
-  V2 width_comp = vector_tangent(width_vector);
+  vec2 width_comp = vector_tangent(width_vector);
 
   glBegin(GL_QUADS);
     glVertex3f(start.x-width_comp.x, start.y-width_comp.y, 0);
@@ -134,16 +134,16 @@ draw_line(V2 start, V2 end, r32 width = 50, LineEndStyle line_end = LINE_END_NUL
 
 
 void
-draw_box_outline(V2 size, r32 thickness = 1, r32 radius = 0)
+draw_box_outline(vec2 size, r32 thickness = 1, r32 radius = 0)
 {
   r32 corner_ext = -thickness*0.5 + radius;
 
   if (radius > 0)
   {
-    V2 top_left     = -0.5*size + corner_ext;
-    V2 top_right    = (V2){ 0.5*size.x-corner_ext, -0.5*size.y+corner_ext};
-    V2 bottom_right =  0.5*size - corner_ext;
-    V2 bottom_left  = (V2){-0.5*size.x+corner_ext,  0.5*size.y-corner_ext};
+    vec2 top_left     = -0.5*size + corner_ext;
+    vec2 top_right    = (vec2){ 0.5*size.x-corner_ext, -0.5*size.y+corner_ext};
+    vec2 bottom_right =  0.5*size - corner_ext;
+    vec2 bottom_left  = (vec2){-0.5*size.x+corner_ext,  0.5*size.y-corner_ext};
 
     glPushMatrix();
       glTranslatef(top_left.x, top_left.y, 0);
@@ -166,10 +166,10 @@ draw_box_outline(V2 size, r32 thickness = 1, r32 radius = 0)
       draw_circle_outline(thickness/(radius-thickness/2), 0.75, 1);
     glPopMatrix();
   }
-  draw_line(-0.5*size + (V2){corner_ext, 0         }, (V2){ 0.5*size.x-corner_ext, -0.5*size.y           }, thickness);
-  draw_line(-0.5*size + (V2){0         , corner_ext}, (V2){-0.5*size.x           ,  0.5*size.y-corner_ext}, thickness);
-  draw_line( 0.5*size - (V2){corner_ext, 0         }, (V2){-0.5*size.x+corner_ext,  0.5*size.y           }, thickness);
-  draw_line( 0.5*size - (V2){0         , corner_ext}, (V2){ 0.5*size.x           , -0.5*size.y+corner_ext}, thickness);
+  draw_line(-0.5*size + (vec2){corner_ext, 0         }, (vec2){ 0.5*size.x-corner_ext, -0.5*size.y           }, thickness);
+  draw_line(-0.5*size + (vec2){0         , corner_ext}, (vec2){-0.5*size.x           ,  0.5*size.y-corner_ext}, thickness);
+  draw_line( 0.5*size - (vec2){corner_ext, 0         }, (vec2){-0.5*size.x+corner_ext,  0.5*size.y           }, thickness);
+  draw_line( 0.5*size - (vec2){0         , corner_ext}, (vec2){ 0.5*size.x           , -0.5*size.y+corner_ext}, thickness);
 }
 
 
@@ -188,8 +188,8 @@ draw_svg_path(SVGPath *path, SVGStyle *style)
   {
     LineSegment *segment = path->segments + segment_n;
 
-    V2 start = segment->start;
-    V2 end = segment->end;
+    vec2 start = segment->start;
+    vec2 end = segment->end;
 
     LineEndStyle this_line_cap_start = line_join;
     LineEndStyle this_line_cap_end = line_join;
@@ -225,7 +225,7 @@ draw_svg(SVGOperation *svg_operations)
       {
         SVGRect *rect = &operation->rect;
         glPushMatrix();
-          V2 center = rect->rect.start + size(rect->rect)*0.5;
+          vec2 center = rect->rect.start + size(rect->rect)*0.5;
           glTranslatef(center.x, center.y, 0);
           glColor3f(operation->style.stroke_colour.r, operation->style.stroke_colour.g, operation->style.stroke_colour.b);
 

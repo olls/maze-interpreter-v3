@@ -82,7 +82,7 @@ step_particles(Particles *particles, u64 time_us)
 
             new_particle->t0 = time_us;
             new_particle->source_pos = source->pos;
-            new_particle->offset = (V2){0};
+            new_particle->offset = (vec2){0};
 
             // NOTE: Initial setup of particles
             switch (new_particle->type)
@@ -95,7 +95,7 @@ step_particles(Particles *particles, u64 time_us)
               } break;
               case PS_GROW:
               {
-                new_particle->color = (V4){1, 1, 1, 1};
+                new_particle->color = (vec4){1, 1, 1, 1};
                 new_particle->hue = rand() % 360;
                 new_particle->grow.direction = 2 * M_PI * ((r32)(rand() % 360) / 360.0);
               } break;
@@ -162,7 +162,7 @@ render_particles(Particles *particles, RenderWindow *render_window)
       particle_pos.offset += particle->offset;
       re_form_world_coord(&particle_pos);
 
-      V2 normalised_pos = world_coord_to_render_window_coord(render_window, particle_pos);
+      vec2 normalised_pos = world_coord_to_render_window_coord(render_window, particle_pos);
 
       switch (particle->type)
       {
@@ -177,7 +177,7 @@ render_particles(Particles *particles, RenderWindow *render_window)
         } break;
         case PS_GROW:
         {
-          V2 bitmap_size = {particle->bitmap->file->width,
+          vec2 bitmap_size = {particle->bitmap->file->width,
                             particle->bitmap->file->height};
 
           // BlitBitmapOptions blit_opts;

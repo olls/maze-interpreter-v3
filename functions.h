@@ -26,9 +26,9 @@ struct Function
     struct
     {
       s32 value;
-      V2 true_direction;
+      vec2 true_direction;
       b32 else_exists;
-      V2 false_direction;
+      vec2 false_direction;
     } conditional;
   };
 };

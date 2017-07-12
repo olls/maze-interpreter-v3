@@ -22,7 +22,7 @@ struct WorldSpace
   u32 cell_y;
 
   // NOTE: Used for sub-cell positioning, 0-1.
-  V2 offset;
+  vec2 offset;
 };
 
 

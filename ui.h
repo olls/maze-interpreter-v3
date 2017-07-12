@@ -1,7 +1,7 @@
-const V4 FRAME_COLOR = {1, 0.35, 0.5, .95};
+const vec4 FRAME_COLOR = {1, 0.35, 0.5, .95};
 const r32 FONT_SIZE = 0.2;
 const r32 MENU_ANNIMATION_SPEED = .4;
-const V2 MENU_ITEM_SIZE = {250, 25};
+const vec2 MENU_ITEM_SIZE = {250, 25};
 const u32 MAX_UI_BOX_CHARS = 32;
 
 
@@ -18,7 +18,7 @@ struct MenuItem
 struct MenuItemSelector
 {
   s32 item_n;
-  V2 annimated_pos;
+  vec2 annimated_pos;
 };
 
 
@@ -31,13 +31,13 @@ struct Menu
   MenuItem items[MAX_MENU_ITEMS];
   u32 length;
   u32 chars_wide;
-  V2 pos;
+  vec2 pos;
 
   MenuItemSelector hover_selector;
   MenuItemSelector selected_selector;
   u64 opened_on_frame;
 
-  V2 highlighted_cell_annimation_offset;
+  vec2 highlighted_cell_annimation_offset;
 };
 
 
@@ -46,7 +46,7 @@ struct InputBox
   char text[MAX_UI_BOX_CHARS];
   u32 cursor_pos;
   u32 length;
-  V2 pos;
+  vec2 pos;
   b32 active;
   b32 allow_num;
   b32 allow_alpha;
@@ -56,7 +56,7 @@ struct InputBox
 
 struct Button
 {
-  V2 pos;
+  vec2 pos;
   u32 length;
   char name[MAX_UI_BOX_CHARS];
   u64 hovered_at_time;
@@ -70,7 +70,7 @@ struct CarInput
   Button done;
   u32 car_id;
   WorldSpace car_world_pos;
-  V2 car_world_pos_offset;
+  vec2 car_world_pos_offset;
 
   CarInput *next;
 };

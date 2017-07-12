@@ -28,7 +28,7 @@ struct GameState
   r32 zoom_multiplier;
   r32 zoom;
   r32 old_zoom;
-  V2 scale_focus_pixels;
+  vec2 scale_focus_pixels;
 
   GLuint shader_program;
   OpenGL_VBOs opengl_vbos;
@@ -38,7 +38,7 @@ struct GameState
   r32 cell_margin;
 
   WorldSpace world_maze_pos;
-  V2 last_mouse_pos;
+  vec2 last_mouse_pos;
   b32 currently_panning;
 
   b32 single_step;

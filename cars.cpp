@@ -7,7 +7,7 @@ calc_car_radius(r32 cell_margin)
 
 
 void
-init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V2 direction = DOWN)
+init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, vec2 direction = DOWN)
 {
   car->update_next_frame = false;
   car->dead = false;
@@ -16,7 +16,7 @@ init_car(GameState *game_state, u64 time_us, Car *car, u32 cell_x, u32 cell_y, V
   car->id = cars_id++;
   car->cell_pos.cell_x = cell_x;
   car->cell_pos.cell_y = cell_y;
-  car->cell_pos.offset = (V2){0, 0};
+  car->cell_pos.offset = (vec2){0, 0};
   car->direction = direction;
   car->pause_left = 0;
   car->unpause_direction = STATIONARY;
@@ -37,9 +37,9 @@ move_car(GameState *game_state, Maze *maze, Car *car)
   }
   else
   {
-    V2 dir_components[] = {UP, DOWN, LEFT, RIGHT};
+    vec2 dir_components[] = {UP, DOWN, LEFT, RIGHT};
 
-    V2 directions[4];
+    vec2 directions[4];
     directions[0] = car->direction;
     directions[3] = -car->direction;
 
@@ -48,7 +48,7 @@ move_car(GameState *game_state, Maze *maze, Car *car)
          direction_index < 4;
          direction_index++)
     {
-      V2 test_direction = dir_components[direction_index];
+      vec2 test_direction = dir_components[direction_index];
 
       if ((test_direction != directions[0]) &&
           (test_direction != directions[3]))
@@ -62,7 +62,7 @@ move_car(GameState *game_state, Maze *maze, Car *car)
          direction_index < 4;
          direction_index++)
     {
-      V2 test_direction = directions[direction_index];
+      vec2 test_direction = directions[direction_index];
 
       Cell *test_cell = get_cell(maze, (car->cell_pos.cell_x + test_direction.x), (car->cell_pos.cell_y + test_direction.y));
       if (test_cell &&
@@ -400,9 +400,9 @@ update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
 {
 #if 1
   r32 speed = (last_frame_dt / 1000000.0) * game_state->sim_ticks_per_s;
-  V2 direction = -unit_vector(car->cell_pos.offset);
+  vec2 direction = -unit_vector(car->cell_pos.offset);
 
-  V2 movement = direction * speed;
+  vec2 movement = direction * speed;
 
   if (abs(car->cell_pos.offset.x) >= abs(movement.x))
   {
@@ -423,7 +423,7 @@ update_car_position(GameState *game_state, Car *car, u32 last_frame_dt)
   }
 
 #else
-  car->cell_pos.offset = (V2){0};
+  car->cell_pos.offset = (vec2){0};
 #endif
 }
 
@@ -444,11 +444,11 @@ annimate_cars(GameState *game_state, u32 last_frame_dt)
 
 
 void
-draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_us, V4 colour = (V4){1, 0.60, 0.13, 0.47})
+draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_us, vec4 colour = (vec4){1, 0.60, 0.13, 0.47})
 {
   r32 car_radius = calc_car_radius(game_state->cell_margin);
 
-  V2 pos = world_coord_to_render_window_coord(render_window, car->cell_pos);
+  vec2 pos = world_coord_to_render_window_coord(render_window, car->cell_pos);
 
   glPushMatrix();
     glTranslatef(pos.x, pos.y, 0);
@@ -467,7 +467,7 @@ draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_
     u32 chars = fmted_str(str, max_len, "%d", car->value);
     font_size /= chars;
 
-    draw_string(&game_state->bitmaps.font, pos - 0.5*(V2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
+    draw_string(&game_state->bitmaps.font, pos - 0.5*(vec2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
   glPopMatrix();
 }
 

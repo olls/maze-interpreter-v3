@@ -70,7 +70,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
       Rectangle bottom_right_bounds = get_bottom_right(tree->bounds);
       Rectangle bottom_left_bounds  = get_bottom_left(tree->bounds);
 
-      if (in_rectangle((V2){x, y}, top_right_bounds))
+      if (in_rectangle((vec2){x, y}, top_right_bounds))
       {
         if (!tree->top_right)
         {
@@ -78,7 +78,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
         }
         tree = tree->top_right;
       }
-      else if (in_rectangle((V2){x, y}, top_left_bounds))
+      else if (in_rectangle((vec2){x, y}, top_left_bounds))
       {
         if (!tree->top_left)
         {
@@ -86,7 +86,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
         }
         tree = tree->top_left;
       }
-      else if (in_rectangle((V2){x, y}, bottom_right_bounds))
+      else if (in_rectangle((vec2){x, y}, bottom_right_bounds))
       {
         if (!tree->bottom_right)
         {
@@ -94,7 +94,7 @@ get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
         }
         tree = tree->bottom_right;
       }
-      else if (in_rectangle((V2){x, y}, bottom_left_bounds))
+      else if (in_rectangle((vec2){x, y}, bottom_left_bounds))
       {
         if (!tree->bottom_left)
         {

@@ -87,7 +87,7 @@ log_ind(LoggingChannel channel, u32 n, const char *text, ...)
 
 
 void
-log_d(LoggingChannel channel, V2 direction)
+log_d(LoggingChannel channel, vec2 direction)
 {
   char s[16] = {};
 
@@ -113,19 +113,19 @@ log_d(LoggingChannel channel, V2 direction)
 
 
 void
-log(LoggingChannel channel, V4 vec)
+log(LoggingChannel channel, vec4 vec)
 {
   log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
 }
 
 void
-log(LoggingChannel channel, V2 vec)
+log(LoggingChannel channel, vec2 vec)
 {
   log(channel, "(%f, %f)", vec.x, vec.y);
 }
 
 void
-log(LoggingChannel channel, V3 vec)
+log(LoggingChannel channel, vec3 vec)
 {
   log(channel, "(%f, %f, %f)", vec.x, vec.y, vec.z);
 }
@@ -153,19 +153,19 @@ log_ind(LoggingChannel channel, u32 n, const char *text, ...)
 {}
 
 void
-log_d(LoggingChannel channel, V2 direction)
+log_d(LoggingChannel channel, vec2 direction)
 {}
 
 void
-log(LoggingChannel channel, V4 vec)
+log(LoggingChannel channel, vec4 vec)
 {}
 
 void
-log(LoggingChannel channel, V2 vec)
+log(LoggingChannel channel, vec2 vec)
 {}
 
 void
-log(LoggingChannel channel, V3 vec)
+log(LoggingChannel channel, vec3 vec)
 {}
 
 void

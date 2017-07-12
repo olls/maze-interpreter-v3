@@ -1,32 +1,32 @@
-V2
-v2(r32 x)
+vec2
+Vec2(r32 x)
 {
-  return (V2){x, x};
+  return (vec2){x, x};
 }
 
 b32
-operator==(V2 a, V2 b)
+operator==(vec2 a, vec2 b)
 {
   b32 result = ((a.x == b.x) &&
                 (a.y == b.y));
   return result;
 }
 b32
-operator!=(V2 a, V2 b)
+operator!=(vec2 a, vec2 b)
 {
   b32 result = !(a == b);
   return result;
 }
 
 b32
-operator>(V2 a, V2 b)
+operator>(vec2 a, vec2 b)
 {
   b32 result = ((a.x > b.x) &&
                  (a.y > b.y));
   return result;
 }
 b32
-operator<(V2 a, V2 b)
+operator<(vec2 a, vec2 b)
 {
   b32 result = ((a.x < b.x) &&
                 (a.y < b.y));
@@ -34,208 +34,208 @@ operator<(V2 a, V2 b)
 }
 
 b32
-operator>=(V2 a, V2 b)
+operator>=(vec2 a, vec2 b)
 {
   b32 result = ((a.x >= b.x) &&
                 (a.y >= b.y));
   return result;
 }
 b32
-operator<=(V2 a, V2 b)
+operator<=(vec2 a, vec2 b)
 {
   b32 result = ((a.x <= b.x) &&
                 (a.y <= b.y));
   return result;
 }
 
-V2
-operator*(r32 c, V2 vec)
+vec2
+operator*(r32 c, vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = c * vec.x;
   result.y = c * vec.y;
   return result;
 }
-V2
-operator*(V2 vec, r32 c)
+vec2
+operator*(vec2 vec, r32 c)
 {
-  V2 result = c * vec;
+  vec2 result = c * vec;
   return result;
 }
-V2 &
-operator*=(V2 &vec, r32 c)
+vec2 &
+operator*=(vec2 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
-V2
-operator*(V2 a, V2 b)
+vec2
+operator*(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = a.x * b.x;
   result.y = a.y * b.y;
   return result;
 }
-V2 &
-operator*=(V2 &a, V2 b)
+vec2 &
+operator*=(vec2 &a, vec2 b)
 {
   a = a * b;
   return a;
 }
 
-V2
-operator/(r32 c, V2 vec)
+vec2
+operator/(r32 c, vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = c / vec.x;
   result.y = c / vec.y;
   return result;
 }
-V2
-operator/(V2 vec, r32 c)
+vec2
+operator/(vec2 vec, r32 c)
 {
-  V2 result;
+  vec2 result;
   result.x = vec.x / c;
   result.y = vec.y / c;
   return result;
 }
-V2
-operator/(V2 a, V2 b)
+vec2
+operator/(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = a.x / b.x;
   result.y = a.y / b.y;
   return result;
 }
-V2 &
-operator/=(V2 &a, r32 b)
+vec2 &
+operator/=(vec2 &a, r32 b)
 {
   a = a / b;
   return a;
 }
 
-V2
-operator+(r32 c, V2 vec)
+vec2
+operator+(r32 c, vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = c + vec.x;
   result.y = c + vec.y;
   return result;
 }
-V2
-operator+(V2 vec, r32 c)
+vec2
+operator+(vec2 vec, r32 c)
 {
-  V2 result = c + vec;
+  vec2 result = c + vec;
   return result;
 }
-V2 &
-operator+=(V2 &vec, r32 c)
+vec2 &
+operator+=(vec2 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
 }
 
-V2
-operator+(V2 a, V2 b)
+vec2
+operator+(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   return result;
 }
-V2 &
-operator+=(V2 &a, V2 b)
+vec2 &
+operator+=(vec2 &a, vec2 b)
 {
   a = a + b;
   return a;
 }
 
-V2
-operator-(V2 vec)
+vec2
+operator-(vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = -vec.x;
   result.y = -vec.y;
   return result;
 }
 
-V2
-operator-(r32 c, V2 vec)
+vec2
+operator-(r32 c, vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = c - vec.x;
   result.y = c - vec.y;
   return result;
 }
-V2
-operator-(V2 vec, r32 c)
+vec2
+operator-(vec2 vec, r32 c)
 {
-  V2 result;
+  vec2 result;
   result.x = vec.x - c;
   result.y = vec.y - c;
   return result;
 }
-V2 &
-operator-=(V2 &vec, r32 c)
+vec2 &
+operator-=(vec2 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
 }
 
-V2
-operator-(V2 a, V2 b)
+vec2
+operator-(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   return result;
 }
-V2 &
-operator-=(V2 &a, V2 b)
+vec2 &
+operator-=(vec2 &a, vec2 b)
 {
   a = a - b;
   return a;
 }
 
-V2
-min_V2(V2 a, V2 b)
+vec2
+min_vec2(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = min(a.x, b.x);
   result.y = min(a.y, b.y);
   return result;
 }
 
-V2
-max_V2(V2 a, V2 b)
+vec2
+max_vec2(vec2 a, vec2 b)
 {
-  V2 result;
+  vec2 result;
   result.x = max(a.x, b.x);
   result.y = max(a.y, b.y);
   return result;
 }
 
-V2
-round_down(V2 vec)
+vec2
+round_down(vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x = round_down(vec.x);
   result.y = round_down(vec.y);
   return result;
 }
 
 r32
-length_sq(V2 vec)
+length_sq(vec2 vec)
 {
   r32 result = (vec.x * vec.x) + (vec.y * vec.y);
   return result;
 }
 
-V2
-unit_vector(V2 vec)
+vec2
+unit_vector(vec2 vec)
 {
-  V2 result = {0};
+  vec2 result = {0};
   r32 length = sqrt(length_sq(vec));
   if (length != 0)
   {
@@ -244,27 +244,27 @@ unit_vector(V2 vec)
   return result;
 }
 
-V2
-vector_direction(V2 vec)
+vec2
+vector_direction(vec2 vec)
 {
-  V2 result = vec;
+  vec2 result = vec;
   result.x = div_or_0(result.x, abs(result.x));
   result.y = div_or_0(result.y, abs(result.y));
   return result;
 }
-V2
-vector_direction_or_1(V2 vec)
+vec2
+vector_direction_or_1(vec2 vec)
 {
-  V2 result = vec;
+  vec2 result = vec;
   result.x = div_or_1(result.x, abs(result.x));
   result.y = div_or_1(result.y, abs(result.y));
   return result;
 }
 
-V2
-vector_tangent(V2 vec)
+vec2
+vector_tangent(vec2 vec)
 {
-  V2 result;
+  vec2 result;
   result.x =  vec.y;
   result.y = -vec.x;
   return result;
@@ -299,7 +299,7 @@ operator*(Rectangle rect, r32 c)
   return result;
 }
 Rectangle
-operator*(Rectangle rect, V2 vec)
+operator*(Rectangle rect, vec2 vec)
 {
   Rectangle result;
   result.start = rect.start * vec;
@@ -330,7 +330,7 @@ operator/(Rectangle rect, r32 c)
   return result;
 }
 Rectangle
-operator/(Rectangle rect, V2 vec)
+operator/(Rectangle rect, vec2 vec)
 {
   Rectangle result;
   result.start = rect.start / vec;
@@ -366,7 +366,7 @@ operator+=(Rectangle &rect, r32 c)
 }
 
 Rectangle
-operator+(Rectangle rect, V2 vec)
+operator+(Rectangle rect, vec2 vec)
 {
   Rectangle result;
   result.start = rect.start + vec;
@@ -374,13 +374,13 @@ operator+(Rectangle rect, V2 vec)
   return result;
 }
 Rectangle
-operator+(V2 vec, Rectangle rect)
+operator+(vec2 vec, Rectangle rect)
 {
   Rectangle result = rect + vec;
   return result;
 }
 Rectangle &
-operator+=(Rectangle &rect, V2 vec)
+operator+=(Rectangle &rect, vec2 vec)
 {
   rect = rect + vec;
   return rect;
@@ -434,7 +434,7 @@ operator-=(Rectangle &rect, r32 c)
 }
 
 Rectangle
-operator-(V2 c, Rectangle rect)
+operator-(vec2 c, Rectangle rect)
 {
   Rectangle result;
   result.start = c - rect.start;
@@ -442,7 +442,7 @@ operator-(V2 c, Rectangle rect)
   return result;
 }
 Rectangle
-operator-(Rectangle rect, V2 c)
+operator-(Rectangle rect, vec2 c)
 {
   Rectangle result;
   result.start = rect.start - c;
@@ -450,7 +450,7 @@ operator-(Rectangle rect, V2 c)
   return result;
 }
 Rectangle &
-operator-=(Rectangle &rect, V2 c)
+operator-=(Rectangle &rect, vec2 c)
 {
   rect = rect - c;
   return rect;
@@ -472,7 +472,7 @@ operator-=(Rectangle &a, Rectangle b)
 }
 
 Rectangle
-rectangle(V2 start, V2 size)
+rectangle(vec2 start, vec2 size)
 {
   Rectangle result;
   result.start = start;
@@ -481,7 +481,7 @@ rectangle(V2 start, V2 size)
 }
 
 Rectangle
-radius_rectangle(V2 center, r32 radius)
+radius_rectangle(vec2 center, r32 radius)
 {
   Rectangle result;
   result.start = center - radius;
@@ -499,7 +499,7 @@ round_down(Rectangle rect)
 }
 
 b32
-in_rectangle(V2 test, Rectangle rect)
+in_rectangle(vec2 test, Rectangle rect)
 {
   b32 result = ((test.x >= rect.start.x) &&
                 (test.x < rect.end.x) &&
@@ -522,8 +522,8 @@ Rectangle
 crop_to(Rectangle rect, Rectangle bound)
 {
   Rectangle result;
-  result.start = max_V2(rect.start, bound.start);
-  result.end   = min_V2(rect.end,   bound.end);
+  result.start = max_vec2(rect.start, bound.start);
+  result.end   = min_vec2(rect.end,   bound.end);
   return result;
 }
 
@@ -534,18 +534,18 @@ get_overlap(Rectangle a, Rectangle b)
   return result;
 }
 
-V2
+vec2
 size(Rectangle rect)
 {
-  V2 result;
+  vec2 result;
   result = rect.end - rect.start;
   return result;
 }
 
-V2
+vec2
 get_center(Rectangle rect)
 {
-  V2 result = rect.start + size(rect)*0.5;
+  vec2 result = rect.start + size(rect)*0.5;
   return result;
 }
 
@@ -553,9 +553,9 @@ Rectangle
 get_top_left(Rectangle rect)
 {
   Rectangle result;
-  V2 center = get_center(rect);
-  result.start = (V2){rect.start.x, center.y};
-  result.end   = (V2){center.x, rect.end.y};
+  vec2 center = get_center(rect);
+  result.start = (vec2){rect.start.x, center.y};
+  result.end   = (vec2){center.x, rect.end.y};
   return result;
 }
 
@@ -563,7 +563,7 @@ Rectangle
 get_top_right(Rectangle rect)
 {
   Rectangle result;
-  V2 center = get_center(rect);
+  vec2 center = get_center(rect);
   result.start = center;
   result.end   = rect.end;
   return result;
@@ -573,9 +573,9 @@ Rectangle
 get_bottom_right(Rectangle rect)
 {
   Rectangle result;
-  V2 center = get_center(rect);
-  result.start = (V2){center.x, rect.start.y};
-  result.end   = (V2){rect.end.x, center.y};
+  vec2 center = get_center(rect);
+  result.start = (vec2){center.x, rect.start.y};
+  result.end   = (vec2){rect.end.x, center.y};
   return result;
 }
 
@@ -583,16 +583,16 @@ Rectangle
 get_bottom_left(Rectangle rect)
 {
   Rectangle result;
-  V2 center = get_center(rect);
+  vec2 center = get_center(rect);
   result.start = rect.start;
   result.end   = center;
   return result;
 }
 
 Rectangle
-get_segment(Rectangle rect, V2 pos, V2 segments)
+get_segment(Rectangle rect, vec2 pos, vec2 segments)
 {
-  V2 seg_size = size(rect) / segments;
+  vec2 seg_size = size(rect) / segments;
 
   Rectangle result;
   result.start = rect.start + seg_size*pos;
@@ -615,7 +615,7 @@ get_horizontal_fraction(Rectangle rect, r32 frac)
 {
   Rectangle result;
   result.start = rect.start;
-  result.end = (V2){
+  result.end = (vec2){
     result.start.x + (rect.end.x-rect.start.x)*frac,
     rect.end.y
   };
@@ -625,7 +625,7 @@ Rectangle
 get_nth_horizontal_fraction(Rectangle rect, r32 frac, u32 n)
 {
   Rectangle result = get_horizontal_fraction(rect, frac);
-  result += (V2){(rect.end.x-rect.start.x)*frac*n, 0};
+  result += (vec2){(rect.end.x-rect.start.x)*frac*n, 0};
   return result;
 }
 
@@ -634,7 +634,7 @@ get_vertical_fraction(Rectangle rect, r32 frac)
 {
   Rectangle result;
   result.start = rect.start;
-  result.end = (V2){
+  result.end = (vec2){
     rect.end.x,
     result.start.y + (rect.end.y-rect.start.y)*frac
   };
@@ -644,7 +644,7 @@ Rectangle
 get_nth_vertical_fraction(Rectangle rect, r32 frac, u32 n)
 {
   Rectangle result = get_vertical_fraction(rect, frac);
-  result += (V2){0, (rect.end.y-rect.start.y)*frac*n};
+  result += (vec2){0, (rect.end.y-rect.start.y)*frac*n};
   return result;
 }
 
@@ -652,14 +652,14 @@ Rectangle
 get_union(Rectangle a, Rectangle b)
 {
   Rectangle result;
-  result.start = min_V2(a.start, b.start);
-  result.end   = max_V2(a.end,   b.end);
+  result.start = min_vec2(a.start, b.start);
+  result.end   = max_vec2(a.end,   b.end);
   return result;
 }
 
 
 b32
-operator==(V3 a, V3 b)
+operator==(vec3 a, vec3 b)
 {
   b32 result = ((a.x == b.x) &&
                 (a.y == b.y) &&
@@ -667,187 +667,187 @@ operator==(V3 a, V3 b)
   return result;
 }
 b32
-operator!=(V3 a, V3 b)
+operator!=(vec3 a, vec3 b)
 {
   b32 result = !(a == b);
   return result;
 }
-V3
-operator*(r32 c, V3 vec)
+vec3
+operator*(r32 c, vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = c * vec.x;
   result.y = c * vec.y;
   result.z = c * vec.z;
   return result;
 }
-V3
-operator*(V3 vec, r32 c)
+vec3
+operator*(vec3 vec, r32 c)
 {
-  V3 result = c * vec;
+  vec3 result = c * vec;
   return result;
 }
-V3 &
-operator*=(V3 &vec, r32 c)
+vec3 &
+operator*=(vec3 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
-V3
-operator*(V3 a, V3 b)
+vec3
+operator*(vec3 a, vec3 b)
 {
-  V3 result;
+  vec3 result;
   result.x = a.x * b.x;
   result.y = a.y * b.y;
   result.z = a.z * b.z;
   return result;
 }
-V3 &
-operator*=(V3 &a, V3 b)
+vec3 &
+operator*=(vec3 &a, vec3 b)
 {
   a = a * b;
   return a;
 }
 
-V3
-operator/(r32 c, V3 vec)
+vec3
+operator/(r32 c, vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = c / vec.x;
   result.y = c / vec.y;
   result.z = c / vec.z;
   return result;
 }
-V3
-operator/(V3 vec, r32 c)
+vec3
+operator/(vec3 vec, r32 c)
 {
-  V3 result;
+  vec3 result;
   result.x = vec.x / c;
   result.y = vec.y / c;
   result.z = vec.z / c;
   return result;
 }
-V3 &
-operator/=(V3 &vec, r32 c)
+vec3 &
+operator/=(vec3 &vec, r32 c)
 {
   vec = vec / c;
   return vec;
 }
 
-V3
-operator+(r32 c, V3 vec)
+vec3
+operator+(r32 c, vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = c + vec.x;
   result.y = c + vec.y;
   result.z = c + vec.z;
   return result;
 }
-V3
-operator+(V3 vec, r32 c)
+vec3
+operator+(vec3 vec, r32 c)
 {
-  V3 result = c + vec;
+  vec3 result = c + vec;
   return result;
 }
-V3 &
-operator+=(V3 &vec, r32 c)
+vec3 &
+operator+=(vec3 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
 }
 
-V3
-operator+(V3 a, V3 b)
+vec3
+operator+(vec3 a, vec3 b)
 {
-  V3 result;
+  vec3 result;
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   result.z = a.z + b.z;
   return result;
 }
-V3 &
-operator+=(V3 &a, V3 b)
+vec3 &
+operator+=(vec3 &a, vec3 b)
 {
   a = a + b;
   return a;
 }
 
-V3
-operator-(V3 vec)
+vec3
+operator-(vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = -vec.x;
   result.y = -vec.y;
   result.z = -vec.z;
   return result;
 }
 
-V3
-operator-(r32 c, V3 vec)
+vec3
+operator-(r32 c, vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = c - vec.x;
   result.y = c - vec.y;
   result.z = c - vec.z;
   return result;
 }
-V3
-operator-(V3 vec, r32 c)
+vec3
+operator-(vec3 vec, r32 c)
 {
-  V3 result;
+  vec3 result;
   result.x = vec.x - c;
   result.y = vec.y - c;
   result.z = vec.z - c;
   return result;
 }
-V3 &
-operator-=(V3 &vec, r32 c)
+vec3 &
+operator-=(vec3 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
 }
 
-V3
-operator-(V3 a, V3 b)
+vec3
+operator-(vec3 a, vec3 b)
 {
-  V3 result;
+  vec3 result;
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
   return result;
 }
-V3 &
-operator-=(V3 &a, V3 b)
+vec3 &
+operator-=(vec3 &a, vec3 b)
 {
   a = a - b;
   return a;
 }
 
-V3
-min_V3(V3 a, V3 b)
+vec3
+min_vec3(vec3 a, vec3 b)
 {
-  V3 result;
+  vec3 result;
   result.x = min(a.x, b.x);
   result.y = min(a.y, b.y);
   result.z = min(a.z, b.z);
   return result;
 }
 
-V3
-max_V3(V3 a, V3 b)
+vec3
+max_vec3(vec3 a, vec3 b)
 {
-  V3 result;
+  vec3 result;
   result.x = max(a.x, b.x);
   result.y = max(a.y, b.y);
   result.z = max(a.z, b.z);
   return result;
 }
 
-V3
-round_down(V3 vec)
+vec3
+round_down(vec3 vec)
 {
-  V3 result;
+  vec3 result;
   result.x = (s32)vec.x;
   result.y = (s32)vec.y;
   result.z = (s32)vec.z;
@@ -855,7 +855,7 @@ round_down(V3 vec)
 }
 
 b32
-operator==(V4 a, V4 b)
+operator==(vec4 a, vec4 b)
 {
   b32 result = ((a.w == b.w) &&
                 (a.x == b.x) &&
@@ -864,122 +864,122 @@ operator==(V4 a, V4 b)
   return result;
 }
 b32
-operator!=(V4 a, V4 b)
+operator!=(vec4 a, vec4 b)
 {
   b32 result = !(a == b);
   return result;
 }
-V4
-operator*(r32 c, V4 vec)
+vec4
+operator*(r32 c, vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = c * vec.w;
   result.x = c * vec.x;
   result.y = c * vec.y;
   result.z = c * vec.z;
   return result;
 }
-V4
-operator*(V4 vec, r32 c)
+vec4
+operator*(vec4 vec, r32 c)
 {
-  V4 result = c * vec;
+  vec4 result = c * vec;
   return result;
 }
-V4 &
-operator*=(V4 &vec, r32 c)
+vec4 &
+operator*=(vec4 &vec, r32 c)
 {
   vec = c * vec;
   return vec;
 }
 
-V4
-operator*(V4 a, V4 b)
+vec4
+operator*(vec4 a, vec4 b)
 {
-  V4 result;
+  vec4 result;
   result.w = a.w * b.w;
   result.x = a.x * b.x;
   result.y = a.y * b.y;
   result.z = a.z * b.z;
   return result;
 }
-V4 &
-operator*=(V4 &a, V4 b)
+vec4 &
+operator*=(vec4 &a, vec4 b)
 {
   a = a * b;
   return a;
 }
 
-V4
-operator/(r32 c, V4 vec)
+vec4
+operator/(r32 c, vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = c / vec.w;
   result.x = c / vec.x;
   result.y = c / vec.y;
   result.z = c / vec.z;
   return result;
 }
-V4
-operator/(V4 vec, r32 c)
+vec4
+operator/(vec4 vec, r32 c)
 {
-  V4 result;
+  vec4 result;
   result.w = vec.w / c;
   result.x = vec.x / c;
   result.y = vec.y / c;
   result.z = vec.z / c;
   return result;
 }
-V4 &
-operator/=(V4 &vec, r32 c)
+vec4 &
+operator/=(vec4 &vec, r32 c)
 {
   vec = vec / c;
   return vec;
 }
 
-V4
-operator+(r32 c, V4 vec)
+vec4
+operator+(r32 c, vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = c + vec.w;
   result.x = c + vec.x;
   result.y = c + vec.y;
   result.z = c + vec.z;
   return result;
 }
-V4
-operator+(V4 vec, r32 c)
+vec4
+operator+(vec4 vec, r32 c)
 {
-  V4 result = c + vec;
+  vec4 result = c + vec;
   return result;
 }
-V4 &
-operator+=(V4 &vec, r32 c)
+vec4 &
+operator+=(vec4 &vec, r32 c)
 {
   vec = c + vec;
   return vec;
 }
 
-V4
-operator+(V4 a, V4 b)
+vec4
+operator+(vec4 a, vec4 b)
 {
-  V4 result;
+  vec4 result;
   result.w = a.w + b.w;
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   result.z = a.z + b.z;
   return result;
 }
-V4 &
-operator+=(V4 &a, V4 b)
+vec4 &
+operator+=(vec4 &a, vec4 b)
 {
   a = a + b;
   return a;
 }
 
-V4
-operator-(V4 vec)
+vec4
+operator-(vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = -vec.w;
   result.x = -vec.x;
   result.y = -vec.y;
@@ -987,54 +987,54 @@ operator-(V4 vec)
   return result;
 }
 
-V4
-operator-(r32 c, V4 vec)
+vec4
+operator-(r32 c, vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = c - vec.w;
   result.x = c - vec.x;
   result.y = c - vec.y;
   result.z = c - vec.z;
   return result;
 }
-V4
-operator-(V4 vec, r32 c)
+vec4
+operator-(vec4 vec, r32 c)
 {
-  V4 result;
+  vec4 result;
   result.w = vec.w - c;
   result.x = vec.x - c;
   result.y = vec.y - c;
   result.z = vec.z - c;
   return result;
 }
-V4 &
-operator-=(V4 &vec, r32 c)
+vec4 &
+operator-=(vec4 &vec, r32 c)
 {
   vec = vec - c;
   return vec;
 }
 
-V4
-operator-(V4 a, V4 b)
+vec4
+operator-(vec4 a, vec4 b)
 {
-  V4 result;
+  vec4 result;
   result.w = a.w - b.w;
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
   return result;
 }
-V4 &
-operator-=(V4 &a, V4 b)
+vec4 &
+operator-=(vec4 &a, vec4 b)
 {
   a = a - b;
   return a;
 }
 
-V4
-min_V4(V4 a, V4 b)
+vec4
+min_vec4(vec4 a, vec4 b)
 {
-  V4 result;
+  vec4 result;
   result.w = min(a.w, b.w);
   result.x = min(a.x, b.x);
   result.y = min(a.y, b.y);
@@ -1042,10 +1042,10 @@ min_V4(V4 a, V4 b)
   return result;
 }
 
-V4
-max_V4(V4 a, V4 b)
+vec4
+max_vec4(vec4 a, vec4 b)
 {
-  V4 result;
+  vec4 result;
   result.w = max(a.w, b.w);
   result.x = max(a.x, b.x);
   result.y = max(a.y, b.y);
@@ -1053,17 +1053,17 @@ max_V4(V4 a, V4 b)
   return result;
 }
 
-V4
-clamp(V4 vec, u32 max)
+vec4
+clamp(vec4 vec, u32 max)
 {
-  V4 result = min_V4(vec, (V4){max, max, max, max});
+  vec4 result = min_vec4(vec, (vec4){max, max, max, max});
   return result;
 }
 
-V4
-round_down(V4 vec)
+vec4
+round_down(vec4 vec)
 {
-  V4 result;
+  vec4 result;
   result.w = (s32)vec.w;
   result.x = (s32)vec.x;
   result.y = (s32)vec.y;
@@ -1072,10 +1072,10 @@ round_down(V4 vec)
 }
 
 
-V4
-lerp(V4 min, r32 t, V4 max)
+vec4
+lerp(vec4 min, r32 t, vec4 max)
 {
-  V4 result;
+  vec4 result;
   result.w = lerp(min.w, t, max.w);
   result.x = lerp(min.x, t, max.x);
   result.y = lerp(min.y, t, max.y);
@@ -1084,10 +1084,10 @@ lerp(V4 min, r32 t, V4 max)
 }
 
 
-V3
-remove_alpha(V4 vec)
+vec3
+remove_alpha(vec4 vec)
 {
-  V3 result;
+  vec3 result;
   result.r = vec.r;
   result.g = vec.g;
   result.b = vec.b;
@@ -1095,10 +1095,10 @@ remove_alpha(V4 vec)
 }
 
 
-V3
-pixel_color_to_V3(PixelColor color)
+vec3
+pixel_color_to_vec3(PixelColor color)
 {
-  V3 result;
+  vec3 result;
   result.r = color.r;
   result.g = color.g;
   result.b = color.b;
@@ -1107,7 +1107,7 @@ pixel_color_to_V3(PixelColor color)
 
 
 PixelColor
-to_color(V3 vec)
+to_color(vec3 vec)
 {
   PixelColor result;
   result.r = vec.r;
@@ -1117,45 +1117,45 @@ to_color(V3 vec)
 }
 
 
-V4
-add_color(V4 colour, r32 x)
+vec4
+add_color(vec4 colour, r32 x)
 {
-  V4 result = colour + x;
+  vec4 result = colour + x;
   result.a = colour.a;
   return result;
 }
 
 
-V4
+vec4
 get_color(s32 i = -1)
 {
-  static V4 colors[] = {(V4){1, 0.0, 0.0, 0.0},
-                        (V4){1, 0.0, 0.0, 0.5},
-                        (V4){1, 0.0, 0.0, 1.0},
-                        (V4){1, 0.0, 0.5, 0.0},
-                        (V4){1, 0.0, 0.5, 0.5},
-                        (V4){1, 0.0, 0.5, 1.0},
-                        (V4){1, 0.0, 1.0, 0.0},
-                        (V4){1, 0.0, 1.0, 0.5},
-                        (V4){1, 0.0, 1.0, 1.0},
-                        (V4){1, 0.5, 0.0, 0.0},
-                        (V4){1, 0.5, 0.0, 0.5},
-                        (V4){1, 0.5, 0.0, 1.0},
-                        (V4){1, 0.5, 0.5, 0.0},
-                        (V4){1, 0.5, 0.5, 0.5},
-                        (V4){1, 0.5, 0.5, 1.0},
-                        (V4){1, 0.5, 1.0, 0.0},
-                        (V4){1, 0.5, 1.0, 0.5},
-                        (V4){1, 0.5, 1.0, 1.0},
-                        (V4){1, 1.0, 0.0, 0.0},
-                        (V4){1, 1.0, 0.0, 0.5},
-                        (V4){1, 1.0, 0.0, 1.0},
-                        (V4){1, 1.0, 0.5, 0.0},
-                        (V4){1, 1.0, 0.5, 0.5},
-                        (V4){1, 1.0, 0.5, 1.0},
-                        (V4){1, 1.0, 1.0, 0.0},
-                        (V4){1, 1.0, 1.0, 0.5},
-                        (V4){1, 1.0, 1.0, 1.0}};
+  static vec4 colors[] = {(vec4){1, 0.0, 0.0, 0.0},
+                          (vec4){1, 0.0, 0.0, 0.5},
+                          (vec4){1, 0.0, 0.0, 1.0},
+                          (vec4){1, 0.0, 0.5, 0.0},
+                          (vec4){1, 0.0, 0.5, 0.5},
+                          (vec4){1, 0.0, 0.5, 1.0},
+                          (vec4){1, 0.0, 1.0, 0.0},
+                          (vec4){1, 0.0, 1.0, 0.5},
+                          (vec4){1, 0.0, 1.0, 1.0},
+                          (vec4){1, 0.5, 0.0, 0.0},
+                          (vec4){1, 0.5, 0.0, 0.5},
+                          (vec4){1, 0.5, 0.0, 1.0},
+                          (vec4){1, 0.5, 0.5, 0.0},
+                          (vec4){1, 0.5, 0.5, 0.5},
+                          (vec4){1, 0.5, 0.5, 1.0},
+                          (vec4){1, 0.5, 1.0, 0.0},
+                          (vec4){1, 0.5, 1.0, 0.5},
+                          (vec4){1, 0.5, 1.0, 1.0},
+                          (vec4){1, 1.0, 0.0, 0.0},
+                          (vec4){1, 1.0, 0.0, 0.5},
+                          (vec4){1, 1.0, 0.0, 1.0},
+                          (vec4){1, 1.0, 0.5, 0.0},
+                          (vec4){1, 1.0, 0.5, 0.5},
+                          (vec4){1, 1.0, 0.5, 1.0},
+                          (vec4){1, 1.0, 1.0, 0.0},
+                          (vec4){1, 1.0, 1.0, 0.5},
+                          (vec4){1, 1.0, 1.0, 1.0}};
 
   if (i < 0)
   {
@@ -1169,7 +1169,7 @@ get_color(s32 i = -1)
 
 
 char
-vector_to_compass_dir(V2 direction)
+vector_to_compass_dir(vec2 direction)
 {
   char result = 0;
 
@@ -1199,7 +1199,7 @@ vector_to_compass_dir(V2 direction)
 
 
 r32
-angle_from_vector(V2 direction)
+angle_from_vector(vec2 direction)
 {
   r32 result = 0;
 

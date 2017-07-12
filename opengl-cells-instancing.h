@@ -28,6 +28,6 @@ struct CellInstance
 {
   s32 world_cell_position_x;
   s32 world_cell_position_y;
-  V2 world_cell_offset;
-  V4 colour;
+  vec2 world_cell_offset;
+  vec4 colour;
 };

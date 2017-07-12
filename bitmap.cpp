@@ -97,10 +97,10 @@ load_bitmap(Bitmap *result, const char *filename)
 }
 
 
-V4
+vec4
 get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
 {
-  V4 result;
+  vec4 result;
 
   if (x < bitmap->file->width &&
       y < bitmap->file->height)
@@ -128,10 +128,10 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
       pixel = raw_pixel;
     }
 
-    result = (V4){(r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
-                  (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
-                  (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
-                  (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
+    result = (vec4){(r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
+                    (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
+                    (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
+                    (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
 
     if (bitmap->file->compression == 3 && bitmap->alpha_shift < 0)
     {
@@ -144,7 +144,7 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
     {
       if (result.r == 0xec && result.g == 0xd9 && result.b == 0x9f)
       {
-        result = (V4){0,1,1,1};
+        result = (vec4){0,1,1,1};
       }
       else
       {
@@ -154,7 +154,7 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
   }
   else
   {
-    result = (V4){1, 1, 0, 0};
+    result = (vec4){1, 1, 0, 0};
   }
 
   return result;
@@ -166,21 +166,21 @@ void
 blit_bitmap(Renderer *renderer,
             RenderBasis *render_basis,
             Bitmap *bitmap,
-            V2 pos,
+            vec2 pos,
             BlitBitmapOptions *opts)
 {
   if (opts->crop.start.x == -1)
   {
-    opts->crop.start = (V2){0, 0};
-    opts->crop.end = (V2){bitmap->file->width, bitmap->file->height};
+    opts->crop.start = (vec2){0, 0};
+    opts->crop.end = (vec2){bitmap->file->width, bitmap->file->height};
   }
 
   r32 scale = render_basis->scale * opts->scale;
 
-  V2 crop_size = opts->crop.end - opts->crop.start;
-  V2 fract_pixel_space_size = crop_size * scale;
+  vec2 crop_size = opts->crop.end - opts->crop.start;
+  vec2 fract_pixel_space_size = crop_size * scale;
 
-  Rectangle window_region = (Rectangle){(V2){0, 0}, (V2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
+  Rectangle window_region = (Rectangle){(vec2){0, 0}, (vec2){renderer->frame_buffer.width, renderer->frame_buffer.height}};
   Rectangle render_region = render_basis->clip_region / render_basis->world_per_pixel;
   render_region = get_overlap(render_region, window_region);
 
@@ -189,10 +189,10 @@ blit_bitmap(Renderer *renderer,
   fract_pixel_space.end = fract_pixel_space.start + fract_pixel_space_size;
 
   Rectangle cropped_fract_pixel_space = crop_to(fract_pixel_space, render_region);
-  V2 offset = fract_pixel_space.start - cropped_fract_pixel_space.start;
+  vec2 offset = fract_pixel_space.start - cropped_fract_pixel_space.start;
 
   Rectangle pixel_space = round_down(cropped_fract_pixel_space);
-  V2 fract_offset = pixel_space.start - cropped_fract_pixel_space.start;
+  vec2 fract_offset = pixel_space.start - cropped_fract_pixel_space.start;
 
   for (u32 pixel_y = pixel_space.start.y+1;
        pixel_y <= pixel_space.end.y;
@@ -202,11 +202,11 @@ blit_bitmap(Renderer *renderer,
          pixel_x <= pixel_space.end.x;
          pixel_x++)
     {
-      V2 image_fract_pixel = ((V2){(r32)pixel_x, (r32)pixel_y} - pixel_space.start) - offset + fract_offset;
+      vec2 image_fract_pixel = ((vec2){(r32)pixel_x, (r32)pixel_y} - pixel_space.start) - offset + fract_offset;
 
-      V2 image_pos = image_fract_pixel / fract_pixel_space_size;
+      vec2 image_pos = image_fract_pixel / fract_pixel_space_size;
 
-      V2 rot_image_pos;
+      vec2 rot_image_pos;
       if (opts->rotate == 90)
       {
         rot_image_pos.u =     image_pos.v;
@@ -228,18 +228,18 @@ blit_bitmap(Renderer *renderer,
         rot_image_pos.v = 1 - image_pos.v;
       }
 
-      V2 image_pixel = opts->crop.start + rot_image_pos * crop_size;
+      vec2 image_pixel = opts->crop.start + rot_image_pos * crop_size;
 
       // TODO: Fix interpolation on edges of crop
 
-      V4 top_left_color     = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y);
-      V4 top_right_color    = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y);
-      V4 bottom_left_color  = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y + 1);
-      V4 bottom_right_color = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y + 1);
+      vec4 top_left_color     = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y);
+      vec4 top_right_color    = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y);
+      vec4 bottom_left_color  = get_bitmap_color(bitmap, image_pixel.x,     image_pixel.y + 1);
+      vec4 bottom_right_color = get_bitmap_color(bitmap, image_pixel.x + 1, image_pixel.y + 1);
 
-      V2 frac_pixel = image_pixel - round_down(image_pixel);
+      vec2 frac_pixel = image_pixel - round_down(image_pixel);
 
-      V4 color = top_left_color;
+      vec4 color = top_left_color;
 
       if (opts->interpolation)
       {

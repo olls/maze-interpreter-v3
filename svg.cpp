@@ -1,13 +1,13 @@
 struct ParsePathCommandResult
 {
-  V2 last_point;
+  vec2 last_point;
   char *c;
   b32 found_command;
   LineSegment *added_segment;
 };
 
 ParsePathCommandResult
-parse_path_command(Memory *memory, char command, char *c, char *c_after_command, char *end_f, SVGPath *path, V2 last_point, V2 origin)
+parse_path_command(Memory *memory, char command, char *c, char *c_after_command, char *end_f, SVGPath *path, vec2 last_point, vec2 origin)
 {
   ParsePathCommandResult result;
 
@@ -24,7 +24,7 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
       // Move
       c = c_after_command;
 
-      V2 d_move;
+      vec2 d_move;
       consume_until(c, is_num_or_sign, end_f);
       c = get_num(c, end_f, &d_move.x);
       consume_until(c, is_num_or_sign, end_f);
@@ -155,14 +155,14 @@ parse_path_command(Memory *memory, char command, char *c, char *c_after_command,
 
 
 SVGPath
-parse_path_d(Memory *memory, XMLTag *path_tag, String d_attr, V2 origin)
+parse_path_d(Memory *memory, XMLTag *path_tag, String d_attr, vec2 origin)
 {
   SVGPath path = {.segments = 0, .n_segments = 0};
 
   log(L_SVG, "Parsing d: '%.*s'", d_attr.length, d_attr.text);
   char *end_f = d_attr.text + d_attr.length;
 
-  V2 current_point = origin;
+  vec2 current_point = origin;
 
   char last_command = 0;
 
@@ -267,7 +267,7 @@ find_svg_style(char *c, char *end, String *label_result, String *value_result)
 
 
 b32
-parse_colour_string(String string, V4 *result)
+parse_colour_string(String string, vec4 *result)
 {
   b32 parsed = true;
 
@@ -484,11 +484,11 @@ parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
     char *end = style.text + style.length;
 
     result->stroke_width = 1;
-    result->stroke_colour = (V4){1, 0, 0, 0};
+    result->stroke_colour = (vec4){1, 0, 0, 0};
     result->stroke_linecap = LINECAP_BUTT;
     result->stroke_linejoin = LINEJOIN_MITER;
     result->filled = false;
-    result->fill_colour = (V4){1, 0, 0, 0};
+    result->fill_colour = (vec4){1, 0, 0, 0};
 
     while (c < end)
     {
@@ -514,7 +514,7 @@ parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
 
 
 SVGPath
-parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
+parse_path(Memory *memory, XMLTag *path_tag, vec2 origin)
 {
   SVGPath result;
 
@@ -529,10 +529,10 @@ parse_path(Memory *memory, XMLTag *path_tag, V2 origin)
 
 
 // NOTE: Only implements translate()
-V2
+vec2
 parse_svg_transform(String transform_attr)
 {
-  V2 result = {0, 0};
+  vec2 result = {0, 0};
 
   char *c = transform_attr.text;
   char *end_f = transform_attr.text + transform_attr.length;
@@ -574,7 +574,7 @@ parse_svg_transform(String transform_attr)
 
 
 SVGRect
-parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
+parse_rect(Memory *memory, XMLTag *rect_tag, vec2 origin)
 {
   SVGRect result;
 
@@ -592,8 +592,8 @@ parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
   String height_str = get_attr_value(rect_tag, String("height"));
   String r_str = get_attr_value(rect_tag, String("ry"));
 
-  V2 pos = {0, 0};
-  V2 size = {0, 0};
+  vec2 pos = {0, 0};
+  vec2 size = {0, 0};
   r32 radius = 0;
 
   get_num(x_str.text, x_str.text + x_str.length, &pos.x);
@@ -611,7 +611,7 @@ parse_rect(Memory *memory, XMLTag *rect_tag, V2 origin)
 
 
 SVGCircle
-parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
+parse_circle(Memory *memory, XMLTag *circle_tag, vec2 origin)
 {
   SVGCircle result;
 
@@ -625,7 +625,7 @@ parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
   String y_str = get_attr_value(circle_tag, String("cy"));
   String radius_str  = get_attr_value(circle_tag, String("r"));
 
-  V2 pos;
+  vec2 pos;
   r32 radius;
   get_num(x_str.text, x_str.text + x_str.length, &pos.x);
   get_num(y_str.text, y_str.text + y_str.length, &pos.y);
@@ -639,7 +639,7 @@ parse_circle(Memory *memory, XMLTag *circle_tag, V2 origin)
 
 
 SVGLine
-parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
+parse_line(Memory *memory, XMLTag *line_tag, vec2 origin)
 {
   SVGLine result;
 
@@ -654,7 +654,7 @@ parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
   String x2_str = get_attr_value(line_tag, String("x2"));
   String y2_str = get_attr_value(line_tag, String("y2"));
 
-  V2 start, end;
+  vec2 start, end;
   get_num(x1_str.text, x1_str.text + x1_str.length, &start.x);
   get_num(y1_str.text, y1_str.text + y1_str.length, &start.y);
   get_num(x2_str.text, x2_str.text + x2_str.length,   &end.x);
@@ -667,10 +667,10 @@ parse_line(Memory *memory, XMLTag *line_tag, V2 origin)
 }
 
 
-V2
+vec2
 parse_svg_group(XMLTag *g_tag)
 {
-  V2 result = {0, 0};
+  vec2 result = {0, 0};
 
   String transform_attr = get_attr_value(g_tag, String("transform"));
   if (transform_attr.text != 0)
@@ -683,7 +683,7 @@ parse_svg_group(XMLTag *g_tag)
 
 
 SVGRect
-get_svg_root_rect(XMLTag *root, V2 origin)
+get_svg_root_rect(XMLTag *root, vec2 origin)
 {
   SVGRect result;
   result.rect = (Rectangle){ .start = origin, .end = origin};
@@ -691,7 +691,7 @@ get_svg_root_rect(XMLTag *root, V2 origin)
   String width_str  = get_attr_value(root, String("width"));
   String height_str = get_attr_value(root, String("height"));
 
-  V2 size = {0, 0};
+  vec2 size = {0, 0};
   get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
   get_num(height_str.text, height_str.text + height_str.length, &size.y);
 
@@ -703,7 +703,7 @@ get_svg_root_rect(XMLTag *root, V2 origin)
 
 
 void
-get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta = (V2){0, 0})
+get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delta = (vec2){0, 0})
 {
   XMLTag *child = tag->first_child;
   while (child)
@@ -783,7 +783,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, V2 delta 
       // TODO: Temporary hack for displaying rectangle around SVGs
       (*result)->style = (SVGStyle){
         .stroke_width = 1,
-        .stroke_colour = (V4){0.2, 1, 1, 0},
+        .stroke_colour = (vec4){0.2, 1, 1, 0},
         .stroke_linecap = LINECAP_SQUARE,
         .stroke_linejoin = LINEJOIN_MITER,
         .filled = false

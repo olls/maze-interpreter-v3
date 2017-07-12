@@ -1,8 +1,8 @@
 void
-update_pan_and_zoom(GameState *game_state, Mouse *mouse, V2 screen_size)
+update_pan_and_zoom(GameState *game_state, Mouse *mouse, vec2 screen_size)
 {
   // Convert to 0-centred coords from 0-top-left
-  V2 screen_mouse_pixels = (V2){mouse->x, mouse->y} - (0.5 * screen_size);
+  vec2 screen_mouse_pixels = (vec2){mouse->x, mouse->y} - (0.5 * screen_size);
 
   r32 old_zoom_multiplier = game_state->zoom_multiplier;
   game_state->zoom_multiplier -= mouse->scroll.y * 0.01;
@@ -27,7 +27,7 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse, V2 screen_size)
   game_state->zoom = max(0.005, min(1.0, game_state->zoom));
   game_state->zoom_multiplier *= 0.9f;
 
-  V2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
+  vec2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
   game_state->last_mouse_pos = screen_mouse_pixels;
 
   // TODO: Need a layer to filter whether the mouse is focused on the world
@@ -36,7 +36,7 @@ update_pan_and_zoom(GameState *game_state, Mouse *mouse, V2 screen_size)
     game_state->world_maze_pos.offset -= d_screen_mouse_pixels / (game_state->zoom * 270);
     re_form_world_coord(&game_state->world_maze_pos);
 
-    if (game_state->currently_panning || d_screen_mouse_pixels != (V2){0,0})
+    if (game_state->currently_panning || d_screen_mouse_pixels != (vec2){0,0})
     {
       game_state->currently_panning = true;
     }
@@ -82,17 +82,17 @@ reset_zoom(GameState *game_state)
   //       the cell position?
   game_state->world_per_pixel = 64*64;
   game_state->cell_margin = 0;
-  game_state->last_mouse_pos = (V2){0};
+  game_state->last_mouse_pos = (vec2){0};
 
   game_state->zoom = 0.1;
   game_state->zoom_multiplier = 0;
-  game_state->scale_focus_pixels = (V2){0, 0};
+  game_state->scale_focus_pixels = (vec2){0, 0};
 
-  game_state->world_maze_pos.offset = (V2){0, 0};
+  game_state->world_maze_pos.offset = (vec2){0, 0};
 
   // TODO: Centre maze at start
-  V2 maze_size = get_maze_size(&game_state->maze);
-  V2 maze_center = 0.5f * maze_size;
+  vec2 maze_size = get_maze_size(&game_state->maze);
+  vec2 maze_center = 0.5f * maze_size;
   game_state->world_maze_pos.cell_x = maze_center.x;
   game_state->world_maze_pos.cell_y = maze_center.y;
 }
@@ -188,7 +188,7 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
                   u32 argc, char *argv[])
 {
   b32 keep_running = true;
-  V2 screen_size = (V2){renderer->width, renderer->height};
+  vec2 screen_size = (vec2){renderer->width, renderer->height};
 
   if (!game_state->init)
   {
@@ -300,14 +300,14 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
 
 
   // draw_string(renderer, &orthographic_basis, &\game_state->bitmaps.font,
-  //             size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(V2){strlen(game_state->persistent_str), 1},
-  //             game_state->persistent_str, text_scale, (V4){1, 0, 0, 0});
+  //             size(game_state->screen_render_region) - CHAR_SIZE*text_scale*(vec2){strlen(game_state->persistent_str), 1},
+  //             game_state->persistent_str, text_scale, (vec4){1, 0, 0, 0});
 
   // draw_ui(&render_window, &game_state->bitmaps.font, &game_state->cell_bitmaps, &game_state->ui, time_us);
 
   // char str[4];
   // fmted_str(str, 4, "%d", fps);
-  // draw_string(renderer, &orthographic_basis, &game_state->bitmaps.font, (V2){0, 0}, str, 0.3, (V4){1, 0, 0, 0});
+  // draw_string(renderer, &orthographic_basis, &game_state->bitmaps.font, (vec2){0, 0}, str, 0.3, (vec4){1, 0, 0, 0});
 
   keep_running &= print_gl_errors();
   // printf("Main loop end\n");

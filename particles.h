@@ -17,10 +17,10 @@ struct Particle
   WorldSpace source_pos;
 
   // The position of the particle relative to it's initial (source) position
-  V2 offset;
+  vec2 offset;
 
   r32 speed;
-  V4 color;
+  vec4 color;
   r32 hue;
   b32 fade_out;
   Bitmap *bitmap;

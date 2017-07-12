@@ -50,8 +50,8 @@ draw_string(FT_Library *font_library, FT_Face face, ConstString string)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    V2 pos = {0, 0};
-    V2 size = {5, 5};
+    vec2 pos = {0, 0};
+    vec2 size = {5, 5};
 
     for (u32 char_index = 0;
          char_index < string.length;

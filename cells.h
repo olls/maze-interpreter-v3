@@ -33,11 +33,11 @@ struct CellDisplay
   Bitmap *bitmap;
   Bitmap *bitmap_overlay;
   u32 rotate;
-  V4 color;
+  vec4 color;
 };
 
 
-const V2 CELL_VERTICES[] = {
+const vec2 CELL_VERTICES[] = {
   {0.3, 0.0},
   {0.7, 0.0},
   {0.7, 0.3},
@@ -67,4 +67,4 @@ const GLushort CELL_TRIANGLE_INDICES[] = {
 
 
 void
-draw_cell(CellType type, V2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display = 0);
+draw_cell(CellType type, vec2 world_pos, u32 cell_radius, b32 hovered, CellBitmaps *cell_bitmaps, CellDisplay *cell_display = 0);

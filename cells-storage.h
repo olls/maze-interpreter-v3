@@ -111,5 +111,5 @@ struct Maze
 };
 
 
-V2
+vec2
 get_direction_cell_direction(CellType);

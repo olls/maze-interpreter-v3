@@ -83,7 +83,7 @@ struct Mouse
   b32 l_on_up;
   b32 r_on_up;
 
-  V2 scroll;
+  vec2 scroll;
 };
 
 

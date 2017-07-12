@@ -1,5 +1,5 @@
 char *
-get_direction(char *ptr, V2 *result)
+get_direction(char *ptr, vec2 *result)
 {
   *result = STATIONARY;
 
@@ -213,7 +213,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
               f_ptr += 4;
               consume_whitespace(f_ptr, f_end);
 
-              V2 true_direction;
+              vec2 true_direction;
               char *end_true_direction_f_ptr = get_direction(f_ptr, &true_direction);
               if (end_true_direction_f_ptr == f_ptr)
               {
@@ -229,7 +229,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
 
                 b32 valid_conditional_function = true;
                 b32 else_exists = false;
-                V2 false_direction;
+                vec2 false_direction;
 
                 // ELSE is optional
                 if (str_eq(f_ptr, "ELSE", 4) || str_eq(f_ptr, "else", 4))
@@ -416,7 +416,7 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
   success &= open_file(filename, &file);
   if (success)
   {
-    maze->tree.bounds = (Rectangle){(V2){0, 0}, (V2){MAX_MAZE_SIZE, MAX_MAZE_SIZE}};
+    maze->tree.bounds = (Rectangle){(vec2){0, 0}, (vec2){MAX_MAZE_SIZE, MAX_MAZE_SIZE}};
 
     u32 x = 0;
     u32 y = 0;

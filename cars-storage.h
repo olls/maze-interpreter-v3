@@ -31,10 +31,10 @@ struct Car
 
   WorldSpace cell_pos;
 
-  V2 direction;
+  vec2 direction;
 
   u32 pause_left;
-  V2 unpause_direction;
+  vec2 unpause_direction;
 
   CellType updated_cell_type;
 
@@ -49,7 +49,7 @@ struct CarsBlock
   CarsBlock *next_block;
 
 #ifdef DEBUG_BLOCK_COLORS
-  V4 c;
+  vec4 c;
 #endif
 };
 

@@ -3,17 +3,17 @@
 
 
 void
-setup_cell_vertex_vbo_and_ibo(OpenGL_VBOs *opengl_vbos, const V2 *vertices, u32 n_vertices,
+setup_cell_vertex_vbo_and_ibo(OpenGL_VBOs *opengl_vbos, const vec2 *vertices, u32 n_vertices,
                                                         const GLushort *indices, u32 n_indices)
 {
   // Vertex VBO
 
   glGenBuffers(1, &opengl_vbos->cell_vertex_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_vertex_vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(V2) * n_vertices, vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * n_vertices, vertices, GL_STATIC_DRAW);
 
   GLuint attribute_vertex = 8;
-  glVertexAttribPointer(attribute_vertex, 2, GL_FLOAT, GL_FALSE, sizeof(V2), 0);
+  glVertexAttribPointer(attribute_vertex, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
   glEnableVertexAttribArray(attribute_vertex);
 
   // Vertex IBO
@@ -43,12 +43,12 @@ setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
 
   GLuint attribute_world_cell_offset = 2;
   glEnableVertexAttribArray(attribute_world_cell_offset);
-  glVertexAttribPointer(attribute_world_cell_offset, sizeof(V2)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_offset));
+  glVertexAttribPointer(attribute_world_cell_offset, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_offset));
   glVertexAttribDivisor(attribute_world_cell_offset, 1);
 
   GLuint attribute_colour = 4;
   glEnableVertexAttribArray(attribute_colour);
-  glVertexAttribPointer(attribute_colour, sizeof(V4)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, colour));
+  glVertexAttribPointer(attribute_colour, sizeof(vec4)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, colour));
   glVertexAttribDivisor(attribute_colour, 1);
 }
 
@@ -82,10 +82,8 @@ setup_cell_instancing(GameState *game_state)
   glUseProgram(game_state->shader_program);
 
   setup_vao();
-
   setup_cell_vertex_vbo_and_ibo(&game_state->opengl_vbos, CELL_VERTICES, array_count(CELL_VERTICES),
                                                           CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
-
   setup_cell_instances_vbo(&game_state->opengl_vbos);
 
   CellInstance cell_instances[] = {

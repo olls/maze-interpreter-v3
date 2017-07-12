@@ -1,8 +1,8 @@
 void
-draw_char(Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1})
+draw_char(Bitmap *font, vec2 world_pos, char x, r32 scale = 1, vec4 color = (vec4){-1})
 {
   u32 char_index = x - MIN_CHAR;
-  V2 bitmap_pos = {
+  vec2 bitmap_pos = {
     .x = char_index % 16,
     .y = 5 - (char_index / 16)
   };
@@ -26,7 +26,7 @@ draw_char(Bitmap *font, V2 world_pos, char x, r32 scale = 1, V4 color = (V4){-1}
 
 
 void
-draw_string(Bitmap *font, V2 world_pos, const char str[], r32 scale = 1, V4 color = (V4){-1})
+draw_string(Bitmap *font, vec2 world_pos, const char str[], r32 scale = 1, vec4 color = (vec4){-1})
 {
   u32 i = 0;
   while (str[i])

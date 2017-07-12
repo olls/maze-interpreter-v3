@@ -1,7 +1,7 @@
-V4
-rgb_to_hsv(V4 rgb)
+vec4
+rgb_to_hsv(vec4 rgb)
 {
-  V4 hsv;
+  vec4 hsv;
   hsv.a = rgb.a;
 
   r32 min_c = min(rgb.r, min(rgb.g, rgb.b));
@@ -38,10 +38,10 @@ rgb_to_hsv(V4 rgb)
 }
 
 
-V4
-hsv_to_rgb(V4 hsv)
+vec4
+hsv_to_rgb(vec4 hsv)
 {
-  V4 rgb;
+  vec4 rgb;
   rgb.a = hsv.a;
 
   u32 i;
@@ -98,12 +98,12 @@ hsv_to_rgb(V4 hsv)
 }
 
 
-V4
-shift_hue(V4 color, u32 degrees)
+vec4
+shift_hue(vec4 color, u32 degrees)
 {
-  V4 hsv = rgb_to_hsv(color);
+  vec4 hsv = rgb_to_hsv(color);
   hsv.h = ((u32)hsv.h + degrees) % 360 + (hsv.h - (u32)hsv.h);
-  V4 result = hsv_to_rgb(hsv);
+  vec4 result = hsv_to_rgb(hsv);
 
   return result;
 }
