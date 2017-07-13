@@ -9,9 +9,6 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -394,6 +391,13 @@ main(int argc, char *argv[])
 
   glViewport(0, 0, renderer.width, renderer.height);
   glEnable(GL_DEPTH_TEST);
+
+#ifdef DEBUG
+  glEnable(GL_DEBUG_OUTPUT);
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  glDebugMessageCallback(opengl_debug_output_callback, NULL);
+  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+#endif
 
   const unsigned char *opengl_version = glGetString(GL_VERSION);
   printf("OpenGL Version: %s\n", opengl_version);

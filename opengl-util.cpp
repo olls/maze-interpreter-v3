@@ -199,3 +199,102 @@ get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
 
   return success;
 }
+
+
+void
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+  const char *source_str = 0;
+  const char *type_str = 0;
+  const char * severity_str = 0;
+
+  switch (source)
+  {
+      case GL_DEBUG_SOURCE_API:
+      {
+        source_str = "GL_DEBUG_SOURCE_API";
+      } break;
+      case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+      {
+        source_str = "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
+      } break;
+      case GL_DEBUG_SOURCE_SHADER_COMPILER:
+      {
+        source_str = "GL_DEBUG_SOURCE_SHADER_COMPILER";
+      } break;
+      case GL_DEBUG_SOURCE_THIRD_PARTY:
+      {
+        source_str = "GL_DEBUG_SOURCE_THIRD_PARTY";
+      } break;
+      case GL_DEBUG_SOURCE_APPLICATION:
+      {
+        source_str = "GL_DEBUG_SOURCE_APPLICATION";
+      } break;
+      case GL_DEBUG_SOURCE_OTHER:
+      {
+        source_str = "GL_DEBUG_SOURCE_OTHER";
+      } break;
+  }
+
+  switch (type)
+  {
+      case GL_DEBUG_TYPE_ERROR:
+      {
+        type_str = "GL_DEBUG_TYPE_ERROR";
+      } break;
+      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+      {
+        type_str = "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+      } break;
+      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+      {
+        type_str = "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+      } break;
+      case GL_DEBUG_TYPE_PORTABILITY:
+      {
+        type_str = "GL_DEBUG_TYPE_PORTABILITY";
+      } break;
+      case GL_DEBUG_TYPE_PERFORMANCE:
+      {
+        type_str = "GL_DEBUG_TYPE_PERFORMANCE";
+      } break;
+      case GL_DEBUG_TYPE_MARKER:
+      {
+        type_str = "GL_DEBUG_TYPE_MARKER";
+      } break;
+      case GL_DEBUG_TYPE_PUSH_GROUP:
+      {
+        type_str = "GL_DEBUG_TYPE_PUSH_GROUP";
+      } break;
+      case GL_DEBUG_TYPE_POP_GROUP:
+      {
+        type_str = "GL_DEBUG_TYPE_POP_GROUP";
+      } break;
+      case GL_DEBUG_TYPE_OTHER:
+      {
+        type_str = "GL_DEBUG_TYPE_OTHER";
+      } break;
+  }
+
+  switch (severity)
+  {
+      case GL_DEBUG_SEVERITY_HIGH:
+      {
+        severity_str = "GL_DEBUG_SEVERITY_HIGH";
+      } break;
+      case GL_DEBUG_SEVERITY_MEDIUM:
+      {
+        severity_str = "GL_DEBUG_SEVERITY_MEDIUM";
+      } break;
+      case GL_DEBUG_SEVERITY_LOW:
+      {
+        severity_str = "GL_DEBUG_SEVERITY_LOW";
+      } break;
+      case GL_DEBUG_SEVERITY_NOTIFICATION:
+      {
+        severity_str = "GL_DEBUG_SEVERITY_NOTIFICATION";
+      } break;
+  }
+
+  printf("Source: %s, Type: %s, ID: %d, Severity: %s, \"%.*s\"\n", source_str, type_str, id, severity_str, length, message);
+}
