@@ -96,48 +96,52 @@ create_shader_program(const char *filenames[], GLenum types[], s32 size, GLuint 
 
 
 void
-gl_print_error(GLenum error_code)
+gl_print_error(GLenum error_code, const char *file, u32 line)
 {
+  const char *error;
   switch (error_code)
   {
     case (GL_INVALID_ENUM):
     {
-      log(L_OpenGL, "OpenGL error: GL_INVALID_ENUM");
+      error = "GL_INVALID_ENUM";
     } break;
     case (GL_INVALID_VALUE):
     {
-      log(L_OpenGL, "OpenGL error: GL_INVALID_VALUE");
+      error = "GL_INVALID_VALUE";
     } break;
     case (GL_INVALID_OPERATION):
     {
-      log(L_OpenGL, "OpenGL error: GL_INVALID_OPERATION");
+      error = "GL_INVALID_OPERATION";
     } break;
     case (GL_STACK_OVERFLOW):
     {
-      log(L_OpenGL, "OpenGL error: GL_STACK_OVERFLOW");
+      error = "GL_STACK_OVERFLOW";
     } break;
     case (GL_STACK_UNDERFLOW):
     {
-      log(L_OpenGL, "OpenGL error: GL_STACK_UNDERFLOW");
+      error = "GL_STACK_UNDERFLOW";
     } break;
     case (GL_OUT_OF_MEMORY):
     {
-      log(L_OpenGL, "OpenGL error: GL_OUT_OF_MEMORY");
+      error = "GL_OUT_OF_MEMORY";
     } break;
     case (GL_INVALID_FRAMEBUFFER_OPERATION):
     {
-      log(L_OpenGL, "OpenGL error: GL_INVALID_FRAMEBUFFER_OPERATION");
+      error = "GL_INVALID_FRAMEBUFFER_OPERATION";
     } break;
     case (GL_TABLE_TOO_LARGE):
     {
-      log(L_OpenGL, "OpenGL error: GL_TABLE_TOO_LARGE");
+      error = "GL_TABLE_TOO_LARGE";
     }
   }
+  printf("OpenGL error: %s at %s:%d\n", error, file, line);
 }
 
 
+#define print_gl_errors() _print_gl_errors(__FILE__, __LINE__)
+
 b32
-print_gl_errors()
+_print_gl_errors(const char *file, u32 line)
 {
   b32 success = true;
 
@@ -145,7 +149,7 @@ print_gl_errors()
   while (error != GL_NO_ERROR)
   {
     success &= false;
-    gl_print_error(error);
+    gl_print_error(error, file, line);
 
     error = glGetError();
   }

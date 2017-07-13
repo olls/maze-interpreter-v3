@@ -353,7 +353,7 @@ main(int argc, char *argv[])
   renderer.window = SDL_CreateWindow("Maze Interpreter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, renderer.width, renderer.height, flags);
   if (!renderer.window)
   {
-    printf("Failed to initialise SDL window.\n");
+    printf("Failed to initialise SDL window: %s\n", SDL_GetError());
     exit(1);
   }
 

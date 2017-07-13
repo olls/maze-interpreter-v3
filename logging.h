@@ -15,7 +15,6 @@
           CHANNEL(L_Font) \
           CHANNEL(L_Vector) \
           CHANNEL(L_Render) \
-          CHANNEL(L_RenderQueue) \
           CHANNEL(L_OpenGL) \
           CHANNEL(L_CellInstancing) \
           CHANNEL(L_Layouter) \
