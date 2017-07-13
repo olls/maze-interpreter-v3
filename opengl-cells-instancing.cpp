@@ -1,3 +1,8 @@
+// Cells storage in instance VBO:
+//  - Allocate block of X bytes
+//  - Use block for contiguous array of CellInstances
+//  - Record CellInstance positions in QuadTree Cells
+
 
 // TODO: Separate instance types for the different cell types.
 
@@ -54,19 +59,85 @@ setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
 
 
 void
+allocate_cell_instances_block(OpenGL_VBOs *opengl_vbos, u32 n_cell_instances)
+{
+  glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * n_cell_instances, NULL, GL_STATIC_DRAW);
+  opengl_vbos->n_cell_instances = 0;
+  opengl_vbos->cell_instances_vbo_size = n_cell_instances;
+}
+
+
+void
 load_cell_instances(OpenGL_VBOs *opengl_vbos, CellInstance *cell_instances, u32 n_cell_instances)
 {
   glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * n_cell_instances, cell_instances, GL_STATIC_DRAW);
   opengl_vbos->n_cell_instances = n_cell_instances;
+  opengl_vbos->cell_instances_vbo_size = n_cell_instances;
 }
 
 
 void
 update_cell_instance(OpenGL_VBOs *opengl_vbos, u32 cell_instance_number, CellInstance *instance)
 {
+  if (cell_instance_number < opengl_vbos->n_cell_instances)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(CellInstance) * cell_instance_number, sizeof(CellInstance), instance);
+  }
+}
+
+
+void
+add_cell_instance(OpenGL_VBOs *opengl_vbos, CellInstance *cell_instance)
+{
+  log(L_CellInstancing, "Adding cell instance.");
+
+  if (opengl_vbos->n_cell_instances >= opengl_vbos->cell_instances_vbo_size)
+  {
+    // TODO: Allocate new / extend the CellInstance block
+    log(L_CellInstancing, "Out of space.");
+    return;
+  }
+
   glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(CellInstance) * cell_instance_number, sizeof(CellInstance), instance);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(CellInstance) * opengl_vbos->n_cell_instances, sizeof(CellInstance), cell_instance);
+  ++opengl_vbos->n_cell_instances;
+
+  log(L_CellInstancing, "n_cell_instances: %d, out of cell_instances_vbo_size: %d", opengl_vbos->n_cell_instances, opengl_vbos->cell_instances_vbo_size);
+}
+
+
+void
+remove_cell_instance(OpenGL_VBOs *opengl_vbos, u32 cell_instance_number_to_remove)
+{
+  // Move last CellInstance in VBO into the removed CellInstance.
+
+  log(L_CellInstancing, "Removing cell instance %d.", cell_instance_number_to_remove);
+
+  if (cell_instance_number_to_remove < opengl_vbos->n_cell_instances)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+
+    // Reduce size of cell instances by one, this is also now indicating the position of the cell we need to move into the removed cell's slot.
+    --opengl_vbos->n_cell_instances;
+
+    if (opengl_vbos->n_cell_instances == 0 ||
+        cell_instance_number_to_remove == opengl_vbos->n_cell_instances - 1)
+    {
+      // All cell instances have been removed, or the cell we were removing was at the end of the array, hence no more action is needed.
+    }
+    else
+    {
+      u32 cell_to_remove_position = cell_instance_number_to_remove * sizeof(CellInstance);
+      u32 cell_to_move_position = opengl_vbos->n_cell_instances * sizeof(CellInstance);
+
+      glCopyBufferSubData(GL_ARRAY_BUFFER, GL_ARRAY_BUFFER, cell_to_move_position, cell_to_remove_position, sizeof(CellInstance));
+    }
+  }
+
+  log(L_CellInstancing, "n_cell_instances: %d, out of cell_instances_vbo_size: %d", opengl_vbos->n_cell_instances, opengl_vbos->cell_instances_vbo_size);
 }
 
 

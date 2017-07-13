@@ -17,6 +17,7 @@
           CHANNEL(L_Render) \
           CHANNEL(L_RenderQueue) \
           CHANNEL(L_OpenGL) \
+          CHANNEL(L_CellInstancing) \
           CHANNEL(L_Layouter) \
           CHANNEL(L_GameLoop) \
           CHANNEL(N_LOGGING_CHANNELS)

@@ -19,7 +19,6 @@ layout (location = 8) in vec2 vertex;
 
 // Outputs
 out vec4 colour_varying;
-out vec4 gl_Position;
 
 void
 main(void)

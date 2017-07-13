@@ -21,6 +21,7 @@ struct OpenGL_VBOs
   u32 n_cell_indices;
 
   GLuint cell_instances_vbo;
+  u32 cell_instances_vbo_size;
   u32 n_cell_instances;
 };
 
