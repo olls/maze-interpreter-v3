@@ -33,7 +33,6 @@ setup_cell_vertex_vbo_and_ibo(OpenGL_VBOs *opengl_vbos, const vec2 *vertices, u3
 void
 setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
 {
-  glGenBuffers(1, &opengl_vbos->cell_instances_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
 
   GLuint attribute_world_cell_position_x = 0;
@@ -96,9 +95,35 @@ add_cell_instance(OpenGL_VBOs *opengl_vbos, CellInstance *cell_instance)
 
   if (opengl_vbos->n_cell_instances >= opengl_vbos->cell_instances_vbo_size)
   {
-    // TODO: Allocate new / extend the CellInstance block
-    log(L_CellInstancing, "Out of space.");
-    return;
+    log(L_CellInstancing, "Out of space, allocating larger VBO.");
+
+    GLuint new_buffer = create_buffer();
+    glBindBuffer(GL_ARRAY_BUFFER, new_buffer);
+
+    assert(opengl_vbos->cell_instances_vbo_size < MAX_U32 / 2);
+    u32 new_buffer_size = opengl_vbos->cell_instances_vbo_size * 2;
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * new_buffer_size, NULL, GL_STATIC_DRAW);
+
+    // Copy data into new VBO
+    // Bind buffers to special READ/WRITE copying buffers
+    glBindBuffer(GL_COPY_READ_BUFFER, opengl_vbos->cell_instances_vbo);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, new_buffer);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(CellInstance) * opengl_vbos->n_cell_instances);
+
+    glDeleteBuffers(1, &opengl_vbos->cell_instances_vbo);
+
+    opengl_vbos->cell_instances_vbo = new_buffer;
+    opengl_vbos->cell_instances_vbo_size = new_buffer_size;
+
+    // TODO: Because we overwrite the old buffer with a new buffer, and the
+    //       attributes are linked to the old buffer, we must re-set-them-up.
+    //       If we kept the same buffer name, but still expanded it without
+    //       losing the data, this would prevent us having to do this.
+    setup_cell_instances_vbo(opengl_vbos);
+
+    print_gl_errors();
+    log(L_CellInstancing, "Reallocated VBO.");
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
@@ -155,6 +180,8 @@ setup_cell_instancing(GameState *game_state)
   setup_vao();
   setup_cell_vertex_vbo_and_ibo(&game_state->opengl_vbos, CELL_VERTICES, array_count(CELL_VERTICES),
                                                           CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
+
+  game_state->opengl_vbos.cell_instances_vbo = create_buffer();
   setup_cell_instances_vbo(&game_state->opengl_vbos);
 
   CellInstance cell_instances[] = {
