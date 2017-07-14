@@ -1,3 +1,7 @@
+const u32 INITIAL_CELL_INSTANCE_VBO_SIZE = 16;
+const u32 INVALID_CELL_INSTANCE_POSITION = MAX_U32;
+
+
 struct Uniforms
 {
   union {

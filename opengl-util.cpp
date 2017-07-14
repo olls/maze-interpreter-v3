@@ -202,7 +202,7 @@ get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
 
 
 void
-opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
 {
   const char *source_str = 0;
   const char *type_str = 0;
