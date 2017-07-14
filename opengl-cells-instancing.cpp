@@ -37,12 +37,12 @@ setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
 
   GLuint attribute_world_cell_position_x = 0;
   glEnableVertexAttribArray(attribute_world_cell_position_x);
-  glVertexAttribPointer(attribute_world_cell_position_x, 1, GL_INT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_x));
+  glVertexAttribIPointer(attribute_world_cell_position_x, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_x));
   glVertexAttribDivisor(attribute_world_cell_position_x, 1);
 
   GLuint attribute_world_cell_position_y = 1;
   glEnableVertexAttribArray(attribute_world_cell_position_y);
-  glVertexAttribPointer(attribute_world_cell_position_y, 1, GL_INT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_y));
+  glVertexAttribIPointer(attribute_world_cell_position_y, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_y));
   glVertexAttribDivisor(attribute_world_cell_position_y, 1);
 
   GLuint attribute_world_cell_offset = 2;
@@ -152,6 +152,36 @@ add_cell_instance(OpenGL_VBOs *opengl_vbos, Cell *cell)
 
 
 void
+recurse_adding_all_cell_instances(OpenGL_VBOs *opengl_vbos, QuadTree *tree)
+{
+  if (tree)
+  {
+    for (u32 cell_index = 0;
+         cell_index < tree->used;
+         ++cell_index)
+    {
+      Cell *cell = tree->cells + cell_index;
+      add_cell_instance(opengl_vbos, cell);
+    }
+
+    recurse_adding_all_cell_instances(opengl_vbos, tree->top_right);
+    recurse_adding_all_cell_instances(opengl_vbos, tree->top_left);
+    recurse_adding_all_cell_instances(opengl_vbos, tree->bottom_right);
+    recurse_adding_all_cell_instances(opengl_vbos, tree->bottom_left);
+  }
+}
+
+
+void
+add_all_cell_instances(OpenGL_VBOs *opengl_vbos, QuadTree *tree)
+{
+  recurse_adding_all_cell_instances(opengl_vbos, tree);
+  print_gl_errors();
+  log(L_CellInstancing, "Added all cell instances.");
+}
+
+
+void
 remove_cell_instance(OpenGL_VBOs *opengl_vbos, Maze *maze, Cell *cell)
 {
   // Move last CellInstance in VBO into the removed CellInstance.
@@ -223,6 +253,8 @@ setup_cell_instancing(GameState *game_state)
   setup_cell_instances_vbo(&game_state->opengl_vbos);
   game_state->opengl_vbos.cell_instances_vbo_size = 0;
 
+  add_all_cell_instances(&game_state->opengl_vbos, &game_state->maze.tree);
+
   game_state->uniforms.mat4_projection_matrix.name = "projection_matrix";
   game_state->uniforms.int_render_origin_cell_x.name = "render_origin_cell_x";
   game_state->uniforms.int_render_origin_cell_y.name = "render_origin_cell_y";
@@ -231,7 +263,7 @@ setup_cell_instancing(GameState *game_state)
   success &= get_uniform_locations(game_state->shader_program, game_state->uniforms.array, array_count(game_state->uniforms.array));
 
   success &= print_gl_errors();
-  printf("OpenGL VBOs setup finished\n");
+  log(L_CellInstancing, "OpenGL VBOs setup finished.");
 
   return success;
 }

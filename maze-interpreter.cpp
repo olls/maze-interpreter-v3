@@ -289,15 +289,15 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
 
   r32 aspect = (r32)renderer->height / renderer->width;
   mat4 projection_matrix = {aspect, 0, 0, 0,
-                            0, 1, 0, 0,
+                            0, -1, 0, 0,
                             0, 0, 1, 0,
                             0, 0, 0, 1};
   glUniformMatrix4fv(game_state->uniforms.mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
 
-  glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, 0);
-  glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, 0);
-  glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, 0, 0);
-  glUniform1f(game_state->uniforms.float_scale.location, 0.5);
+  glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, game_state->world_maze_pos.cell_x);
+  glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, game_state->world_maze_pos.cell_y);
+  glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, game_state->world_maze_pos.offset.x, game_state->world_maze_pos.offset.y);
+  glUniform1f(game_state->uniforms.float_scale.location, game_state->zoom);
 
   glDrawElementsInstanced(GL_TRIANGLES, game_state->opengl_vbos.n_cell_indices, GL_UNSIGNED_SHORT, 0, game_state->opengl_vbos.n_cell_instances);
 

@@ -35,5 +35,7 @@ main(void)
   screen_postion *= scale;
 
   gl_Position = projection_matrix * vec4(screen_postion, 0.0, 1.0);
-  colour_varying = colour;
+
+  // TODO: Use same colour component ordering in OpenGL and engine...
+  colour_varying = vec4(colour.gba, 1);
 }

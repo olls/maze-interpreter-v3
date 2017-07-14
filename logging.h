@@ -16,6 +16,7 @@
           CHANNEL(L_Vector) \
           CHANNEL(L_Render) \
           CHANNEL(L_OpenGL) \
+          CHANNEL(L_OpenGL_Debug) \
           CHANNEL(L_CellInstancing) \
           CHANNEL(L_Layouter) \
           CHANNEL(L_GameLoop) \

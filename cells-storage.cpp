@@ -49,7 +49,7 @@ get_cell_from_hash(Maze *maze, u32 x, u32 y)
 
 
 Cell *
-get_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
+find_or_create_cell(Maze *maze, u32 x, u32 y, Memory *memory = 0)
 {
   QuadTree * tree = &(maze->tree);
 
@@ -150,4 +150,18 @@ clear_maze(Maze *maze)
 {
   clear_cells_from_quadtree(&maze->tree);
   zero_n(&maze->cache_hash, Cell*, CELL_CACHE_SIZE);
+}
+
+
+Cell *
+get_cell(Maze *maze, u32 x, u32 y)
+{
+  return find_or_create_cell(maze, x, y);
+}
+
+
+Cell *
+create_new_cell(Maze *maze, u32 x, u32 y, Memory *memory)
+{
+  return find_or_create_cell(maze, x, y, memory);
 }

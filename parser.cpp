@@ -435,7 +435,7 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
 
       if (new_cell.type != CELL_NULL)
       {
-        Cell *cell = get_cell(maze, x, y, memory);
+        Cell *cell = create_new_cell(maze, x, y, memory);
 
         cell->type = new_cell.type;
         cell->pause = new_cell.pause;
