@@ -29,7 +29,6 @@
 #include "layouter.h"
 #include "freetype.h"
 #include "opengl-util.h"
-#include "draw-ui-elements.h"
 
 #include "engine.h"
 
@@ -49,6 +48,5 @@
 #include "layouter.cpp"
 #include "freetype.cpp"
 #include "opengl-util.cpp"
-#include "draw-ui-elements.cpp"
 
 #include "engine.cpp"

@@ -184,7 +184,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
   setup_inputs(keys, &game_state->inputs);
 
   success &= load_assets(memory, game_state, font_library);
-  success &= setup_cell_instancing(&game_state->cell_instancing_vbos, &game_state->uniforms);
+  success &= setup_cell_instancing(&game_state->cell_instancing_vbos);
 
   add_all_cell_instances(&game_state->cell_instancing_vbos, &game_state->maze.tree);
 
@@ -305,15 +305,8 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                             0, -1, 0, 0,
                             0, 0, 1, 0,
                             0, 0, 0, 1};
-  glUniformMatrix4fv(game_state->uniforms.mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
 
-  Panning *panning = &game_state->panning;
-  glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, panning->world_maze_pos.cell_x);
-  glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, panning->world_maze_pos.cell_y);
-  glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, panning->world_maze_pos.offset.x, panning->world_maze_pos.offset.y);
-  glUniform1f(game_state->uniforms.float_scale.location, panning->zoom);
-
-  glDrawElementsInstanced(GL_TRIANGLES, game_state->cell_instancing_vbos.n_cell_indices, GL_UNSIGNED_SHORT, 0, game_state->cell_instancing_vbos.n_cell_instances);
+  draw_instanced_cells(&game_state->cell_instancing_vbos, &game_state->panning, projection_matrix);
 
   // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
   // draw_cars(game_state, &render_window, &(game_state->cars), time_us);

@@ -21,6 +21,7 @@ struct Uniforms
 struct CellInstancingVBOs
 {
   GLuint shader_program;
+  Uniforms uniforms;
 
   GLuint cell_vertex_vbo;
   GLuint cell_vertex_ibo;

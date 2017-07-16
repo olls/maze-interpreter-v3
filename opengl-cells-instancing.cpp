@@ -234,8 +234,24 @@ remove_cell_instance(CellInstancingVBOs *cell_instancing_vbos, Maze *maze, Cell 
 }
 
 
+void
+draw_instanced_cells(CellInstancingVBOs *cell_instancing_vbos, Panning *panning, mat4 projection_matrix)
+{
+  Uniforms *uniforms = &cell_instancing_vbos->uniforms;
+
+  glUniformMatrix4fv(uniforms->mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
+
+  glUniform1i(uniforms->int_render_origin_cell_x.location, panning->world_maze_pos.cell_x);
+  glUniform1i(uniforms->int_render_origin_cell_y.location, panning->world_maze_pos.cell_y);
+  glUniform2f(uniforms->vec2_render_origin_offset.location, panning->world_maze_pos.offset.x, panning->world_maze_pos.offset.y);
+  glUniform1f(uniforms->float_scale.location, panning->zoom);
+
+  glDrawElementsInstanced(GL_TRIANGLES, cell_instancing_vbos->n_cell_indices, GL_UNSIGNED_SHORT, 0, cell_instancing_vbos->n_cell_instances);
+}
+
+
 b32
-setup_cell_instancing(CellInstancingVBOs *cell_instancing_vbos, Uniforms *uniforms)
+setup_cell_instancing(CellInstancingVBOs *cell_instancing_vbos)
 {
   b32 success = true;
 
@@ -253,6 +269,7 @@ setup_cell_instancing(CellInstancingVBOs *cell_instancing_vbos, Uniforms *unifor
   setup_cell_instances_vbo(cell_instancing_vbos);
   cell_instancing_vbos->cell_instances_vbo_size = 0;
 
+  Uniforms *uniforms = &cell_instancing_vbos->uniforms;
   uniforms->mat4_projection_matrix.name = "projection_matrix";
   uniforms->int_render_origin_cell_x.name = "render_origin_cell_x";
   uniforms->int_render_origin_cell_y.name = "render_origin_cell_y";
