@@ -1129,7 +1129,7 @@ add_color(vec4 colour, r32 x)
 vec4
 get_color(s32 i = -1)
 {
-  static vec4 colors[] = {(vec4){1, 0.0, 0.0, 0.0},
+  static vec4 colours[] = {(vec4){1, 0.0, 0.0, 0.0},
                           (vec4){1, 0.0, 0.0, 0.5},
                           (vec4){1, 0.0, 0.0, 1.0},
                           (vec4){1, 0.0, 0.5, 0.0},
@@ -1164,7 +1164,7 @@ get_color(s32 i = -1)
 
   i %= 27;
 
-  return colors[i];
+  return colours[i];
 }
 
 

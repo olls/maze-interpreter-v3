@@ -1,8 +1,3 @@
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-
 u32
 get_first_bit_pos(u32 x)
 {
@@ -51,7 +46,7 @@ load_bitmap(Bitmap *result, const char *filename)
   log(L_Bitmap, "bits_per_pixel (1, 4, 8, 16, 24, or 32):           `%d`", file->bits_per_pixel);
   log(L_Bitmap, "compression (0 = uncompressed):                    `%d`", file->compression);
   log(L_Bitmap, "image_size (may be zero for uncompressed images):  `%d`", file->image_size);
-  log(L_Bitmap, "n_colors_table (Number of color table entries):    `%d`", file->n_colors_table);
+  log(L_Bitmap, "n_colours_table (Number of color table entries):    `%d`", file->n_colours_table);
   log(L_Bitmap, "red_mask:                                          `%8x`", file->red_mask);
   log(L_Bitmap, "green_mask:                                        `%8x`", file->green_mask);
   log(L_Bitmap, "blue_mask:                                         `%8x`", file->blue_mask);

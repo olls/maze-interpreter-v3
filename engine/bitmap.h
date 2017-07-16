@@ -15,8 +15,8 @@ struct Bitmap
     u32 image_size;         // May be zero for uncompressed images
     u32 x_pixels_per_meter; // Preferred resolution
     u32 y_pixels_per_meter; // Preferred resolution
-    u32 n_colors_table;     // Number of color table entries
-    u32 important_colors;   // Number of significant colors
+    u32 n_colours_table;     // Number of color table entries
+    u32 important_colours;   // Number of significant colours
 
     u32 red_mask;
     u32 green_mask;

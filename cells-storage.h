@@ -83,7 +83,8 @@ struct Cell
 
   u64 edit_mode_last_change;
 
-  union {
+  union
+  {
     u32 pause;
     u32 function_index;
   };

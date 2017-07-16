@@ -193,15 +193,18 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 
 
 b32
-update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_Library *font_library,
+update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
                   u32 argc, char *argv[])
 {
   b32 keep_running = true;
   vec2 screen_size = (vec2){renderer->width, renderer->height};
 
-  if (!game_state->init)
+  static GameState *game_state = 0;
+  if (game_state == 0)
   {
+    game_state = push_struct(memory, GameState);
+
     if (!init_game(memory, game_state, keys, font_library, time_us, argc, argv))
     {
       keep_running = false;

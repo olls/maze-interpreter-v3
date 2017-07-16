@@ -38,7 +38,6 @@ const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(200);
 
 
-
 struct Renderer
 {
   SDL_Window *window;
@@ -93,3 +92,8 @@ struct FPSCounter
   u64 last_update;
   u32 current_avg;
 };
+
+
+typedef b32 (*UpdateAndRenderFunc)(Memory *memory, Renderer *renderer, FT_Library *font_library,
+                                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
+                                   u32 argc, char *argv[]);
