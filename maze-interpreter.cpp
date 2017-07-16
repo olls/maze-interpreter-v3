@@ -1,8 +1,17 @@
+vec2
+screen_pixels_to_screen_space(vec2 screen_size, vec2 screen_pixels)
+{
+  // Convert from top-left = (0, 0) bottom-right = (width, height)
+  //         to top-left = (-1, -1) bottom-right = (1, 1)
+  vec2 result = (2*screen_pixels / screen_size.y) - 1;
+  return result;
+}
+
+
 void
 update_pan_and_zoom(Panning *panning, Inputs *inputs, Mouse *mouse, vec2 screen_size)
 {
-  // Convert to 0-centred coords from 0-top-left
-  vec2 screen_mouse_pixels = (vec2){mouse->x, mouse->y} - (0.5 * screen_size);
+  vec2 screen_mouse_pixels = screen_pixels_to_screen_space(screen_size, (vec2){mouse->x, mouse->y});
 
   r32 old_zoom_multiplier = panning->zoom_multiplier;
   panning->zoom_multiplier -= mouse->scroll.y * 0.01;
@@ -33,7 +42,7 @@ update_pan_and_zoom(Panning *panning, Inputs *inputs, Mouse *mouse, vec2 screen_
   // TODO: Need a layer to filter whether the mouse is focused on the world
   if (mouse->l_down)
   {
-    panning->world_maze_pos.offset -= d_screen_mouse_pixels / (panning->zoom * 270);
+    panning->world_maze_pos.offset -= d_screen_mouse_pixels / panning->zoom;
     re_form_world_coord(&panning->world_maze_pos);
 
     if (panning->currently_panning || d_screen_mouse_pixels != (vec2){0,0})
