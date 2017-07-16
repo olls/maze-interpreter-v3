@@ -1,49 +1,49 @@
 void
-update_pan_and_zoom(GameState *game_state, Mouse *mouse, vec2 screen_size)
+update_pan_and_zoom(Panning *panning, Inputs *inputs, Mouse *mouse, vec2 screen_size)
 {
   // Convert to 0-centred coords from 0-top-left
   vec2 screen_mouse_pixels = (vec2){mouse->x, mouse->y} - (0.5 * screen_size);
 
-  r32 old_zoom_multiplier = game_state->zoom_multiplier;
-  game_state->zoom_multiplier -= mouse->scroll.y * 0.01;
+  r32 old_zoom_multiplier = panning->zoom_multiplier;
+  panning->zoom_multiplier -= mouse->scroll.y * 0.01;
 
-  if (game_state->inputs.maps[ZOOM_IN].active)
+  if (inputs->maps[ZOOM_IN].active)
   {
-    game_state->zoom_multiplier += .2;
+    panning->zoom_multiplier += .2;
   }
-  if (game_state->inputs.maps[ZOOM_OUT].active)
+  if (inputs->maps[ZOOM_OUT].active)
   {
-    game_state->zoom_multiplier -= .2;
+    panning->zoom_multiplier -= .2;
   }
 
   // If just started zooming: use this mouse position for scale focus
-  // if (old_zoom_multiplier < 0.0005 && game_state->zoom_multiplier > 0.001)
+  // if (old_zoom_multiplier < 0.0005 && panning->zoom_multiplier > 0.001)
   {
-    game_state->scale_focus_pixels = screen_mouse_pixels;
+    panning->scale_focus_pixels = screen_mouse_pixels;
   }
 
-  game_state->old_zoom = game_state->zoom;
-  game_state->zoom *= 1 + game_state->zoom_multiplier;
-  game_state->zoom = max(0.005, min(1.0, game_state->zoom));
-  game_state->zoom_multiplier *= 0.9f;
+  panning->old_zoom = panning->zoom;
+  panning->zoom *= 1 + panning->zoom_multiplier;
+  panning->zoom = max(0.005, min(1.0, panning->zoom));
+  panning->zoom_multiplier *= 0.9f;
 
-  vec2 d_screen_mouse_pixels = screen_mouse_pixels - game_state->last_mouse_pos;
-  game_state->last_mouse_pos = screen_mouse_pixels;
+  vec2 d_screen_mouse_pixels = screen_mouse_pixels - panning->last_mouse_pos;
+  panning->last_mouse_pos = screen_mouse_pixels;
 
   // TODO: Need a layer to filter whether the mouse is focused on the world
   if (mouse->l_down)
   {
-    game_state->world_maze_pos.offset -= d_screen_mouse_pixels / (game_state->zoom * 270);
-    re_form_world_coord(&game_state->world_maze_pos);
+    panning->world_maze_pos.offset -= d_screen_mouse_pixels / (panning->zoom * 270);
+    re_form_world_coord(&panning->world_maze_pos);
 
-    if (game_state->currently_panning || d_screen_mouse_pixels != (vec2){0,0})
+    if (panning->currently_panning || d_screen_mouse_pixels != (vec2){0,0})
     {
-      game_state->currently_panning = true;
+      panning->currently_panning = true;
     }
   }
-  else if (game_state->currently_panning && mouse->l_on_up)
+  else if (panning->currently_panning && mouse->l_on_up)
   {
-    game_state->currently_panning = false;
+    panning->currently_panning = false;
     mouse->l_on_up = false;
   }
 }
@@ -78,23 +78,22 @@ sim_tick(GameState *game_state, u64 time_us)
 void
 reset_zoom(GameState *game_state)
 {
-  // TODO: Should world coords be r32s now we are using u32s for
-  //       the cell position?
   game_state->world_per_pixel = 64*64;
   game_state->cell_margin = 0;
-  game_state->last_mouse_pos = (vec2){0};
 
-  game_state->zoom = 0.1;
-  game_state->zoom_multiplier = 0;
-  game_state->scale_focus_pixels = (vec2){0, 0};
+  Panning *panning = &game_state->panning;
+  panning->last_mouse_pos = (vec2){0};
+  panning->zoom = 0.1;
+  panning->zoom_multiplier = 0;
+  panning->scale_focus_pixels = (vec2){0, 0};
 
-  game_state->world_maze_pos.offset = (vec2){0, 0};
+  panning->world_maze_pos.offset = (vec2){0, 0};
 
   // TODO: Centre maze at start
   vec2 maze_size = get_maze_size(&game_state->maze);
   vec2 maze_center = 0.5f * maze_size;
-  game_state->world_maze_pos.cell_x = maze_center.x;
-  game_state->world_maze_pos.cell_y = maze_center.y;
+  panning->world_maze_pos.cell_x = maze_center.x;
+  panning->world_maze_pos.cell_y = maze_center.y;
 }
 
 
@@ -176,7 +175,9 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
   setup_inputs(keys, &game_state->inputs);
 
   success &= load_assets(memory, game_state, font_library);
-  success &= setup_cell_instancing(game_state);
+  success &= setup_cell_instancing(&game_state->cell_instancing_vbos, &game_state->uniforms);
+
+  add_all_cell_instances(&game_state->cell_instancing_vbos, &game_state->maze.tree);
 
   return success;
 }
@@ -238,7 +239,7 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
   // UPDATE VIEW
   //
 
-  update_pan_and_zoom(game_state, mouse, screen_size);
+  update_pan_and_zoom(&game_state->panning, &game_state->inputs, mouse, screen_size);
 
 
   //
@@ -294,12 +295,13 @@ update_and_render(Memory *memory, GameState *game_state, Renderer *renderer, FT_
                             0, 0, 0, 1};
   glUniformMatrix4fv(game_state->uniforms.mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
 
-  glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, game_state->world_maze_pos.cell_x);
-  glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, game_state->world_maze_pos.cell_y);
-  glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, game_state->world_maze_pos.offset.x, game_state->world_maze_pos.offset.y);
-  glUniform1f(game_state->uniforms.float_scale.location, game_state->zoom);
+  Panning *panning = &game_state->panning;
+  glUniform1i(game_state->uniforms.int_render_origin_cell_x.location, panning->world_maze_pos.cell_x);
+  glUniform1i(game_state->uniforms.int_render_origin_cell_y.location, panning->world_maze_pos.cell_y);
+  glUniform2f(game_state->uniforms.vec2_render_origin_offset.location, panning->world_maze_pos.offset.x, panning->world_maze_pos.offset.y);
+  glUniform1f(game_state->uniforms.float_scale.location, panning->zoom);
 
-  glDrawElementsInstanced(GL_TRIANGLES, game_state->opengl_vbos.n_cell_indices, GL_UNSIGNED_SHORT, 0, game_state->opengl_vbos.n_cell_instances);
+  glDrawElementsInstanced(GL_TRIANGLES, game_state->cell_instancing_vbos.n_cell_indices, GL_UNSIGNED_SHORT, 0, game_state->cell_instancing_vbos.n_cell_instances);
 
   // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
   // draw_cars(game_state, &render_window, &(game_state->cars), time_us);

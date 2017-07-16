@@ -18,8 +18,10 @@ struct Uniforms
 };
 
 
-struct OpenGL_VBOs
+struct CellInstancingVBOs
 {
+  GLuint shader_program;
+
   GLuint cell_vertex_vbo;
   GLuint cell_vertex_ibo;
   u32 n_cell_indices;

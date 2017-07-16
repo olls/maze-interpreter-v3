@@ -18,6 +18,19 @@ struct Bitmaps
 };
 
 
+struct Panning
+{
+  r32 zoom_multiplier;
+  r32 zoom;
+  r32 old_zoom;
+  vec2 scale_focus_pixels;
+
+  WorldSpace world_maze_pos;
+  vec2 last_mouse_pos;
+  b32 currently_panning;
+};
+
+
 struct GameState
 {
   b32 init;
@@ -25,21 +38,13 @@ struct GameState
 
   u32 world_per_pixel;
 
-  r32 zoom_multiplier;
-  r32 zoom;
-  r32 old_zoom;
-  vec2 scale_focus_pixels;
+  Panning panning;
 
-  GLuint shader_program;
-  OpenGL_VBOs opengl_vbos;
+  CellInstancingVBOs cell_instancing_vbos;
   Uniforms uniforms;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;
-
-  WorldSpace world_maze_pos;
-  vec2 last_mouse_pos;
-  b32 currently_panning;
 
   b32 single_step;
   u64 last_sim_tick;

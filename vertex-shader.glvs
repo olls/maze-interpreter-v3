@@ -1,6 +1,5 @@
 #version 330 core
 
-// TODO: Convert to a transformation matrix?
 uniform int render_origin_cell_x;
 uniform int render_origin_cell_y;
 uniform vec2 render_origin_offset;

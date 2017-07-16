@@ -8,13 +8,13 @@
 
 
 void
-setup_cell_vertex_vbo_and_ibo(OpenGL_VBOs *opengl_vbos, const vec2 *vertices, u32 n_vertices,
-                                                        const GLushort *indices, u32 n_indices)
+setup_cell_vertex_vbo_and_ibo(CellInstancingVBOs *cell_instancing_vbos, const vec2 *vertices, u32 n_vertices,
+                                                                        const GLushort *indices, u32 n_indices)
 {
   // Vertex VBO
 
-  glGenBuffers(1, &opengl_vbos->cell_vertex_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_vertex_vbo);
+  glGenBuffers(1, &cell_instancing_vbos->cell_vertex_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing_vbos->cell_vertex_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * n_vertices, vertices, GL_STATIC_DRAW);
 
   GLuint attribute_vertex = 8;
@@ -23,17 +23,17 @@ setup_cell_vertex_vbo_and_ibo(OpenGL_VBOs *opengl_vbos, const vec2 *vertices, u3
 
   // Vertex IBO
 
-  glGenBuffers(1, &opengl_vbos->cell_vertex_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, opengl_vbos->cell_vertex_ibo);
+  glGenBuffers(1, &cell_instancing_vbos->cell_vertex_ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cell_instancing_vbos->cell_vertex_ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * n_indices, indices, GL_STATIC_DRAW);
-  opengl_vbos->n_cell_indices = n_indices;
+  cell_instancing_vbos->n_cell_indices = n_indices;
 }
 
 
 void
-setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
+setup_cell_instances_vbo(CellInstancingVBOs *cell_instancing_vbos)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing_vbos->cell_instances_vbo);
 
   GLuint attribute_world_cell_position_x = 0;
   glEnableVertexAttribArray(attribute_world_cell_position_x);
@@ -58,29 +58,29 @@ setup_cell_instances_vbo(OpenGL_VBOs *opengl_vbos)
 
 
 void
-allocate_cell_instances_block(OpenGL_VBOs *opengl_vbos, u32 n_cell_instances)
+allocate_cell_instances_block(CellInstancingVBOs *cell_instancing_vbos, u32 n_cell_instances)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing_vbos->cell_instances_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * n_cell_instances, NULL, GL_STATIC_DRAW);
-  opengl_vbos->n_cell_instances = 0;
-  opengl_vbos->cell_instances_vbo_size = n_cell_instances;
+  cell_instancing_vbos->n_cell_instances = 0;
+  cell_instancing_vbos->cell_instances_vbo_size = n_cell_instances;
 }
 
 
 void
-extend_cell_instance_vbo(OpenGL_VBOs *opengl_vbos)
+extend_cell_instance_vbo(CellInstancingVBOs *cell_instancing_vbos)
 {
-  if (opengl_vbos->cell_instances_vbo_size == 0)
+  if (cell_instancing_vbos->cell_instances_vbo_size == 0)
   {
     log(L_CellInstancing, "No buffer allocated yet, allocating new buffer.");
-    allocate_cell_instances_block(opengl_vbos, INITIAL_CELL_INSTANCE_VBO_SIZE);
+    allocate_cell_instances_block(cell_instancing_vbos, INITIAL_CELL_INSTANCE_VBO_SIZE);
   }
   else
   {
     log(L_CellInstancing, "Out of space, allocating larger buffer.");
 
-    assert(opengl_vbos->cell_instances_vbo_size < MAX_U32 / 2);
-    u32 new_buffer_size = opengl_vbos->cell_instances_vbo_size * 2;
+    assert(cell_instancing_vbos->cell_instances_vbo_size < MAX_U32 / 2);
+    u32 new_buffer_size = cell_instancing_vbos->cell_instances_vbo_size * 2;
 
     GLuint new_buffer = create_buffer();
     glBindBuffer(GL_ARRAY_BUFFER, new_buffer);
@@ -88,20 +88,20 @@ extend_cell_instance_vbo(OpenGL_VBOs *opengl_vbos)
 
     // Copy data into new VBO
     // Bind buffers to special READ/WRITE copying buffers
-    glBindBuffer(GL_COPY_READ_BUFFER, opengl_vbos->cell_instances_vbo);
+    glBindBuffer(GL_COPY_READ_BUFFER, cell_instancing_vbos->cell_instances_vbo);
     glBindBuffer(GL_COPY_WRITE_BUFFER, new_buffer);
-    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(CellInstance) * opengl_vbos->n_cell_instances);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(CellInstance) * cell_instancing_vbos->n_cell_instances);
 
-    glDeleteBuffers(1, &opengl_vbos->cell_instances_vbo);
+    glDeleteBuffers(1, &cell_instancing_vbos->cell_instances_vbo);
 
-    opengl_vbos->cell_instances_vbo = new_buffer;
-    opengl_vbos->cell_instances_vbo_size = new_buffer_size;
+    cell_instancing_vbos->cell_instances_vbo = new_buffer;
+    cell_instancing_vbos->cell_instances_vbo_size = new_buffer_size;
 
     // TODO: Because we overwrite the old buffer with a new buffer, and the
     //       attributes are linked to the old buffer, we must re-set-them-up.
     //       If we kept the same buffer name, but still expanded it without
     //       losing the data, this would prevent us having to do this.
-    setup_cell_instances_vbo(opengl_vbos);
+    setup_cell_instances_vbo(cell_instancing_vbos);
   }
 
   print_gl_errors();
@@ -110,25 +110,25 @@ extend_cell_instance_vbo(OpenGL_VBOs *opengl_vbos)
 
 
 void
-update_cell_instance(OpenGL_VBOs *opengl_vbos, u32 cell_instance_position, CellInstance *cell_instance)
+update_cell_instance(CellInstancingVBOs *cell_instancing_vbos, u32 cell_instance_position, CellInstance *cell_instance)
 {
   // Overwrite cell_instance_position with cell_instance
-  if (cell_instance_position < opengl_vbos->n_cell_instances)
+  if (cell_instance_position < cell_instancing_vbos->n_cell_instances)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, cell_instancing_vbos->cell_instances_vbo);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(CellInstance) * cell_instance_position, sizeof(CellInstance), cell_instance);
   }
 }
 
 
 void
-add_cell_instance(OpenGL_VBOs *opengl_vbos, Cell *cell)
+add_cell_instance(CellInstancingVBOs *cell_instancing_vbos, Cell *cell)
 {
   log(L_CellInstancing, "Adding cell instance.");
 
-  if (opengl_vbos->n_cell_instances >= opengl_vbos->cell_instances_vbo_size)
+  if (cell_instancing_vbos->n_cell_instances >= cell_instancing_vbos->cell_instances_vbo_size)
   {
-    extend_cell_instance_vbo(opengl_vbos);
+    extend_cell_instance_vbo(cell_instancing_vbos);
   }
 
   CellInstance cell_instance = {
@@ -142,17 +142,17 @@ add_cell_instance(OpenGL_VBOs *opengl_vbos, Cell *cell)
 
   // Write cell_instance to the end of the cell instances array.
 
-  cell->opengl_instance_position = opengl_vbos->n_cell_instances;
-  ++opengl_vbos->n_cell_instances;
+  cell->opengl_instance_position = cell_instancing_vbos->n_cell_instances;
+  ++cell_instancing_vbos->n_cell_instances;
 
-  update_cell_instance(opengl_vbos, cell->opengl_instance_position, &cell_instance);
+  update_cell_instance(cell_instancing_vbos, cell->opengl_instance_position, &cell_instance);
 
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", opengl_vbos->n_cell_instances, opengl_vbos->cell_instances_vbo_size);
+  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instancing_vbos->n_cell_instances, cell_instancing_vbos->cell_instances_vbo_size);
 }
 
 
 void
-recurse_adding_all_cell_instances(OpenGL_VBOs *opengl_vbos, QuadTree *tree)
+recurse_adding_all_cell_instances(CellInstancingVBOs *cell_instancing_vbos, QuadTree *tree)
 {
   if (tree)
   {
@@ -161,28 +161,28 @@ recurse_adding_all_cell_instances(OpenGL_VBOs *opengl_vbos, QuadTree *tree)
          ++cell_index)
     {
       Cell *cell = tree->cells + cell_index;
-      add_cell_instance(opengl_vbos, cell);
+      add_cell_instance(cell_instancing_vbos, cell);
     }
 
-    recurse_adding_all_cell_instances(opengl_vbos, tree->top_right);
-    recurse_adding_all_cell_instances(opengl_vbos, tree->top_left);
-    recurse_adding_all_cell_instances(opengl_vbos, tree->bottom_right);
-    recurse_adding_all_cell_instances(opengl_vbos, tree->bottom_left);
+    recurse_adding_all_cell_instances(cell_instancing_vbos, tree->top_right);
+    recurse_adding_all_cell_instances(cell_instancing_vbos, tree->top_left);
+    recurse_adding_all_cell_instances(cell_instancing_vbos, tree->bottom_right);
+    recurse_adding_all_cell_instances(cell_instancing_vbos, tree->bottom_left);
   }
 }
 
 
 void
-add_all_cell_instances(OpenGL_VBOs *opengl_vbos, QuadTree *tree)
+add_all_cell_instances(CellInstancingVBOs *cell_instancing_vbos, QuadTree *tree)
 {
-  recurse_adding_all_cell_instances(opengl_vbos, tree);
+  recurse_adding_all_cell_instances(cell_instancing_vbos, tree);
   print_gl_errors();
   log(L_CellInstancing, "Added all cell instances.");
 }
 
 
 void
-remove_cell_instance(OpenGL_VBOs *opengl_vbos, Maze *maze, Cell *cell)
+remove_cell_instance(CellInstancingVBOs *cell_instancing_vbos, Maze *maze, Cell *cell)
 {
   // Move last CellInstance in VBO into the removed CellInstance.
 
@@ -190,14 +190,14 @@ remove_cell_instance(OpenGL_VBOs *opengl_vbos, Maze *maze, Cell *cell)
   cell->opengl_instance_position = INVALID_CELL_INSTANCE_POSITION;
   log(L_CellInstancing, "Attempting to remove cell instance %u.", cell_instance_number_to_remove);
 
-  if (cell_instance_number_to_remove < opengl_vbos->n_cell_instances &&
+  if (cell_instance_number_to_remove < cell_instancing_vbos->n_cell_instances &&
       cell_instance_number_to_remove != INVALID_CELL_INSTANCE_POSITION)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, opengl_vbos->cell_instances_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, cell_instancing_vbos->cell_instances_vbo);
 
     // Reduce size of cell instances by one, this is also now indicating the position of the cell we need to move into the removed cell's slot.
-    --opengl_vbos->n_cell_instances;
-    u32 cell_to_move = opengl_vbos->n_cell_instances;
+    --cell_instancing_vbos->n_cell_instances;
+    u32 cell_to_move = cell_instancing_vbos->n_cell_instances;
 
     if (cell_to_move == 0 ||
         cell_instance_number_to_remove == cell_to_move)
@@ -230,37 +230,35 @@ remove_cell_instance(OpenGL_VBOs *opengl_vbos, Maze *maze, Cell *cell)
     }
   }
 
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", opengl_vbos->n_cell_instances, opengl_vbos->cell_instances_vbo_size);
+  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instancing_vbos->n_cell_instances, cell_instancing_vbos->cell_instances_vbo_size);
 }
 
 
 b32
-setup_cell_instancing(GameState *game_state)
+setup_cell_instancing(CellInstancingVBOs *cell_instancing_vbos, Uniforms *uniforms)
 {
   b32 success = true;
 
   const char *filenames[] = {"vertex-shader.glvs", "fragment-shader.glfs"};
   GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 
-  success &= create_shader_program(filenames, shader_types, array_count(shader_types), &game_state->shader_program);
-  glUseProgram(game_state->shader_program);
+  success &= create_shader_program(filenames, shader_types, array_count(shader_types), &cell_instancing_vbos->shader_program);
+  glUseProgram(cell_instancing_vbos->shader_program);
 
   setup_vao();
-  setup_cell_vertex_vbo_and_ibo(&game_state->opengl_vbos, CELL_VERTICES, array_count(CELL_VERTICES),
-                                                          CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
+  setup_cell_vertex_vbo_and_ibo(cell_instancing_vbos, CELL_VERTICES, array_count(CELL_VERTICES),
+                                                      CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
 
-  game_state->opengl_vbos.cell_instances_vbo = create_buffer();
-  setup_cell_instances_vbo(&game_state->opengl_vbos);
-  game_state->opengl_vbos.cell_instances_vbo_size = 0;
+  cell_instancing_vbos->cell_instances_vbo = create_buffer();
+  setup_cell_instances_vbo(cell_instancing_vbos);
+  cell_instancing_vbos->cell_instances_vbo_size = 0;
 
-  add_all_cell_instances(&game_state->opengl_vbos, &game_state->maze.tree);
-
-  game_state->uniforms.mat4_projection_matrix.name = "projection_matrix";
-  game_state->uniforms.int_render_origin_cell_x.name = "render_origin_cell_x";
-  game_state->uniforms.int_render_origin_cell_y.name = "render_origin_cell_y";
-  game_state->uniforms.vec2_render_origin_offset.name = "render_origin_offset";
-  game_state->uniforms.float_scale.name = "scale";
-  success &= get_uniform_locations(game_state->shader_program, game_state->uniforms.array, array_count(game_state->uniforms.array));
+  uniforms->mat4_projection_matrix.name = "projection_matrix";
+  uniforms->int_render_origin_cell_x.name = "render_origin_cell_x";
+  uniforms->int_render_origin_cell_y.name = "render_origin_cell_y";
+  uniforms->vec2_render_origin_offset.name = "render_origin_offset";
+  uniforms->float_scale.name = "scale";
+  success &= get_uniform_locations(cell_instancing_vbos->shader_program, uniforms->array, array_count(uniforms->array));
 
   success &= print_gl_errors();
   log(L_CellInstancing, "OpenGL VBOs setup finished.");
