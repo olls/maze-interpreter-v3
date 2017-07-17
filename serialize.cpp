@@ -17,19 +17,19 @@ find_min_max(QuadTree *tree, vec2 *most_left, vec2 *most_top, vec2 *most_right, 
       {
         if (cell->x < most_left->x)
         {
-          *most_left = (vec2){cell->x, cell->y};
+          *most_left = Vec2(cell->x, cell->y);
         }
         if (cell->y < most_top->y)
         {
-          *most_top = (vec2){cell->x, cell->y};
+          *most_top = Vec2(cell->x, cell->y);
         }
         if (cell->x > most_right->x)
         {
-          *most_right = (vec2){cell->x, cell->y};
+          *most_right = Vec2(cell->x, cell->y);
         }
         if (cell->y > most_bottom->y)
         {
-          *most_bottom = (vec2){cell->x, cell->y};
+          *most_bottom = Vec2(cell->x, cell->y);
         }
       }
     }
@@ -90,15 +90,15 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, vec2 maze_origin,
 vec2
 get_maze_size(Maze *maze)
 {
-  vec2 most_left   = {maze->tree.cells[maze->tree.used-1].x, maze->tree.cells[maze->tree.used-1].y};
+  vec2 most_left   = Vec2(maze->tree.cells[maze->tree.used-1].x, maze->tree.cells[maze->tree.used-1].y);
   vec2 most_top    = most_left;
   vec2 most_right  = most_left;
   vec2 most_bottom = most_left;
 
   find_min_max(&maze->tree, &most_left, &most_top, &most_right, &most_bottom);
 
-  vec2 result = {(u32)(most_right - most_left).x + 1,
-               (u32)(most_bottom - most_top).y + 1};
+  vec2 result = Vec2((u32)(most_right - most_left).x + 1,
+                     (u32)(most_bottom - most_top).y + 1);
 
   return result;
 }
@@ -177,7 +177,8 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   ((char *)filename)[0] = '_';
 #endif
 
-  vec2 most_left   = {maze->tree.cells[maze->tree.used-1].x, maze->tree.cells[maze->tree.used-1].y};
+  vec2 most_left   = Vec2(maze->tree.cells[maze->tree.used-1].x,
+                          maze->tree.cells[maze->tree.used-1].y);
   vec2 most_top    = most_left;
   vec2 most_right  = most_left;
   vec2 most_bottom = most_left;

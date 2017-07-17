@@ -123,10 +123,10 @@ get_bitmap_color(Bitmap *bitmap, u32 x, u32 y)
       pixel = raw_pixel;
     }
 
-    result = (vec4){(r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
-                    (r32)((pixel >> bitmap->red_shift) & 0xff) / 255.0,
-                    (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
-                    (r32)((pixel >> bitmap->blue_shift) & 0xff) / 255.0};
+    result = Vec4((r32)((pixel >> bitmap->alpha_shift) & 0xff) / 255.0,
+                  (r32)((pixel >> bitmap->red_shift) & 0xff  ) / 255.0,
+                  (r32)((pixel >> bitmap->green_shift) & 0xff) / 255.0,
+                  (r32)((pixel >> bitmap->blue_shift) & 0xff ) / 255.0);
 
     if (bitmap->file->compression == 3 && bitmap->alpha_shift < 0)
     {

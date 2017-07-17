@@ -467,7 +467,7 @@ draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_
     u32 chars = fmted_str(str, max_len, "%d", car->value);
     font_size /= chars;
 
-    draw_string(&game_state->bitmaps.font, pos - 0.5*(vec2){chars, 1}*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
+    draw_string(&game_state->bitmaps.font, pos - 0.5*Vec2(chars, 1)*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
   glPopMatrix();
 }
 

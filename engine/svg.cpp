@@ -242,7 +242,7 @@ find_svg_style(char *c, char *end, String *label_result, String *value_result)
 
   *label_result = (String){
     .text = start_label,
-    .length = end_label - start_label
+    .length = (u32)(end_label - start_label)
   };
 
   consume_until_char(c, ':', end);
@@ -256,7 +256,7 @@ find_svg_style(char *c, char *end, String *label_result, String *value_result)
 
   *value_result = (String){
     .text = start_value,
-    .length = end_value - start_value
+    .length = (u32)(end_value - start_value)
   };
 
   consume_until_char(c, ';', end);

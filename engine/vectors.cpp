@@ -1,8 +1,77 @@
 vec2
+Vec2(r32 x, r32 y)
+{
+  return (vec2){x, y};
+}
+
+vec2
+Vec2(r64 x, r64 y)
+{
+  return (vec2){(r32)x, (r32)y};
+}
+
+vec2
+Vec2(u32 x, u32 y)
+{
+  return (vec2){(r32)x, (r32)y};
+}
+
+vec2
 Vec2(r32 x)
 {
   return (vec2){x, x};
 }
+
+
+vec3
+Vec3(r32 x, r32 y, r32 z)
+{
+  return (vec3){x, y, z};
+}
+
+vec3
+Vec3(r64 x, r64 y, r64 z)
+{
+  return (vec3){(r32)x, (r32)y, (r32)z};
+}
+
+vec3
+Vec3(u32 x, u32 y, u32 z)
+{
+  return (vec3){(r32)x, (r32)y, (r32)z};
+}
+
+vec3
+Vec3(r32 x)
+{
+  return (vec3){x, x, x};
+}
+
+
+vec4
+Vec4(r32 w, r32 x, r32 y, r32 z)
+{
+  return (vec4){w, x, y, z};
+}
+
+vec4
+Vec4(r64 w, r64 x, r64 y, r64 z)
+{
+  return (vec4){(r32)w, (r32)x, (r32)y, (r32)z};
+}
+
+vec4
+Vec4(u32 w, u32 x, u32 y, u32 z)
+{
+  return (vec4){(r32)w, (r32)x, (r32)y, (r32)z};
+}
+
+vec4
+Vec4(r32 x)
+{
+  return (vec4){x, x, x, x};
+}
+
 
 b32
 operator==(vec2 a, vec2 b)
@@ -1054,7 +1123,7 @@ max_vec4(vec4 a, vec4 b)
 }
 
 vec4
-clamp(vec4 vec, u32 max)
+clamp(vec4 vec, r32 max)
 {
   vec4 result = min_vec4(vec, (vec4){max, max, max, max});
   return result;

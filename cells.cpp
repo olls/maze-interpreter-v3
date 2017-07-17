@@ -569,7 +569,7 @@ draw_cells(GameState *game_state, RenderWindow *render_window, QuadTree *tree, u
         glColor3f(.9, .1, .2); // TODO: Alpha: 0.3
         glTranslatef(normalised_highlight_pos.x, normalised_highlight_pos.y, 0);
 
-        draw_box_outline((vec2){cell_radius, cell_radius}, 0.3);
+        draw_box_outline(Vec2(cell_radius, cell_radius), 0.3);
       glPopMatrix();
     }
     else

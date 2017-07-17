@@ -32,7 +32,7 @@ world_coord_to_render_window_coord(RenderWindow *render_window, WorldSpace world
 
   s64 recentred_cell_x = (s64)world_coord.cell_x - (s64)render_window->render_origin.cell_x;
   s64 recentred_cell_y = (s64)world_coord.cell_y - (s64)render_window->render_origin.cell_y;
-  vec2 recentred_cell_coord = (vec2){recentred_cell_x, recentred_cell_y}; // Cells at the extreme distance from the render_origin are cropped here
+  vec2 recentred_cell_coord = (vec2){(r32)recentred_cell_x, (r32)recentred_cell_y}; // Cells at the extreme distance from the render_origin are cropped here
 
   result = recentred_cell_coord - render_window->render_origin.offset + world_coord.offset;
 

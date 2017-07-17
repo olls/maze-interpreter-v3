@@ -141,9 +141,9 @@ draw_box_outline(vec2 size, r32 thickness = 1, r32 radius = 0)
   if (radius > 0)
   {
     vec2 top_left     = -0.5*size + corner_ext;
-    vec2 top_right    = (vec2){ 0.5*size.x-corner_ext, -0.5*size.y+corner_ext};
+    vec2 top_right    =  0.5*(vec2){ size.x, -size.y} + (vec2){-corner_ext, corner_ext};
     vec2 bottom_right =  0.5*size - corner_ext;
-    vec2 bottom_left  = (vec2){-0.5*size.x+corner_ext,  0.5*size.y-corner_ext};
+    vec2 bottom_left  =  0.5*(vec2){-size.x,  size.y} + (vec2){corner_ext, -corner_ext};
 
     glPushMatrix();
       glTranslatef(top_left.x, top_left.y, 0);
@@ -166,10 +166,10 @@ draw_box_outline(vec2 size, r32 thickness = 1, r32 radius = 0)
       draw_circle_outline(thickness/(radius-thickness/2), 0.75, 1);
     glPopMatrix();
   }
-  draw_line(-0.5*size + (vec2){corner_ext, 0         }, (vec2){ 0.5*size.x-corner_ext, -0.5*size.y           }, thickness);
-  draw_line(-0.5*size + (vec2){0         , corner_ext}, (vec2){-0.5*size.x           ,  0.5*size.y-corner_ext}, thickness);
-  draw_line( 0.5*size - (vec2){corner_ext, 0         }, (vec2){-0.5*size.x+corner_ext,  0.5*size.y           }, thickness);
-  draw_line( 0.5*size - (vec2){0         , corner_ext}, (vec2){ 0.5*size.x           , -0.5*size.y+corner_ext}, thickness);
+  draw_line(-0.5*size + Vec2(corner_ext, 0), 0.5*Vec2( size.x, -size.y) - Vec2(-corner_ext,  0), thickness);
+  draw_line(-0.5*size + Vec2(0, corner_ext), 0.5*Vec2(-size.x,  size.y) - Vec2( 0, -corner_ext), thickness);
+  draw_line( 0.5*size - Vec2(corner_ext, 0), 0.5*Vec2(-size.x,  size.y) - Vec2( corner_ext,  0), thickness);
+  draw_line( 0.5*size - Vec2(0, corner_ext), 0.5*Vec2( size.x, -size.y) - Vec2( 0,  corner_ext), thickness);
 }
 
 

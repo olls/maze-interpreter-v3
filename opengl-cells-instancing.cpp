@@ -132,8 +132,8 @@ add_cell_instance(CellInstancingVBOs *cell_instancing_vbos, Cell *cell)
   }
 
   CellInstance cell_instance = {
-    .world_cell_position_x = cell->x,
-    .world_cell_position_y = cell->y,
+    .world_cell_position_x = (s32)cell->x,
+    .world_cell_position_y = (s32)cell->y,
     .world_cell_offset = {0, 0},
 
     // TODO: This is temporary until we have the different cell types in different instance arrays.

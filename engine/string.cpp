@@ -1,4 +1,4 @@
-#define String(lit) (ConstString){ .text = lit, .length = strlen(lit) }
+#define String(lit) (ConstString){ .text = lit, .length = (u32)strlen(lit) }
 
 
 s32

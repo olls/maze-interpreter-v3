@@ -177,8 +177,8 @@ render_particles(Particles *particles, RenderWindow *render_window)
         } break;
         case PS_GROW:
         {
-          vec2 bitmap_size = {particle->bitmap->file->width,
-                            particle->bitmap->file->height};
+          vec2 bitmap_size = Vec2(particle->bitmap->file->width,
+                                  particle->bitmap->file->height);
 
           // BlitBitmapOptions blit_opts;
           // get_default_blit_bitmap_options(&blit_opts);

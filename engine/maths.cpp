@@ -188,20 +188,16 @@ sign(r32 a)
 }
 
 
-void
-printF(LoggingChannel channel, r32 f)
+r32
+sin(r32 x)
 {
-  log(channel, "%f", f);
+  r32 result = (r32)sin((r64)x);
+  return result;
 }
 
-void
-printU(LoggingChannel channel, u32 u)
+r32
+cos(r32 x)
 {
-  log(channel, "%d", u);
-}
-
-void
-printI(LoggingChannel channel, s32 i)
-{
-  log(channel, "%d", i);
+  r32 result = (r32)cos((r64)x);
+  return result;
 }

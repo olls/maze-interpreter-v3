@@ -2,7 +2,7 @@ Rectangle
 get_menu_item_rect(Menu *menu, u32 n)
 {
   Rectangle result;
-  result.start = menu->pos + (vec2){0, n}*MENU_ITEM_SIZE;
+  result.start = menu->pos + Vec2(0, n)*MENU_ITEM_SIZE;
   result.end = result.start + (vec2){menu->chars_wide*CHAR_SIZE.x*FONT_SIZE + MENU_ITEM_SIZE.y, MENU_ITEM_SIZE.y};
   return result;
 }
@@ -13,7 +13,7 @@ get_input_box_rect(InputBox *input_box)
 {
   Rectangle result;
   result.start = input_box->pos;
-  result.end = result.start + (vec2){input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  result.end = result.start + Vec2(input_box->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y);
   return result;
 }
 
@@ -23,7 +23,7 @@ get_button_rect(Button *button)
 {
   Rectangle result;
   result.start = button->pos;
-  result.end = result.start + (vec2){button->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y};
+  result.end = result.start + Vec2(button->length*CHAR_SIZE.x*FONT_SIZE, MENU_ITEM_SIZE.y);
   return result;
 }
 
@@ -97,7 +97,7 @@ ui_consume_mouse_clicks(UI *ui, Mouse *mouse, vec2 mouse_pos, u64 time_us)
   {
     Rectangle rect;
     rect.start = ui->cell_type_menu.pos;
-    rect.end = rect.start + MENU_ITEM_SIZE*(vec2){1, ui->cell_type_menu.length};
+    rect.end = rect.start + MENU_ITEM_SIZE*Vec2(1, ui->cell_type_menu.length);
 
     if (in_rectangle(mouse_pos, rect))
     {
@@ -481,7 +481,7 @@ init_car_input_box(Memory *memory, GameState *game_state, u32 car_id, s32 initia
 
   u32 car_radius = calc_car_radius(game_state->cell_margin);
   car_input->car_world_pos = world_pos;
-  car_input->car_world_pos_offset = (vec2){car_radius, car_radius};
+  car_input->car_world_pos_offset = Vec2(car_radius, car_radius);
 
   zero(&car_input->input, InputBox);
   car_input->input.length = 10;

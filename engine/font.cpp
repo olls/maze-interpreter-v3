@@ -3,8 +3,8 @@ draw_char(Bitmap *font, vec2 world_pos, char x, r32 scale = 1, vec4 color = (vec
 {
   u32 char_index = x - MIN_CHAR;
   vec2 bitmap_pos = {
-    .x = char_index % 16,
-    .y = 5 - (char_index / 16)
+    .x = r32(char_index % 16),
+    .y = 5 - r32(char_index / 16)
   };
 
   Rectangle char_box = {

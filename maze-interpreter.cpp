@@ -11,7 +11,7 @@ screen_pixels_to_screen_space(vec2 screen_size, vec2 screen_pixels)
 void
 update_pan_and_zoom(Panning *panning, Inputs *inputs, Mouse *mouse, vec2 screen_size)
 {
-  vec2 screen_mouse_pixels = screen_pixels_to_screen_space(screen_size, (vec2){mouse->x, mouse->y});
+  vec2 screen_mouse_pixels = screen_pixels_to_screen_space(screen_size, Vec2(mouse->x, mouse->y));
 
   r32 old_zoom_multiplier = panning->zoom_multiplier;
   panning->zoom_multiplier -= mouse->scroll.y * 0.01;
@@ -198,7 +198,7 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                   u32 argc, char *argv[])
 {
   b32 keep_running = true;
-  vec2 screen_size = (vec2){renderer->width, renderer->height};
+  vec2 screen_size = Vec2(renderer->width, renderer->height);
 
   static GameState *game_state = 0;
   if (game_state == 0)
