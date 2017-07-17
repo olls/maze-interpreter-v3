@@ -273,23 +273,23 @@ load_xml(const char filename[], Memory *memory)
 
 
 void
-test_traverse_xml_struct(LoggingChannel channel, XMLTag *parent, u32 level=0)
+test_traverse_xml_struct(XMLTag *parent, u32 level=0)
 {
   XMLTag *child = parent->first_child;
   while (child)
   {
-    log_ind(channel, level, "%.*s", child->name.length, child->name.text);
+    log_ind(L_XML, level, "%.*s", child->name.length, child->name.text);
 
     XMLAttr *attr = child->attrs;
     while (attr)
     {
-      log_ind(channel, level + 1, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
+      log_ind(L_XML, level + 1, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
       attr = attr->next_attr;
     }
 
     if (child->type == XML_ELEMENT)
     {
-      test_traverse_xml_struct(channel, child, level + 2);
+      test_traverse_xml_struct(child, level + 2);
     }
 
     child = child->next_sibling;

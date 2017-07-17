@@ -14,8 +14,8 @@
 #include FT_FREETYPE_H
 
 
-#include "logging.h"
 #include "platform.h"
+#include "logging.h"
 #include "maths.h"
 #include "vectors.h"
 #include "matrices.h"
@@ -32,8 +32,8 @@
 
 #include "engine.h"
 
-#include "logging.cpp"
 #include "platform.cpp"
+#include "logging.cpp"
 #include "maths.cpp"
 #include "vectors.cpp"
 #include "matrices.cpp"

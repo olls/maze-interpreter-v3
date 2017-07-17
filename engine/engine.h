@@ -1,6 +1,3 @@
-#define DEBUG
-// #define DEBUG_BLOCK_COLORS
-
 #ifdef DEBUG
 #define S(x) #x
 #define S_(x) S(x)

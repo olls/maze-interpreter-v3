@@ -1,5 +1,10 @@
+#define DEBUG
+// #define DEBUG_BLOCK_COLORS
+
+
 #include "engine/engine-includes.h"
 
+#include "logging-channels.h"
 #include "functions.h"
 #include "world-position.h"
 #include "particles.h"
@@ -15,6 +20,7 @@
 
 #include "maze-interpreter.h"
 
+#include "logging-channels.cpp"
 #include "functions.cpp"
 #include "world-position.cpp"
 #include "particles.cpp"
@@ -34,6 +40,8 @@
 int
 main(int argc, char *argv[])
 {
+  register_game_logging_channels(GAME_LOGGING_CHANNEL_DEFINITIONS);
+
   bool success = start_engine(argc, argv, update_and_render);
   return !success;
 }

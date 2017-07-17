@@ -1,29 +1,24 @@
+void
+register_game_logging_channels(const char **GAME_LOGGING_CHANNEL_NAMES)
+{
+  GAME_LOGGING_CHANNELS = GAME_LOGGING_CHANNEL_NAMES;
+}
+
+
 b32
-channel_enabled(LoggingChannel channel)
+channel_enabled(ENGINELoggingChannel channel)
 {
   switch(channel)
   {
     case L_Main:
-    case L_CarsStorage:
-    case L_CarsSim:
-    case L_CellsStorage:
-    case L_Cells:
-    case L_Parser:
-    case L_Serializer:
-    case L_Particles:
-    case L_UI:
     case L_Bitmap:
     case L_SVG:
     case L_XML:
     case L_XMLTokens:
     case L_Font:
-    case L_Vector:
-    case L_Render:
-    // case L_OpenGL:
+    case L_OpenGL:
     case L_OpenGL_Debug:
-    // case L_CellInstancing:
     case L_Layouter:
-    case L_GameLoop:
     {
       return false;
     } break;
@@ -36,59 +31,34 @@ channel_enabled(LoggingChannel channel)
 }
 
 
-#ifdef DEBUG
-
-
+POLYMORPHIC_LOGGING_ENDPOINT(
 void
-log_s(LoggingChannel channel, const char *text, ...)
+log_s, {
+  printf("%s", buf);
+},
+const char *text, ...)
+
+
+POLYMORPHIC_LOGGING_ENDPOINT(
+void
+log, {
+  printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, channel_name, buf);
+},
+const char *text, ...)
+
+
+POLYMORPHIC_LOGGING_ENDPOINT(
+void
+log_ind,
 {
-  if (channel_enabled(channel))
-  {
-    char buf[256];
-    va_list aptr;
-    va_start(aptr, text);
-    vsnprintf(buf, 256, text, aptr);
-    va_end(aptr);
-
-    printf("%s", buf);
-  }
-}
+  printf("\e[01;3%dm%s\e[0m -> %*s%s\n", channel % 8, channel_name, n, " ", buf);
+},
+u32 n, const char *text, ...)
 
 
+POLYMORPHIC_LOGGING_FUNCTION(
 void
-log(LoggingChannel channel, const char *text, ...)
-{
-  if (channel_enabled(channel))
-  {
-    char buf[256];
-    va_list aptr;
-    va_start(aptr, text);
-    vsnprintf(buf, 256, text, aptr);
-    va_end(aptr);
-
-    printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, LOGGING_CHANNELS[channel], buf);
-  }
-}
-
-
-void
-log_ind(LoggingChannel channel, u32 n, const char *text, ...)
-{
-  if (channel_enabled(channel))
-  {
-    char buf[256];
-    va_list aptr;
-    va_start(aptr, text);
-    vsnprintf(buf, 256, text, aptr);
-    va_end(aptr);
-
-    printf("\e[01;3%dm%s\e[0m -> %*s%s\n", channel % 8, LOGGING_CHANNELS[channel], n, "", buf);
-  }
-}
-
-
-void
-log_d(LoggingChannel channel, vec2 direction)
+log_d,
 {
   char s[16] = {};
 
@@ -110,68 +80,38 @@ log_d(LoggingChannel channel, vec2 direction)
   {
     log_s(channel, s);
   }
-}
+},
+vec2 direction)
 
 
+POLYMORPHIC_LOGGING_FUNCTION(
 void
-log(LoggingChannel channel, vec4 vec)
-{
-  log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
-}
-
-void
-log(LoggingChannel channel, vec2 vec)
+log,
 {
   log(channel, "(%f, %f)", vec.x, vec.y);
-}
+},
+vec2 vec)
 
+POLYMORPHIC_LOGGING_FUNCTION(
 void
-log(LoggingChannel channel, vec3 vec)
+log,
 {
   log(channel, "(%f, %f, %f)", vec.x, vec.y, vec.z);
-}
+},
+vec3 vec)
 
+POLYMORPHIC_LOGGING_FUNCTION(
 void
-log(LoggingChannel channel, Rectangle rect)
+log,
+{
+  log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
+},
+vec4 vec)
+
+POLYMORPHIC_LOGGING_FUNCTION(
+void
+log,
 {
   log(channel, "((%f, %f), (%f, %f))", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
-}
-
-
-#else
-
-
-void
-log_s(LoggingChannel channel, const char *text, ...)
-{}
-
-void
-log(LoggingChannel channel, const char *text, ...)
-{}
-
-void
-log_ind(LoggingChannel channel, u32 n, const char *text, ...)
-{}
-
-void
-log_d(LoggingChannel channel, vec2 direction)
-{}
-
-void
-log(LoggingChannel channel, vec4 vec)
-{}
-
-void
-log(LoggingChannel channel, vec2 vec)
-{}
-
-void
-log(LoggingChannel channel, vec3 vec)
-{}
-
-void
-log(LoggingChannel channel, Rectangle rect)
-{}
-
-
-#endif
+},
+Rectangle rect)
