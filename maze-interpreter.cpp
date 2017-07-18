@@ -184,9 +184,9 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
   setup_inputs(keys, &game_state->inputs);
 
   success &= load_assets(memory, game_state, font_library);
-  success &= setup_cell_instancing(&game_state->cell_instancing_vbos);
+  success &= setup_cell_instancing(&game_state->cell_instancing);
 
-  add_all_cell_instances(&game_state->cell_instancing_vbos, &game_state->maze.tree);
+  add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
 
   return success;
 }
@@ -306,7 +306,7 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                             0, 0, 1, 0,
                             0, 0, 0, 1};
 
-  draw_instanced_cells(&game_state->cell_instancing_vbos, &game_state->panning, projection_matrix);
+  draw_instanced_cells(&game_state->cell_instancing, &game_state->panning, projection_matrix);
 
   // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
   // draw_cars(game_state, &render_window, &(game_state->cars), time_us);

@@ -40,7 +40,7 @@ struct GameState
 
   Panning panning;
 
-  CellInstancingVBOs cell_instancing_vbos;
+  CellInstancing cell_instancing;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;
