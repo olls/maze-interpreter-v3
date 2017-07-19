@@ -8,129 +8,15 @@
 
 
 void
-setup_cell_vertex_vbo_and_ibo(CellInstancing *cell_instancing, const vec2 *vertices, u32 n_vertices,
-                                                               const GLushort *indices, u32 n_indices)
-{
-  // Vertex VBO
-
-  glGenBuffers(1, &cell_instancing->cell_vertex_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing->cell_vertex_vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * n_vertices, vertices, GL_STATIC_DRAW);
-
-  GLuint attribute_vertex = 8;
-  glVertexAttribPointer(attribute_vertex, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
-  glEnableVertexAttribArray(attribute_vertex);
-
-  // Vertex IBO
-
-  glGenBuffers(1, &cell_instancing->cell_vertex_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cell_instancing->cell_vertex_ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * n_indices, indices, GL_STATIC_DRAW);
-  cell_instancing->n_cell_indices = n_indices;
-}
-
-
-void
-setup_cell_instances_vbo(CellInstancing *cell_instancing)
-{
-  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing->cell_instances_vbo);
-
-  GLuint attribute_world_cell_position_x = 0;
-  glEnableVertexAttribArray(attribute_world_cell_position_x);
-  glVertexAttribIPointer(attribute_world_cell_position_x, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_x));
-  glVertexAttribDivisor(attribute_world_cell_position_x, 1);
-
-  GLuint attribute_world_cell_position_y = 1;
-  glEnableVertexAttribArray(attribute_world_cell_position_y);
-  glVertexAttribIPointer(attribute_world_cell_position_y, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_y));
-  glVertexAttribDivisor(attribute_world_cell_position_y, 1);
-
-  GLuint attribute_world_cell_offset = 2;
-  glEnableVertexAttribArray(attribute_world_cell_offset);
-  glVertexAttribPointer(attribute_world_cell_offset, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_offset));
-  glVertexAttribDivisor(attribute_world_cell_offset, 1);
-
-  GLuint attribute_colour = 4;
-  glEnableVertexAttribArray(attribute_colour);
-  glVertexAttribPointer(attribute_colour, sizeof(vec4)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, colour));
-  glVertexAttribDivisor(attribute_colour, 1);
-}
-
-
-void
-allocate_cell_instances_block(CellInstancing *cell_instancing, u32 n_cell_instances)
-{
-  glBindBuffer(GL_ARRAY_BUFFER, cell_instancing->cell_instances_vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * n_cell_instances, NULL, GL_STATIC_DRAW);
-  cell_instancing->n_cell_instances = 0;
-  cell_instancing->cell_instances_vbo_size = n_cell_instances;
-}
-
-
-void
-extend_cell_instance_vbo(CellInstancing *cell_instancing)
-{
-  if (cell_instancing->cell_instances_vbo_size == 0)
-  {
-    log(L_CellInstancing, "No buffer allocated yet, allocating new buffer.");
-    allocate_cell_instances_block(cell_instancing, INITIAL_CELL_INSTANCE_VBO_SIZE);
-  }
-  else
-  {
-    log(L_CellInstancing, "Out of space, allocating larger buffer.");
-
-    assert(cell_instancing->cell_instances_vbo_size < MAX_U32 / 2);
-    u32 new_buffer_size = cell_instancing->cell_instances_vbo_size * 2;
-
-    GLuint new_buffer = create_buffer();
-    glBindBuffer(GL_ARRAY_BUFFER, new_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(CellInstance) * new_buffer_size, NULL, GL_STATIC_DRAW);
-
-    // Copy data into new VBO
-    // Bind buffers to special READ/WRITE copying buffers
-    glBindBuffer(GL_COPY_READ_BUFFER, cell_instancing->cell_instances_vbo);
-    glBindBuffer(GL_COPY_WRITE_BUFFER, new_buffer);
-    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(CellInstance) * cell_instancing->n_cell_instances);
-
-    glDeleteBuffers(1, &cell_instancing->cell_instances_vbo);
-
-    cell_instancing->cell_instances_vbo = new_buffer;
-    cell_instancing->cell_instances_vbo_size = new_buffer_size;
-
-    // TODO: Because we overwrite the old buffer with a new buffer, and the
-    //       attributes are linked to the old buffer, we must re-set-them-up.
-    //       If we kept the same buffer name, but still expanded it without
-    //       losing the data, this would prevent us having to do this.
-    setup_cell_instances_vbo(cell_instancing);
-  }
-
-  print_gl_errors();
-  log(L_CellInstancing, "Reallocated VBO.");
-}
-
-
-void
 update_cell_instance(CellInstancing *cell_instancing, u32 cell_instance_position, CellInstance *cell_instance)
 {
-  // Overwrite cell_instance_position with cell_instance
-  if (cell_instance_position < cell_instancing->n_cell_instances)
-  {
-    glBindBuffer(GL_ARRAY_BUFFER, cell_instancing->cell_instances_vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(CellInstance) * cell_instance_position, sizeof(CellInstance), cell_instance);
-  }
+  update_buffer_element(L_CellInstancing, &cell_instancing->cell_instances_vbo, cell_instance_position, cell_instance);
 }
 
 
 void
 add_cell_instance(CellInstancing *cell_instancing, Cell *cell)
 {
-  log(L_CellInstancing, "Adding cell instance.");
-
-  if (cell_instancing->n_cell_instances >= cell_instancing->cell_instances_vbo_size)
-  {
-    extend_cell_instance_vbo(cell_instancing);
-  }
-
   CellInstance cell_instance = {
     .world_cell_position_x = (s32)cell->x,
     .world_cell_position_y = (s32)cell->y,
@@ -140,14 +26,10 @@ add_cell_instance(CellInstancing *cell_instancing, Cell *cell)
     .colour = get_cell_color(cell->type)
   };
 
-  // Write cell_instance to the end of the cell instances array.
+  cell->opengl_instance_position = new_buffer_element(L_CellInstancing, &cell_instancing->cell_instances_vbo, &cell_instance);
 
-  cell->opengl_instance_position = cell_instancing->n_cell_instances;
-  ++cell_instancing->n_cell_instances;
-
-  update_cell_instance(cell_instancing, cell->opengl_instance_position, &cell_instance);
-
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instancing->n_cell_instances, cell_instancing->cell_instances_vbo_size);
+  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u",
+      cell_instancing->cell_instances_vbo.elements_used, cell_instancing->cell_instances_vbo.total_elements);
 }
 
 
@@ -175,62 +57,55 @@ recurse_adding_all_cell_instances(CellInstancing *cell_instancing, QuadTree *tre
 void
 add_all_cell_instances(CellInstancing *cell_instancing, QuadTree *tree)
 {
+  glBindVertexArray(cell_instancing->vao);
+
   recurse_adding_all_cell_instances(cell_instancing, tree);
   print_gl_errors();
   log(L_CellInstancing, "Added all cell instances.");
+
+  glBindVertexArray(0);
 }
 
 
 void
 remove_cell_instance(CellInstancing *cell_instancing, Maze *maze, Cell *cell)
 {
-  // Move last CellInstance in VBO into the removed CellInstance.
+  OpenGL_Buffer *cell_instances_vbo = &cell_instancing->cell_instances_vbo;
 
-  u32 cell_instance_number_to_remove = cell->opengl_instance_position;
-  cell->opengl_instance_position = INVALID_CELL_INSTANCE_POSITION;
-  log(L_CellInstancing, "Attempting to remove cell instance %u.", cell_instance_number_to_remove);
+  u32 cell_instance_position = cell->opengl_instance_position;
+  cell->opengl_instance_position = INVALID_GL_BUFFER_ELEMENT_POSITION;
 
-  if (cell_instance_number_to_remove < cell_instancing->n_cell_instances &&
-      cell_instance_number_to_remove != INVALID_CELL_INSTANCE_POSITION)
+  log(L_CellInstancing, "Attempting to remove cell instance %u.", cell_instance_position);
+
+  remove_buffer_element(cell_instances_vbo, cell_instance_position);
+
+  // If the removed element is less or equal than the new number of
+  //   elements, then another element has been moved into it's
+  //   position, and the Cell needs to know it's new position.
+
+  if (cell_instance_position <= cell_instances_vbo->elements_used)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, cell_instancing->cell_instances_vbo);
+    log(L_CellInstancing, "Updating moved cell instance");
 
-    // Reduce size of cell instances by one, this is also now indicating the position of the cell we need to move into the removed cell's slot.
-    --cell_instancing->n_cell_instances;
-    u32 cell_to_move = cell_instancing->n_cell_instances;
+    glBindBuffer(cell_instances_vbo->binding_target, cell_instances_vbo->id);
 
-    if (cell_to_move == 0 ||
-        cell_instance_number_to_remove == cell_to_move)
+    CellInstance moved_cell_instance;
+    glGetBufferSubData(cell_instances_vbo->binding_target, cell_instance_position, cell_instances_vbo->element_size, &moved_cell_instance);
+
+    glBindBuffer(cell_instances_vbo->binding_target, 0);
+
+    Cell *moved_cell = get_cell(maze, moved_cell_instance.world_cell_position_x, moved_cell_instance.world_cell_position_y);
+    if (moved_cell)
     {
-      // All cell instances have been removed, or the cell we were removing was at the end of the array, hence no more action is needed.
+      moved_cell->opengl_instance_position = cell_instance_position;
     }
     else
     {
-      u32 cell_to_remove_position = cell_instance_number_to_remove * sizeof(CellInstance);
-      u32 cell_to_move_position = cell_to_move * sizeof(CellInstance);
-
-      glCopyBufferSubData(GL_ARRAY_BUFFER, GL_ARRAY_BUFFER, cell_to_move_position, cell_to_remove_position, sizeof(CellInstance));
-
-      // Need to update the main Cell record with the moved instance's new position.
-      // TODO: If we could figure out a way around this it would be nice...
-      u32 moved_cell_position = cell_to_remove_position;
-
-      CellInstance moved_cell_instance;
-      glGetBufferSubData(GL_ARRAY_BUFFER, moved_cell_position, sizeof(CellInstance), &moved_cell_instance);
-
-      Cell *moved_cell = get_cell(maze, moved_cell_instance.world_cell_position_x, moved_cell_instance.world_cell_position_y);
-      if (moved_cell)
-      {
-        moved_cell->opengl_instance_position = moved_cell_position;
-      }
-      else
-      {
-        log(L_CellInstancing, "Could not get cell being moved from the Maze to update it's instance position");
-      }
+      log(L_CellInstancing, "Could not get cell being moved from the Maze to update it's instance position");
     }
   }
 
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instancing->n_cell_instances, cell_instancing->cell_instances_vbo_size);
+  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instances_vbo->elements_used, cell_instances_vbo->total_elements);
 }
 
 
@@ -247,9 +122,108 @@ draw_instanced_cells(CellInstancing *cell_instancing, Panning *panning, mat4 pro
   glUniform1f(uniforms->float_scale.location, panning->zoom);
 
   glBindVertexArray(cell_instancing->vao);
-  glDrawElementsInstanced(GL_TRIANGLES, cell_instancing->n_cell_indices, GL_UNSIGNED_SHORT, 0, cell_instancing->n_cell_instances);
-
+  glDrawElementsInstanced(GL_TRIANGLES, cell_instancing->cell_vertex_ibo.elements_used, GL_UNSIGNED_SHORT, 0, cell_instancing->cell_instances_vbo.elements_used);
   glBindVertexArray(0);
+}
+
+
+// Setup functions
+
+
+void
+setup_cell_vertex_vbo_attributes(OpenGL_Buffer *cell_vertex_vbo)
+{
+  glBindBuffer(cell_vertex_vbo->binding_target, cell_vertex_vbo->id);
+
+  GLuint attribute_vertex = 8;
+  glVertexAttribPointer(attribute_vertex, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+  glEnableVertexAttribArray(attribute_vertex);
+}
+
+
+void
+setup_cell_vertex_vbo(OpenGL_Buffer *cell_vertex_vbo, const vec2 *vertices, u32 n_vertices)
+{
+  cell_vertex_vbo->id = create_buffer();
+  cell_vertex_vbo->element_size = sizeof(vec2);
+  cell_vertex_vbo->total_elements = n_vertices;
+  cell_vertex_vbo->elements_used = n_vertices;
+  cell_vertex_vbo->binding_target = GL_ARRAY_BUFFER;
+  cell_vertex_vbo->usage = GL_STATIC_DRAW;
+  cell_vertex_vbo->setup_attributes_func = setup_cell_vertex_vbo_attributes;
+
+  glBindBuffer(cell_vertex_vbo->binding_target, cell_vertex_vbo->id);
+  glBufferData(cell_vertex_vbo->binding_target, cell_vertex_vbo->element_size * cell_vertex_vbo->elements_used, vertices, cell_vertex_vbo->usage);
+
+  cell_vertex_vbo->setup_attributes_func(cell_vertex_vbo);
+}
+
+
+void
+setup_cell_vertex_ibo_attributes(OpenGL_Buffer *cell_vertex_ibo)
+{}
+
+
+void
+setup_cell_vertex_ibo(OpenGL_Buffer *cell_vertex_ibo, const GLushort *indices, u32 n_indices)
+{
+  cell_vertex_ibo->id = create_buffer();
+  cell_vertex_ibo->element_size = sizeof(GLushort);
+  cell_vertex_ibo->total_elements = n_indices;
+  cell_vertex_ibo->elements_used = n_indices;
+  cell_vertex_ibo->binding_target = GL_ELEMENT_ARRAY_BUFFER;
+  cell_vertex_ibo->usage = GL_STATIC_DRAW;
+  cell_vertex_ibo->setup_attributes_func = setup_cell_vertex_ibo_attributes;
+
+  glBindBuffer(cell_vertex_ibo->binding_target, cell_vertex_ibo->id);
+  glBufferData(cell_vertex_ibo->binding_target, cell_vertex_ibo->element_size * cell_vertex_ibo->elements_used, indices, cell_vertex_ibo->usage);
+
+  cell_vertex_ibo->setup_attributes_func(cell_vertex_ibo);
+}
+
+
+void
+setup_cell_instances_vbo_attributes(OpenGL_Buffer *cell_instances_vbo)
+{
+  glBindBuffer(cell_instances_vbo->binding_target, cell_instances_vbo->id);
+
+  GLuint attribute_world_cell_position_x = 0;
+  glEnableVertexAttribArray(attribute_world_cell_position_x);
+  glVertexAttribIPointer(attribute_world_cell_position_x, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_x));
+  glVertexAttribDivisor(attribute_world_cell_position_x, 1);
+
+  GLuint attribute_world_cell_position_y = 1;
+  glEnableVertexAttribArray(attribute_world_cell_position_y);
+  glVertexAttribIPointer(attribute_world_cell_position_y, 1, GL_INT, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_position_y));
+  glVertexAttribDivisor(attribute_world_cell_position_y, 1);
+
+  GLuint attribute_world_cell_offset = 2;
+  glEnableVertexAttribArray(attribute_world_cell_offset);
+  glVertexAttribPointer(attribute_world_cell_offset, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, world_cell_offset));
+  glVertexAttribDivisor(attribute_world_cell_offset, 1);
+
+  GLuint attribute_colour = 4;
+  glEnableVertexAttribArray(attribute_colour);
+  glVertexAttribPointer(attribute_colour, sizeof(vec4)/sizeof(r32), GL_FLOAT, GL_FALSE, sizeof(CellInstance), (void *)offsetof(CellInstance, colour));
+  glVertexAttribDivisor(attribute_colour, 1);
+}
+
+
+void
+setup_cell_instances_vbo(OpenGL_Buffer *cell_instances_vbo)
+{
+  cell_instances_vbo->id = create_buffer();
+  cell_instances_vbo->element_size = sizeof(CellInstance);
+  cell_instances_vbo->total_elements = 16;
+  cell_instances_vbo->elements_used = 0;
+  cell_instances_vbo->binding_target = GL_ARRAY_BUFFER;
+  cell_instances_vbo->usage = GL_STATIC_DRAW;
+  cell_instances_vbo->setup_attributes_func = setup_cell_instances_vbo_attributes;
+
+  glBindBuffer(cell_instances_vbo->binding_target, cell_instances_vbo->id);
+  glBufferData(cell_instances_vbo->binding_target, cell_instances_vbo->element_size * cell_instances_vbo->total_elements, 0, cell_instances_vbo->usage);
+
+  cell_instances_vbo->setup_attributes_func(cell_instances_vbo);
 }
 
 
@@ -265,12 +239,14 @@ setup_cell_instancing(CellInstancing *cell_instancing)
   glUseProgram(cell_instancing->shader_program);
 
   cell_instancing->vao = setup_vao();
-  setup_cell_vertex_vbo_and_ibo(cell_instancing, CELL_VERTICES, array_count(CELL_VERTICES),
-                                                 CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
 
-  cell_instancing->cell_instances_vbo = create_buffer();
-  setup_cell_instances_vbo(cell_instancing);
-  cell_instancing->cell_instances_vbo_size = 0;
+  setup_cell_vertex_vbo(&cell_instancing->cell_vertex_vbo, CELL_VERTICES,         array_count(CELL_VERTICES));
+  setup_cell_vertex_ibo(&cell_instancing->cell_vertex_ibo, CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
+  setup_cell_instances_vbo(&cell_instancing->cell_instances_vbo);
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   CellUniforms *uniforms = &cell_instancing->uniforms;
   uniforms->mat4_projection_matrix.name = "projection_matrix";

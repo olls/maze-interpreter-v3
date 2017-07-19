@@ -77,10 +77,10 @@ enum GAMELoggingChannel : short \
   { \
     if (channel_enabled(channel)) \
     { \
-      char buf[256]; \
+      char buf[1024]; \
       va_list aptr; \
       va_start(aptr, text); \
-      vsnprintf(buf, 256, text, aptr); \
+      vsnprintf(buf, 1024, text, aptr); \
       va_end(aptr); \
       \
       const char *channel_name = LOGGING_TYPE ## _LOGGING_CHANNELS[channel]; \

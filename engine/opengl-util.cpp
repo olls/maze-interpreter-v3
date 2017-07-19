@@ -177,6 +177,147 @@ setup_vao()
 }
 
 
+POLYMORPHIC_LOGGING_FUNCTION(
+void
+extend_gl_buffer,
+{
+  if (buffer->total_elements == 0)
+  {
+    buffer->elements_used = 0;
+    buffer->total_elements = INITIAL_GL_BUFFER_TOTAL_ELEMENTS;
+
+    log(channel, "Initial buffer size is 0, allocating new buffer of size %u", buffer->total_elements);
+
+    glBindBuffer(buffer->binding_target, buffer->id);
+    glBufferData(buffer->binding_target, buffer->element_size * buffer->total_elements, NULL, GL_STATIC_DRAW);
+    glBindBuffer(buffer->binding_target, 0);
+  }
+  else
+  {
+    log(channel, "Out of space in buffer, allocating larger buffer.");
+
+    u32 buffer_size = buffer->element_size * buffer->total_elements;
+    assert(buffer_size < MAX_U32 / 2);
+
+    u32 new_total_elements = buffer->total_elements * 2;
+
+    GLuint new_buffer = create_buffer();
+    glBindBuffer(buffer->binding_target, new_buffer);
+    glBufferData(buffer->binding_target, buffer->element_size * new_total_elements, NULL, GL_STATIC_DRAW);
+
+    // Copy data into new VBO
+    // Bind buffers to special READ/WRITE copying buffers
+    glBindBuffer(GL_COPY_READ_BUFFER, buffer->id);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, new_buffer);
+
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, buffer->element_size * buffer->elements_used);
+
+    glBindBuffer(GL_COPY_READ_BUFFER, 0);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
+    glDeleteBuffers(1, &buffer->id);
+
+    buffer->id = new_buffer;
+    buffer->total_elements = new_total_elements;
+
+    // Re-setup attributes
+    buffer->setup_attributes_func(buffer);
+
+    glBindBuffer(buffer->binding_target, 0);
+  }
+
+  print_gl_errors();
+  log(channel, "Reallocated VBO.");
+},
+OpenGL_Buffer *buffer)
+
+
+POLYMORPHIC_LOGGING_FUNCTION(
+void
+update_buffer_element,
+{
+  if (element_position < buffer->elements_used)
+  {
+    glBindBuffer(buffer->binding_target, buffer->id);
+    glBufferSubData(buffer->binding_target, buffer->element_size * element_position, buffer->element_size, new_element);
+    glBindBuffer(buffer->binding_target, 0);
+  }
+  else
+  {
+    log(channel, "Cannot update element %u. Buffer only has %u elements", element_position, buffer->elements_used);
+  }
+  print_gl_errors();
+},
+OpenGL_Buffer *buffer, u32 element_position, void *new_element)
+
+
+POLYMORPHIC_LOGGING_FUNCTION(
+u32
+new_buffer_element,
+{
+  log(channel, "Adding new element.");
+
+  if (buffer->elements_used >= buffer->total_elements)
+  {
+    extend_gl_buffer(channel, buffer);
+  }
+
+  u32 position = buffer->elements_used;
+  ++buffer->elements_used;
+
+  update_buffer_element(channel, buffer, position, element);
+
+  print_gl_errors();
+  return position;
+},
+OpenGL_Buffer *buffer, void *element)
+
+
+void
+remove_buffer_element(OpenGL_Buffer *buffer, u32 element_to_remove)
+{
+  if (element_to_remove < buffer->elements_used &&
+      element_to_remove != INVALID_GL_BUFFER_ELEMENT_POSITION)
+  {
+    glBindBuffer(buffer->binding_target, buffer->id);
+
+    // Reduce size of buffer by one, this is also now indicating the position of the element we need to move into the removed element's slot.
+    --buffer->elements_used;
+    u32 element_to_move = buffer->elements_used;
+
+    if (element_to_move == 0 ||
+        element_to_remove == element_to_move)
+    {
+      // All elements have been removed, or the element we were removing was at the end of the array, hence no more action is needed.
+    }
+    else
+    {
+      // Copy last element into the removed element's slot
+      u32 element_to_remove_position = element_to_remove * buffer->element_size;
+      u32 element_to_move_position = element_to_move * buffer->element_size;
+
+      glCopyBufferSubData(buffer->binding_target, buffer->binding_target, element_to_move_position, element_to_remove_position, buffer->element_size);
+    }
+
+    glBindBuffer(buffer->binding_target, 0);
+  }
+  print_gl_errors();
+}
+
+
+void *
+get_element_from_buffer(OpenGL_Buffer *buffer, u32 element_position)
+{
+  void *element = malloc(buffer->element_size);
+
+  glBindBuffer(buffer->binding_target, buffer->id);
+  glGetBufferSubData(buffer->binding_target, buffer->element_size * element_position, buffer->element_size, element);
+  glBindBuffer(buffer->binding_target, 0);
+
+  return element;
+}
+
+
 b32
 get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
 {
