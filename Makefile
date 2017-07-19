@@ -1,12 +1,15 @@
 CC         = clang++
 CFLAGS     = -Werror -g -ferror-limit=1 -O0 -std=c++14
 LIBS       = -lSDL2 -lGLEW -lGL -lGLU -lpthread -lfreetype -I/usr/include/freetype2
-SOURCES    = main.cpp
-EXECUTABLE = maze-interpreter
 
 
-all:
-	$(CC) $(CFLAGS) $(SOURCES) $(LIBS) -o $(EXECUTABLE)
+.PHONY: maze-interpreter no-gui
+
+maze-interpreter:
+	$(CC) $(CFLAGS) main.cpp $(LIBS) -o maze-interpreter
+
+no-gui:
+	$(CC) $(CFLAGS) no-gui.cpp $(LIBS) -o maze-interpreter-no-gui
 
 
 clean:
