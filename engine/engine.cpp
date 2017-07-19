@@ -141,7 +141,7 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
 
 void
-game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, char *argv[], UpdateAndRenderFunc update_and_render_func)
+game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, const char *argv[], UpdateAndRenderFunc update_and_render_func)
 {
   b32 running = true;
 
@@ -230,7 +230,7 @@ game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc
 
 
 bool
-start_engine(int argc, char *argv[], UpdateAndRenderFunc update_and_render_func)
+start_engine(int argc, const char *argv[], UpdateAndRenderFunc update_and_render_func)
 {
   bool success = true;
 

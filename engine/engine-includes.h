@@ -14,6 +14,7 @@
 #include FT_FREETYPE_H
 
 
+#include "utils.h"
 #include "platform.h"
 #include "logging.h"
 #include "maths.h"
@@ -32,6 +33,7 @@
 
 #include "engine.h"
 
+#include "utils.cpp"
 #include "platform.cpp"
 #include "logging.cpp"
 #include "maths.cpp"

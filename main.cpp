@@ -38,7 +38,7 @@
 
 
 int
-main(int argc, char *argv[])
+main(int argc, const char *argv[])
 {
   register_game_logging_channels(GAME_LOGGING_CHANNEL_DEFINITIONS);
 

@@ -52,14 +52,14 @@ const vec2 CELL_VERTICES[] = {
 };
 
 const GLushort CELL_TRIANGLE_INDICES[] = {
-  11, 0, 1, // Top
-  11, 1, 2,
-  2, 3, 4,  // Right
-  2, 4, 5,
-  5, 6, 7,  // Bottom
-  5, 7, 8,
-  8, 9, 10, // Left
-  8, 10, 11,
-  11, 2, 5, // Middle
-  11, 5, 8
+  11, 0,  1, // Top
+  11, 1,  2,
+  2,  3,  4,  // Right
+  2,  4,  5,
+  5,  6,  7,  // Bottom
+  5,  7,  8,
+  8,  9,  10, // Left
+  8,  10, 11,
+  11, 2,  5, // Middle
+  11, 5,  8
 };

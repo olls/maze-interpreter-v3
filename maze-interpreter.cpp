@@ -107,7 +107,7 @@ reset_zoom(GameState *game_state)
 
 
 b32
-load_maze(Memory *memory, GameState *game_state, u32 argc, char *argv[])
+load_maze(Memory *memory, GameState *game_state, u32 argc, const char *argv[])
 {
   b32 success = true;
   success &= parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
@@ -157,7 +157,7 @@ load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
 
 
 b32
-init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, char *argv[])
+init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, const char *argv[])
 {
   b32 success = true;
 
@@ -195,7 +195,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 b32
 update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
-                  u32 argc, char *argv[])
+                  u32 argc, const char *argv[])
 {
   b32 keep_running = true;
   vec2 screen_size = Vec2(renderer->width, renderer->height);
