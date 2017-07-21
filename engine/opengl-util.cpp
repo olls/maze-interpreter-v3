@@ -1,3 +1,66 @@
+void
+gl_print_error(GLenum error_code, const char *file, u32 line)
+{
+  const char *error;
+  switch (error_code)
+  {
+    case (GL_INVALID_ENUM):
+    {
+      error = "GL_INVALID_ENUM";
+    } break;
+    case (GL_INVALID_VALUE):
+    {
+      error = "GL_INVALID_VALUE";
+    } break;
+    case (GL_INVALID_OPERATION):
+    {
+      error = "GL_INVALID_OPERATION";
+    } break;
+    case (GL_STACK_OVERFLOW):
+    {
+      error = "GL_STACK_OVERFLOW";
+    } break;
+    case (GL_STACK_UNDERFLOW):
+    {
+      error = "GL_STACK_UNDERFLOW";
+    } break;
+    case (GL_OUT_OF_MEMORY):
+    {
+      error = "GL_OUT_OF_MEMORY";
+    } break;
+    case (GL_INVALID_FRAMEBUFFER_OPERATION):
+    {
+      error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+    } break;
+    case (GL_TABLE_TOO_LARGE):
+    {
+      error = "GL_TABLE_TOO_LARGE";
+    }
+  }
+  printf("OpenGL error: %s at %s:%d\n", error, file, line);
+}
+
+
+#define print_gl_errors() _print_gl_errors(__FILE__, __LINE__)
+
+b32
+_print_gl_errors(const char *file, u32 line)
+{
+  b32 success = true;
+
+  GLenum error = glGetError();
+  while (error != GL_NO_ERROR)
+  {
+    success &= false;
+    gl_print_error(error, file, line);
+
+    error = glGetError();
+  }
+
+  return success;
+}
+
+
 b32
 compile_shader(const char shader_source[], s32 size, GLenum shader_type, GLuint *shader)
 {
@@ -95,69 +158,6 @@ create_shader_program(const char *filenames[], GLenum types[], s32 size, GLuint 
 }
 
 
-void
-gl_print_error(GLenum error_code, const char *file, u32 line)
-{
-  const char *error;
-  switch (error_code)
-  {
-    case (GL_INVALID_ENUM):
-    {
-      error = "GL_INVALID_ENUM";
-    } break;
-    case (GL_INVALID_VALUE):
-    {
-      error = "GL_INVALID_VALUE";
-    } break;
-    case (GL_INVALID_OPERATION):
-    {
-      error = "GL_INVALID_OPERATION";
-    } break;
-    case (GL_STACK_OVERFLOW):
-    {
-      error = "GL_STACK_OVERFLOW";
-    } break;
-    case (GL_STACK_UNDERFLOW):
-    {
-      error = "GL_STACK_UNDERFLOW";
-    } break;
-    case (GL_OUT_OF_MEMORY):
-    {
-      error = "GL_OUT_OF_MEMORY";
-    } break;
-    case (GL_INVALID_FRAMEBUFFER_OPERATION):
-    {
-      error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-    } break;
-    case (GL_TABLE_TOO_LARGE):
-    {
-      error = "GL_TABLE_TOO_LARGE";
-    }
-  }
-  printf("OpenGL error: %s at %s:%d\n", error, file, line);
-}
-
-
-#define print_gl_errors() _print_gl_errors(__FILE__, __LINE__)
-
-b32
-_print_gl_errors(const char *file, u32 line)
-{
-  b32 success = true;
-
-  GLenum error = glGetError();
-  while (error != GL_NO_ERROR)
-  {
-    success &= false;
-    gl_print_error(error, file, line);
-
-    error = glGetError();
-  }
-
-  return success;
-}
-
-
 GLuint
 create_buffer()
 {
@@ -168,11 +168,10 @@ create_buffer()
 
 
 GLuint
-setup_vao()
+create_vao()
 {
   GLuint result;
   glGenVertexArrays(1, &result);
-  glBindVertexArray(result);
   return result;
 }
 
@@ -184,7 +183,15 @@ extend_gl_buffer,
   if (buffer->total_elements == 0)
   {
     buffer->elements_used = 0;
-    buffer->total_elements = INITIAL_GL_BUFFER_TOTAL_ELEMENTS;
+
+    if (minimum_new_total_elements != 0)
+    {
+      buffer->total_elements = minimum_new_total_elements;
+    }
+    else
+    {
+      buffer->total_elements = INITIAL_GL_BUFFER_TOTAL_ELEMENTS;
+    }
 
     log(channel, "Initial buffer size is 0, allocating new buffer of size %u", buffer->total_elements);
 
@@ -199,7 +206,12 @@ extend_gl_buffer,
     u32 buffer_size = buffer->element_size * buffer->total_elements;
     assert(buffer_size < MAX_U32 / 2);
 
+    // At least one double, then as many more as needed to be greater than minimum_new_total_elements
     u32 new_total_elements = buffer->total_elements * 2;
+    while (new_total_elements <= minimum_new_total_elements)
+    {
+      new_total_elements *= 2;
+    }
 
     GLuint new_buffer = create_buffer();
     glBindBuffer(buffer->binding_target, new_buffer);
@@ -220,8 +232,11 @@ extend_gl_buffer,
     buffer->id = new_buffer;
     buffer->total_elements = new_total_elements;
 
-    // Re-setup attributes
-    buffer->setup_attributes_func(buffer);
+    // Re-setup attributes if needed
+    if (buffer->setup_attributes_func != 0)
+    {
+      buffer->setup_attributes_func(buffer);
+    }
 
     glBindBuffer(buffer->binding_target, 0);
   }
@@ -229,7 +244,7 @@ extend_gl_buffer,
   print_gl_errors();
   log(channel, "Reallocated VBO.");
 },
-OpenGL_Buffer *buffer)
+OpenGL_Buffer *buffer, u32 minimum_new_total_elements = 0)
 
 
 POLYMORPHIC_LOGGING_FUNCTION(
@@ -271,6 +286,30 @@ new_buffer_element,
   return position;
 },
 OpenGL_Buffer *buffer, void *element)
+
+
+POLYMORPHIC_LOGGING_FUNCTION(
+u32
+add_vertex_buffer,
+{
+  if (buffer->total_elements - buffer->elements_used < vertex_buffer->n_vertices)
+  {
+    u32 new_total_elements_needed = vertex_buffer->n_vertices + buffer->elements_used;
+
+    extend_gl_buffer(channel, buffer, new_total_elements_needed);
+  }
+
+  u32 start_position = buffer->elements_used;
+
+  glBindBuffer(buffer->binding_target, buffer->id);
+  glBufferSubData(buffer->binding_target, buffer->element_size * start_position, buffer->element_size * vertex_buffer->n_vertices, vertex_buffer->vertices);
+  glBindBuffer(buffer->binding_target, 0);
+
+  buffer->elements_used += vertex_buffer->n_vertices;
+
+  return start_position;
+},
+OpenGL_Buffer *buffer, VertexBuffer *vertex_buffer)
 
 
 void

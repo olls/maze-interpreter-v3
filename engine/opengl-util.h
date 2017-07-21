@@ -22,3 +22,10 @@ struct OpenGL_Buffer
 
   void (*setup_attributes_func)(OpenGL_Buffer *);
 };
+
+
+struct VertexBuffer
+{
+  vec2 *vertices;
+  u32 n_vertices;
+};
