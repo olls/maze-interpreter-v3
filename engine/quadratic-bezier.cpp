@@ -21,17 +21,17 @@ subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexBuffer *vertic
                      p1.x*(p2.y - p0.y) +
                      p2.x*(p0.y - p1.y));
 
+  vec2 p01 = mid_point(p0, p1);
+  vec2 p12 = mid_point(p1, p2);
+  vec2 p012 = mid_point(p01, p12);
+
   if (flatness <= LINE_SEGMENT_FLATNESS_ELIPSON ||
       recursions >= MAX_BEZIER_SUBDIVISIONS)
   {
-    add_point(memory, vertices, p1);
+    add_point(memory, vertices, p012);
   }
   else
   {
-    vec2 p01 = mid_point(p0, p1);
-    vec2 p12 = mid_point(p1, p2);
-    vec2 p012 = mid_point(p01, p12);
-
     subdivide_bezier(p0, p01, p012, memory, vertices, recursions+1);
     subdivide_bezier(p012, p12, p2, memory, vertices, recursions+1);
   }
@@ -50,12 +50,9 @@ bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Me
   }
   else
   {
-    // First control point must be an on-curve point.
-    result->vertices = push_struct(memory, vec2);
-    result->vertices[0] = control_points[0].point;
-    result->n_vertices = 1;
+    result->vertices = (vec2 *)(memory->memory + memory->used);
 
-    for (u32 control_point_n = 1;
+    for (u32 control_point_n = 0;
          control_point_n < n_control_points;
          ++control_point_n)
     {
@@ -83,7 +80,7 @@ bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Me
         }
 
         u32 p2_index;
-        if (control_point_n + 1 < n_control_points)
+        if (control_point_n < n_control_points - 1)
         {
           p2_index = control_point_n + 1;
         }

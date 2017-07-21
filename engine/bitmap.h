@@ -4,17 +4,17 @@ struct Bitmap
     char signature[2];
     u32 file_size;
     u32 _;
-    u32 pixels_offset;      // Offset to start of Pixel Data
+    u32 pixels_offset;       // Offset to start of Pixel Data
 
-    u32 dib_header_size;    // Must be at least 40
+    u32 dib_header_size;     // Must be at least 40
     u32 width;
     u32 height;
-    u16 planes;             // Must be 1
-    u16 bits_per_pixel;     // 1, 4, 8, 16, 24, or 32
-    u32 compression;        // 0 = uncompressed
-    u32 image_size;         // May be zero for uncompressed images
-    u32 x_pixels_per_meter; // Preferred resolution
-    u32 y_pixels_per_meter; // Preferred resolution
+    u16 planes;              // Must be 1
+    u16 bits_per_pixel;      // 1, 4, 8, 16, 24, or 32
+    u32 compression;         // 0 = uncompressed
+    u32 image_size;          // May be zero for uncompressed images
+    u32 x_pixels_per_meter;  // Preferred resolution
+    u32 y_pixels_per_meter;  // Preferred resolution
     u32 n_colours_table;     // Number of color table entries
     u32 important_colours;   // Number of significant colours
 
