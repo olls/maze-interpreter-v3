@@ -324,6 +324,6 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
   // draw_string(renderer, &orthographic_basis, &game_state->bitmaps.font, (vec2){0, 0}, str, 0.3, (vec4){1, 0, 0, 0});
 
   keep_running &= print_gl_errors();
-  // printf("Main loop end\n");
+  log(L_GameLoop, "Main loop end");
   return keep_running;
 }

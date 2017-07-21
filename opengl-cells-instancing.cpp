@@ -112,8 +112,9 @@ remove_cell_instance(CellInstancing *cell_instancing, Maze *maze, Cell *cell)
 void
 draw_instanced_cells(CellInstancing *cell_instancing, Panning *panning, mat4 projection_matrix)
 {
-  CellUniforms *uniforms = &cell_instancing->uniforms;
+  glUseProgram(cell_instancing->shader_program);
 
+  CellUniforms *uniforms = &cell_instancing->uniforms;
   glUniformMatrix4fv(uniforms->mat4_projection_matrix.location, 1, GL_TRUE, projection_matrix.es);
 
   glUniform1i(uniforms->int_render_origin_cell_x.location, panning->world_maze_pos.cell_x);
@@ -238,7 +239,8 @@ setup_cell_instancing(CellInstancing *cell_instancing)
   success &= create_shader_program(filenames, shader_types, array_count(shader_types), &cell_instancing->shader_program);
   glUseProgram(cell_instancing->shader_program);
 
-  cell_instancing->vao = setup_vao();
+  cell_instancing->vao = create_vao();
+  glBindVertexArray(cell_instancing->vao);
 
   setup_cell_vertex_vbo(&cell_instancing->cell_vertex_vbo, CELL_VERTICES,         array_count(CELL_VERTICES));
   setup_cell_vertex_ibo(&cell_instancing->cell_vertex_ibo, CELL_TRIANGLE_INDICES, array_count(CELL_TRIANGLE_INDICES));
