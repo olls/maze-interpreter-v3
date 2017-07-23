@@ -1,7 +1,7 @@
 struct XMLAttr
 {
-  String name;
-  String value;
+  ConstString name;
+  ConstString value;
 
   XMLAttr *next_attr;
 };
@@ -20,12 +20,12 @@ enum XMLTagType
 
 struct XMLTag
 {
-  String name;
+  ConstString name;
 
   XMLTagType type;
 
-  char *file_start;
-  char *file_end;
+  const char *file_start;
+  const char *file_end;
 
   XMLAttr *attrs;
 

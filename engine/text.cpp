@@ -72,10 +72,10 @@ is_whitespace_nl(char character)
 }
 
 
-char *
-get_num(char *ptr, char *f_end, u32 *result)
+const char *
+get_num(const char *ptr, const char *f_end, u32 *result)
 {
-  char *num_start = ptr;
+  const char *num_start = ptr;
 
   consume_while(ptr, is_num, f_end);
 
@@ -94,8 +94,8 @@ get_num(char *ptr, char *f_end, u32 *result)
 }
 
 
-char *
-get_num(char *ptr, char *f_end, s32 *result)
+const char *
+get_num(const char *ptr, const char *f_end, s32 *result)
 {
   *result = 0;
 
@@ -106,7 +106,7 @@ get_num(char *ptr, char *f_end, s32 *result)
     coef = -1;
   }
 
-  char *num_start = ptr;
+  const char *num_start = ptr;
 
   consume_while(ptr, is_num, f_end);
 
@@ -126,8 +126,8 @@ get_num(char *ptr, char *f_end, s32 *result)
 }
 
 
-char*
-get_num(char *ptr, char *f_end, r32 *result)
+const char*
+get_num(const char *ptr, const char *f_end, r32 *result)
 {
   s32 whole_num = 0;
   ptr = get_num(ptr, f_end, &whole_num);
@@ -160,12 +160,12 @@ get_num(char *ptr, char *f_end, r32 *result)
 
 
 u32
-hex_string_to_int(String string)
+hex_string_to_int(ConstString string)
 {
   u32 result = 0;
 
   u32 position = string.length - 1;
-  for (char *c = string.text;
+  for (const char *c = string.text;
        c < string.text + string.length;
        ++c)
   {

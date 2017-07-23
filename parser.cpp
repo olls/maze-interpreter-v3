@@ -1,5 +1,5 @@
-char *
-get_direction(char *ptr, vec2 *result)
+const char *
+get_direction(const char *ptr, vec2 *result)
 {
   *result = STATIONARY;
 
@@ -38,12 +38,12 @@ get_direction(char *ptr, vec2 *result)
 }
 
 
-char *
-parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
+const char *
+parse_function_definition(Functions *functions, const char cell_str[2], const char *f_ptr, const char *f_end, Cell *cell)
 {
   u32 function_index = get_function_index(cell_str);
 
-  char *start_f_ptr = f_ptr;
+  const char *start_f_ptr = f_ptr;
 
   consume_whitespace(f_ptr, f_end);
 
@@ -75,7 +75,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
         consume_whitespace(f_ptr, f_end);
 
         u32 assignment_value;
-        char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
+        const char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
 
         if (end_num_f_ptr == f_ptr)
         {
@@ -104,7 +104,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
         consume_whitespace(f_ptr, f_end);
 
         u32 assignment_value;
-        char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
+        const char *end_num_f_ptr = get_num(f_ptr, f_end, &assignment_value);
         if (end_num_f_ptr == f_ptr)
         {
           function->type = FUNCTION_NULL;
@@ -190,7 +190,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
           consume_whitespace(f_ptr, f_end);
 
           u32 condition_value;
-          char *end_num_f_ptr = get_num(f_ptr, f_end, &condition_value);
+          const char *end_num_f_ptr = get_num(f_ptr, f_end, &condition_value);
           if (end_num_f_ptr == f_ptr)
           {
             log(L_Parser, "  Invalid function: Missing condition value.");
@@ -214,7 +214,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
               consume_whitespace(f_ptr, f_end);
 
               vec2 true_direction;
-              char *end_true_direction_f_ptr = get_direction(f_ptr, &true_direction);
+              const char *end_true_direction_f_ptr = get_direction(f_ptr, &true_direction);
               if (end_true_direction_f_ptr == f_ptr)
               {
                 log(L_Parser, "  Invalid function: Missing 'THEN' direction.");
@@ -239,7 +239,7 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
                   f_ptr += 4;
                   consume_whitespace(f_ptr, f_end);
 
-                  char *end_false_direction_f_ptr = get_direction(f_ptr, &false_direction);
+                  const char *end_false_direction_f_ptr = get_direction(f_ptr, &false_direction);
                   if (end_false_direction_f_ptr == f_ptr)
                   {
                     log(L_Parser, "Invalid function: Missing 'ELSE' direction.");
@@ -291,8 +291,8 @@ parse_function_definition(Functions *functions, char cell_str[2], char *f_ptr, c
 }
 
 
-char *
-parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char *f_end, Cell *cell)
+const char *
+parse_cell(Maze *maze, Functions *functions, const char cell_str[2], const char *f_ptr, const char *f_end, Cell *cell)
 {
   if (str_eq(cell_str, "^^", 2))
   {
@@ -318,8 +318,8 @@ parse_cell(Maze *maze, Functions *functions, char cell_str[2], char *f_ptr, char
   }
   else if (is_letter(cell_str[0]) && (is_letter(cell_str[1]) || is_num(cell_str[1])))
   {
-    char *end_function_name_f_ptr = f_ptr + 2;
-    char *end_function_definition_f_ptr = parse_function_definition(functions, cell_str, end_function_name_f_ptr, f_end, cell);
+    const char *end_function_name_f_ptr = f_ptr + 2;
+    const char *end_function_definition_f_ptr = parse_function_definition(functions, cell_str, end_function_name_f_ptr, f_end, cell);
     if (end_function_definition_f_ptr != end_function_name_f_ptr)
     {
       f_ptr = end_function_definition_f_ptr;
@@ -422,8 +422,8 @@ parse(Maze *maze, Functions *functions, Memory *memory, const char *filename)
     u32 y = 0;
 
     char cell_str[2] = {};
-    char *f_ptr = file.text;
-    char *f_end = f_ptr + file.size;
+    const char *f_ptr = file.text;
+    const char *f_end = f_ptr + file.size;
     while (f_ptr < f_end)
     {
       cell_str[0] = f_ptr[0];

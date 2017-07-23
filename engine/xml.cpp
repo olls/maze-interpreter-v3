@@ -12,10 +12,10 @@ not_label(char c)
 }
 
 
-char *
-get_label(char *start, char *end_f, String *result)
+const char *
+get_label(const char *start, const char *end_f, ConstString *result)
 {
-  char *c = start;
+  const char *c = start;
   consume_until(c, is_letter, end_f);
 
   result->text = c;
@@ -33,8 +33,8 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
   // Creates a array of tokens, each representing "< ... >", sequentially in memory
   // TODO: This really doesn't handle comments well.
 
-  char *end_f = file->text + file->size;
-  char *c = file->text;
+  const char *end_f = file->text + file->size;
+  const char *c = file->text;
 
   XMLTag *result = 0;
 
@@ -120,7 +120,7 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
 void
 parse_tag_attrs(Memory *memory, XMLTag *tag)
 {
-  char *c = tag->name.text + tag->name.length;
+  const char *c = tag->name.text + tag->name.length;
 
   tag->attrs = 0;
 
@@ -128,7 +128,7 @@ parse_tag_attrs(Memory *memory, XMLTag *tag)
 
   while (c < tag->file_end)
   {
-    char *new_c = get_label(c, tag->file_end, &tmp_attr.name);
+    const char *new_c = get_label(c, tag->file_end, &tmp_attr.name);
     if (tmp_attr.name.length == 0 || c == tag->file_end) break;
     c = new_c;
 
@@ -297,15 +297,15 @@ test_traverse_xml_struct(XMLTag *parent, u32 level=0)
 }
 
 
-String
+ConstString
 get_attr_value(XMLTag *tag, ConstString name)
 {
-  String result = {.text = 0, .length = 0};
+  ConstString result = {.text = 0, .length = 0};
 
   XMLAttr *attr = tag->attrs;
   while (attr)
   {
-    if (str_eq(&attr->name, name))
+    if (str_eq(&attr->name, &name))
     {
       result = attr->value;
       break;

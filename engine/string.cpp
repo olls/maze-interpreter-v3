@@ -32,6 +32,12 @@ str_eq(ConstString *a, ConstString *b)
 }
 
 b32
+str_eq(ConstString a, ConstString b)
+{
+  return str_eq(&a, &b);
+}
+
+b32
 str_eq(String *a, ConstString b)
 {
   return str_eq((ConstString *)a, &b);
@@ -53,4 +59,10 @@ b32
 str_eq(char *a, ConstString b)
 {
   return str_eq((String){ .text = a, .length = b.length }, b);
+}
+
+b32
+str_eq(const char *a, ConstString b)
+{
+  return str_eq((ConstString){ .text = a, .length = b.length }, b);
 }

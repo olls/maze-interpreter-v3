@@ -202,8 +202,8 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
 
   log(L_Serializer, "Serializing maze");
 
-  memset(file.text, ' ', length);
-  write_cells(&maze->tree, file.text, width, height, (vec2){most_left.x, most_top.y}, functions);
+  memset(file.write, ' ', length);
+  write_cells(&maze->tree, file.write, width, height, (vec2){most_left.x, most_top.y}, functions);
 
   // Add line breaks to maze
   for (u32 line = 0;
@@ -211,7 +211,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
        ++line)
   {
     u32 file_offset = (line+1) * width * CELL_LENGTH + line;
-    file.text[file_offset] = '\n';
+    file.write[file_offset] = '\n';
   }
 
   // Add line breaks for gap between maze and function defs
@@ -220,7 +220,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
        ++line)
   {
     u32 file_offset = maze_length + line;
-    file.text[file_offset] = '\n';
+    file.write[file_offset] = '\n';
   }
 
   log(L_Serializer, "Serializing functions");
@@ -250,7 +250,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
         u32 file_pos = maze_length + gap_length + length_funcs_written;
 
         u32 func_length = serialize_function(tmp_function_buffer, function);
-        memcpy(file.text + file_pos, tmp_function_buffer, func_length);
+        memcpy(file.write + file_pos, tmp_function_buffer, func_length);
 
         log(L_Serializer, "%.*s", func_length, tmp_function_buffer);
         length_funcs_written += func_length;

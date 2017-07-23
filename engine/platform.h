@@ -42,7 +42,7 @@ struct Memory
 struct File
 {
   s32 fd;
-  char *text;
-  const char *read_only;
+  const char *text;
+  char *write;
   s32 size;
 };

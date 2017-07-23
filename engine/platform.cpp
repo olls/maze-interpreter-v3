@@ -79,21 +79,23 @@ open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = 
 
     if (success)
     {
-      result->text = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
-      if (result->text == MAP_FAILED)
+      const char *file_ptr = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
+      if (file_ptr == MAP_FAILED)
       {
         printf("Failed to map file: \"%s\"\n", filename);
         success = false;
       }
       else
       {
+        result->text = file_ptr;
+
         if (write)
         {
-          result->read_only = NULL;
+          result->write = (char *)file_ptr;
         }
         else
         {
-          result->read_only = result->text;
+          result->write = NULL;
         }
       }
     }
@@ -104,7 +106,7 @@ open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = 
     close(result->fd);
     result->fd = -1;
     result->text = 0;
-    result->read_only = 0;
+    result->write = 0;
     result->size = 0;
   }
 
