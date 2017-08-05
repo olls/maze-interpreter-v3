@@ -1,50 +1,50 @@
 void
-gl_print_error(GLenum error_code, const char *file, u32 line)
+gl_print_error(GLenum error_code, const u8 *file, u32 line)
 {
-  const char *error;
+  const u8 *error;
   switch (error_code)
   {
     case (GL_INVALID_ENUM):
     {
-      error = "GL_INVALID_ENUM";
+      error = u8("GL_INVALID_ENUM");
     } break;
     case (GL_INVALID_VALUE):
     {
-      error = "GL_INVALID_VALUE";
+      error = u8("GL_INVALID_VALUE");
     } break;
     case (GL_INVALID_OPERATION):
     {
-      error = "GL_INVALID_OPERATION";
+      error = u8("GL_INVALID_OPERATION");
     } break;
     case (GL_STACK_OVERFLOW):
     {
-      error = "GL_STACK_OVERFLOW";
+      error = u8("GL_STACK_OVERFLOW");
     } break;
     case (GL_STACK_UNDERFLOW):
     {
-      error = "GL_STACK_UNDERFLOW";
+      error = u8("GL_STACK_UNDERFLOW");
     } break;
     case (GL_OUT_OF_MEMORY):
     {
-      error = "GL_OUT_OF_MEMORY";
+      error = u8("GL_OUT_OF_MEMORY");
     } break;
     case (GL_INVALID_FRAMEBUFFER_OPERATION):
     {
-      error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+      error = u8("GL_INVALID_FRAMEBUFFER_OPERATION");
     } break;
     case (GL_TABLE_TOO_LARGE):
     {
-      error = "GL_TABLE_TOO_LARGE";
+      error = u8("GL_TABLE_TOO_LARGE");
     }
   }
   printf("OpenGL error: %s at %s:%d\n", error, file, line);
 }
 
 
-#define print_gl_errors() _print_gl_errors(__FILE__, __LINE__)
+#define print_gl_errors() _print_gl_errors(u8(__FILE__), __LINE__)
 
 b32
-_print_gl_errors(const char *file, u32 line)
+_print_gl_errors(const u8 *file, u32 line)
 {
   b32 success = true;
 
@@ -62,13 +62,13 @@ _print_gl_errors(const char *file, u32 line)
 
 
 b32
-compile_shader(const char shader_source[], s32 size, GLenum shader_type, GLuint *shader)
+compile_shader(const u8 shader_source[], s32 size, GLenum shader_type, GLuint *shader)
 {
   b32 success = true;
 
   *shader = glCreateShader(shader_type);
 
-  glShaderSource(*shader, 1, &shader_source, &size);
+  glShaderSource(*shader, 1, (const char **)&shader_source, &size);
   glCompileShader(*shader);
 
   GLint compile_success = 0;
@@ -81,7 +81,7 @@ compile_shader(const char shader_source[], s32 size, GLenum shader_type, GLuint 
     GLchar *info_log = (GLchar *)malloc(sizeof(GLchar) * log_size);
     glGetShaderInfoLog(*shader, log_size, NULL, info_log);
 
-    log(L_OpenGL, "Shader compile error:\n%s", info_log);
+    log(L_OpenGL, u8("Shader compile error:\n%s"), info_log);
     free(info_log);
 
     glDeleteShader(*shader);
@@ -94,7 +94,7 @@ compile_shader(const char shader_source[], s32 size, GLenum shader_type, GLuint 
 
 
 b32
-load_shader(const char filename[], GLenum shader_type, GLuint *shader)
+load_shader(const u8 filename[], GLenum shader_type, GLuint *shader)
 {
   b32 success = true;
   *shader = 0;
@@ -114,7 +114,7 @@ load_shader(const char filename[], GLenum shader_type, GLuint *shader)
 
 
 b32
-create_shader_program(const char *filenames[], GLenum types[], s32 size, GLuint *shader_program)
+create_shader_program(const u8 *filenames[], GLenum types[], s32 size, GLuint *shader_program)
 {
   b32 success = true;
   *shader_program = glCreateProgram();
@@ -145,7 +145,7 @@ create_shader_program(const char *filenames[], GLenum types[], s32 size, GLuint 
       GLchar *info_log = (GLchar *)malloc(sizeof(GLchar) * log_size);
       glGetProgramInfoLog(*shader_program, log_size, NULL, info_log);
 
-      log(L_OpenGL, "Shader link error:\n%s", info_log);
+      log(L_OpenGL, u8("Shader link error:\n%s"), info_log);
       free(info_log);
 
       glDeleteProgram(*shader_program);
@@ -193,7 +193,7 @@ extend_gl_buffer,
       buffer->total_elements = INITIAL_GL_BUFFER_TOTAL_ELEMENTS;
     }
 
-    log(channel, "Initial buffer size is 0, allocating new buffer of size %u", buffer->total_elements);
+    log(channel, u8("Initial buffer size is 0, allocating new buffer of size %u"), buffer->total_elements);
 
     glBindBuffer(buffer->binding_target, buffer->id);
     glBufferData(buffer->binding_target, buffer->element_size * buffer->total_elements, NULL, GL_STATIC_DRAW);
@@ -201,7 +201,7 @@ extend_gl_buffer,
   }
   else
   {
-    log(channel, "Out of space in buffer, allocating larger buffer.");
+    log(channel, u8("Out of space in buffer, allocating larger buffer."));
 
     u32 buffer_size = buffer->element_size * buffer->total_elements;
     assert(buffer_size < MAX_U32 / 2);
@@ -242,7 +242,7 @@ extend_gl_buffer,
   }
 
   print_gl_errors();
-  log(channel, "Reallocated VBO.");
+  log(channel, u8("Reallocated VBO."));
 },
 OpenGL_Buffer *buffer, u32 minimum_new_total_elements = 0)
 
@@ -259,7 +259,7 @@ update_buffer_element,
   }
   else
   {
-    log(channel, "Cannot update element %u. Buffer only has %u elements", element_position, buffer->elements_used);
+    log(channel, u8("Cannot update element %u. Buffer only has %u elements"), element_position, buffer->elements_used);
   }
   print_gl_errors();
 },
@@ -270,7 +270,7 @@ POLYMORPHIC_LOGGING_FUNCTION(
 u32
 new_buffer_element,
 {
-  log(channel, "Adding new element.");
+  log(channel, u8("Adding new element."));
 
   if (buffer->elements_used >= buffer->total_elements)
   {
@@ -368,10 +368,10 @@ get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
   {
     Uniform *current = uniforms + i;
 
-    current->location = glGetUniformLocation(shader_program, current->name);
+    current->location = glGetUniformLocation(shader_program, (const char *)current->name);
     if (current->location == -1)
     {
-      log(L_OpenGL, "Failed to find uniform %s", current->name);
+      log(L_OpenGL, u8("Failed to find uniform %s"), current->name);
       current->location = 0;
       success &= false;
     }
@@ -382,37 +382,37 @@ get_uniform_locations(GLuint shader_program, Uniform *uniforms, u32 n_uniforms)
 
 
 void
-opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user_param)
 {
-  const char *source_str = 0;
-  const char *type_str = 0;
-  const char * severity_str = 0;
+  const u8 *source_str = 0;
+  const u8 *type_str = 0;
+  const u8 * severity_str = 0;
 
   switch (source)
   {
       case GL_DEBUG_SOURCE_API:
       {
-        source_str = "GL_DEBUG_SOURCE_API";
+        source_str = u8("GL_DEBUG_SOURCE_API");
       } break;
       case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
       {
-        source_str = "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
+        source_str = u8("GL_DEBUG_SOURCE_WINDOW_SYSTEM");
       } break;
       case GL_DEBUG_SOURCE_SHADER_COMPILER:
       {
-        source_str = "GL_DEBUG_SOURCE_SHADER_COMPILER";
+        source_str = u8("GL_DEBUG_SOURCE_SHADER_COMPILER");
       } break;
       case GL_DEBUG_SOURCE_THIRD_PARTY:
       {
-        source_str = "GL_DEBUG_SOURCE_THIRD_PARTY";
+        source_str = u8("GL_DEBUG_SOURCE_THIRD_PARTY");
       } break;
       case GL_DEBUG_SOURCE_APPLICATION:
       {
-        source_str = "GL_DEBUG_SOURCE_APPLICATION";
+        source_str = u8("GL_DEBUG_SOURCE_APPLICATION");
       } break;
       case GL_DEBUG_SOURCE_OTHER:
       {
-        source_str = "GL_DEBUG_SOURCE_OTHER";
+        source_str = u8("GL_DEBUG_SOURCE_OTHER");
       } break;
   }
 
@@ -420,39 +420,39 @@ opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum sever
   {
       case GL_DEBUG_TYPE_ERROR:
       {
-        type_str = "GL_DEBUG_TYPE_ERROR";
+        type_str = u8("GL_DEBUG_TYPE_ERROR");
       } break;
       case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
       {
-        type_str = "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+        type_str = u8("GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR");
       } break;
       case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
       {
-        type_str = "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+        type_str = u8("GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR");
       } break;
       case GL_DEBUG_TYPE_PORTABILITY:
       {
-        type_str = "GL_DEBUG_TYPE_PORTABILITY";
+        type_str = u8("GL_DEBUG_TYPE_PORTABILITY");
       } break;
       case GL_DEBUG_TYPE_PERFORMANCE:
       {
-        type_str = "GL_DEBUG_TYPE_PERFORMANCE";
+        type_str = u8("GL_DEBUG_TYPE_PERFORMANCE");
       } break;
       case GL_DEBUG_TYPE_MARKER:
       {
-        type_str = "GL_DEBUG_TYPE_MARKER";
+        type_str = u8("GL_DEBUG_TYPE_MARKER");
       } break;
       case GL_DEBUG_TYPE_PUSH_GROUP:
       {
-        type_str = "GL_DEBUG_TYPE_PUSH_GROUP";
+        type_str = u8("GL_DEBUG_TYPE_PUSH_GROUP");
       } break;
       case GL_DEBUG_TYPE_POP_GROUP:
       {
-        type_str = "GL_DEBUG_TYPE_POP_GROUP";
+        type_str = u8("GL_DEBUG_TYPE_POP_GROUP");
       } break;
       case GL_DEBUG_TYPE_OTHER:
       {
-        type_str = "GL_DEBUG_TYPE_OTHER";
+        type_str = u8("GL_DEBUG_TYPE_OTHER");
       } break;
   }
 
@@ -460,21 +460,27 @@ opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum sever
   {
       case GL_DEBUG_SEVERITY_HIGH:
       {
-        severity_str = "GL_DEBUG_SEVERITY_HIGH";
+        severity_str = u8("GL_DEBUG_SEVERITY_HIGH");
       } break;
       case GL_DEBUG_SEVERITY_MEDIUM:
       {
-        severity_str = "GL_DEBUG_SEVERITY_MEDIUM";
+        severity_str = u8("GL_DEBUG_SEVERITY_MEDIUM");
       } break;
       case GL_DEBUG_SEVERITY_LOW:
       {
-        severity_str = "GL_DEBUG_SEVERITY_LOW";
+        severity_str = u8("GL_DEBUG_SEVERITY_LOW");
       } break;
       case GL_DEBUG_SEVERITY_NOTIFICATION:
       {
-        severity_str = "GL_DEBUG_SEVERITY_NOTIFICATION";
+        severity_str = u8("GL_DEBUG_SEVERITY_NOTIFICATION");
       } break;
   }
 
-  log(L_OpenGL_Debug, "Source: %s, Type: %s, ID: %d, Severity: %s, \"%.*s\"", source_str, type_str, id, severity_str, length, message);
+  log(L_OpenGL_Debug, u8("Source: %s, Type: %s, ID: %d, Severity: %s, \"%.*s\""), source_str, type_str, id, severity_str, length, message);
+}
+
+void
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *user_param)
+{
+  opengl_debug_output_callback(source, type, id, severity, length, message, (const void *)user_param);
 }

@@ -1,3 +1,5 @@
+#define u8(literal) ((const u8 *)literal)
+
 #ifdef DEBUG
 #define S(x) #x
 #define S_(x) S(x)

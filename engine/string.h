@@ -1,12 +1,19 @@
 struct String
 {
-    char *text;
+    const u8 *text;
     u32 length;
 };
 
 
-struct ConstString
+struct WriteString
 {
-    const char *text;
+    u8 *text;
     u32 length;
+};
+
+
+struct u32_String
+{
+  const u32 *text;
+  u32 length;
 };

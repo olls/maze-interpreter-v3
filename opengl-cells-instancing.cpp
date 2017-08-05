@@ -28,7 +28,7 @@ add_cell_instance(CellInstancing *cell_instancing, Cell *cell)
 
   cell->opengl_instance_position = new_buffer_element(L_CellInstancing, &cell_instancing->cell_instances_vbo, &cell_instance);
 
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u",
+  log(L_CellInstancing, u8("n_cell_instances: %u, out of cell_instances_vbo_size: %u"),
       cell_instancing->cell_instances_vbo.elements_used, cell_instancing->cell_instances_vbo.total_elements);
 }
 
@@ -61,7 +61,7 @@ add_all_cell_instances(CellInstancing *cell_instancing, QuadTree *tree)
 
   recurse_adding_all_cell_instances(cell_instancing, tree);
   print_gl_errors();
-  log(L_CellInstancing, "Added all cell instances.");
+  log(L_CellInstancing, u8("Added all cell instances."));
 
   glBindVertexArray(0);
 }
@@ -75,7 +75,7 @@ remove_cell_instance(CellInstancing *cell_instancing, Maze *maze, Cell *cell)
   u32 cell_instance_position = cell->opengl_instance_position;
   cell->opengl_instance_position = INVALID_GL_BUFFER_ELEMENT_POSITION;
 
-  log(L_CellInstancing, "Attempting to remove cell instance %u.", cell_instance_position);
+  log(L_CellInstancing, u8("Attempting to remove cell instance %u."), cell_instance_position);
 
   remove_buffer_element(cell_instances_vbo, cell_instance_position);
 
@@ -85,7 +85,7 @@ remove_cell_instance(CellInstancing *cell_instancing, Maze *maze, Cell *cell)
 
   if (cell_instance_position <= cell_instances_vbo->elements_used)
   {
-    log(L_CellInstancing, "Updating moved cell instance");
+    log(L_CellInstancing, u8("Updating moved cell instance"));
 
     glBindBuffer(cell_instances_vbo->binding_target, cell_instances_vbo->id);
 
@@ -101,11 +101,11 @@ remove_cell_instance(CellInstancing *cell_instancing, Maze *maze, Cell *cell)
     }
     else
     {
-      log(L_CellInstancing, "Could not get cell being moved from the Maze to update it's instance position");
+      log(L_CellInstancing, u8("Could not get cell being moved from the Maze to update it's instance position"));
     }
   }
 
-  log(L_CellInstancing, "n_cell_instances: %u, out of cell_instances_vbo_size: %u", cell_instances_vbo->elements_used, cell_instances_vbo->total_elements);
+  log(L_CellInstancing, u8("n_cell_instances: %u, out of cell_instances_vbo_size: %u"), cell_instances_vbo->elements_used, cell_instances_vbo->total_elements);
 }
 
 
@@ -233,7 +233,7 @@ setup_cell_instancing(CellInstancing *cell_instancing)
 {
   b32 success = true;
 
-  const char *filenames[] = {"cell-instancing.glvs", "cell-instancing.glfs"};
+  const u8 *filenames[] = {u8("cell-instancing.glvs"), u8("cell-instancing.glfs")};
   GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 
   success &= create_shader_program(filenames, shader_types, array_count(shader_types), &cell_instancing->shader_program);
@@ -251,15 +251,15 @@ setup_cell_instancing(CellInstancing *cell_instancing)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   CellUniforms *uniforms = &cell_instancing->uniforms;
-  uniforms->mat4_projection_matrix.name = "projection_matrix";
-  uniforms->int_render_origin_cell_x.name = "render_origin_cell_x";
-  uniforms->int_render_origin_cell_y.name = "render_origin_cell_y";
-  uniforms->vec2_render_origin_offset.name = "render_origin_offset";
-  uniforms->float_scale.name = "scale";
+  uniforms->mat4_projection_matrix.name = u8("projection_matrix");
+  uniforms->int_render_origin_cell_x.name = u8("render_origin_cell_x");
+  uniforms->int_render_origin_cell_y.name = u8("render_origin_cell_y");
+  uniforms->vec2_render_origin_offset.name = u8("render_origin_offset");
+  uniforms->float_scale.name = u8("scale");
   success &= get_uniform_locations(cell_instancing->shader_program, uniforms->array, array_count(uniforms->array));
 
   success &= print_gl_errors();
-  log(L_CellInstancing, "OpenGL VBOs setup finished.");
+  log(L_CellInstancing, u8("OpenGL VBOs setup finished."));
 
   return success;
 }

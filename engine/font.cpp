@@ -1,5 +1,5 @@
 void
-draw_char(Bitmap *font, vec2 world_pos, char x, r32 scale = 1, vec4 color = (vec4){-1})
+draw_char(Bitmap *font, vec2 world_pos, u8 x, r32 scale = 1, vec4 color = (vec4){-1})
 {
   u32 char_index = x - MIN_CHAR;
   vec2 bitmap_pos = {
@@ -26,7 +26,7 @@ draw_char(Bitmap *font, vec2 world_pos, char x, r32 scale = 1, vec4 color = (vec
 
 
 void
-draw_string(Bitmap *font, vec2 world_pos, const char str[], r32 scale = 1, vec4 color = (vec4){-1})
+draw_string(Bitmap *font, vec2 world_pos, const u8 str[], r32 scale = 1, vec4 color = (vec4){-1})
 {
   u32 i = 0;
   while (str[i])
@@ -40,13 +40,13 @@ draw_string(Bitmap *font, vec2 world_pos, const char str[], r32 scale = 1, vec4 
 
 
 u32
-fmted_str(char *out, u32 max_len, const char *pattern,  ...)
+formatted_string(u8 *out, u32 max_len, const u8 *pattern,  ...)
 {
   u32 result;
 
   va_list aptr;
   va_start(aptr, pattern);
-  s32 written = vsnprintf(out, max_len, pattern, aptr);
+  s32 written = vsnprintf((char *)out, max_len, (const char *)pattern, aptr);
   va_end(aptr);
 
   if (written >= 0 && written <= max_len)

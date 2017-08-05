@@ -1,5 +1,5 @@
 void
-register_game_logging_channels(const char **GAME_LOGGING_CHANNEL_NAMES)
+register_game_logging_channels(const u8 **GAME_LOGGING_CHANNEL_NAMES)
 {
   GAME_LOGGING_CHANNELS = GAME_LOGGING_CHANNEL_NAMES;
 }
@@ -36,7 +36,7 @@ void
 log_s, {
   printf("%s", buf);
 },
-const char *text, ...)
+const u8 *text, ...)
 
 
 POLYMORPHIC_LOGGING_ENDPOINT(
@@ -44,7 +44,7 @@ void
 log, {
   printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, channel_name, buf);
 },
-const char *text, ...)
+const u8 *text, ...)
 
 
 POLYMORPHIC_LOGGING_ENDPOINT(
@@ -53,26 +53,27 @@ log_ind,
 {
   printf("\e[01;3%dm%s\e[0m -> %*s%s\n", channel % 8, channel_name, n, " ", buf);
 },
-u32 n, const char *text, ...)
+u32 n, const u8 *text, ...)
 
 
 POLYMORPHIC_LOGGING_FUNCTION(
 void
 log_d,
 {
-  char s[16] = {};
+  const u32 s_length = 16;
+  u8 s[s_length] = {};
 
   switch (vector_to_compass_dir(direction))
   {
-    case ('U'): strcpy(s, "UP");
+    case ('U'): copy_string(s, u8("UP"), s_length);
       break;
-    case ('D'): strcpy(s, "DOWN");
+    case ('D'): copy_string(s, u8("DOWN"), s_length);
       break;
-    case ('L'): strcpy(s, "LEFT");
+    case ('L'): copy_string(s, u8("LEFT"), s_length);
       break;
-    case ('R'): strcpy(s, "RIGHT");
+    case ('R'): copy_string(s, u8("RIGHT"), s_length);
       break;
-    case ('N'): strcpy(s, "STATIONARY");
+    case ('N'): copy_string(s, u8("STATIONARY"), s_length);
       break;
   }
 
@@ -88,7 +89,7 @@ POLYMORPHIC_LOGGING_FUNCTION(
 void
 log,
 {
-  log(channel, "(%f, %f)", vec.x, vec.y);
+  log(channel, u8("(%f, %f)"), vec.x, vec.y);
 },
 vec2 vec)
 
@@ -96,7 +97,7 @@ POLYMORPHIC_LOGGING_FUNCTION(
 void
 log,
 {
-  log(channel, "(%f, %f, %f)", vec.x, vec.y, vec.z);
+  log(channel, u8("(%f, %f, %f)"), vec.x, vec.y, vec.z);
 },
 vec3 vec)
 
@@ -104,7 +105,7 @@ POLYMORPHIC_LOGGING_FUNCTION(
 void
 log,
 {
-  log(channel, "(%f, %f, %f, %f)", vec.w, vec.x, vec.y, vec.z);
+  log(channel, u8("(%f, %f, %f, %f)"), vec.w, vec.x, vec.y, vec.z);
 },
 vec4 vec)
 
@@ -112,6 +113,6 @@ POLYMORPHIC_LOGGING_FUNCTION(
 void
 log,
 {
-  log(channel, "((%f, %f), (%f, %f))", rect.start.x, rect.start.y, rect.end.x, rect.end.y);
+  log(channel, u8("((%f, %f), (%f, %f))"), rect.start.x, rect.start.y, rect.end.x, rect.end.y);
 },
 Rectangle rect)

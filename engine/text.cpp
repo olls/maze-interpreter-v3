@@ -8,8 +8,15 @@
 #define consume_until_newline(ptr, end) consume_until(ptr, is_newline, end)
 
 
-bool
-str_eq(const char *a, const char *b, u32 n)
+u8 *
+copy_string(u8 *dest, const u8 *source, u32 size)
+{
+  return (u8 *)strncpy((char *)dest, (const char *)source, size);
+}
+
+
+b32
+str_eq(const u8 *a, const u8 *b, u32 n)
 {
   for (u32 i = 0; i < n; ++i)
   {
@@ -24,7 +31,7 @@ str_eq(const char *a, const char *b, u32 n)
 
 
 b32
-is_num(char character)
+is_num(u8 character)
 {
   b32 result = (character >= '0') && (character <= '9');
   return result;
@@ -32,7 +39,7 @@ is_num(char character)
 
 
 b32
-is_num_or_sign(char character)
+is_num_or_sign(u8 character)
 {
   b32 result = is_num(character) || character == '-';
   return result;
@@ -40,7 +47,7 @@ is_num_or_sign(char character)
 
 
 b32
-is_letter(char character)
+is_letter(u8 character)
 {
   b32 result = (((character >= 'a') && (character <= 'z')) ||
                 ((character >= 'A') && (character <= 'Z')));
@@ -49,7 +56,7 @@ is_letter(char character)
 
 
 b32
-is_newline(char character)
+is_newline(u8 character)
 {
   b32 result = (character == '\n') || (character == '\r');
   return result;
@@ -57,7 +64,7 @@ is_newline(char character)
 
 
 b32
-is_whitespace(char character)
+is_whitespace(u8 character)
 {
   b32 result = (character == ' ') || (character == '\t');
   return result;
@@ -65,17 +72,17 @@ is_whitespace(char character)
 
 
 b32
-is_whitespace_nl(char character)
+is_whitespace_nl(u8 character)
 {
   b32 result = is_whitespace(character) || is_newline(character);
   return result;
 }
 
 
-const char *
-get_num(const char *ptr, const char *f_end, u32 *result)
+const u8 *
+get_num(const u8 *ptr, const u8 *f_end, u32 *result)
 {
-  const char *num_start = ptr;
+  const u8 *num_start = ptr;
 
   consume_while(ptr, is_num, f_end);
 
@@ -94,8 +101,8 @@ get_num(const char *ptr, const char *f_end, u32 *result)
 }
 
 
-const char *
-get_num(const char *ptr, const char *f_end, s32 *result)
+const u8 *
+get_num(const u8 *ptr, const u8 *f_end, s32 *result)
 {
   *result = 0;
 
@@ -106,7 +113,7 @@ get_num(const char *ptr, const char *f_end, s32 *result)
     coef = -1;
   }
 
-  const char *num_start = ptr;
+  const u8 *num_start = ptr;
 
   consume_while(ptr, is_num, f_end);
 
@@ -126,8 +133,8 @@ get_num(const char *ptr, const char *f_end, s32 *result)
 }
 
 
-const char*
-get_num(const char *ptr, const char *f_end, r32 *result)
+const u8 *
+get_num(const u8 *ptr, const u8 *f_end, r32 *result)
 {
   s32 whole_num = 0;
   ptr = get_num(ptr, f_end, &whole_num);
@@ -160,16 +167,16 @@ get_num(const char *ptr, const char *f_end, r32 *result)
 
 
 u32
-hex_string_to_int(ConstString string)
+hex_string_to_int(String string)
 {
   u32 result = 0;
 
   u32 position = string.length - 1;
-  for (const char *c = string.text;
+  for (const u8 *c = string.text;
        c < string.text + string.length;
        ++c)
   {
-    char this_c = *c;
+    u8 this_c = *c;
     u32 char_num = 0;
 
     if (is_num(this_c))

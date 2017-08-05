@@ -4,19 +4,6 @@ const r32 MAX_ZOOM = 200;
 const r32 ZOOM_MIN_CELLS_ON_SCREEN = 100;
 const r32 ZOOM_MAX_CELLS_ON_SCREEN = 2;
 
-// const char MAZE_FILENAME[] = "programs/test-huge.mz";
-// const char MAZE_FILENAME[] = "programs/test-big.mz";
-// const char MAZE_FILENAME[] = "programs/tree-big.mz";
-// const char MAZE_FILENAME[] = "programs/non-square.mz";
-const char MAZE_FILENAME[] = "test.mz";
-
-
-struct Bitmaps
-{
-  Bitmap tile;
-  Bitmap font;
-};
-
 
 struct Panning
 {
@@ -34,7 +21,7 @@ struct Panning
 struct GameState
 {
   b32 init;
-  const char *filename;
+  const u8 *filename;
 
   u32 world_per_pixel;
 
@@ -58,14 +45,13 @@ struct GameState
   Cars cars;
   Particles particles;
 
-  Bitmaps bitmaps;
   CellBitmaps cell_bitmaps;
 
   SVGOperation *arrow_svg;
 
   FT_Face font_face;
 
-  char persistent_str[256];
+  u8 persistent_str[256];
 
   UI ui;
 };

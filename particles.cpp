@@ -35,7 +35,7 @@ new_particle_source(Particles *particles, WorldSpace pos, ParticleType type, u64
     } break;
   }
 
-  log(L_Particles, "New particle system");
+  log(L_Particles, u8("New particle system"));
 
   return result;
 }

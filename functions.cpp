@@ -1,5 +1,5 @@
 u32
-get_function_index(const char name[2])
+get_function_index(const u8 name[2])
 {
   u32 result;
 

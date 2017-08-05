@@ -125,19 +125,19 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
   {
     case (CELL_NULL):
     {
-      log(L_CarsSim, "Null");
+      log(L_CarsSim, u8("Null"));
       car->direction = STATIONARY;
     } break;
 
     case (CELL_WALL):
     {
-      log(L_CarsSim, "Wall");
+      log(L_CarsSim, u8("Wall"));
       car->direction = STATIONARY;
     } break;
 
     case (CELL_START):
     {
-      log(L_CarsSim, "Start");
+      log(L_CarsSim, u8("Start"));
     } break;
 
     case (CELL_PATH):
@@ -146,13 +146,13 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
     case (CELL_HOLE):
     {
-      log(L_CarsSim, "Hole");
+      log(L_CarsSim, u8("Hole"));
       car->dead = true;
     } break;
 
     case (CELL_SPLITTER):
     {
-      log(L_CarsSim, "Splitter");
+      log(L_CarsSim, u8("Splitter"));
 
       Car *new_car = get_new_car(memory, cars);
       init_car(game_state, time_us, new_car, car->cell_pos.cell_x, car->cell_pos.cell_y, RIGHT);
@@ -167,11 +167,11 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
       if (function->type == FUNCTION_NULL)
       {
-        log(L_CarsSim, "Function '%.2s' not defined, skipping.", current_cell->name);
+        log(L_CarsSim, u8("Function '%.2s' not defined, skipping."), current_cell->name);
       }
       else
       {
-        log(L_CarsSim, "Function: %s, {type=%d, value=%d}", function->name, (u32)function->type, function->value);
+        log(L_CarsSim, u8("Function: %s, {type=%d, value=%d}"), function->name, (u32)function->type, function->value);
 
         switch (function->type)
         {
@@ -203,7 +203,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
           case (FUNCTION_GREATER_EQUAL):
           case (FUNCTION_GREATER):
           {
-            bool condition;
+            b32 condition;
             switch (function->type)
             {
               case (FUNCTION_LESS):
@@ -242,13 +242,13 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
           default: break;
         }
 
-        log(L_CarsSim, "New car value: %d", car->value);
+        log(L_CarsSim, u8("New car value: %d"), car->value);
       }
     } break;
 
     case (CELL_ONCE):
     {
-      log(L_CarsSim, "Once");
+      log(L_CarsSim, u8("Once"));
       car->updated_cell_type = CELL_WALL;
     } break;
 
@@ -257,7 +257,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_LEFT_UNLESS_DETECT):
     case (CELL_RIGHT_UNLESS_DETECT):
     {
-      log(L_CarsSim, "Unless Detect");
+      log(L_CarsSim, u8("Unless Detect"));
       // TODO: This might need optimising for large numbers of cars (We're looping through cars^2)
       if (cars_in_direct_neighbourhood(maze, cars, current_cell) == 0)
       {
@@ -283,14 +283,14 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
 
     case (CELL_OUT):
     {
-      log(L_CarsSim, "Output");
+      log(L_CarsSim, u8("Output"));
       printf("%d\n", car->value);
-      snprintf(game_state->persistent_str, 256, "%d", car->value);
+      formatted_string(game_state->persistent_str, array_count(game_state->persistent_str), u8("%d"), car->value);
     } break;
 
     case (CELL_INP):
     {
-      log(L_CarsSim, "Input");
+      log(L_CarsSim, u8("Input"));
       init_car_input_box(memory, game_state, car->id, car->value, car->cell_pos);
     } break;
 
@@ -299,7 +299,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
     case (CELL_LEFT):
     case (CELL_RIGHT):
     {
-      log(L_CarsSim, "Direction");
+      log(L_CarsSim, u8("Direction"));
       car->direction = get_direction_cell_direction(current_cell->type);
     } break;
 
@@ -326,7 +326,7 @@ car_cell_interactions(Memory *memory, GameState *game_state, u64 time_us, Maze *
           car->unpause_direction = STATIONARY;
         }
       }
-      log(L_CarsSim, "Pause: %d/%d", car->pause_left, current_cell->pause);
+      log(L_CarsSim, u8("Pause: %d/%d"), car->pause_left, current_cell->pause);
     } break;
 
     default:
@@ -461,13 +461,13 @@ draw_car(GameState *game_state, RenderWindow *render_window, Car *car, u64 time_
     glPopMatrix();
 
     u32 max_len = 16;
-    char str[max_len];
+    u8 str[max_len];
     r32 font_size = 0.15;
 
-    u32 chars = fmted_str(str, max_len, "%d", car->value);
+    u32 chars = formatted_string(str, max_len, u8("%d"), car->value);
     font_size /= chars;
 
-    draw_string(&game_state->bitmaps.font, pos - 0.5*Vec2(chars, 1)*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
+    // draw_string(&game_state->bitmaps.font, pos - 0.5*Vec2(chars, 1)*CHAR_SIZE*game_state->world_per_pixel*font_size, str, font_size);
   glPopMatrix();
 }
 

@@ -1,7 +1,7 @@
 struct Bitmap
 {
   struct BitmapFile {
-    char signature[2];
+    u8 signature[2];
     u32 file_size;
     u32 _;
     u32 pixels_offset;       // Offset to start of Pixel Data

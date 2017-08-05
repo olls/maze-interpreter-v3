@@ -4,7 +4,7 @@ const u32 INVALID_GL_BUFFER_ELEMENT_POSITION = MAX_U32;
 
 struct Uniform
 {
-  const char *name;
+  const u8 *name;
   GLuint location;
 };
 

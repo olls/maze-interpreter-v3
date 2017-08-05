@@ -42,6 +42,6 @@ main(int argc, const char *argv[])
 {
   register_game_logging_channels(GAME_LOGGING_CHANNEL_DEFINITIONS);
 
-  bool success = start_engine(argc, argv, update_and_render);
+  b32 success = start_engine(argc, (const u8 **)argv, update_and_render);
   return !success;
 }

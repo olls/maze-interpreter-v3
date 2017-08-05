@@ -12,11 +12,11 @@ get_first_bit_pos(u32 x)
 
 
 void
-load_bitmap(Bitmap *result, const char *filename)
+load_bitmap(Bitmap *result, const u8 *filename)
 {
-  log(L_Bitmap, "Loading bitmap: \"%s\"", filename);
+  log(L_Bitmap, u8("Loading bitmap: \"%s\""), filename);
 
-  u32 fd = open(filename, O_RDONLY);
+  u32 fd = open((const char *)filename, O_RDONLY);
   if (fd == -1)
   {
     printf("Failed to open \"%s\"\n", filename);
@@ -31,28 +31,28 @@ load_bitmap(Bitmap *result, const char *filename)
   }
 
   Bitmap::BitmapFile *file = (Bitmap::BitmapFile *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-  if ((char *)file == MAP_FAILED)
+  if ((u8 *)file == MAP_FAILED)
   {
     printf("Failed to open \"%s\"\n", filename);
     assert(0);
   }
 
-  log(L_Bitmap, "signature:                                         `%.2s`", file->signature);
-  log(L_Bitmap, "file_size:                                         `%d`", file->file_size);
-  log(L_Bitmap, "pixels_offset (Offset to start of Pixel Data):     `%d`", file->pixels_offset);
-  log(L_Bitmap, "dib_header_size (Must be at least 40):             `%d`", file->dib_header_size);
-  log(L_Bitmap, "width:                                             `%d`", file->width);
-  log(L_Bitmap, "height:                                            `%d`", file->height);
-  log(L_Bitmap, "bits_per_pixel (1, 4, 8, 16, 24, or 32):           `%d`", file->bits_per_pixel);
-  log(L_Bitmap, "compression (0 = uncompressed):                    `%d`", file->compression);
-  log(L_Bitmap, "image_size (may be zero for uncompressed images):  `%d`", file->image_size);
-  log(L_Bitmap, "n_colours_table (Number of color table entries):    `%d`", file->n_colours_table);
-  log(L_Bitmap, "red_mask:                                          `%8x`", file->red_mask);
-  log(L_Bitmap, "green_mask:                                        `%8x`", file->green_mask);
-  log(L_Bitmap, "blue_mask:                                         `%8x`", file->blue_mask);
-  log(L_Bitmap, "alpha_mask:                                        `%8x`", file->alpha_mask);
+  log(L_Bitmap, u8("signature:                                         `%.2s`"), file->signature);
+  log(L_Bitmap, u8("file_size:                                         `%d`"), file->file_size);
+  log(L_Bitmap, u8("pixels_offset (Offset to start of Pixel Data):     `%d`"), file->pixels_offset);
+  log(L_Bitmap, u8("dib_header_size (Must be at least 40):             `%d`"), file->dib_header_size);
+  log(L_Bitmap, u8("width:                                             `%d`"), file->width);
+  log(L_Bitmap, u8("height:                                            `%d`"), file->height);
+  log(L_Bitmap, u8("bits_per_pixel (1, 4, 8, 16, 24, or 32):           `%d`"), file->bits_per_pixel);
+  log(L_Bitmap, u8("compression (0 = uncompressed):                    `%d`"), file->compression);
+  log(L_Bitmap, u8("image_size (may be zero for uncompressed images):  `%d`"), file->image_size);
+  log(L_Bitmap, u8("n_colours_table (Number of color table entries):    `%d`"), file->n_colours_table);
+  log(L_Bitmap, u8("red_mask:                                          `%8x`"), file->red_mask);
+  log(L_Bitmap, u8("green_mask:                                        `%8x`"), file->green_mask);
+  log(L_Bitmap, u8("blue_mask:                                         `%8x`"), file->blue_mask);
+  log(L_Bitmap, u8("alpha_mask:                                        `%8x`"), file->alpha_mask);
 
-  if (strncmp(file->signature, "BM", 2) != 0)
+  if (!str_eq(file->signature, u8("BM"), 2))
   {
     printf("File not a bitmap: \"%s\"\n", filename);
     assert(0);
@@ -88,7 +88,7 @@ load_bitmap(Bitmap *result, const char *filename)
   result->pixels = (u8 *)file + file->pixels_offset;
   result->file = file;
 
-  log(L_Bitmap, "Loaded %s", filename);
+  log(L_Bitmap, u8("Loaded %s"), filename);
 }
 
 

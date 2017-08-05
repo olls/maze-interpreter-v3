@@ -14,7 +14,7 @@ get_new_car(Memory *memory, Cars *cars)
     {
       block = cars->free_chain;
       cars->free_chain = block->next_block;
-      log(L_CarsStorage, "Getting car block from free chain");
+      log(L_CarsStorage, u8("Getting car block from free chain"));
     }
     else
     {
@@ -26,7 +26,7 @@ get_new_car(Memory *memory, Cars *cars)
       C %= 27;
 #endif
 
-      log(L_CarsStorage, "Allocating new car block");
+      log(L_CarsStorage, u8("Allocating new car block"));
     }
 
     block->next_free_in_block = 0;
@@ -108,12 +108,12 @@ update_dead_cars(Cars *cars)
 
     if (car->dead)
     {
-      log(L_CarsStorage, "Deleting car");
+      log(L_CarsStorage, u8("Deleting car"));
       rm_car(cars_block, first_car_not_checked_in_block);
 
       if (cars_block->next_free_in_block == 0)
       {
-        log(L_CarsStorage, "Deallocating car block");
+        log(L_CarsStorage, u8("Deallocating car block"));
 
         // Reconnect previous block's link
         if (cars->first_block == cars_block)

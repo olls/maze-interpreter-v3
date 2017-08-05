@@ -84,21 +84,21 @@ perform_cells_sim_tick(Memory *memory, GameState *game_state, QuadTree *tree, u6
 void
 load_cell_bitmaps(CellBitmaps *cell_bitmaps)
 {
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_ENCLOSED], "cells/path-enclosed.bmp");
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_SINGLE],   "cells/path-single.bmp");
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_L],        "cells/path-l.bmp");
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_STRAIGHT], "cells/path-straight.bmp");
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_T],        "cells/path-t.bmp");
-  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_CROSS],    "cells/path-cross.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_ENCLOSED], "cells/unwalkable-enclosed.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_SINGLE],   "cells/unwalkable-single.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_L],        "cells/unwalkable-l.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_STRAIGHT], "cells/unwalkable-straight.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_T],        "cells/unwalkable-t.bmp");
-  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_CROSS],    "cells/unwalkable-cross.bmp");
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_ENCLOSED], u8("cells/path-enclosed.bmp"));
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_SINGLE],   u8("cells/path-single.bmp"));
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_L],        u8("cells/path-l.bmp"));
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_STRAIGHT], u8("cells/path-straight.bmp"));
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_T],        u8("cells/path-t.bmp"));
+  load_bitmap(&cell_bitmaps->walkable[DISP_TYPE_CROSS],    u8("cells/path-cross.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_ENCLOSED], u8("cells/unwalkable-enclosed.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_SINGLE],   u8("cells/unwalkable-single.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_L],        u8("cells/unwalkable-l.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_STRAIGHT], u8("cells/unwalkable-straight.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_T],        u8("cells/unwalkable-t.bmp"));
+  load_bitmap(&cell_bitmaps->unwalkable[DISP_TYPE_CROSS],    u8("cells/unwalkable-cross.bmp"));
 
-  load_bitmap(&cell_bitmaps->arrow, "cells/arrow.bmp");
-  load_bitmap(&cell_bitmaps->splitter, "cells/splitter.bmp");
+  load_bitmap(&cell_bitmaps->arrow, u8("cells/arrow.bmp"));
+  load_bitmap(&cell_bitmaps->splitter, u8("cells/splitter.bmp"));
 }
 
 

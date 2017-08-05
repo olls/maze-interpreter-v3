@@ -28,7 +28,7 @@ load_font(FT_Library *font_library, FT_Face *result)
 
 
 void
-draw_string(FT_Library *font_library, FT_Face face, ConstString string)
+draw_string(FT_Library *font_library, FT_Face face, String string)
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS); {
 

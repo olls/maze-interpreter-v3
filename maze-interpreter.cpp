@@ -1,3 +1,10 @@
+void
+load_debug_persistent_str(const u8 *string, GameState *game_state)
+{
+  copy_string(game_state->persistent_str, string, array_count(game_state->persistent_str));
+}
+
+
 vec2
 screen_pixels_to_screen_space(vec2 screen_size, vec2 screen_pixels)
 {
@@ -107,7 +114,7 @@ reset_zoom(GameState *game_state)
 
 
 b32
-load_maze(Memory *memory, GameState *game_state, u32 argc, const char *argv[])
+load_maze(Memory *memory, GameState *game_state)
 {
   b32 success = true;
   success &= parse(&game_state->maze, &game_state->functions, memory, game_state->filename);
@@ -133,31 +140,33 @@ load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
     success = false;
   }
 
-  load_bitmap(&game_state->particles.spark_bitmap, "particles/spark.bmp");
-  load_bitmap(&game_state->particles.cross_bitmap, "particles/cross.bmp");
-  load_bitmap(&game_state->particles.blob_bitmap,  "particles/blob.bmp");
-  load_bitmap(&game_state->particles.smoke_bitmap, "particles/smoke.bmp");
-  load_bitmap(&game_state->bitmaps.tile, "tile.bmp");
-  load_bitmap(&game_state->bitmaps.font, "font.bmp");
+  load_bitmap(&game_state->particles.spark_bitmap, u8("particles/spark.bmp"));
+  load_bitmap(&game_state->particles.cross_bitmap, u8("particles/cross.bmp"));
+  load_bitmap(&game_state->particles.blob_bitmap,  u8("particles/blob.bmp"));
+  load_bitmap(&game_state->particles.smoke_bitmap, u8("particles/smoke.bmp"));
 
   load_cell_bitmaps(&game_state->cell_bitmaps);
 
-  strcpy(game_state->persistent_str, "Init!");
+  load_debug_persistent_str(u8("Init!"), game_state);
 
   init_ui(&game_state->ui);
 
-  XMLTag *arrow = load_xml("cells/arrow.svg", memory);
+  XMLTag *arrow = load_xml(u8("cells/arrow.svg"), memory);
   // test_traverse_xml_struct(L_GameLoop, arrow);
 
   game_state->arrow_svg = 0;
   get_svg_operations(memory, arrow, &game_state->arrow_svg);
+
+  Font font = {};
+  success &= parse_otf_file(u8("fonts/DejaVuSansMono.ttf"), &font);
+  get_glyph(&font, U'a' /*U'😌'*/);
 
   return success;
 }
 
 
 b32
-init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, const char *argv[])
+init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, const u8 *argv[])
 {
   b32 success = true;
 
@@ -178,7 +187,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
     success = false;
   }
 
-  success &= load_maze(memory, game_state, argc, argv);
+  success &= load_maze(memory, game_state);
   reset_zoom(game_state);
 
   setup_inputs(keys, &game_state->inputs);
@@ -195,7 +204,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 b32
 update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
-                  u32 argc, const char *argv[])
+                  u32 argc, const u8 *argv[])
 {
   b32 keep_running = true;
   vec2 screen_size = Vec2(renderer->width, renderer->height);
@@ -221,19 +230,19 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
 
   if (game_state->inputs.maps[RELOAD].active)
   {
-    strcpy(game_state->persistent_str, "Reload!");
-    load_maze(memory, game_state, argc, argv);
+    load_debug_persistent_str(u8("Reload!"), game_state);
+    load_maze(memory, game_state);
   }
 
   if (game_state->inputs.maps[RESET].active)
   {
-    strcpy(game_state->persistent_str, "Reset!");
+    load_debug_persistent_str(u8("Reset!"), game_state);
     reset_zoom(game_state);
   }
 
   if (game_state->inputs.maps[RESTART].active)
   {
-    strcpy(game_state->persistent_str, "Restart!");
+    load_debug_persistent_str(u8("Restart!"), game_state);
     delete_all_cars(&game_state->cars);
     reset_car_inputs(&game_state->ui);
     game_state->finish_sim_step_move = false;
@@ -244,7 +253,7 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
   if (game_state->inputs.maps[STEP_MODE_TOGGLE].active)
   {
     game_state->single_step = !game_state->single_step;
-    log(L_GameLoop, "Changing stepping mode");
+    log(L_GameLoop, u8("Changing stepping mode"));
   }
 
   //
@@ -324,6 +333,6 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
   // draw_string(renderer, &orthographic_basis, &game_state->bitmaps.font, (vec2){0, 0}, str, 0.3, (vec4){1, 0, 0, 0});
 
   keep_running &= print_gl_errors();
-  log(L_GameLoop, "Main loop end");
+  log(L_GameLoop, u8("Main loop end"));
   return keep_running;
 }

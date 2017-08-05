@@ -141,7 +141,7 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
 
 void
-game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, const char *argv[], UpdateAndRenderFunc update_and_render_func)
+game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
 {
   b32 running = true;
 
@@ -223,16 +223,16 @@ game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc
     }
     else
     {
-      log(L_Main, "Missed frame rate: %d", frame_dt);
+      log(L_Main, u8("Missed frame rate: %d"), frame_dt);
     }
   }
 }
 
 
-bool
-start_engine(int argc, const char *argv[], UpdateAndRenderFunc update_and_render_func)
+b32
+start_engine(u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
 {
-  bool success = true;
+  b32 success = true;
 
   srand(time(0));
 

@@ -1,3 +1,11 @@
+void
+set_ui_name(u8 *field, String name)
+{
+  u32 size = min(name.length, MAX_UI_BOX_CHARS);
+  copy_string(field, name.text, size);
+}
+
+
 Rectangle
 get_menu_item_rect(Menu *menu, u32 n)
 {
@@ -39,7 +47,7 @@ init_ui(UI *ui)
        ++item_index)
   {
     MenuItem *item = ui->cell_type_menu.items + item_index;
-    strncpy(item->name, CELL_TYPE_NAMES[item_index], MAX_UI_BOX_CHARS);
+    set_ui_name(item->name, CELL_TYPE_NAMES[item_index]);
     item->cell_type = (CellType)item_index;
 
     u32 len;
@@ -488,9 +496,9 @@ init_car_input_box(Memory *memory, GameState *game_state, u32 car_id, s32 initia
   car_input->input.allow_num = true;
   car_input->input.allow_alpha = false;
   car_input->input.allow_all = false;
-  car_input->input.cursor_pos = fmted_str(car_input->input.text, car_input->input.length, "%d", initial_value);
+  car_input->input.cursor_pos = formatted_string(car_input->input.text, car_input->input.length, u8("%d"), initial_value);
 
-  strcpy(car_input->done.name, "Set value");
+  set_ui_name(car_input->done.name, String("Set value"));
   car_input->done.length = car_input->input.length;
   car_input->done.activated = false;
 }

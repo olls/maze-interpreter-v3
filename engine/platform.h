@@ -37,12 +37,3 @@ struct Memory
   size_t used;
   size_t total;
 };
-
-
-struct File
-{
-  s32 fd;
-  const char *text;
-  char *write;
-  s32 size;
-};

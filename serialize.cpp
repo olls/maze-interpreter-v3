@@ -43,7 +43,7 @@ find_min_max(QuadTree *tree, vec2 *most_left, vec2 *most_top, vec2 *most_right, 
 
 
 void
-write_cells(QuadTree *tree, char *file, u32 width, u32 height, vec2 maze_origin, Functions *functions)
+write_cells(QuadTree *tree, u8 *file, u32 width, u32 height, vec2 maze_origin, Functions *functions)
 {
   if (tree)
   {
@@ -59,7 +59,7 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, vec2 maze_origin,
       u32 n_line_breaks = rel_cell_pos_y*LINE_BREAK_LENGTH;
 
       u32 cell_file_offset = CELL_LENGTH*(rel_cell_pos_x + (rel_cell_pos_y * width)) + n_line_breaks;
-      char *file_pos = file + cell_file_offset;
+      u8 *file_pos = file + cell_file_offset;
 
       if (cell->type == CELL_FUNCTION)
       {
@@ -68,11 +68,11 @@ write_cells(QuadTree *tree, char *file, u32 width, u32 height, vec2 maze_origin,
       }
       else if (cell->type == CELL_PAUSE)
       {
-        fmted_str(file_pos, 3, "%02d", cell->pause);
+        formatted_string(file_pos, 3, u8("%02d"), cell->pause);
       }
       else if (cell->type != CELL_NULL)
       {
-        const char *text = CELL_TYPE_TXT[cell->type];
+        const u8 *text = CELL_TYPE_TXT[cell->type];
         memcpy(file_pos, text, 2);
       }
 
@@ -108,7 +108,7 @@ const u32 MAX_FUNC_LENGTH = 40;
 
 
 u32
-serialize_function(char buffer[MAX_FUNC_LENGTH], Function *function)
+serialize_function(u8 buffer[MAX_FUNC_LENGTH], Function *function)
 {
   u32 pos = 0;
   s32 space_left = MAX_FUNC_LENGTH;
@@ -118,40 +118,40 @@ serialize_function(char buffer[MAX_FUNC_LENGTH], Function *function)
   memcpy(buffer+pos, function->name, 2);  INC_POS(2);
   memcpy(buffer+pos, " -> ", 4);  INC_POS(4);
 
-  char symbol[] = "\0\0\0";
+  u8 symbol[2];
   u32 n_written;
   switch (function->type)
   {
-    case (FUNCTION_ASSIGNMENT):    strcpy(symbol, "");    goto LBL_FUNCTION_ASSIGN;
-    case (FUNCTION_INCREMENT):     strcpy(symbol, "+");   goto LBL_FUNCTION_ASSIGN;
-    case (FUNCTION_DECREMENT):     strcpy(symbol, "-");   goto LBL_FUNCTION_ASSIGN;
-    case (FUNCTION_MULTIPLY):      strcpy(symbol, "*");   goto LBL_FUNCTION_ASSIGN;
-    case (FUNCTION_DIVIDE):        strcpy(symbol, "/");   goto LBL_FUNCTION_ASSIGN;
+    case (FUNCTION_ASSIGNMENT):    copy_string(symbol, u8(""), 2);    goto LBL_FUNCTION_ASSIGN;
+    case (FUNCTION_INCREMENT):     copy_string(symbol, u8("+"), 2);   goto LBL_FUNCTION_ASSIGN;
+    case (FUNCTION_DECREMENT):     copy_string(symbol, u8("-"), 2);   goto LBL_FUNCTION_ASSIGN;
+    case (FUNCTION_MULTIPLY):      copy_string(symbol, u8("*"), 2);   goto LBL_FUNCTION_ASSIGN;
+    case (FUNCTION_DIVIDE):        copy_string(symbol, u8("/"), 2);   goto LBL_FUNCTION_ASSIGN;
 
     LBL_FUNCTION_ASSIGN: {
-      log(L_Serializer, "Function type: Assign");
-      n_written = fmted_str(buffer+pos, space_left, "%.1s= %d", symbol, function->value);
+      log(L_Serializer, u8("Function type: Assign"));
+      n_written = formatted_string(buffer+pos, space_left, u8("%.1s= %d"), symbol, function->value);
       INC_POS(n_written);
     } break;
 
-    case (FUNCTION_LESS):          strcpy(symbol, "<");   goto LBL_FUNCTION_COND;
-    case (FUNCTION_LESS_EQUAL):    strcpy(symbol, "<=");  goto LBL_FUNCTION_COND;
-    case (FUNCTION_EQUAL):         strcpy(symbol, "==");  goto LBL_FUNCTION_COND;
-    case (FUNCTION_NOT_EQUAL):     strcpy(symbol, "!=");  goto LBL_FUNCTION_COND;
-    case (FUNCTION_GREATER_EQUAL): strcpy(symbol, ">=");  goto LBL_FUNCTION_COND;
-    case (FUNCTION_GREATER):       strcpy(symbol, ">");   goto LBL_FUNCTION_COND;
+    case (FUNCTION_LESS):          copy_string(symbol, u8("<"), 2);   goto LBL_FUNCTION_COND;
+    case (FUNCTION_LESS_EQUAL):    copy_string(symbol, u8("<="), 2);  goto LBL_FUNCTION_COND;
+    case (FUNCTION_EQUAL):         copy_string(symbol, u8("=="), 2);  goto LBL_FUNCTION_COND;
+    case (FUNCTION_NOT_EQUAL):     copy_string(symbol, u8("!="), 2);  goto LBL_FUNCTION_COND;
+    case (FUNCTION_GREATER_EQUAL): copy_string(symbol, u8(">="), 2);  goto LBL_FUNCTION_COND;
+    case (FUNCTION_GREATER):       copy_string(symbol, u8(">"), 2);   goto LBL_FUNCTION_COND;
 
     LBL_FUNCTION_COND: {
-      log(L_Serializer, "Function type: Cond");
-      char true_direction = vector_to_compass_dir(function->conditional.true_direction);
-      n_written = fmted_str(buffer+pos, space_left, "IF %.2s %d THEN %%%c", symbol, function->conditional.value, true_direction);
+      log(L_Serializer, u8("Function type: Cond"));
+      u8 true_direction = vector_to_compass_dir(function->conditional.true_direction);
+      n_written = formatted_string(buffer+pos, space_left, u8("IF %.2s %d THEN %%%c"), symbol, function->conditional.value, true_direction);
       INC_POS(n_written);
 
       if (function->conditional.else_exists)
       {
-        log(L_Serializer, "  with else");
-        char false_direction = vector_to_compass_dir(function->conditional.false_direction);
-        n_written = fmted_str(buffer+pos, space_left, " ELSE %%%c", false_direction);
+        log(L_Serializer, u8("  with else"));
+        u8 false_direction = vector_to_compass_dir(function->conditional.false_direction);
+        n_written = formatted_string(buffer+pos, space_left, u8(" ELSE %%%c"), false_direction);
         INC_POS(n_written);
       }
 
@@ -170,11 +170,11 @@ serialize_function(char buffer[MAX_FUNC_LENGTH], Function *function)
 
 
 void
-serialize_maze(Maze *maze, Functions *functions, const char *filename)
+serialize_maze(Maze *maze, Functions *functions, const u8 *filename)
 {
   // TMP: For testing without overwriting
 #if 0
-  ((char *)filename)[0] = '_';
+  ((u8 *)filename)[0] = '_';
 #endif
 
   vec2 most_left   = Vec2(maze->tree.cells[maze->tree.used-1].x,
@@ -200,7 +200,7 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
   File file;
   open_file(filename, &file, true, length);
 
-  log(L_Serializer, "Serializing maze");
+  log(L_Serializer, u8("Serializing maze"));
 
   memset(file.write, ' ', length);
   write_cells(&maze->tree, file.write, width, height, (vec2){most_left.x, most_top.y}, functions);
@@ -223,9 +223,9 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
     file.write[file_offset] = '\n';
   }
 
-  log(L_Serializer, "Serializing functions");
+  log(L_Serializer, u8("Serializing functions"));
 
-  char tmp_function_buffer[MAX_FUNC_LENGTH];
+  u8 tmp_function_buffer[MAX_FUNC_LENGTH];
   u32 length_funcs_written = 0;
   u32 functions_serialized = 0;
 
@@ -237,12 +237,12 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
 
     if (function->type != FUNCTION_NULL)
     {
-      log(L_Serializer, "Serializing function");
+      log(L_Serializer, u8("Serializing function"));
 
       ++functions_serialized;
       if (functions_serialized > n_funcs)
       {
-        log(L_Serializer, "Error: Found more functions in hash table than told, ignoring extra functions.");
+        log(L_Serializer, u8("Error: Found more functions in hash table than told, ignoring extra functions."));
         break;
       }
       else
@@ -252,15 +252,14 @@ serialize_maze(Maze *maze, Functions *functions, const char *filename)
         u32 func_length = serialize_function(tmp_function_buffer, function);
         memcpy(file.write + file_pos, tmp_function_buffer, func_length);
 
-        log(L_Serializer, "%.*s", func_length, tmp_function_buffer);
+        log(L_Serializer, u8("%.*s"), func_length, tmp_function_buffer);
         length_funcs_written += func_length;
       }
     }
   }
 
   u32 length_written = maze_length + gap_length + length_funcs_written;
-  log(L_Serializer, "Overestimated bytes: %d", length - length_written);
-  log(L_Serializer, "Done");
+  log(L_Serializer, u8("Overestimated bytes: %d"), length - length_written);
 
   close_file(&file, length_written);
 }

@@ -7,7 +7,7 @@ const u32 MAX_UI_BOX_CHARS = 32;
 
 struct MenuItem
 {
-  char name[MAX_UI_BOX_CHARS];
+  u8 name[MAX_UI_BOX_CHARS];
   u64 hovered_at_time;
 
   u32 *some_kind_of_pointer_maybe;
@@ -43,7 +43,7 @@ struct Menu
 
 struct InputBox
 {
-  char text[MAX_UI_BOX_CHARS];
+  u8 text[MAX_UI_BOX_CHARS];
   u32 cursor_pos;
   u32 length;
   vec2 pos;
@@ -58,7 +58,7 @@ struct Button
 {
   vec2 pos;
   u32 length;
-  char name[MAX_UI_BOX_CHARS];
+  u8 name[MAX_UI_BOX_CHARS];
   u64 hovered_at_time;
   b32 activated;
 };

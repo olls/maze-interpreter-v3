@@ -23,50 +23,50 @@ enum CellType
   N_CELL_TYPES
 };
 
-const char *CELL_TYPE_NAMES[] =
+const String CELL_TYPE_NAMES[] =
 {
-  "Null",                 // CELL_NULL
-  "Start",                // CELL_START
-  "Path",                 // CELL_PATH
-  "Wall",                 // CELL_WALL
-  "Hole",                 // CELL_HOLE
-  "Splitter",             // CELL_SPLITTER
-  "Function",             // CELL_FUNCTION
-  "Once",                 // CELL_ONCE
-  "Up Unless Detect",     // CELL_UP_UNLESS_DETECT
-  "Down Unless Detect",   // CELL_DOWN_UNLESS_DETECT
-  "Left Unless Detect",   // CELL_LEFT_UNLESS_DETECT
-  "Right Unless Detect",  // CELL_RIGHT_UNLESS_DETECT
-  "Inp",                  // CELL_INP
-  "Out",                  // CELL_OUT
-  "Up",                   // CELL_UP
-  "Down",                 // CELL_DOWN
-  "Left",                 // CELL_LEFT
-  "Right",                // CELL_RIGHT
-  "Pause"                 // CELL_PAUSE
+  String("Null"),                 // CELL_NULL
+  String("Start"),                // CELL_START
+  String("Path"),                 // CELL_PATH
+  String("Wall"),                 // CELL_WALL
+  String("Hole"),                 // CELL_HOLE
+  String("Splitter"),             // CELL_SPLITTER
+  String("Function"),             // CELL_FUNCTION
+  String("Once"),                 // CELL_ONCE
+  String("Up Unless Detect"),     // CELL_UP_UNLESS_DETECT
+  String("Down Unless Detect"),   // CELL_DOWN_UNLESS_DETECT
+  String("Left Unless Detect"),   // CELL_LEFT_UNLESS_DETECT
+  String("Right Unless Detect"),  // CELL_RIGHT_UNLESS_DETECT
+  String("Inp"),                  // CELL_INP
+  String("Out"),                  // CELL_OUT
+  String("Up"),                   // CELL_UP
+  String("Down"),                 // CELL_DOWN
+  String("Left"),                 // CELL_LEFT
+  String("Right"),                // CELL_RIGHT
+  String("Pause")                 // CELL_PAUSE
 };
 
-const char *CELL_TYPE_TXT[] =
+const u8 *CELL_TYPE_TXT[] =
 {
-  "!!",  // CELL_NULL
-  "^^",  // CELL_START
-  "..",  // CELL_PATH
-  "##",  // CELL_WALL
-  "()",  // CELL_HOLE
-  "<>",  // CELL_SPLITTER
-  "AA",  // CELL_FUNCTION
-  "--",  // CELL_ONCE
-  "*U",  // CELL_UP_UNLESS_DETECT
-  "*D",  // CELL_DOWN_UNLESS_DETECT
-  "*L",  // CELL_LEFT_UNLESS_DETECT
-  "*R",  // CELL_RIGHT_UNLESS_DETECT
-  "<<",  // CELL_INP
-  ">>",  // CELL_OUT
-  "%U",  // CELL_UP
-  "%D",  // CELL_DOWN
-  "%L",  // CELL_LEFT
-  "%R",  // CELL_RIGHT
-  "00"   // CELL_PAUSE
+  u8("!!"),  // CELL_NULL
+  u8("^^"),  // CELL_START
+  u8(".."),  // CELL_PATH
+  u8("##"),  // CELL_WALL
+  u8("()"),  // CELL_HOLE
+  u8("<>"),  // CELL_SPLITTER
+  u8("AA"),  // CELL_FUNCTION
+  u8("--"),  // CELL_ONCE
+  u8("*U"),  // CELL_UP_UNLESS_DETECT
+  u8("*D"),  // CELL_DOWN_UNLESS_DETECT
+  u8("*L"),  // CELL_LEFT_UNLESS_DETECT
+  u8("*R"),  // CELL_RIGHT_UNLESS_DETECT
+  u8("<<"),  // CELL_INP
+  u8(">>"),  // CELL_OUT
+  u8("%U"),  // CELL_UP
+  u8("%D"),  // CELL_DOWN
+  u8("%L"),  // CELL_LEFT
+  u8("%R"),  // CELL_RIGHT
+  u8("00")   // CELL_PAUSE
 };
 
 
@@ -75,7 +75,7 @@ struct Cell
   u32 x;
   u32 y;
   enum CellType type;
-  char name[2];
+  u8 name[2];
 
   u32 opengl_instance_position;
 

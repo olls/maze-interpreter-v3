@@ -1,5 +1,5 @@
 #define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
+#define GENERATE_STRING(STRING) u8(#STRING),
 
 
 #define ENGINE_LOGGING_CHANNELS_DEFINITIONS(CHANNEL) \
@@ -20,7 +20,7 @@ enum ENGINELoggingChannel
   ENGINE_LOGGING_CHANNELS_DEFINITIONS(GENERATE_ENUM)
 };
 
-static const char *ENGINE_LOGGING_CHANNELS[] = {
+static const u8 *ENGINE_LOGGING_CHANNELS[] = {
   ENGINE_LOGGING_CHANNELS_DEFINITIONS(GENERATE_STRING)
 };
 
@@ -35,7 +35,7 @@ channel_enabled(GAMELoggingChannel);
 // Pointer to list of game logging channel strings matching the
 //   GAMELoggingChannel enum, this pointer is set in
 //   register_game_logging_channels()
-static const char **GAME_LOGGING_CHANNELS;
+static const u8 **GAME_LOGGING_CHANNELS;
 
 
 #define DEFINE_GAME_LOGGING_CHANNELS(CHANNELS) { \
@@ -77,13 +77,13 @@ enum GAMELoggingChannel : short \
   { \
     if (channel_enabled(channel)) \
     { \
-      char buf[1024]; \
+      u8 buf[1024]; \
       va_list aptr; \
       va_start(aptr, text); \
-      vsnprintf(buf, 1024, text, aptr); \
+      vsnprintf((char *)buf, 1024, (const char *)text, aptr); \
       va_end(aptr); \
       \
-      const char *channel_name = LOGGING_TYPE ## _LOGGING_CHANNELS[channel]; \
+      const u8 *channel_name = LOGGING_TYPE ## _LOGGING_CHANNELS[channel]; \
       \
       BODY \
     } \

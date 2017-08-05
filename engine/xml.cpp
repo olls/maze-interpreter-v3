@@ -1,5 +1,5 @@
 b32
-not_label(char c)
+not_label(u8 c)
 {
   b32 result = true;
 
@@ -12,10 +12,10 @@ not_label(char c)
 }
 
 
-const char *
-get_label(const char *start, const char *end_f, ConstString *result)
+const u8 *
+get_label(const u8 *start, const u8 *end_f, String *result)
 {
-  const char *c = start;
+  const u8 *c = start;
   consume_until(c, is_letter, end_f);
 
   result->text = c;
@@ -33,8 +33,8 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
   // Creates a array of tokens, each representing "< ... >", sequentially in memory
   // TODO: This really doesn't handle comments well.
 
-  const char *end_f = file->text + file->size;
-  const char *c = file->text;
+  const u8 *end_f = file->text + file->size;
+  const u8 *c = file->text;
 
   XMLTag *result = 0;
 
@@ -60,7 +60,7 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
     if (tag->file_start[0] == '?' && tag->file_end[-1] == '?')
     {
       // XML declaration
-      log(L_XMLTokens, "XML declaration");
+      log(L_XMLTokens, u8("XML declaration"));
 
       tag->type = XML_DECLARATION;
 
@@ -70,16 +70,16 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
     else if (tag->file_end[-1] == '/')
     {
       // Empty-element tag
-      log(L_XMLTokens, "Empty-element tag");
+      log(L_XMLTokens, u8("Empty-element tag"));
 
       tag->type = XML_EMPTY_ELEMENT;
 
       --tag->file_end;
     }
-    else if (str_eq(tag->file_start, "!--", 3) && str_eq((tag->file_end - 2), "--", 2))
+    else if (str_eq(tag->file_start, u8("!--"), 3) && str_eq((tag->file_end - 2), u8("--"), 2))
     {
       // Comment
-      log(L_XMLTokens, "Comment");
+      log(L_XMLTokens, u8("Comment"));
 
       tag->type = XML_COMMENT;
 
@@ -89,14 +89,14 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
     else if (tag->file_start[0] == '/')
     {
       // Tag
-      log(L_XMLTokens, "Tag end");
+      log(L_XMLTokens, u8("Tag end"));
 
       tag->type = XML_ELEMENT_END;
     }
     else
     {
       // Tag
-      log(L_XMLTokens, "Tag");
+      log(L_XMLTokens, u8("Tag"));
 
       tag->type = XML_ELEMENT_START;
     }
@@ -107,7 +107,7 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
     {
       get_label(tag->file_start, tag->file_end, &tag->name);
 
-      log(L_XMLTokens, " %.*s", tag->name.length, tag->name.text);
+      log(L_XMLTokens, u8(" %.*s"), tag->name.length, tag->name.text);
     }
 
     ++c;
@@ -120,7 +120,7 @@ parse_tag_tokens(Memory *memory, File *file, u32 *n_tokens)
 void
 parse_tag_attrs(Memory *memory, XMLTag *tag)
 {
-  const char *c = tag->name.text + tag->name.length;
+  const u8 *c = tag->name.text + tag->name.length;
 
   tag->attrs = 0;
 
@@ -128,7 +128,7 @@ parse_tag_attrs(Memory *memory, XMLTag *tag)
 
   while (c < tag->file_end)
   {
-    const char *new_c = get_label(c, tag->file_end, &tmp_attr.name);
+    const u8 *new_c = get_label(c, tag->file_end, &tmp_attr.name);
     if (tmp_attr.name.length == 0 || c == tag->file_end) break;
     c = new_c;
 
@@ -196,9 +196,9 @@ parse_xml_structure(Memory *memory, XMLTag *parent, XMLTag *start_of_tokens, XML
         tag_token->next_sibling = parent->first_child;
         parent->first_child = tag_token;
 
-        log_ind(L_XML, level, "Starting: %.*s {", tag_token->name.length, tag_token->name.text);
+        log_ind(L_XML, level, u8("Starting: %.*s {"), tag_token->name.length, tag_token->name.text);
         tag_token = parse_xml_structure(memory, tag_token, tag_token+1, end_of_tokens, level+1);
-        log_ind(L_XML, level, "}");
+        log_ind(L_XML, level, u8("}"));
       } break;
 
       case (XML_ELEMENT_END):
@@ -209,14 +209,14 @@ parse_xml_structure(Memory *memory, XMLTag *parent, XMLTag *start_of_tokens, XML
         }
         else
         {
-          log_ind(L_XML, level, "Error in XML: Closing tag doesn't match opening tag");
+          log_ind(L_XML, level, u8("Error in XML: Closing tag doesn't match opening tag"));
           loop_break = true;
         }
       } break;
 
       case (XML_EMPTY_ELEMENT):
       {
-        log_ind(L_XML, level, "Found: %.*s", tag_token->name.length, tag_token->name.text);
+        log_ind(L_XML, level, u8("Found: %.*s"), tag_token->name.length, tag_token->name.text);
 
         tag_token->next_sibling = parent->first_child;
         parent->first_child = tag_token;
@@ -258,7 +258,7 @@ parse_xml(Memory *memory, File *file, XMLTag **root)
 
 
 XMLTag *
-load_xml(const char filename[], Memory *memory)
+load_xml(const u8 filename[], Memory *memory)
 {
   File file;
   open_file(filename, &file);
@@ -278,12 +278,12 @@ test_traverse_xml_struct(XMLTag *parent, u32 level=0)
   XMLTag *child = parent->first_child;
   while (child)
   {
-    log_ind(L_XML, level, "%.*s", child->name.length, child->name.text);
+    log_ind(L_XML, level, u8("%.*s"), child->name.length, child->name.text);
 
     XMLAttr *attr = child->attrs;
     while (attr)
     {
-      log_ind(L_XML, level + 1, "'%.*s' = '%.*s'", attr->name.length, attr->name.text, attr->value.length, attr->value.text);
+      log_ind(L_XML, level + 1, u8("'%.*s' = '%.*s'"), attr->name.length, attr->name.text, attr->value.length, attr->value.text);
       attr = attr->next_attr;
     }
 
@@ -297,10 +297,10 @@ test_traverse_xml_struct(XMLTag *parent, u32 level=0)
 }
 
 
-ConstString
-get_attr_value(XMLTag *tag, ConstString name)
+String
+get_attr_value(XMLTag *tag, String name)
 {
-  ConstString result = {.text = 0, .length = 0};
+  String result = {.text = 0, .length = 0};
 
   XMLAttr *attr = tag->attrs;
   while (attr)

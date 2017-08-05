@@ -11,19 +11,19 @@ add_box(Layouter *layouter, vec2 desired_pos, vec2 desired_size)
 void
 layout_boxes(Layouter *layouter)
 {
-  log_s(L_Layouter, "init\n");
+  log_s(L_Layouter, u8("init\n"));
   u32 passes = 0;
   b32 moved_rect = true;
   while (moved_rect && passes < MAX_PASSES)
   {
-    log_s(L_Layouter, ">\n");
+    log_s(L_Layouter, u8(">\n"));
     moved_rect = false;
 
     for (u32 subject_index = 0;
          subject_index < layouter->next_free;
          ++subject_index)
     {
-      log_s(L_Layouter, "  ");
+      log_s(L_Layouter, u8("  "));
       Rectangle *current_subject = layouter->rects + subject_index;
 
       for (u32 test_index = 0;
@@ -36,7 +36,7 @@ layout_boxes(Layouter *layouter)
         {
           if (overlaps(*current_subject, *test))
           {
-            log_s(L_Layouter, "  ");
+            log_s(L_Layouter, u8("  "));
             moved_rect = true;
             Rectangle overlap = get_overlap(*current_subject, *test);
 
@@ -57,22 +57,22 @@ layout_boxes(Layouter *layouter)
           }
           else
           {
-            log_s(L_Layouter, "# ");
+            log_s(L_Layouter, u8("# "));
           }
         }
         else
         {
-          log_s(L_Layouter, "X ");
+          log_s(L_Layouter, u8("X "));
         }
 
       }
-      log_s(L_Layouter, "\n");
+      log_s(L_Layouter, u8("\n"));
     }
     ++passes;
   }
 
   if (moved_rect)
   {
-    log(L_Layouter, "Couldn't find layout in time...");
+    log(L_Layouter, u8("Couldn't find layout in time..."));
   }
 }

@@ -1,13 +1,13 @@
 struct ParsePathCommandResult
 {
   vec2 last_point;
-  const char *c;
+  const u8 *c;
   b32 found_command;
   LineSegment *added_segment;
 };
 
 ParsePathCommandResult
-parse_path_command(Memory *memory, const char command, const char *c, const char *c_after_command, const char *end_f, SVGPath *path, vec2 last_point, vec2 origin)
+parse_path_command(Memory *memory, const u8 command, const u8 *c, const u8 *c_after_command, const u8 *end_f, SVGPath *path, vec2 last_point, vec2 origin)
 {
   ParsePathCommandResult result;
 
@@ -155,24 +155,24 @@ parse_path_command(Memory *memory, const char command, const char *c, const char
 
 
 SVGPath
-parse_path_d(Memory *memory, XMLTag *path_tag, ConstString d_attr, vec2 origin)
+parse_path_d(Memory *memory, XMLTag *path_tag, String d_attr, vec2 origin)
 {
   SVGPath path = {.segments = 0, .n_segments = 0};
 
-  log(L_SVG, "Parsing d: '%.*s'", d_attr.length, d_attr.text);
-  const char *end_f = d_attr.text + d_attr.length;
+  log(L_SVG, u8("Parsing d: '%.*s'"), d_attr.length, d_attr.text);
+  const u8 *end_f = d_attr.text + d_attr.length;
 
   vec2 current_point = origin;
 
-  char last_command = 0;
+  u8 last_command = 0;
 
-  const char *c = d_attr.text;
+  const u8 *c = d_attr.text;
   while (c < end_f)
   {
     consume_whitespace(c, end_f);
 
-    const char command = *c;
-    const char *after_command = c + 1;
+    const u8 command = *c;
+    const u8 *after_command = c + 1;
 
     ParsePathCommandResult command_parse_result = parse_path_command(memory, command, c, after_command, end_f, &path, current_point, origin);
     current_point = command_parse_result.last_point;
@@ -222,7 +222,7 @@ parse_path_d(Memory *memory, XMLTag *path_tag, ConstString d_attr, vec2 origin)
 
 
 b32
-is_style_value_char(char character)
+is_style_value_char(u8 character)
 {
   return is_letter(character) ||
          is_num_or_sign(character) ||
@@ -231,16 +231,16 @@ is_style_value_char(char character)
 }
 
 
-const char *
-find_svg_style(const char *c, const char *end, ConstString *label_result, ConstString *value_result)
+const u8 *
+find_svg_style(const u8 *c, const u8 *end, String *label_result, String *value_result)
 {
   consume_whitespace_nl(c, end);
-  const char *start_label = c;
+  const u8 *start_label = c;
 
   consume_while_f_or_char(c, is_letter, '-', end);
-  const char *end_label = c;
+  const u8 *end_label = c;
 
-  *label_result = (ConstString){
+  *label_result = (String){
     .text = start_label,
     .length = (u32)(end_label - start_label)
   };
@@ -249,12 +249,12 @@ find_svg_style(const char *c, const char *end, ConstString *label_result, ConstS
   ++c;
 
   consume_whitespace(c, end);
-  const char *start_value = c;
+  const u8 *start_value = c;
 
   consume_while(c, is_style_value_char, end);
-  const char *end_value = c;
+  const u8 *end_value = c;
 
-  *value_result = (ConstString){
+  *value_result = (String){
     .text = start_value,
     .length = (u32)(end_value - start_value)
   };
@@ -267,7 +267,7 @@ find_svg_style(const char *c, const char *end, ConstString *label_result, ConstS
 
 
 b32
-parse_colour_string(ConstString string, vec4 *result)
+parse_colour_string(String string, vec4 *result)
 {
   b32 parsed = true;
 
@@ -278,7 +278,7 @@ parse_colour_string(ConstString string, vec4 *result)
     if (string.length == 4)
     {
       // #rgb
-      ConstString channel_str = {.length = 1};
+      String channel_str = {.length = 1};
 
       channel_str.text = string.text + 1;
       result->r = (1.0/15.0) * (r32)hex_string_to_int(channel_str);
@@ -292,7 +292,7 @@ parse_colour_string(ConstString string, vec4 *result)
     else if (string.length == 7)
     {
       // #rrggbb
-      ConstString channel_str = {.length = 2};
+      String channel_str = {.length = 2};
 
       channel_str.text = string.text + 1;
       result->r = (1.0/255.0) * (r32)hex_string_to_int(channel_str);
@@ -318,7 +318,7 @@ parse_colour_string(ConstString string, vec4 *result)
 
 
 SVGStrokeLinecap
-parse_svg_stroke_linecap(ConstString value)
+parse_svg_stroke_linecap(String value)
 {
   SVGStrokeLinecap result = LINECAP_BUTT;
 
@@ -340,7 +340,7 @@ parse_svg_stroke_linecap(ConstString value)
 
 
 SVGStrokeLinejoin
-parse_svg_stroke_linejoin(ConstString value)
+parse_svg_stroke_linejoin(String value)
 {
   SVGStrokeLinejoin result = LINEJOIN_MITER;
 
@@ -362,47 +362,47 @@ parse_svg_stroke_linejoin(ConstString value)
 
 
 void
-parse_svg_style(ConstString label, ConstString value, SVGStyle *result)
+parse_svg_style(String label, String value, SVGStyle *result)
 {
   if (str_eq(label, String("fill")))
   {
-    log(L_SVG, "Style label: fill");
+    log(L_SVG, u8("Style label: fill"));
 
     result->filled = parse_colour_string(value, &result->fill_colour);
   }
   else if (str_eq(label, String("fill-opacity")))
   {
-    log(L_SVG, "Style label: fill-opacity");
+    log(L_SVG, u8("Style label: fill-opacity"));
 
     get_num(value.text, value.text + value.length, &result->fill_colour.a);
   }
   else if (str_eq(label, String("stroke")))
   {
-    log(L_SVG, "Style label: stroke");
+    log(L_SVG, u8("Style label: stroke"));
 
     parse_colour_string(value, &result->stroke_colour);
   }
   else if (str_eq(label, String("stroke-opacity")))
   {
-    log(L_SVG, "Style label: stroke-opacity");
+    log(L_SVG, u8("Style label: stroke-opacity"));
 
     get_num(value.text, value.text + value.length, &result->stroke_colour.a);
   }
   else if (str_eq(label, String("stroke-width")))
   {
-    log(L_SVG, "Style label: stroke-width");
+    log(L_SVG, u8("Style label: stroke-width"));
 
     get_num(value.text, value.text + value.length, &result->stroke_width);
   }
   else if (str_eq(label, String("stroke-linecap")))
   {
-    log(L_SVG, "Style label: stroke-linecap");
+    log(L_SVG, u8("Style label: stroke-linecap"));
 
     result->stroke_linecap = parse_svg_stroke_linecap(value);
   }
   else if (str_eq(label, String("stroke-linejoin")))
   {
-    log(L_SVG, "Style label: stroke-linejoin");
+    log(L_SVG, u8("Style label: stroke-linejoin"));
 
     result->stroke_linejoin = parse_svg_stroke_linejoin(value);
   }
@@ -412,58 +412,58 @@ parse_svg_style(ConstString label, ConstString value, SVGStyle *result)
 void
 get_svg_styles_from_attrs(XMLTag *tag, SVGStyle *result)
 {
-  ConstString fill = get_attr_value(tag, String("fill"));
+  String fill = get_attr_value(tag, String("fill"));
   if (fill.text != 0)
   {
-    log(L_SVG, "Style label: fill");
+    log(L_SVG, u8("Style label: fill"));
 
     result->filled = parse_colour_string(fill, &result->fill_colour);
   }
 
-  ConstString fill_opacity = get_attr_value(tag, String("fill-opacity"));
+  String fill_opacity = get_attr_value(tag, String("fill-opacity"));
   if (fill_opacity.text != 0)
   {
-    log(L_SVG, "Style label: fill-opacity");
+    log(L_SVG, u8("Style label: fill-opacity"));
 
     get_num(fill_opacity.text, fill_opacity.text + fill_opacity.length, &result->fill_colour.a);
   }
 
-  ConstString stroke = get_attr_value(tag, String("stroke"));
+  String stroke = get_attr_value(tag, String("stroke"));
   if (stroke.text != 0)
   {
-    log(L_SVG, "Style label: stroke");
+    log(L_SVG, u8("Style label: stroke"));
 
     parse_colour_string(stroke, &result->stroke_colour);
   }
 
-  ConstString stroke_opacity = get_attr_value(tag, String("stroke-opacity"));
+  String stroke_opacity = get_attr_value(tag, String("stroke-opacity"));
   if (stroke_opacity.text != 0)
   {
-    log(L_SVG, "Style label: stroke-opacity");
+    log(L_SVG, u8("Style label: stroke-opacity"));
 
     get_num(stroke_opacity.text, stroke_opacity.text + stroke_opacity.length, &result->stroke_colour.a);
   }
 
-  ConstString stroke_width = get_attr_value(tag, String("stroke-width"));
+  String stroke_width = get_attr_value(tag, String("stroke-width"));
   if (stroke_width.text != 0)
   {
-    log(L_SVG, "Style label: stroke-width");
+    log(L_SVG, u8("Style label: stroke-width"));
 
     get_num(stroke_width.text, stroke_width.text + stroke_width.length, &result->stroke_width);
   }
 
-  ConstString stroke_linecap = get_attr_value(tag, String("stroke-linecap"));
+  String stroke_linecap = get_attr_value(tag, String("stroke-linecap"));
   if (stroke_linecap.text != 0)
   {
-    log(L_SVG, "Style label: stroke-linecap");
+    log(L_SVG, u8("Style label: stroke-linecap"));
 
     result->stroke_linecap = parse_svg_stroke_linecap(stroke_linecap);
   }
 
-  ConstString stroke_linejoin = get_attr_value(tag, String("stroke-linejoin"));
+  String stroke_linejoin = get_attr_value(tag, String("stroke-linejoin"));
   if (stroke_linejoin.text != 0)
   {
-    log(L_SVG, "Style label: stroke-linejoin");
+    log(L_SVG, u8("Style label: stroke-linejoin"));
 
     result->stroke_linejoin = parse_svg_stroke_linejoin(stroke_linejoin);
   }
@@ -475,13 +475,13 @@ parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
 {
   // Get styles from style attribute
 
-  ConstString style = get_attr_value(from_tag, String("style"));
+  String style = get_attr_value(from_tag, String("style"));
   if (style.text != 0)
   {
-    log(L_SVG, "Parsing style: %.*s", style.length, style.text);
+    log(L_SVG, u8("Parsing style: %.*s"), style.length, style.text);
 
-    const char *c = style.text;
-    const char *end = style.text + style.length;
+    const u8 *c = style.text;
+    const u8 *end = style.text + style.length;
 
     result->stroke_width = 1;
     result->stroke_colour = (vec4){1, 0, 0, 0};
@@ -492,7 +492,7 @@ parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
 
     while (c < end)
     {
-      ConstString label, value;
+      String label, value;
       c = find_svg_style(c, end, &label, &value);
 
       parse_svg_style(label, value, result);
@@ -502,14 +502,14 @@ parse_svg_styles(XMLTag *from_tag, SVGStyle *result)
   // Get styles from individual attributes (overriding previous styles)
   get_svg_styles_from_attrs(from_tag, result);
 
-  log(L_SVG, "Styles:");
+  log(L_SVG, u8("Styles:"));
 
-  log(L_SVG, "stroke_width: %d", result->stroke_width);
-  log(L_SVG, "stroke_colour: (%f,%f,%f,%f)", result->stroke_colour.a, result->stroke_colour.r, result->stroke_colour.g, result->stroke_colour.b);
-  log(L_SVG, "stroke_linecap: %d", result->stroke_linecap);
-  log(L_SVG, "stroke_linejoin: %d", result->stroke_linejoin);
-  log(L_SVG, "filled: %d", result->filled);
-  log(L_SVG, "fill_colour: (%f,%f,%f,%f)", result->fill_colour.a, result->fill_colour.r, result->fill_colour.g, result->fill_colour.b);
+  log(L_SVG, u8("stroke_width: %d"), result->stroke_width);
+  log(L_SVG, u8("stroke_colour: (%f,%f,%f,%f)"), result->stroke_colour.a, result->stroke_colour.r, result->stroke_colour.g, result->stroke_colour.b);
+  log(L_SVG, u8("stroke_linecap: %d"), result->stroke_linecap);
+  log(L_SVG, u8("stroke_linejoin: %d"), result->stroke_linejoin);
+  log(L_SVG, u8("filled: %d"), result->filled);
+  log(L_SVG, u8("fill_colour: (%f,%f,%f,%f)"), result->fill_colour.a, result->fill_colour.r, result->fill_colour.g, result->fill_colour.b);
 }
 
 
@@ -518,7 +518,7 @@ parse_path(Memory *memory, XMLTag *path_tag, vec2 origin)
 {
   SVGPath result;
 
-  ConstString d_attr = get_attr_value(path_tag, String("d"));
+  String d_attr = get_attr_value(path_tag, String("d"));
   if (d_attr.text != 0)
   {
     result = parse_path_d(memory, path_tag, d_attr, origin);
@@ -530,25 +530,25 @@ parse_path(Memory *memory, XMLTag *path_tag, vec2 origin)
 
 // NOTE: Only implements translate()
 vec2
-parse_svg_transform(ConstString transform_attr)
+parse_svg_transform(String transform_attr)
 {
   vec2 result = {0, 0};
 
-  const char *c = transform_attr.text;
-  const char *end_f = transform_attr.text + transform_attr.length;
+  const u8 *c = transform_attr.text;
+  const u8 *end_f = transform_attr.text + transform_attr.length;
 
   consume_whitespace(c, end_f);
   if (str_eq(c, String("translate")))
   {
     consume_until_char(c, '(', end_f);
-    const char *start_translate = c;
+    const u8 *start_translate = c;
 
     consume_until_char(c, ')', end_f);
-    const char *end_translate = c;
+    const u8 *end_translate = c;
 
     if (start_translate == end_f || end_translate == end_f)
     {
-      log(L_SVG, "Invalid translate() in transform");
+      log(L_SVG, u8("Invalid translate() in transform"));
     }
     else
     {
@@ -559,7 +559,7 @@ parse_svg_transform(ConstString transform_attr)
 
       if (c == end_translate)
       {
-        log(L_SVG, "Invalid translate: No dx provided");
+        log(L_SVG, u8("Invalid translate: No dx provided"));
       }
       else
       {
@@ -578,7 +578,7 @@ parse_rect(Memory *memory, XMLTag *rect_tag, vec2 origin)
 {
   SVGRect result;
 
-  ConstString transform_attr = get_attr_value(rect_tag, String("transform"));
+  String transform_attr = get_attr_value(rect_tag, String("transform"));
   if (transform_attr.text != 0)
   {
     origin += parse_svg_transform(transform_attr);
@@ -586,11 +586,11 @@ parse_rect(Memory *memory, XMLTag *rect_tag, vec2 origin)
 
   result.rect = (Rectangle){ .start = origin, .end = origin};
 
-  ConstString x_str = get_attr_value(rect_tag, String("x"));
-  ConstString y_str = get_attr_value(rect_tag, String("y"));
-  ConstString width_str  = get_attr_value(rect_tag, String("width"));
-  ConstString height_str = get_attr_value(rect_tag, String("height"));
-  ConstString r_str = get_attr_value(rect_tag, String("ry"));
+  String x_str = get_attr_value(rect_tag, String("x"));
+  String y_str = get_attr_value(rect_tag, String("y"));
+  String width_str  = get_attr_value(rect_tag, String("width"));
+  String height_str = get_attr_value(rect_tag, String("height"));
+  String r_str = get_attr_value(rect_tag, String("ry"));
 
   vec2 pos = {0, 0};
   vec2 size = {0, 0};
@@ -615,15 +615,15 @@ parse_circle(Memory *memory, XMLTag *circle_tag, vec2 origin)
 {
   SVGCircle result;
 
-  ConstString transform_attr = get_attr_value(circle_tag, String("transform"));
+  String transform_attr = get_attr_value(circle_tag, String("transform"));
   if (transform_attr.text != 0)
   {
     origin += parse_svg_transform(transform_attr);
   }
 
-  ConstString x_str = get_attr_value(circle_tag, String("cx"));
-  ConstString y_str = get_attr_value(circle_tag, String("cy"));
-  ConstString radius_str  = get_attr_value(circle_tag, String("r"));
+  String x_str = get_attr_value(circle_tag, String("cx"));
+  String y_str = get_attr_value(circle_tag, String("cy"));
+  String radius_str  = get_attr_value(circle_tag, String("r"));
 
   vec2 pos;
   r32 radius;
@@ -643,16 +643,16 @@ parse_line(Memory *memory, XMLTag *line_tag, vec2 origin)
 {
   SVGLine result;
 
-  ConstString transform_attr = get_attr_value(line_tag, String("transform"));
+  String transform_attr = get_attr_value(line_tag, String("transform"));
   if (transform_attr.text != 0)
   {
     origin += parse_svg_transform(transform_attr);
   }
 
-  ConstString x1_str = get_attr_value(line_tag, String("x1"));
-  ConstString y1_str = get_attr_value(line_tag, String("y1"));
-  ConstString x2_str = get_attr_value(line_tag, String("x2"));
-  ConstString y2_str = get_attr_value(line_tag, String("y2"));
+  String x1_str = get_attr_value(line_tag, String("x1"));
+  String y1_str = get_attr_value(line_tag, String("y1"));
+  String x2_str = get_attr_value(line_tag, String("x2"));
+  String y2_str = get_attr_value(line_tag, String("y2"));
 
   vec2 start, end;
   get_num(x1_str.text, x1_str.text + x1_str.length, &start.x);
@@ -672,7 +672,7 @@ parse_svg_group(XMLTag *g_tag)
 {
   vec2 result = {0, 0};
 
-  ConstString transform_attr = get_attr_value(g_tag, String("transform"));
+  String transform_attr = get_attr_value(g_tag, String("transform"));
   if (transform_attr.text != 0)
   {
     result = parse_svg_transform(transform_attr);
@@ -688,8 +688,8 @@ get_svg_root_rect(XMLTag *root, vec2 origin)
   SVGRect result;
   result.rect = (Rectangle){ .start = origin, .end = origin};
 
-  ConstString width_str  = get_attr_value(root, String("width"));
-  ConstString height_str = get_attr_value(root, String("height"));
+  String width_str  = get_attr_value(root, String("width"));
+  String height_str = get_attr_value(root, String("height"));
 
   vec2 size = {0, 0};
   get_num( width_str.text,  width_str.text +  width_str.length, &size.x);
@@ -710,7 +710,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
   {
     if (str_eq(child->name, String("path")))
     {
-      log(L_SVG, "Found: path");
+      log(L_SVG, u8("Found: path"));
 
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);
@@ -723,7 +723,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
     }
     else if (str_eq(child->name, String("rect")))
     {
-      log(L_SVG, "Found: rect");
+      log(L_SVG, u8("Found: rect"));
 
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);
@@ -736,7 +736,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
     }
     else if (str_eq(child->name, String("circle")))
     {
-      log(L_SVG, "Found: circle");
+      log(L_SVG, u8("Found: circle"));
 
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);
@@ -749,7 +749,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
     }
     else if (str_eq(child->name, String("line")))
     {
-      log(L_SVG, "Found: line");
+      log(L_SVG, u8("Found: line"));
 
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);
@@ -762,7 +762,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
     }
     else if (str_eq(child->name, String("g")))
     {
-      log(L_SVG, "Found: g");
+      log(L_SVG, u8("Found: g"));
 
       delta += parse_svg_group(child);
 
@@ -770,7 +770,7 @@ get_svg_operations(Memory *memory, XMLTag *tag, SVGOperation **result, vec2 delt
     }
     else if (str_eq(child->name, String("svg")))
     {
-      log(L_SVG, "Found: svg");
+      log(L_SVG, u8("Found: svg"));
 
       SVGOperation *old_start = *result;
       *result = push_struct(memory, SVGOperation);

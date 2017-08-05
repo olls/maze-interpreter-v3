@@ -18,7 +18,7 @@ enum FunctionType
 const u32 MAX_FUNCTIONS = (26*2) * ((26*2) + 10); // [A-z][A-z0-9]
 struct Function
 {
-  char name[2];
+  u8 name[2];
   FunctionType type;
   union
   {
