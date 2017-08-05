@@ -25,120 +25,71 @@ _zero(void *mem, u32 size)
 }
 
 
-bool
-open_file(const char *filename, File *result, b32 write = false, s32 trunc_to = -1)
+// To prevent u8 being passed to to_little_endian(u16 big)
+s8
+to_little_endian(s8 big)
 {
-  b32 success = true;
+  s8 result = big;
+  return result;
+}
 
-  s32 open_flags;
-  s32 mmap_flags;
-  s32 mmap_prot;
-  if (write)
-  {
-    open_flags = O_RDWR | O_TRUNC;
-    mmap_prot = PROT_READ | PROT_WRITE;
-    mmap_flags = MAP_SHARED;
-  }
-  else
-  {
-    open_flags = O_RDONLY;
-    mmap_prot = PROT_READ;
-    mmap_flags = MAP_PRIVATE;
-  }
-
-  result->fd = open(filename, open_flags);
-  if (result->fd == -1)
-  {
-    printf("Failed to open file: \"%s\"\n", filename);
-    success = false;
-  }
-  else
-  {
-    if (trunc_to < 0)
-    {
-      struct stat sb;
-      if (fstat(result->fd, &sb) == -1)
-      {
-        printf("Failed to fstat : \"%s\"\n", filename);
-        success = false;
-      }
-      else
-      {
-        result->size = sb.st_size;
-      }
-    }
-    else
-    {
-      result->size = trunc_to;
-      if (ftruncate(result->fd, result->size) == -1)
-      {
-        printf("Failed to ftruncate file: \"%s\"\n", filename);
-        success = false;
-      }
-    }
-
-    if (success)
-    {
-      const char *file_ptr = (char *)mmap(NULL, result->size, mmap_prot, mmap_flags, result->fd, 0);
-      if (file_ptr == MAP_FAILED)
-      {
-        printf("Failed to map file: \"%s\"\n", filename);
-        success = false;
-      }
-      else
-      {
-        result->text = file_ptr;
-
-        if (write)
-        {
-          result->write = (char *)file_ptr;
-        }
-        else
-        {
-          result->write = NULL;
-        }
-      }
-    }
-  }
-
-  if (!success)
-  {
-    close(result->fd);
-    result->fd = -1;
-    result->text = 0;
-    result->write = 0;
-    result->size = 0;
-  }
-
-  return success;
+u8
+to_little_endian(u8 big)
+{
+  u8 result = big;
+  return result;
 }
 
 
-b32
-close_file(File *file, s32 trunc_to = -1)
+u16
+to_little_endian(u16 big)
 {
-  b32 error = false;
+  u8 result[2];
+  u8 *bytes = (u8 *)&big;
 
-  if (munmap((void *)file->text, file->size) != 0)
-  {
-    printf("Error unmapping file.\n");
-    error = true;
-  }
+  result[0] = bytes[1];
+  result[1] = bytes[0];
 
-  if (trunc_to >= 0)
-  {
-    file->size = trunc_to;
-    if (ftruncate(file->fd, file->size) == -1)
-    {
-      printf("Failed to truncate file for saving.\n");
-    }
-  }
+  return *(u16 *)result;
+}
 
-  if (close(file->fd) != 0)
-  {
-    printf("Error while closing file descriptor.\n");
-    error = true;
-  }
+s16
+to_little_endian(s16 big)
+{
+  s8 result[2];
+  s8 *bytes = (s8 *)&big;
 
-  return error;
+  result[0] = bytes[1];
+  result[1] = bytes[0];
+
+  return *(s16 *)result;
+}
+
+
+u32
+to_little_endian(u32 big)
+{
+  u8 result[4];
+  u8 *bytes = (u8 *)&big;
+
+  result[0] = bytes[3];
+  result[1] = bytes[2];
+  result[2] = bytes[1];
+  result[3] = bytes[0];
+
+  return *(u32 *)result;
+}
+
+s32
+to_little_endian(s32 big)
+{
+  s8 result[4];
+  s8 *bytes = (s8 *)&big;
+
+  result[0] = bytes[3];
+  result[1] = bytes[2];
+  result[2] = bytes[1];
+  result[3] = bytes[0];
+
+  return *(s32 *)result;
 }

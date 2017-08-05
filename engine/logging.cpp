@@ -19,6 +19,7 @@ channel_enabled(ENGINELoggingChannel channel)
     case L_OpenGL:
     case L_OpenGL_Debug:
     case L_Layouter:
+    // case L_OpenType:
     {
       return false;
     } break;

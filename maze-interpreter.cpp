@@ -197,6 +197,49 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 
   add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
 
+
+
+  u32 n_control_points = 8;
+  BezierControlPoint control_points[n_control_points];
+
+  for (u32 i = 0;
+       i < n_control_points;
+       ++i)
+  {
+    control_points[i].point.x = sin(i * 1.0/n_control_points * 2.0*M_PI);
+    control_points[i].point.y = cos(i * 1.0/n_control_points * 2.0*M_PI);
+    control_points[i].on_curve = false;
+  }
+
+  VertexBuffer vertices = {};
+  bezier_to_vertices(control_points, n_control_points, memory, &vertices);
+
+  const u8 *filenames[] = {u8("screen.glvs"), u8("screen.glfs")};
+  GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+  success &= create_shader_program(filenames, shader_types, array_count(shader_types), &game_state->screen_shader);
+
+  game_state->general_vbo.id = create_buffer();
+  game_state->general_vbo.element_size = sizeof(vec2);
+  game_state->general_vbo.total_elements = 0;
+  game_state->general_vbo.elements_used = 0;
+  game_state->general_vbo.binding_target = GL_ARRAY_BUFFER;
+  game_state->general_vbo.usage = GL_STATIC_DRAW;
+  game_state->general_vbo.setup_attributes_func = 0;
+
+  add_vertex_buffer(L_GameLoop, &game_state->general_vbo, &vertices);
+
+  game_state->general_vao = create_vao();
+  glBindVertexArray(game_state->general_vao);
+
+  glBindBuffer(game_state->general_vbo.binding_target, game_state->general_vbo.id);
+
+  GLuint attribute_pos = 12;
+  glEnableVertexAttribArray(attribute_pos);
+  glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
+
+  glBindVertexArray(0);
+
+
   return success;
 }
 
@@ -311,11 +354,13 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
 
   r32 aspect = (r32)renderer->height / renderer->width;
   mat4 projection_matrix = {aspect, 0, 0, 0,
-                            0, -1, 0, 0,
-                            0, 0, 1, 0,
-                            0, 0, 0, 1};
+                                0, -1, 0, 0,
+                                0,  0, 1, 0,
+                                0,  0, 0, 1};
 
   draw_instanced_cells(&game_state->cell_instancing, &game_state->panning, projection_matrix);
+
+  debug_render_font_outline(game_state->screen_shader, game_state->general_vao, &game_state->general_vbo, 0, game_state->general_vbo.elements_used);
 
   // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
   // draw_cars(game_state, &render_window, &(game_state->cars), time_us);

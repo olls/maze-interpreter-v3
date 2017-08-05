@@ -29,6 +29,10 @@ struct GameState
 
   CellInstancing cell_instancing;
 
+  GLuint screen_shader;
+  OpenGL_Buffer general_vbo;
+  GLuint general_vao;
+
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;
 
@@ -50,6 +54,7 @@ struct GameState
   SVGOperation *arrow_svg;
 
   FT_Face font_face;
+  Font *test_font;
 
   u8 persistent_str[256];
 

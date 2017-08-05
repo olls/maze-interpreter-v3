@@ -57,6 +57,8 @@
 #include "font.cpp"
 #include "layouter.cpp"
 #include "freetype.cpp"
+#include "opentype.cpp"
+#include "opengl-font.cpp"
 #include "opengl-util.cpp"
 
 #include "engine.cpp"
