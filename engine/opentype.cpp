@@ -341,7 +341,7 @@ parse_coordinate_flags(OTF_GLYF_SimpleFlags flag,
       //   x-coordinate is the same as the previous x-coordinate.
       delta = 0;
 
-      log(L_OpenType, u8("  Repeating point"));
+      // log(L_OpenType, u8("  Repeating point"));
     }
     else
     {
@@ -350,7 +350,7 @@ parse_coordinate_flags(OTF_GLYF_SimpleFlags flag,
       delta = to_little_endian(*(s16 *)coordinate_pos);
 
       *coordinate_index += sizeof(s16);
-      log(L_OpenType, u8("  s16 delta value"));
+      // log(L_OpenType, u8("  s16 delta value"));
     }
   }
   else
@@ -361,7 +361,7 @@ parse_coordinate_flags(OTF_GLYF_SimpleFlags flag,
     delta = *(u8 *)coordinate_pos * (sign ? +1 : -1);
 
     *coordinate_index += sizeof(u8);
-    log(L_OpenType, u8("  u8 delta value"));
+    // log(L_OpenType, u8("  u8 delta value"));
   }
 
   return delta;
@@ -376,6 +376,7 @@ struct GlyphPointReader
   u32 current_y_index;
 
   vec2 point_delta;
+  b32 point_on_curve;
 
   u32 next_flag_index;
 
@@ -416,8 +417,11 @@ read_next_glyph_point(OTF_GLYF_Simple_Ptrs *glyph_pointers, GlyphPointReader *gl
         // Set the repeats left to start repeating in the next iteration
         glyph_point_reader->flag_repeats_left = *((u8 *)glyph_pointers->coordinate_flags + current_flag_index + 1);
         glyph_point_reader->next_flag_index += 1;
+        glyph_point_reader->repeating_flag = current_flag;
       }
     }
+
+    glyph_point_reader->point_on_curve = current_flag & OTF_GLYF_FLAG_ON_CURVE_POINT;
 
     glyph_point_reader->point_delta.x = parse_coordinate_flags(current_flag, glyph_pointers->x_coordinates, &glyph_point_reader->current_x_index,
                                                                OTF_GLYF_FLAG_X_SHORT_VECTOR, OTF_GLYF_FLAG_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR);
@@ -455,11 +459,12 @@ get_glyph_location(Font *font, u32 glyph_index)
 
 
 b32
-get_true_type_glyph(Font *font, u32 glyph_index)
+get_true_type_glyph(Font *font, u32 glyph_index, Memory *memory, VertexBuffer *result)
 {
   b32 success = true;
 
   GlyphLocation glyph_location = get_glyph_location(font, glyph_index);
+  log(L_OpenType, u8("glyph_location: %p"), glyph_location.start_position);
 
   OTF_GLYF_Table *glyf_table = font->true_type_table_ptrs.glyf;
   OTF_GLYF_Header *glyph_header = (OTF_GLYF_Header *)((u8 *)glyf_table->glyphs + glyph_location.start_position);
@@ -479,6 +484,10 @@ get_true_type_glyph(Font *font, u32 glyph_index)
     // Read glyph contour coordinates into a "glyph cache" which we can then
     //   render from (the glyph cache could possibly be a VBO)
 
+    u32 n_points = simple_glyph.n_points;
+    BezierControlPoint points[n_points];
+    u32 point_n = 0;
+
     GlyphPointReader glyph_point_reader = {};
     b32 got_point = true;
     vec2 point = {0, 0};
@@ -489,9 +498,16 @@ get_true_type_glyph(Font *font, u32 glyph_index)
       {
         point += glyph_point_reader.point_delta;
 
+        BezierControlPoint *control_point = points + point_n;
+        control_point->point = point;
+        control_point->on_curve = glyph_point_reader.point_on_curve;
+        ++point_n;
+
         log(L_OpenType, u8("Point delta: (%10.3f, %10.3f), abs: (%10.3f, %10.3f), on curve: %d"), glyph_point_reader.point_delta.x, glyph_point_reader.point_delta.y, control_point->point.x, control_point->point.y, control_point->on_curve);
       }
     }
+
+    bezier_to_vertices(points, n_points, memory, result);
   }
   else
   {
@@ -547,7 +563,7 @@ get_glyph_index(Font *font, u32 character)
 
 
 b32
-get_glyph(Font *font, u32 character)
+get_glyph(Font *font, u32 character, Memory *memory, VertexBuffer *buffer)
 {
   b32 success = true;
 
@@ -560,7 +576,7 @@ get_glyph(Font *font, u32 character)
     {
       log(L_OpenType, u8("Getting glyph from TrueType font."));
 
-      success &= get_true_type_glyph(font, glyph_index);
+      success &= get_true_type_glyph(font, glyph_index, memory, buffer);
 
     } break;
     case OTF_SFNT_CFF_Data:

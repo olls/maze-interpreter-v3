@@ -135,11 +135,6 @@ load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
 {
   b32 success = true;
 
-  if (load_font(font_library, &game_state->font_face))
-  {
-    success = false;
-  }
-
   load_bitmap(&game_state->particles.spark_bitmap, u8("particles/spark.bmp"));
   load_bitmap(&game_state->particles.cross_bitmap, u8("particles/cross.bmp"));
   load_bitmap(&game_state->particles.blob_bitmap,  u8("particles/blob.bmp"));
@@ -157,9 +152,7 @@ load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
   game_state->arrow_svg = 0;
   get_svg_operations(memory, arrow, &game_state->arrow_svg);
 
-  Font font = {};
-  success &= parse_otf_file(u8("fonts/DejaVuSansMono.ttf"), &font);
-  get_glyph(&font, U'a' /*U'😌'*/);
+  success &= parse_otf_file(u8("fonts/DejaVuSansMono.ttf"), &game_state->font);
 
   return success;
 }
@@ -198,21 +191,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
   add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
 
 
-
-  u32 n_control_points = 8;
-  BezierControlPoint control_points[n_control_points];
-
-  for (u32 i = 0;
-       i < n_control_points;
-       ++i)
-  {
-    control_points[i].point.x = sin(i * 1.0/n_control_points * 2.0*M_PI);
-    control_points[i].point.y = cos(i * 1.0/n_control_points * 2.0*M_PI);
-    control_points[i].on_curve = false;
-  }
-
   VertexBuffer vertices = {};
-  bezier_to_vertices(control_points, n_control_points, memory, &vertices);
+  get_glyph(&game_state->font, U'@' /*U'😌'*/, memory, &vertices);
 
   const u8 *filenames[] = {u8("screen.glvs"), u8("screen.glfs")};
   GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
@@ -238,6 +218,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
   glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindVertexArray(0);
+
 
 
   return success;

@@ -53,8 +53,7 @@ struct GameState
 
   SVGOperation *arrow_svg;
 
-  FT_Face font_face;
-  Font *test_font;
+  Font font;
 
   u8 persistent_str[256];
 
