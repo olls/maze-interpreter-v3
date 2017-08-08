@@ -10,9 +10,6 @@
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 
 #include "utils.h"
 #include "platform.h"
@@ -31,7 +28,6 @@
 #include "bitmap.h"
 #include "font.h"
 #include "layouter.h"
-#include "freetype.h"
 #include "opentype.h"
 #include "opengl-font.h"
 #include "opengl-util.h"
@@ -56,7 +52,6 @@
 #include "bitmap.cpp"
 #include "font.cpp"
 #include "layouter.cpp"
-#include "freetype.cpp"
 #include "opentype.cpp"
 #include "opengl-font.cpp"
 #include "opengl-util.cpp"

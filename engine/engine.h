@@ -62,6 +62,6 @@ struct FPSCounter
 };
 
 
-typedef b32 (*UpdateAndRenderFunc)(Memory *memory, Renderer *renderer, FT_Library *font_library,
+typedef b32 (*UpdateAndRenderFunc)(Memory *memory, Renderer *renderer,
                                    Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
                                    u32 argc, const u8 *argv[]);

@@ -141,7 +141,7 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
 
 void
-game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
+game_loop(Memory *memory, Renderer *renderer, u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
 {
   b32 running = true;
 
@@ -202,7 +202,7 @@ game_loop(Memory *memory, Renderer *renderer, FT_Library *font_library, u32 argc
       }
     }
 
-    running &= update_and_render_func(memory, renderer, font_library, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
+    running &= update_and_render_func(memory, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
 
     SDL_GL_SwapWindow(renderer->window);
 
@@ -329,15 +329,7 @@ start_engine(u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_f
   print_gl_errors();
   printf("OpenGL init finished.\n");
 
-  FT_Library font_library;
-  if (init_freetype(&font_library))
-  {
-    printf("Failed to init freetype library.\n");
-    success = false;
-    return success;
-  }
-
-  game_loop(&memory, &renderer, &font_library, argc, argv, update_and_render_func);
+  game_loop(&memory, &renderer, argc, argv, update_and_render_func);
 
   SDL_GL_DeleteContext(renderer.gl_context);
   SDL_DestroyWindow(renderer.window);

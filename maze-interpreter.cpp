@@ -131,7 +131,7 @@ load_maze(Memory *memory, GameState *game_state)
 
 
 b32
-load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
+load_assets(Memory *memory, GameState *game_state)
 {
   b32 success = true;
 
@@ -159,7 +159,7 @@ load_assets(Memory *memory, GameState *game_state, FT_Library *font_library)
 
 
 b32
-init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_library, u64 time_us, u32 argc, const u8 *argv[])
+init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 argc, const u8 *argv[])
 {
   b32 success = true;
 
@@ -185,7 +185,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 
   setup_inputs(keys, &game_state->inputs);
 
-  success &= load_assets(memory, game_state, font_library);
+  success &= load_assets(memory, game_state);
   success &= setup_cell_instancing(&game_state->cell_instancing);
 
   add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
@@ -226,7 +226,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, FT_Library *font_li
 
 
 b32
-update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
+update_and_render(Memory *memory, Renderer *renderer,
                   Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
                   u32 argc, const u8 *argv[])
 {
@@ -238,7 +238,7 @@ update_and_render(Memory *memory, Renderer *renderer, FT_Library *font_library,
   {
     game_state = push_struct(memory, GameState);
 
-    if (!init_game(memory, game_state, keys, font_library, time_us, argc, argv))
+    if (!init_game(memory, game_state, keys, time_us, argc, argv))
     {
       keep_running = false;
       return keep_running;
