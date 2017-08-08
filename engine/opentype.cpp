@@ -206,20 +206,22 @@ parse_otf_file(const u8 filename[], Font *result)
   log(L_OpenType, u8("Parsing %s"), filename);
 
   File file;
-  open_file(filename, &file);
-
-  // Test if the file is a font collection file
-  TTC_Header *ttc = (TTC_Header *)file.text;
-
-  if (tag_cmp(ttc->ttc_tag, (const u8 *)"ttcf"))
+  success &= open_file(filename, &file);
+  if (success)
   {
-    log(L_OpenType, u8("Parsing TrueType Collection; not currently supported."));
-    success &= false;
-  }
-  else
-  {
-    OTF_OffsetTable *otf = (OTF_OffsetTable *)file.text;
-    success &= parse_otf(&file, otf, result);
+    // Test if the file is a font collection file
+    TTC_Header *ttc = (TTC_Header *)file.text;
+
+    if (tag_cmp(ttc->ttc_tag, (const u8 *)"ttcf"))
+    {
+      log(L_OpenType, u8("Parsing TrueType Collection; not currently supported."));
+      success &= false;
+    }
+    else
+    {
+      OTF_OffsetTable *otf = (OTF_OffsetTable *)file.text;
+      success &= parse_otf(&file, otf, result);
+    }
   }
 
   return success;

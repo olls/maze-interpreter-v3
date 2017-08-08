@@ -170,56 +170,77 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
   game_state->finish_sim_step_move = false;
 
+  b32 have_filename = false;
   if (argc > 1)
   {
     game_state->filename = argv[1];
+    have_filename = true;
   }
   else
   {
     printf("Error: No Maze filename supplied.\n");
-    success = false;
+    have_filename = false;
   }
 
-  success &= load_maze(memory, game_state);
-  reset_zoom(game_state);
+  if (!have_filename)
+  {
+    success = false;
+  }
+  else
+  {
+    b32 assets_loaded = load_assets(memory, game_state);
+    b32 maze_loaded = load_maze(memory, game_state);
+    b32 cell_instanceing_setup = success &= setup_cell_instancing(&game_state->cell_instancing);
 
-  setup_inputs(keys, &game_state->inputs);
+    setup_inputs(keys, &game_state->inputs);
 
-  success &= load_assets(memory, game_state);
-  success &= setup_cell_instancing(&game_state->cell_instancing);
+    if (!(assets_loaded &&
+          maze_loaded &&
+          cell_instanceing_setup))
+    {
+      success = false;
+    }
+    else
+    {
 
-  add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
+      reset_zoom(game_state);
+      add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
+
+      //
+      // TODO: Temporary font development shader setup here: move this somewhere more appropriate when appropriate!
+      //
+
+      VertexBuffer vertices = {};
+      get_glyph(&game_state->font, U'}' /*U'😌'*/, memory, &vertices);
+
+      const u8 *filenames[] = {u8("screen.glvs"), u8("screen.glfs")};
+      GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+      success &= create_shader_program(filenames, shader_types, array_count(shader_types), &game_state->screen_shader);
+
+      game_state->general_vbo.id = create_buffer();
+      game_state->general_vbo.element_size = sizeof(vec2);
+      game_state->general_vbo.total_elements = 0;
+      game_state->general_vbo.elements_used = 0;
+      game_state->general_vbo.binding_target = GL_ARRAY_BUFFER;
+      game_state->general_vbo.usage = GL_STATIC_DRAW;
+      game_state->general_vbo.setup_attributes_func = 0;
+
+      add_vertex_buffer(L_GameLoop, &game_state->general_vbo, &vertices);
+
+      game_state->general_vao = create_vao();
+      glBindVertexArray(game_state->general_vao);
+
+      glBindBuffer(game_state->general_vbo.binding_target, game_state->general_vbo.id);
+
+      GLuint attribute_pos = 12;
+      glEnableVertexAttribArray(attribute_pos);
+      glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
+
+      glBindVertexArray(0);
 
 
-  VertexBuffer vertices = {};
-  get_glyph(&game_state->font, U'@' /*U'😌'*/, memory, &vertices);
-
-  const u8 *filenames[] = {u8("screen.glvs"), u8("screen.glfs")};
-  GLenum shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
-  success &= create_shader_program(filenames, shader_types, array_count(shader_types), &game_state->screen_shader);
-
-  game_state->general_vbo.id = create_buffer();
-  game_state->general_vbo.element_size = sizeof(vec2);
-  game_state->general_vbo.total_elements = 0;
-  game_state->general_vbo.elements_used = 0;
-  game_state->general_vbo.binding_target = GL_ARRAY_BUFFER;
-  game_state->general_vbo.usage = GL_STATIC_DRAW;
-  game_state->general_vbo.setup_attributes_func = 0;
-
-  add_vertex_buffer(L_GameLoop, &game_state->general_vbo, &vertices);
-
-  game_state->general_vao = create_vao();
-  glBindVertexArray(game_state->general_vao);
-
-  glBindBuffer(game_state->general_vbo.binding_target, game_state->general_vbo.id);
-
-  GLuint attribute_pos = 12;
-  glEnableVertexAttribArray(attribute_pos);
-  glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
-
-  glBindVertexArray(0);
-
-
+    }
+  }
 
   return success;
 }
