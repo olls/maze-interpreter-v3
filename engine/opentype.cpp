@@ -267,7 +267,6 @@ read_simple_true_type_glyph(OTF_GLYF_Header *glyph_header, GlyphLocation glyph_l
   u32 physical_flag_position = 0;
 
   u32 x_coordinates_size = 0;
-  u32 y_coordinates_size = 0;
 
   while (logical_flag_number < n_flags)
   {
@@ -275,13 +274,17 @@ read_simple_true_type_glyph(OTF_GLYF_Header *glyph_header, GlyphLocation glyph_l
     ++logical_flag_number;
     ++physical_flag_position;
 
+    u8 repeat_count = 0;
+
     if (*current_flag & OTF_GLYF_FLAG_REPEAT_FLAG)
     {
       // Next byte is the repeat count
       physical_flag_position += 1;
-      u8 repeat_count = *(u8 *)(current_flag + 1);
+      repeat_count = *(u8 *)(current_flag + 1);
       logical_flag_number += repeat_count;
     }
+
+    u32 this_coordinate_size = 0;
 
     if ( !(*current_flag & OTF_GLYF_FLAG_X_SHORT_VECTOR) )
     {
@@ -289,21 +292,23 @@ read_simple_true_type_glyph(OTF_GLYF_Header *glyph_header, GlyphLocation glyph_l
       {
         // If X_SHORT_VECTOR is not set and this bit is set, then the current
         //   x-coordinate is the same as the previous x-coordinate.
-        x_coordinates_size += 0;
+        this_coordinate_size = 0;
       }
       else
       {
         // If X_SHORT_VECTOR is not set and this bit is also not set, the
         //   current x-coordinate is a signed 16-bit delta vector.
-        x_coordinates_size += sizeof(s16);
+        this_coordinate_size = sizeof(s16);
       }
     }
     else
     {
       // If X_SHORT_VECTOR is set, this bit describes the sign of
       //   the value, with 1 equalling positive and 0 negative.
-      x_coordinates_size += sizeof(u8);
+      this_coordinate_size = sizeof(u8);
     }
+
+    x_coordinates_size += this_coordinate_size * (1 + repeat_count);
   }
 
   u32 flags_size = physical_flag_position;
@@ -436,17 +441,14 @@ get_glyph_location(Font *font, u32 glyph_index)
 
   if (to_little_endian(head_table->index_to_loc_format) == 1)
   {
-    result.start_position = loca_table->offsets_long[glyph_index];
-    result.end_position = loca_table->offsets_long[glyph_index + 1];
+    result.start_position = to_little_endian(loca_table->offsets_long[glyph_index]);
+    result.end_position = to_little_endian(loca_table->offsets_long[glyph_index + 1]);
   }
   else
   {
-    result.start_position = (u32)loca_table->offsets_short[glyph_index];
-    result.end_position = (u32)loca_table->offsets_short[glyph_index + 1];
+    result.start_position = to_little_endian(loca_table->offsets_short[glyph_index]);
+    result.end_position = to_little_endian(loca_table->offsets_short[glyph_index + 1]);
   }
-
-  result.start_position = to_little_endian(result.start_position);
-  result.end_position = to_little_endian(result.end_position);
 
   return result;
 }
@@ -460,7 +462,7 @@ get_true_type_glyph(Font *font, u32 glyph_index)
   GlyphLocation glyph_location = get_glyph_location(font, glyph_index);
 
   OTF_GLYF_Table *glyf_table = font->true_type_table_ptrs.glyf;
-  OTF_GLYF_Header *glyph_header = glyf_table->glyphs + glyph_location.start_position;
+  OTF_GLYF_Header *glyph_header = (OTF_GLYF_Header *)((u8 *)glyf_table->glyphs + glyph_location.start_position);
 
   log(L_OpenType, u8("x_min: %d"), to_little_endian(glyph_header->x_min));
   log(L_OpenType, u8("y_min: %d"), to_little_endian(glyph_header->y_min));
@@ -486,9 +488,8 @@ get_true_type_glyph(Font *font, u32 glyph_index)
       if (got_point)
       {
         point += glyph_point_reader.point_delta;
-        log(L_OpenType, u8("Got glyph contour delta: (%f, %f)"), glyph_point_reader.point_delta.x, glyph_point_reader.point_delta.y);
-        log(L_OpenType, u8("Got glyph contour point: (%f, %f)"), point.x, point.y);
 
+        log(L_OpenType, u8("Point delta: (%10.3f, %10.3f), abs: (%10.3f, %10.3f), on curve: %d"), glyph_point_reader.point_delta.x, glyph_point_reader.point_delta.y, control_point->point.x, control_point->point.y, control_point->on_curve);
       }
     }
   }

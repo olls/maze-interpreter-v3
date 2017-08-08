@@ -18,14 +18,31 @@ struct OTF_EncodingRecord
   u16 platform_id;  // Platform ID.
   u16 encoding_id;  // Platform-specific encoding ID.
   u32 offset;       // Byte offset from beginning of table to the subtable for this encoding.
-};
+} __attribute__((packed));
 
 struct OTF_CMAP_Table
 {
   u16 version;     // Table version number (0).
   u16 num_tables;  // Number of encoding tables that follow.
   OTF_EncodingRecord encoding_records[];
-};
+} __attribute__((packed));
+
+struct OTF_CMAP_SubTable_Format12
+{
+  u16 format;             // Subtable format; set to 12.
+  u16 reserved;           // Reserved; set to 0
+  u32 length;             // Byte length of this subtable (including the header)
+  u32 language;           // Please see “Note on the language field in 'cmap' subtables“ in this document.
+  u32 num_groups;         // Number of groupings which follow
+
+  struct SequentialMapGroup
+  {
+    u32 start_char_code;  // First character code in this group
+    u32 end_char_code;    // Last character code in this group
+    u32 start_glyph_id;   // Glyph index corresponding to the starting character code
+
+  } groups[];             // Array of SequentialMapGroup records.
+} __attribute__((packed));
 
 
 // 'head' Font header
@@ -83,7 +100,7 @@ struct OTF_HEAD_Table
   s16 font_direction_hint;    // Deprecated (Set to 2).
   s16 index_to_loc_format;    // 0 for short offsets (Offset16), 1 for long (Offset32).
   s16 glyph_data_format;      // 0 for current format.
-};
+} __attribute__((packed));
 
 
 // 'hhea' Horizontal header
@@ -107,7 +124,7 @@ struct OTF_HHEA_Table
   s32 _2;                            // set to 0
   s16 metric_data_format;            // 0 for current format.
   u16 number_of_h_metrics;           // Number of hMetric entries in 'hmtx' table
-};
+} __attribute__((packed));
 
 
 // 'hmtx' Horizontal metrics
@@ -115,12 +132,12 @@ struct OTF_LongHorMetric
 {
   u16 advance_width;       // Advance width, in font design units.
   s16 lsb;                 // Glyph left side bearing, in font design units.
-};
+} __attribute__((packed));
 
 struct OTF_HMTX_Table
 {
 
-};
+} __attribute__((packed));
 
 struct OTF_HMTX_Table_Ptrs
 {
@@ -150,14 +167,14 @@ struct OTF_MAXP_Table
   u16 max_size_of_instructions;  // Maximum byte count for glyph instructions.
   u16 max_component_elements;    // Maximum number of components referenced at “top level” for any composite glyph.
   u16 max_component_depth;       // Maximum levels of recursion; 1 for simple components.
-};
+} __attribute__((packed));
 
 
 // 'name' Naming table
 struct OTF_NAME_Table
 {
   // Not being used.
-};
+} __attribute__((packed));
 
 
 // 'OS/2' OS/2 and Windows specific metrics
@@ -203,14 +220,14 @@ struct OTF_OS_2_Table
   u16 max_context;
   u16 lower_optical_point_size;
   u16 upper_optical_point_size;
-};
+} __attribute__((packed));
 
 
 // 'post' PostScript information
 struct OTF_POST_Table
 {
   // Not being used.
-};
+} __attribute__((packed));
 
 
 struct OTF_Tables
@@ -233,14 +250,14 @@ struct OTF_CVT__Table
 {
   OTF_FWord values[];  // List of n values referenceable by instructions. n is the number of OTF_FWord items that fit in the size of the
                        //   table.
-};
+} __attribute__((packed));
 
 
 // 'fpgm' Font program (optional table)
 struct OTF_FPGM_Table
 {
   u8 instructions[];
-};
+} __attribute__((packed));
 
 
 // 'glyf' Glyph data
@@ -252,12 +269,12 @@ struct OTF_GLYF_Header
   s16 y_min;               // Minimum y for coordinate data.
   s16 x_max;               // Maximum x for coordinate data.
   s16 y_max;               // Maximum y for coordinate data.
-};
+} __attribute__((packed));
 
 struct OTF_GLYF_Table
 {
   OTF_GLYF_Header glyphs[];
-};
+} __attribute__((packed));
 
 
 enum OTF_GLYF_SimpleFlags : u8
@@ -308,14 +325,14 @@ struct OTF_LOCA_Table
     u32 offsets_long[];   // The actual local offset is stored. The value of n is numGlyphs + 1. The value for numGlyphs is found in the
                           //   'maxp' table.
   };
-};
+} __attribute__((packed));
 
 
 // 'prep' CVT Program (optional table)
 struct OTF_PREP_Table
 {
   u8 instructions[];  // Set of instructions executed whenever point size or font or transformation change.
-};
+} __attribute__((packed));
 
 
 // 'gasp' Grid-fitting/Scan-conversion (optional table)
@@ -330,15 +347,15 @@ enum OTF_GaspRangeBehavior : u16
 struct OTF_GaspRange
 {
   u16 range_max_PPEM;       // Upper limit of range, in PPEM
-  u16 range_gasp_behavior;  // Flags describing desired rasterizer behavior.
-};
+  OTF_GaspRangeBehavior range_gasp_behavior;  // Flags describing desired rasterizer behavior.
+} __attribute__((packed));
 
 struct OTF_GASP_Table
 {
   u16 version;                  // Version number (set to 1)
   u16 num_ranges;               // Number of records to follow
   OTF_GaspRange gasp_ranges[];  // Sorted by ppem
-};
+} __attribute__((packed));
 
 
 struct OTF_TrueType_Tables
@@ -358,21 +375,21 @@ struct OTF_TrueType_Tables
 struct OTF_CFF__Table
 {
   //
-};
+} __attribute__((packed));
 
 
 // 'CFF2' Compact Font Format 2.0
 struct OTF_CFF2_Table
 {
   //
-};
+} __attribute__((packed));
 
 
 // 'VORG' Vertical Origin (optional table)
 struct OTF_VORG_Table
 {
   //
-};
+} __attribute__((packed));
 
 
 struct OTF_CFF_Tables
@@ -391,7 +408,7 @@ struct TTC_Header
   u16 minor_version;   // Minor version of the TTC Header, = 0.
   u32 num_fonts;       // Number of fonts in TTC
   u32 offset_table[];  // Array of offsets to the OffsetTable for each font from the beginning of the file
-};
+} __attribute__((packed));
 
 
 struct TTC_DSIG
@@ -399,7 +416,7 @@ struct TTC_DSIG
   u8 dsig_tag[4];   // Tag indicating that a DSIG table exists, 0x44534947 ('DSIG') (null if no signature)
   u32 dsig_length;  // The length (in bytes) of the DSIG table (null if no signature)
   u32 dsig_offset;  // The offset (in bytes) of the DSIG table from the beginning of the TTC file (null if no signature)
-};
+} __attribute__((packed));
 
 
 struct OTF_TableRecord
@@ -408,7 +425,7 @@ struct OTF_TableRecord
   u32 check_sum;  // CheckSum for this table.
   u32 offset;     // Offset from beginning of TrueType font file.
   u32 length;     // Length of this table.
-};
+} __attribute__((packed));
 
 
 struct OTF_OffsetTable
@@ -420,26 +437,7 @@ struct OTF_OffsetTable
   u16 range_shift;     // numTables*16-searchRange
 
   OTF_TableRecord table_records[];
-};
-
-
-
-struct OTF_CMAP_SubTable_Format12
-{
-  u16 format;             // Subtable format; set to 12.
-  u16 reserved;           // Reserved; set to 0
-  u32 length;             // Byte length of this subtable (including the header)
-  u32 language;           // Please see “Note on the language field in 'cmap' subtables“ in this document.
-  u32 num_groups;         // Number of groupings which follow
-
-  struct SequentialMapGroup
-  {
-    u32 start_char_code;  // First character code in this group
-    u32 end_char_code;    // Last character code in this group
-    u32 start_glyph_id;   // Glyph index corresponding to the starting character code
-
-  } groups[];             // Array of SequentialMapGroup records.
-};
+} __attribute__((packed));
 
 
 enum OTF_SfntVersion
@@ -447,7 +445,7 @@ enum OTF_SfntVersion
   OTF_SFNT_TrueType_Outlines,
   OTF_SFNT_CFF_Data,
   OTF_SFNT_Undefined
-};
+} __attribute__((packed));
 
 
 struct Font
