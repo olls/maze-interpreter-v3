@@ -43,7 +43,7 @@ const u8 *text, ...)
 POLYMORPHIC_LOGGING_ENDPOINT(
 void
 log, {
-  printf("\e[01;3%dm%s\e[0m -> %s\n", channel % 8, channel_name, buf);
+  printf("[\e[01;3%dm%s\e[0m] %s\n", channel % 8, channel_name, buf);
 },
 const u8 *text, ...)
 
@@ -52,7 +52,7 @@ POLYMORPHIC_LOGGING_ENDPOINT(
 void
 log_ind,
 {
-  printf("\e[01;3%dm%s\e[0m -> %*s%s\n", channel % 8, channel_name, n, " ", buf);
+  printf("[\e[01;3%dm%s\e[0m] %*s%s\n", channel % 8, channel_name, n, " ", buf);
 },
 u32 n, const u8 *text, ...)
 

@@ -39,9 +39,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="32"
-     inkscape:cx="18.366328"
-     inkscape:cy="46.358326"
+     inkscape:zoom="8"
+     inkscape:cx="24.524681"
+     inkscape:cy="38.185856"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -76,14 +76,6 @@
        d="m 358.5,432.36218 23.375,23.375 -22.5,22.5"
        id="path3792"
        inkscape:connector-curvature="0" />
-    <rect
-       style="stroke:#66ffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       id="rect3845"
-       width="13.205933"
-       height="9.4396973"
-       x="372.83432"
-       y="431.10165"
-       ry="3" />
     <circle
        cx="372"
        cy="431"
@@ -91,6 +83,13 @@
        style="stroke:#ff0000;stroke-width:2;stroke-opacity:1"
        id="circle3075"
        d="m 382,431 c 0,5.52285 -4.47715,10 -10,10 -5.52285,0 -10,-4.47715 -10,-10 0,-5.52285 4.47715,-10 10,-10 5.52285,0 10,4.47715 10,10 z" />
+    <rect
+       style="stroke:#66ffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3845"
+       width="13.112183"
+       height="9.3146973"
+       x="372.83432"
+       y="431.10165" />
     <ellipse
        cx="75"
        cy="75"
@@ -98,7 +97,12 @@
        ry="5"
        style="stroke:#ff0000;stroke-width:2;stroke-opacity:1"
        id="ellipse3077"
-       d="m 95,75 c 0,2.761424 -8.954305,5 -20,5 -11.045695,0 -20,-2.238576 -20,-5 0,-2.761424 8.954305,-5 20,-5 11.045695,0 20,2.238576 20,5 z" />
+       d="m 95,75 c 0,2.761424 -8.954305,5 -20,5 -11.045695,0 -20,-2.238576 -20,-5 0,-2.761424 8.954305,-5 20,-5 11.045695,0 20,2.238576 20,5 z"
+       sodipodi:cx="75"
+       sodipodi:cy="75"
+       sodipodi:rx="20"
+       sodipodi:ry="5"
+       transform="matrix(1.0022727,0,0,0.90909091,259.82955,390.31818)" />
     <line
        x1="350"
        y1="350"
