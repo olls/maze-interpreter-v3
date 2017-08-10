@@ -4,6 +4,7 @@ const u32 WINDOW_HEIGHT = 1080*.5;
 
 const u32 FPS = 60;
 const u32 TOTAL_MEMORY = megabytes_to_bytes(200);
+const u32 TOTAL_FRAME_MEMORY = megabytes_to_bytes(1);
 
 
 struct Renderer
@@ -62,6 +63,6 @@ struct FPSCounter
 };
 
 
-typedef b32 (*UpdateAndRenderFunc)(Memory *memory, Renderer *renderer,
+typedef b32 (*UpdateAndRenderFunc)(Memory *memory, Memory *frame_memory, Renderer *renderer,
                                    Keys *keys, Mouse *mouse, u64 time_us, u32 last_frame_dt, u32 fps,
                                    u32 argc, const u8 *argv[]);

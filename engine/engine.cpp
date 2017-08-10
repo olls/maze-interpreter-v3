@@ -141,7 +141,7 @@ process_mouse(Mouse *mouse, SDL_Event event)
 
 
 void
-game_loop(Memory *memory, Renderer *renderer, u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
+game_loop(Memory *memory, Memory *frame_memory, Renderer *renderer, u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_func)
 {
   b32 running = true;
 
@@ -161,6 +161,8 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, const u8 *argv[], Update
   while (running)
   {
     u64 last_frame_end = get_us();
+
+    frame_memory->used = 0;
 
     // mouse.scroll -= mouse.scroll / 6.0f;
     // r32 epsilon = 1.5f;
@@ -202,7 +204,7 @@ game_loop(Memory *memory, Renderer *renderer, u32 argc, const u8 *argv[], Update
       }
     }
 
-    running &= update_and_render_func(memory, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
+    running &= update_and_render_func(memory, frame_memory, renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
 
     SDL_GL_SwapWindow(renderer->window);
 
@@ -240,6 +242,11 @@ start_engine(u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_f
   memory.total = TOTAL_MEMORY;
   memory.memory = (u8 *)malloc(memory.total);
   memory.used = 0;
+
+  Memory frame_memory;
+  frame_memory.total = TOTAL_FRAME_MEMORY;
+  frame_memory.memory = (u8 *)malloc(frame_memory.total);
+  frame_memory.used = 0;
 
   Renderer renderer;
 
@@ -329,7 +336,7 @@ start_engine(u32 argc, const u8 *argv[], UpdateAndRenderFunc update_and_render_f
   print_gl_errors();
   printf("OpenGL init finished.\n");
 
-  game_loop(&memory, &renderer, argc, argv, update_and_render_func);
+  game_loop(&memory, &frame_memory, &renderer, argc, argv, update_and_render_func);
 
   SDL_GL_DeleteContext(renderer.gl_context);
   SDL_DestroyWindow(renderer.window);

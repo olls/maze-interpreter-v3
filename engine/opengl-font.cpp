@@ -1,13 +1,14 @@
 void
-debug_render_font_outline(GLuint screen_shader, GLuint vao, OpenGL_Buffer *vbo, u32 vbo_start_pos, u32 elements)
+debug_render_font_outline(GLuint general_screen_vao, ScreenSpaceRendering *screen_space_rendering, GeneralVertices *general_vertices, VBO_Segment vbo_segment)
 {
-  glUseProgram(screen_shader);
-  glBindVertexArray(vao);
-  glBindBuffer(vbo->binding_target, vbo->id);
+  glUseProgram(screen_space_rendering->shader_program);
+  glBindVertexArray(general_screen_vao);
 
-  glDrawArrays(GL_LINE_LOOP, vbo_start_pos, elements);
+  glBindBuffer(general_vertices->vbo.binding_target, general_vertices->vbo.id);
+
+  glDrawArrays(GL_TRIANGLES, vbo_segment.start_position, vbo_segment.n_elements);
 
   glBindVertexArray(0);
   glUseProgram(0);
-  glBindBuffer(vbo->binding_target, 0);
+  glBindBuffer(general_vertices->vbo.binding_target, 0);
 }

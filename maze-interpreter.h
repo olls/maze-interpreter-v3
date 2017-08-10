@@ -28,10 +28,9 @@ struct GameState
   Panning panning;
 
   CellInstancing cell_instancing;
-
-  GLuint screen_shader;
-  OpenGL_Buffer general_vbo;
-  GLuint general_vao;
+  ScreenSpaceRendering screen_space_rendering;
+  GeneralVertices general_vertices;
+  GLuint general_screen_vao;
 
   // NOTE: Things are scaled relatively to cell_spacing.
   r32 cell_margin;
@@ -54,6 +53,7 @@ struct GameState
   SVGOperation *arrow_svg;
 
   Font font;
+  VBO_Segment test_character;
 
   u8 persistent_str[256];
 
