@@ -1,4 +1,4 @@
-// General VBO can be used for arbitrary vertex data, items are kept track of with VBO_Segments, rendering for each item is managed by the user
+// General VBO can be used for arbitrary vertex data, items are kept track of with GL_BufferSegments, rendering for each item is managed by the user
 
 // TODO: Do we want to add colours (more...) to the general vbo??
 
@@ -13,6 +13,14 @@ setup_general_vertices(GeneralVertices *general_vertices)
   general_vertices->vbo.binding_target = GL_ARRAY_BUFFER;
   general_vertices->vbo.usage = GL_STATIC_DRAW;
   general_vertices->vbo.setup_attributes_func = 0;
+
+  general_vertices->ibo.id = create_buffer();
+  general_vertices->ibo.element_size = sizeof(u16);
+  general_vertices->ibo.total_elements = 0;
+  general_vertices->ibo.elements_used = 0;
+  general_vertices->ibo.binding_target = GL_ELEMENT_ARRAY_BUFFER;
+  general_vertices->ibo.usage = GL_STATIC_DRAW;
+  general_vertices->ibo.setup_attributes_func = 0;
 }
 
 
@@ -35,28 +43,28 @@ setup_general_vertices_to_screen_space_vao(GeneralVertices *general_vertices)
 
 
 POLYMORPHIC_LOGGING_FUNCTION(
-VBO_Segment
-add_vertex_buffer_to_general_vbo,
+GL_BufferSegment
+add_vertex_array_to_general_vertices,
 {
-  VBO_Segment result;
+  GL_BufferSegment result;
 
-  result.start_position = add_vertex_buffer(channel, &general_vertices->vbo, vertex_buffer);
-  result.n_elements = vertex_buffer->n_vertices;
+  result.start_position = add_vertex_array_to_gl_buffer(channel, &general_vertices->vbo, vertex_array);
+  result.n_elements = vertex_array->n_vertices;
 
   return result;
 },
-GeneralVertices *general_vertices, VertexBuffer *vertex_buffer)
+GeneralVertices *general_vertices, VertexArray *vertex_array)
 
 
-VBO_Segment
-add_glyph_to_general_vertices(Font *font, GeneralVertices *general_vertices, Memory *memory, u32 character)
+POLYMORPHIC_LOGGING_FUNCTION(
+GL_BufferSegment
+add_indices_to_general_vertices,
 {
-  VBO_Segment result;
+  GL_BufferSegment result;
 
-  VertexBuffer vertices = {};
-  get_glyph(font, character, memory, &vertices);
-
-  result = add_vertex_buffer_to_general_vbo(L_OpenType, general_vertices, &vertices);
+  result.start_position = add_items_to_gl_buffer(channel, &general_vertices->ibo, n_indices, indices);
+  result.n_elements = n_indices;
 
   return result;
-}
+},
+GeneralVertices *general_vertices, u16 *indices, u32 n_indices)

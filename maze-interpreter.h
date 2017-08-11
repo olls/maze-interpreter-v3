@@ -53,7 +53,8 @@ struct GameState
   SVGOperation *arrow_svg;
 
   Font font;
-  VBO_Segment test_character;
+  GL_BufferSegment test_character_vbo;
+  GL_BufferSegment test_character_ibo;
 
   u8 persistent_str[256];
 

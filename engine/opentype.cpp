@@ -256,7 +256,8 @@ read_simple_true_type_glyph(OTF_GLYF_Header *glyph_header, GlyphLocation glyph_l
 
   result.n_points = to_little_endian(result.end_points_of_contours[result.number_of_contours-1]) + 1;
 
-  // There is one flag per point, but n_flags may be less than n_points if the REPEAT flag is set on any flags.
+  // There is one flag per point, but n_flags may be less than n_points if
+  //   the REPEAT flag is set on any flags.
   u32 n_flags = result.n_points;
   result.coordinate_flags = (OTF_GLYF_SimpleFlags *)pos;
 
@@ -425,11 +426,13 @@ read_next_glyph_point(OTF_GLYF_Simple_Ptrs *glyph_pointers, GlyphPointReader *gl
 
     glyph_point_reader->point_on_curve = current_flag & OTF_GLYF_FLAG_ON_CURVE_POINT;
 
-    glyph_point_reader->point_delta.x = parse_coordinate_flags(current_flag, glyph_pointers->x_coordinates, &glyph_point_reader->current_x_index,
-                                                               OTF_GLYF_FLAG_X_SHORT_VECTOR, OTF_GLYF_FLAG_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR);
+    glyph_point_reader->point_delta.x = parse_coordinate_flags(
+      current_flag, glyph_pointers->x_coordinates, &glyph_point_reader->current_x_index,
+      OTF_GLYF_FLAG_X_SHORT_VECTOR, OTF_GLYF_FLAG_X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR);
 
-    glyph_point_reader->point_delta.y = parse_coordinate_flags(current_flag, glyph_pointers->y_coordinates, &glyph_point_reader->current_y_index,
-                                                               OTF_GLYF_FLAG_Y_SHORT_VECTOR, OTF_GLYF_FLAG_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR);
+    glyph_point_reader->point_delta.y = parse_coordinate_flags(
+      current_flag, glyph_pointers->y_coordinates, &glyph_point_reader->current_y_index,
+      OTF_GLYF_FLAG_Y_SHORT_VECTOR, OTF_GLYF_FLAG_Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR);
   }
 
   return success;
@@ -461,7 +464,7 @@ get_glyph_location(Font *font, u32 glyph_index)
 
 
 b32
-get_true_type_glyph(Font *font, u32 glyph_index, Memory *memory, VertexBuffer *result)
+get_true_type_glyph(Font *font, u32 glyph_index, Memory *frame_memory, VertexArray *outline_result)
 {
   b32 success = true;
 
@@ -481,7 +484,8 @@ get_true_type_glyph(Font *font, u32 glyph_index, Memory *memory, VertexBuffer *r
     log(L_OpenType, u8("Getting simple glyph"));
 
     OTF_GLYF_Simple_Ptrs simple_glyph = read_simple_true_type_glyph(glyph_header, glyph_location);
-    log(L_OpenType, u8("number_of_contours: %d, number_of_points: %u"), simple_glyph.number_of_contours, simple_glyph.n_points);
+    log(L_OpenType, u8("number_of_contours: %d, number_of_points: %u"),
+        simple_glyph.number_of_contours, simple_glyph.n_points);
 
     // Read glyph contour coordinates into a "glyph cache" which we can then
     //   render from (the glyph cache could possibly be a VBO)
@@ -505,15 +509,17 @@ get_true_type_glyph(Font *font, u32 glyph_index, Memory *memory, VertexBuffer *r
         control_point->on_curve = glyph_point_reader.point_on_curve;
         ++point_n;
 
-        log(L_OpenType, u8("Point delta: (%10.3f, %10.3f), abs: (%10.3f, %10.3f), on curve: %d"), glyph_point_reader.point_delta.x, glyph_point_reader.point_delta.y, control_point->point.x, control_point->point.y, control_point->on_curve);
+        log(L_OpenType, u8("Point delta: (%10.3f, %10.3f), abs: (%10.3f, %10.3f), on curve: %d"),
+            glyph_point_reader.point_delta.x, glyph_point_reader.point_delta.y,
+            control_point->point.x, control_point->point.y, control_point->on_curve);
       }
     }
 
-    bezier_to_vertices(points, n_points, memory, result);
+    bezier_to_vertices(points, n_points, frame_memory, outline_result);
   }
   else
   {
-    log(L_OpenType, u8("Getting Composite glyph"));
+    log(L_OpenType, u8("Getting Composite glyph: Currently unimplemented."));
 
   }
 
@@ -565,7 +571,7 @@ get_glyph_index(Font *font, u32 character)
 
 
 b32
-get_glyph(Font *font, u32 character, Memory *memory, VertexBuffer *buffer)
+get_glyph(Font *font, u32 character, Memory *frame_memory, VertexArray *buffer)
 {
   b32 success = true;
 
@@ -578,7 +584,7 @@ get_glyph(Font *font, u32 character, Memory *memory, VertexBuffer *buffer)
     {
       log(L_OpenType, u8("Getting glyph from TrueType font."));
 
-      success &= get_true_type_glyph(font, glyph_index, memory, buffer);
+      success &= get_true_type_glyph(font, glyph_index, frame_memory, buffer);
 
     } break;
     case OTF_SFNT_CFF_Data:

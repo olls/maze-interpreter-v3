@@ -29,11 +29,12 @@
 #include "font.h"
 #include "layouter.h"
 #include "opentype.h"
+#include "triangulation.h"
 
-#include "opengl-font.h"
 #include "opengl-util.h"
 #include "screen-space-rendering.h"
 #include "general-vertices.h"
+#include "opengl-font.h"
 
 #include "engine.h"
 
@@ -56,10 +57,11 @@
 #include "font.cpp"
 #include "layouter.cpp"
 #include "opentype.cpp"
+#include "triangulation.cpp"
 
-#include "opengl-font.cpp"
 #include "opengl-util.cpp"
 #include "screen-space-rendering.cpp"
 #include "general-vertices.cpp"
+#include "opengl-font.cpp"
 
 #include "engine.cpp"

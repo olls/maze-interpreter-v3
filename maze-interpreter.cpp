@@ -216,7 +216,8 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
       add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
 
-      game_state->test_character = add_glyph_to_general_vertices(&game_state->font, &game_state->general_vertices, memory, U'{');
+      add_glyph_to_general_vertices(&game_state->font, &game_state->general_vertices, memory, U'{',
+                                    &game_state->test_character_vbo, &game_state->test_character_ibo);
     }
     else
     {
@@ -344,7 +345,7 @@ update_and_render(Memory *memory, Memory *frame_memory, Renderer *renderer,
 
   draw_instanced_cells(&game_state->cell_instancing, &game_state->panning, projection_matrix);
 
-  debug_render_font_outline(game_state->general_screen_vao, &game_state->screen_space_rendering, &game_state->general_vertices, game_state->test_character);
+  debug_render_font_outline(game_state->general_screen_vao, &game_state->screen_space_rendering, &game_state->general_vertices, game_state->test_character_vbo, game_state->test_character_ibo);
 
   // draw_cells(game_state, &render_window, &(game_state->maze.tree), time_us);
   // draw_cars(game_state, &render_window, &(game_state->cars), time_us);

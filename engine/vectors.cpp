@@ -47,6 +47,12 @@ Vec3(r32 x)
   return (vec3){x, x, x};
 }
 
+vec3
+Vec3(vec2 xy, r32 z)
+{
+  return (vec3){xy.x, xy.y, z};
+}
+
 
 vec4
 Vec4(r32 w, r32 x, r32 y, r32 z)
@@ -70,6 +76,12 @@ vec4
 Vec4(r32 x)
 {
   return (vec4){x, x, x, x};
+}
+
+vec4
+Vec4(vec3 wxy, r32 z)
+{
+  return (vec4){wxy.x, wxy.y, wxy.z, z};
 }
 
 
@@ -1293,4 +1305,45 @@ angle_from_vector(vec2 direction)
   }
 
   return result;
+}
+
+
+vec3
+cross_product(vec3 a, vec3 b)
+{
+  vec3 result;
+  result.x = (a.y * b.z) - (a.z * b.y);
+  result.y = (a.z * b.x) - (a.x * b.z);
+  result.z = (a.x * b.y) - (a.y * b.x);
+  return result;
+}
+
+
+r32
+dot_product(vec3 a, vec3 b)
+{
+  r32 result = (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+  return result;
+}
+
+
+b32
+points_on_same_side_of_line(vec2 p1, vec2 p2, vec2 line_start, vec2 line_end)
+{
+  vec3 cross_product_1 = cross_product(Vec3(line_end - line_start, 0),
+                                       Vec3(p1 - line_start, 0));
+  vec3 cross_product_2 = cross_product(Vec3(line_end - line_start, 0),
+                                       Vec3(p2 - line_start, 0));
+
+  return dot_product(cross_product_1, cross_product_2) >= 0;
+}
+
+
+b32
+in_triangle(vec2 test, vec2 a, vec2 b, vec2 c)
+{
+  return points_on_same_side_of_line(test, a, b, c) &&
+         points_on_same_side_of_line(test, b, a, c) &&
+         points_on_same_side_of_line(test, c, a, b);
+
 }

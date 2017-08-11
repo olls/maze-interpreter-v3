@@ -290,11 +290,11 @@ OpenGL_Buffer *buffer, void *element)
 
 POLYMORPHIC_LOGGING_FUNCTION(
 u32
-add_vertex_buffer,
+add_items_to_gl_buffer,
 {
-  if (buffer->total_elements - buffer->elements_used < vertex_buffer->n_vertices)
+  if (buffer->total_elements - buffer->elements_used < n_elements)
   {
-    u32 new_total_elements_needed = vertex_buffer->n_vertices + buffer->elements_used;
+    u32 new_total_elements_needed = n_elements + buffer->elements_used;
 
     extend_gl_buffer(channel, buffer, new_total_elements_needed);
   }
@@ -302,14 +302,23 @@ add_vertex_buffer,
   u32 start_position = buffer->elements_used;
 
   glBindBuffer(buffer->binding_target, buffer->id);
-  glBufferSubData(buffer->binding_target, buffer->element_size * start_position, buffer->element_size * vertex_buffer->n_vertices, vertex_buffer->vertices);
+  glBufferSubData(buffer->binding_target, buffer->element_size * start_position, buffer->element_size * n_elements, elements);
   glBindBuffer(buffer->binding_target, 0);
 
-  buffer->elements_used += vertex_buffer->n_vertices;
+  buffer->elements_used += n_elements;
 
   return start_position;
 },
-OpenGL_Buffer *buffer, VertexBuffer *vertex_buffer)
+OpenGL_Buffer *buffer, u32 n_elements, void *elements)
+
+
+POLYMORPHIC_LOGGING_FUNCTION(
+u32
+add_vertex_array_to_gl_buffer,
+{
+  return add_items_to_gl_buffer(channel, buffer, vertex_array->n_vertices, vertex_array->vertices);
+},
+OpenGL_Buffer *buffer, VertexArray *vertex_array)
 
 
 void

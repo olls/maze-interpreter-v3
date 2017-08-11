@@ -24,7 +24,7 @@ struct OpenGL_Buffer
 };
 
 
-struct VertexBuffer
+struct VertexArray
 {
   vec2 *vertices;
   u32 n_vertices;

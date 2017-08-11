@@ -1,5 +1,5 @@
 void
-add_point(Memory *memory, VertexBuffer *vertices, vec2 point)
+add_point(Memory *memory, VertexArray *vertices, vec2 point)
 {
   vec2 *new_point = push_struct(memory, vec2);
   *new_point = point;
@@ -15,7 +15,7 @@ mid_point(vec2 a, vec2 b)
 
 
 void
-subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexBuffer *vertices, u32 recursions=0)
+subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexArray *vertices, u32 recursions=0)
 {
   r32 flatness = abs(p0.x*(p1.y - p2.y) +
                      p1.x*(p2.y - p0.y) +
@@ -39,7 +39,7 @@ subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexBuffer *vertic
 
 
 b32
-bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Memory *memory, VertexBuffer *result)
+bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Memory *memory, VertexArray *result)
 {
   b32 success = true;
 

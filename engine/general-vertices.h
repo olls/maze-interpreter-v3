@@ -1,10 +1,11 @@
 struct GeneralVertices
 {
   OpenGL_Buffer vbo;
+  OpenGL_Buffer ibo;
 };
 
 
-struct VBO_Segment
+struct GL_BufferSegment
 {
   u32 start_position;
   u32 n_elements;

@@ -1,0 +1,13 @@
+#version 330 core
+
+// Inputs
+in vec4 colour_varying;
+
+// Outputs
+out vec4 colour_out;
+
+void
+main(void)
+{
+  colour_out = colour_varying;
+}
