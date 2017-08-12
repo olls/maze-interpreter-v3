@@ -464,7 +464,7 @@ get_glyph_location(Font *font, u32 glyph_index)
 
 
 b32
-get_true_type_glyph(Font *font, u32 glyph_index, Memory *frame_memory, VertexArray *outline_result)
+get_true_type_glyph(Font *font, u32 glyph_index, Memory *frame_memory, r32 detail, VertexArray *outline_result)
 {
   b32 success = true;
 
@@ -515,7 +515,7 @@ get_true_type_glyph(Font *font, u32 glyph_index, Memory *frame_memory, VertexArr
       }
     }
 
-    bezier_to_vertices(points, n_points, frame_memory, outline_result);
+    bezier_to_vertices(points, n_points, frame_memory, detail, outline_result);
   }
   else
   {
@@ -571,7 +571,7 @@ get_glyph_index(Font *font, u32 character)
 
 
 b32
-get_glyph(Font *font, u32 character, Memory *frame_memory, VertexArray *buffer)
+get_glyph(Font *font, u32 character, Memory *frame_memory, r32 detail, VertexArray *buffer)
 {
   b32 success = true;
 
@@ -584,7 +584,7 @@ get_glyph(Font *font, u32 character, Memory *frame_memory, VertexArray *buffer)
     {
       log(L_OpenType, u8("Getting glyph from TrueType font."));
 
-      success &= get_true_type_glyph(font, glyph_index, frame_memory, buffer);
+      success &= get_true_type_glyph(font, glyph_index, frame_memory, detail, buffer);
 
     } break;
     case OTF_SFNT_CFF_Data:

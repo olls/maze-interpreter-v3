@@ -14,7 +14,7 @@ outline_to_triangles(Memory *frame_memory, VertexArray outline, u32 *n_indices)
 
   if (n_vertices < 3)
   {
-    log(L_Font, u8("Error in outline_to_triangles, not enough vertices supplied to form minimum of one triangle."));
+    log(L_Triangulation, u8("Error in outline_to_triangles, not enough vertices supplied to form minimum of one triangle."));
     *n_indices = 0;
     resulting_indices = 0;
   }
@@ -67,50 +67,67 @@ outline_to_triangles(Memory *frame_memory, VertexArray outline, u32 *n_indices)
         DoublyLinked_Vertex *previous = vertex->previous;
         DoublyLinked_Vertex *next = vertex->next;
 
-        vec2 test_ear_0 = previous->v;
-        vec2 test_ear_1 = vertex->v;
-        vec2 test_ear_2 = next->v;
+        vec2 test_ear_a = previous->v;
+        vec2 test_ear_b = vertex->v;
+        vec2 test_ear_c = next->v;
 
-        // Are there any other vertices inside this triangle?
-        b32 is_ear = true;
+        // Is vertex a reflex angle? (convex)
 
-        DoublyLinked_Vertex *test_vertex = first_vertex;
+        vec2 ab = test_ear_b - test_ear_a;
+        vec2 cb = test_ear_b - test_ear_c;
+        vec3 cp = cross_product(normalise(Vec3(ab, 0)), normalise(Vec3(cb, 0)));
 
-        for (u32 vertex_test_n = 0;
-             vertex_test_n < vertices_left;
-             ++vertex_test_n)
+        if (cp.z > 0)
         {
-          if (test_vertex->index != previous->index &&
-              test_vertex->index != vertex->index &&
-              test_vertex->index != next->index &&
-              in_triangle(test_vertex->v, test_ear_0, test_ear_1, test_ear_2))
+          // Are there any other vertices inside this triangle?
+
+          DoublyLinked_Vertex *test_vertex = first_vertex;
+
+          b32 is_ear = true;
+          for (u32 vertex_test_n = 0;
+               vertex_test_n < vertices_left;
+               ++vertex_test_n)
           {
-            is_ear = false;
+            if (test_vertex->index != previous->index &&
+                test_vertex->index != vertex->index &&
+                test_vertex->index != next->index &&
+                in_triangle(test_vertex->v, test_ear_a, test_ear_b, test_ear_c))
+            {
+              is_ear = false;
+              break;
+            }
+
+            test_vertex = test_vertex->next;
+          }
+
+          if (is_ear)
+          {
+            // Remove ear tip
+            vertices_left -= 1;
+            next->previous = previous;
+            previous->next = next;
+
+            if (first_vertex == vertex)
+            {
+              first_vertex = next;
+            }
+
+            // Add ear to triangles
+            resulting_indices[result_position++] = previous->index;
+            resulting_indices[result_position++] = vertex->index;
+            resulting_indices[result_position++] = next->index;
+
+            found_an_ear = true;
             break;
           }
-
-          test_vertex = test_vertex->next;
-        }
-
-        if (is_ear)
-        {
-          // Remove ear tip
-          vertices_left -= 1;
-          next->previous = previous;
-          previous->next = next;
-
-          if (first_vertex == vertex)
+          else
           {
-            first_vertex = next;
+            log(L_Triangulation, u8("Vertex not an ear: triangle contains other vertices."));
           }
-
-          // Add ear to triangles
-          resulting_indices[result_position++] = previous->index;
-          resulting_indices[result_position++] = vertex->index;
-          resulting_indices[result_position++] = next->index;
-
-          found_an_ear = true;
-          break;
+        }
+        else
+        {
+          log(L_Triangulation, u8("Vertex not an ear: convex angle."));
         }
 
         vertex = vertex->next;
@@ -118,7 +135,7 @@ outline_to_triangles(Memory *frame_memory, VertexArray outline, u32 *n_indices)
 
       if (!found_an_ear)
       {
-        log(L_Font, u8("Error: after searching all vertices, no ears where found!"));
+        log(L_Triangulation, u8("Error: after searching all vertices, no ears where found!"));
 
         resulting_indices = 0;
         *n_indices = 0;

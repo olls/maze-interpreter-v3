@@ -1,9 +1,9 @@
 void
-add_glyph_to_general_vertices(Font *font, GeneralVertices *general_vertices, Memory *frame_memory, u32 character,
+add_glyph_to_general_vertices(Font *font, GeneralVertices *general_vertices, Memory *frame_memory, r32 detail, u32 character,
                               GL_BufferSegment *result_vbo_segment, GL_BufferSegment *result_ibo_segment)
 {
   VertexArray outline = {};
-  get_glyph(font, character, frame_memory, &outline);
+  get_glyph(font, character, frame_memory, detail, &outline);
 
   *result_vbo_segment = add_vertex_array_to_general_vertices(L_Font, general_vertices, &outline);
 

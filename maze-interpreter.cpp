@@ -216,7 +216,7 @@ init_game(Memory *memory, GameState *game_state, Keys *keys, u64 time_us, u32 ar
 
       add_all_cell_instances(&game_state->cell_instancing, &game_state->maze.tree);
 
-      add_glyph_to_general_vertices(&game_state->font, &game_state->general_vertices, memory, U'{',
+      add_glyph_to_general_vertices(&game_state->font, &game_state->general_vertices, memory, 1, U'{',
                                     &game_state->test_character_vbo, &game_state->test_character_ibo);
     }
     else

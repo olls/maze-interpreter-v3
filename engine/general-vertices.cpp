@@ -24,17 +24,25 @@ setup_general_vertices(GeneralVertices *general_vertices)
 }
 
 
+void
+setup_general_vertices_to_screen_space_vbo_attributes(OpenGL_Buffer *general_vbo)
+{
+  glBindBuffer(general_vbo->binding_target, general_vbo->id);
+
+  GLuint attribute_pos = 12;
+  glEnableVertexAttribArray(attribute_pos);
+  glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+
 GLuint
 setup_general_vertices_to_screen_space_vao(GeneralVertices *general_vertices)
 {
   GLuint result = create_vao();
   glBindVertexArray(result);
 
-  glBindBuffer(general_vertices->vbo.binding_target, general_vertices->vbo.id);
-
-  GLuint attribute_pos = 12;
-  glEnableVertexAttribArray(attribute_pos);
-  glVertexAttribPointer(attribute_pos, sizeof(vec2)/sizeof(r32), GL_FLOAT, GL_FALSE, 0, 0);
+  general_vertices->vbo.setup_attributes_func = setup_general_vertices_to_screen_space_vbo_attributes;
+  general_vertices->vbo.setup_attributes_func(&general_vertices->vbo);
 
   glBindVertexArray(0);
 

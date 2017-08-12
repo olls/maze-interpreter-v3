@@ -12,7 +12,7 @@ main(void)
 {
   // Recentre the world coordinate about the centre of the window, allowing the offset to be added without loss of precision
 
-  gl_Position = /*projection_matrix * */vec4(-0.5 + 0.001*pos, 0.0, 1.0);
+  gl_Position = /*projection_matrix * */vec4(-0.6 + 0.001*pos, 0.0, 1.0);
 
   // TODO: Use same colour component ordering in OpenGL and engine...
   colour_varying = vec4(0, 0, 0, 1);

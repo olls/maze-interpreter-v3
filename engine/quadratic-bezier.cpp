@@ -15,7 +15,7 @@ mid_point(vec2 a, vec2 b)
 
 
 void
-subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexArray *vertices, u32 recursions=0)
+subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexArray *vertices, r32 detail=LINE_SEGMENT_FLATNESS_ELIPSON, u32 recursions=0)
 {
   r32 flatness = abs(p0.x*(p1.y - p2.y) +
                      p1.x*(p2.y - p0.y) +
@@ -25,21 +25,21 @@ subdivide_bezier(vec2 p0, vec2 p1, vec2 p2, Memory *memory, VertexArray *vertice
   vec2 p12 = mid_point(p1, p2);
   vec2 p012 = mid_point(p01, p12);
 
-  if (flatness <= LINE_SEGMENT_FLATNESS_ELIPSON ||
+  if (flatness <= detail ||
       recursions >= MAX_BEZIER_SUBDIVISIONS)
   {
     add_point(memory, vertices, p012);
   }
   else
   {
-    subdivide_bezier(p0, p01, p012, memory, vertices, recursions+1);
-    subdivide_bezier(p012, p12, p2, memory, vertices, recursions+1);
+    subdivide_bezier(p0, p01, p012, memory, vertices, detail, recursions+1);
+    subdivide_bezier(p012, p12, p2, memory, vertices, detail, recursions+1);
   }
 }
 
 
 b32
-bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Memory *memory, VertexArray *result)
+bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Memory *memory, r32 detail, VertexArray *result)
 {
   b32 success = true;
 
@@ -103,7 +103,7 @@ bezier_to_vertices(BezierControlPoint control_points[], u32 n_control_points, Me
           p2.point = mid_point(p1.point, p2.point);
         }
 
-        subdivide_bezier(p0.point, p1.point, p2.point, memory, result);
+        subdivide_bezier(p0.point, p1.point, p2.point, memory, result, detail);
       }
     }
   }

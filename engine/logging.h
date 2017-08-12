@@ -13,6 +13,7 @@
           CHANNEL(L_OpenGL_Debug) \
           CHANNEL(L_Layouter) \
           CHANNEL(L_OpenType) \
+          CHANNEL(L_Triangulation) \
           CHANNEL(N_ENGINE_LOGGING_CHANNELS)
 
 

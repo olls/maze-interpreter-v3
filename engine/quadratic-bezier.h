@@ -1,5 +1,5 @@
 const u32 MAX_BEZIER_SUBDIVISIONS = 512;
-const r32 LINE_SEGMENT_FLATNESS_ELIPSON = 1;
+const r32 LINE_SEGMENT_FLATNESS_ELIPSON = .1;
 
 struct BezierControlPoint
 {

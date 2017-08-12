@@ -326,6 +326,12 @@ unit_vector(vec2 vec)
 }
 
 vec2
+normalise(vec2 vec)
+{
+  return unit_vector(vec);
+}
+
+vec2
 vector_direction(vec2 vec)
 {
   vec2 result = vec;
@@ -935,6 +941,31 @@ round_down(vec3 vec)
   return result;
 }
 
+r32
+length_sq(vec3 vec)
+{
+  r32 result = (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+  return result;
+}
+
+vec3
+unit_vector(vec3 vec)
+{
+  vec3 result = {0};
+  r32 length = sqrt(length_sq(vec));
+  if (length != 0)
+  {
+    result = vec / length;
+  }
+  return result;
+}
+
+vec3
+normalise(vec3 vec)
+{
+  return unit_vector(vec);
+}
+
 b32
 operator==(vec4 a, vec4 b)
 {
@@ -1150,6 +1181,31 @@ round_down(vec4 vec)
   result.y = (s32)vec.y;
   result.z = (s32)vec.z;
   return result;
+}
+
+r32
+length_sq(vec4 vec)
+{
+  r32 result = (vec.w * vec.w) + (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+  return result;
+}
+
+vec4
+unit_vector(vec4 vec)
+{
+  vec4 result = {0};
+  r32 length = sqrt(length_sq(vec));
+  if (length != 0)
+  {
+    result = vec / length;
+  }
+  return result;
+}
+
+vec4
+normalise(vec4 vec)
+{
+  return unit_vector(vec);
 }
 
 
